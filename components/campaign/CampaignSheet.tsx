@@ -821,7 +821,6 @@ const BOOKING_NOTE: Record<CampaignView["booking"], string> = {
   ok: "",
   full: "Your week is full. Free a slot to book this.",
   meetings_full: `${CAMPAIGN.maxMeetings} meetings this week already.`,
-  week_set: "Your week is locked in. Book it next week.",
 };
 
 function Inbox({ v, busy, onReply, read, initial = null }: { v: CampaignView; busy: boolean; onReply: (m: string, o: string) => void; read: ReadMail; initial?: string | null }) {

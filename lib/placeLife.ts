@@ -33,6 +33,11 @@ export interface LifeActivity {
   energy: number;
   /** Only while this happening runs. */
   happening?: string;
+  /**
+   * An action id at the same place whose daily task this activity also does (owner, Nov 6: walking Sir Barksley is the
+   * dog-walking task, not a second dog walk). The server runs complete_task after the save; the preview's city does too.
+   */
+  task?: string;
   options: LifeOption[];
 }
 export interface LifeHappening {

@@ -178,6 +178,7 @@ from (values
   ('0161_companies.sql', to_regclass('public.companies') is not null),
   ('0162_school_race.sql', to_regclass('public.school_races') is not null),
   ('0163_starter_days.sql', to_regprocedure('public.starter_day(uuid)') is not null),
-  ('0164_starter_lola_text.sql', to_regprocedure('public.starter_lola_reply(integer)') is not null)
+  ('0164_starter_lola_text.sql', to_regprocedure('public.starter_lola_reply(integer)') is not null),
+  ('0165_once_a_day_and_sleep.sql', to_regprocedure('public.do_action_v0039(text, text)') is not null)
 ) as m(file, ran)
 order by (m.ran is distinct from false), m.file;

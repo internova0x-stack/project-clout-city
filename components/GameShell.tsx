@@ -1272,6 +1272,9 @@ export function GameShell({
   const [travelPlan, setTravelPlan] = useState<TripPlan | null>(null);
   const [trip, setTrip] = useState<Trip | null>(null);
   const [restKind, setRestKind] = useState<RestKind | null>(null);
+  // Owner, Nov 6: an action started from a list plays out in the room (the avatar walks to the sofa, the bed, the counter).
+  const [roomAct, setRoomAct] = useState<{ use: "sit" | "sleep" | "cook" | { action: string; index?: number }; key: number } | null>(null);
+  useEffect(() => { setRoomAct(null); }, [inside?.id, tab, insideFloor]);
   const [kitchenOpen, setKitchenOpen] = useState(false);
   // v0.10 Lucky Star Lotto (migration 0032): lotto state is missing until it runs.
   const lottoOn = !!(travelOn && city?.lotto && cityApi?.buyLottoCard && cityApi.scratchLottoCard);
@@ -2124,8 +2127,9 @@ export function GameShell({
     else if (g.kind === "map") setTab("map");
     else setPanel(g.panel === "look" ? (cityOn ? "look" : "profile") : g.panel);
   };
-  // Starter Week's dog: at Astoria Park for the first time this week, Sir Barksley's scene opens by itself (owner, Oct 27).
-  const atPark = (inside?.id ?? (city?.player.at_place === BARKSLEY.placeId ? place?.id : null)) === BARKSLEY.placeId;
+  // Starter Week's dog: inside Astoria Park for the first time this week, Sir Barksley's scene opens by itself (owner, Oct 27;
+  // Nov 6: inside, never from the card outside).
+  const atPark = inside?.id === BARKSLEY.placeId;
   useEffect(() => {
     if (atPark && starter && !barksleyMet() && !barksley) setBarksley({ first: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -2424,6 +2428,7 @@ export function GameShell({
       if (!cityApi) return;
       const act = placeById(pl)?.actions.find((x) => x.id === a);
       const v = act ? actionVerb(act) : { emoji: "✨", label: "On it" };
+      if (act && inside?.id === pl) setRoomAct({ use: { action: a, index: placeById(pl)!.actions.indexOf(act) }, key: Date.now() });
       // v0.13: a together plan for this activity pays its bonus once both have done it.
       void cityThenStory(`${pl}:${a}`, timed(v.emoji, v.label, act ? actionSeconds(act) : 0, () => cityApi.doAction(pl, a))).then((ok) => {
         void claimTogether(pl, a);
@@ -3175,6 +3180,7 @@ export function GameShell({
           state={city}
           handlers={handlers}
           onBack={() => setInside(null)}
+          floor={insideFloor}
           talkNonce={talkNonce}
           sign={sign && sign.id === inside.id ? (
             <StationSign
@@ -3188,6 +3194,7 @@ export function GameShell({
           here={chat?.presence ? { people: here, count: Math.max(hereCount, here.length), inView: inView.map((p) => p.id), floor: insideFloor, onOpen: openPlayer } : undefined}
           room={
             <Room3D
+              act={roomAct}
               template={insideTemplate!}
               crowd={crowd}
               crowdDots={partyFloor}
@@ -3303,6 +3310,7 @@ export function GameShell({
       ) : tab === "home" ? (
         <div className="layer">
           <Room3D
+            act={viewing || decor ? null : roomAct}
             template={viewing ?? decorHome ?? visitView?.template ?? sharedHome?.template ?? upstairs ?? baseHome}
             floor={viewing || decorHome || visitView || sharedHome ? 1 : floorNow}
             layout={viewing ? null : decor ? decor.layout : visitView ? visitView.layout : sharedHome ? sharedHome.layout : city?.homeLayout}
@@ -3320,7 +3328,8 @@ export function GameShell({
               if (viewing || decor) return;
               if (it.use?.kind === "floor") return sharedHome || visitView ? undefined : setHomeFloor(it.use.to);
               if (it.use?.kind === "look") setPanel(cityOn ? "look" : "profile");
-              if (restOn && it.use?.kind === "sleep") setRestKind("nap");
+              // Owner, Nov 6: the bed is for a night's sleep; once that's used today, a nap.
+              if (restOn && it.use?.kind === "sleep") setRestKind(city && (city.restToday?.sleep ?? 0) < CITY_ECONOMY.rest.sleep.perDay ? "sleep" : "nap");
               if (restOn && it.use?.kind === "sit") setRestKind("sit");
               if (kitchenOn && it.use?.kind === "cook") setKitchenOpen(true);
             }}
@@ -3446,7 +3455,7 @@ export function GameShell({
         tips={statSuggestions}
         onTip={(id) => {
           if (id === "gigs") return setPhone({ open: true, app: "gigs" });
-          if (id === "rest:nap" || id === "rest:sit") return setRestKind(id === "rest:nap" ? "nap" : "sit");
+          if (id === "rest:nap" || id === "rest:sit" || id === "rest:sleep") return setRestKind(id.slice(5) as RestKind);
           if (id === "cook") return setKitchenOpen(true);
           if (id === "visits") return setPanel("visits");
           // Something to do right where you are: step inside, where everything happens (#7).
@@ -3663,7 +3672,7 @@ export function GameShell({
             state={city}
             busy={busy !== null}
             onClose={() => setRestKind(null)}
-            onRest={(k) => run(`rest:${k}`, () => cityApi!.rest!(k))}
+            onRest={(k) => { setRoomAct({ use: k === "sit" ? "sit" : "sleep", key: Date.now() }); return run(`rest:${k}`, () => cityApi!.rest!(k)); }}
             onGoHome={() => { setRestKind(null); setTravelPlan({ from: myPos, to: home, fromName: myPosName, toName: "home", toId: "home" }); }}
           />
           <KitchenSheet
@@ -3672,7 +3681,7 @@ export function GameShell({
             busy={busy !== null}
             store={grocer ? { name: grocer.name, miles: formatMiles(milesBetween(myPos, grocer.at)) } : null}
             onClose={() => setKitchenOpen(false)}
-            onCook={() => run("cook", () => cityApi!.cook!())}
+            onCook={() => { setRoomAct({ use: "cook", key: Date.now() }); return run("cook", () => cityApi!.cook!()); }}
             onGoHome={() => { setKitchenOpen(false); setTravelPlan({ from: myPos, to: home, fromName: myPosName, toName: "home", toId: "home" }); }}
             onGoShopping={() => { if (!grocer) return; setKitchenOpen(false); setTravelPlan({ from: myPos, to: grocer.at, fromName: myPosName, toName: grocer.name, toId: grocer.id }); }}
           />

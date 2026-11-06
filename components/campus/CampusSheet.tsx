@@ -57,7 +57,7 @@ export function CampusSheet({
 
   const enrolledHere = s?.campus === campusId;
   const other = s?.campus && s.campus !== campusId ? campusById(s.campus) : null;
-  // Visitors see the dining hall and the leaderboard only.
+  // Visitors see only the enrolment card (owner, Nov 6); the tabs are for students.
   const view: Tab = enrolledHere ? tab : tab === "pride" ? "pride" : "dining";
 
   async function act<T>(key: string, fn: () => Promise<{ ok: true; data: T } | { ok: false; error: string }>, after?: (d: T) => void) {
@@ -150,7 +150,7 @@ export function CampusSheet({
           <div className="stack-4" style={{ minWidth: 0 }}>
             <h2 className="display-lg" style={{ margin: 0 }}>{campus.short}</h2>
             <p className="subtext" style={{ margin: 0 }}>
-              {enrolledHere ? `You're a student. Home of ${campus.mascot}.` : other ? `Visiting. You go to ${other.short}.` : `Home of ${campus.mascot}.`}
+              {enrolledHere ? `You're a student. Home of ${campus.mascot}.` : other ? `Visiting. You go to ${other.short}.` : `You're visiting. Home of ${campus.mascot}.`}
             </p>
           </div>
         </div>
@@ -160,11 +160,16 @@ export function CampusSheet({
 
         {s && !s.campus && (
           <div className="card stack-8">
-            <p className="title" style={{ margin: 0 }}>Enroll at {campus.short}</p>
-            <p className="subtext" style={{ margin: 0 }}>
-              Free. Three classes a week, Friday exams, a dining hall that tries its best and a dorm with the cheapest rent in the city.
-              One campus at a time; switching takes a week of paperwork.
-            </p>
+            {/* Owner, Nov 6 ("I don't get what is going on on the Queensborough screens"): what a student gets, plainly. */}
+            <p className="title" style={{ margin: 0 }}>Become a student here</p>
+            <ul className="campus-perks">
+              <li><span aria-hidden="true">📚</span><span><b>Classes:</b> pick {CAMPUS.coursesPerWeek} a week. Each class is +{CAMPUS.attend.clout} clout and +{CAMPUS.attend.confidence} Confidence, and a daily task.</span></li>
+              <li><span aria-hidden="true">📝</span><span><b>Friday exams:</b> a {CAMPUS.scholarship.gpa} GPA pays a {formatCash(CAMPUS.scholarship.cash)} scholarship. Pass three for a degree, which can start your career a level higher.</span></li>
+              <li><span aria-hidden="true">🛏️</span><span><b>A dorm room:</b> the cheapest rent in the city.</span></li>
+              <li><span aria-hidden="true">🍽️</span><span><b>The dining hall</b> at half price ({formatCash(CAMPUS.dining.student)}).</span></li>
+              <li><span aria-hidden="true">👑</span><span><b>Run for Homecoming</b> royalty in University HQ.</span></li>
+            </ul>
+            <p className="meta" style={{ margin: 0 }}>Free to enroll. One campus at a time; switching takes a week of paperwork.</p>
             <button className="btn btn-taxi" disabled={!here || busy !== null} onClick={() => void enrol()}>
               {here ? (busy === "enrol" ? "Filling in forms…" : "Enroll here") : "Go there to enroll"}
             </button>
@@ -184,11 +189,12 @@ export function CampusSheet({
           </div>
         )}
 
-        {s && (
+        {/* Owner, Nov 6: the dining hall and the rivalry are for students, so the tabs show after enrolling here. */}
+        {s && enrolledHere && (
           <div className="segmented" role="tablist">
             {(enrolledHere ? (["classes", "exams", "dining", "pride"] as Tab[]) : (["dining", "pride"] as Tab[])).map((t) => (
               <button key={t} role="tab" aria-pressed={view === t} onClick={() => setTab(t)}>
-                {{ classes: "Classes", exams: "Exams", dining: "Dining", pride: "Pride" }[t]}
+                {{ classes: "Classes", exams: "Exams", dining: "Dining hall", pride: "Rivalry" }[t]}
               </button>
             ))}
           </div>
@@ -337,7 +343,7 @@ export function CampusSheet({
         })()}
 
         {/* ---- Dining hall (students and visitors) ---- */}
-        {s && view === "dining" && (
+        {s && enrolledHere && view === "dining" && (
           <div className="card stack-8 campus-dining">
             <p className="overline" style={{ margin: 0 }}>Today at the dining hall</p>
             <p className="title" style={{ margin: 0 }}>{menuFor(s.today)}</p>
@@ -349,9 +355,9 @@ export function CampusSheet({
         )}
 
         {/* ---- School pride: the leaderboard ---- */}
-        {s && view === "pride" && board && (
+        {s && enrolledHere && view === "pride" && board && (
           <div className="stack-8">
-            <p className="subtext" style={{ margin: 0 }}>This week: every class counts 1 point, every grade point counts 5. Resets Monday.</p>
+            <p className="subtext" style={{ margin: 0 }}>Which campus studies harder this week. Students score for their school: 1 point a class, 5 a grade point. Resets Monday.</p>
             {board.campuses.map((row, i) => {
               const c = campusById(row.campus) ?? CAMPUSES[0];
               const top = board.campuses[0]?.score || 1;

@@ -95,6 +95,11 @@ export async function lifeActivity(id: string, option: string): Promise<R<{ resu
   } catch (e) { return fail(e); }
   const err = await save(w, "activity", a!.place, r);
   if (err) return { ok: false, error: err };
+  // Owner, Nov 6: an activity that is also a daily task (walking Sir Barksley = the dog-walking shift) ticks that task.
+  if (a!.task) {
+    const t = await w.admin.rpc("complete_task", { p_player: w.id, p_place: a!.place, p_action: a!.task });
+    if (t.error) console.error("complete_task after an activity failed", t.error);
+  }
   c.done.refs.add(r.ref);
   return { ok: true, data: { result: r, view: lifeView(LIFE_CONTENT, a!.place, c.scene, c.done, c.ctx.regularDays[a!.place] ?? 0) } };
 }

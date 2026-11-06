@@ -15,6 +15,8 @@ export function createLifeSim(preset: string | null, opts: {
   regularDays: (place: string) => number;
   conditions: () => string[];
   pay: (r: { cash: number; clout: number; mood: number; energy: number }) => void;
+  /** An activity that is also a daily task (LifeActivity.task) ticks it in the preview's city. */
+  task?: (place: string, action: string) => void;
 }): LifeApi {
   const done: LifeDone = { refs: new Set(), momentsToday: 0 };
   const scene = (place?: string): LifeScene => {
@@ -40,6 +42,7 @@ export function createLifeSim(preset: string | null, opts: {
         const a = LIFE_CONTENT.activities.find((x) => x.id === id);
         const r = doActivity(LIFE_CONTENT, id, option, { at: opts.at(), scene: scene(a?.place), done, energy: opts.energy(), skill: () => 3 }, Math.random);
         apply(r);
+        if (a?.task) opts.task?.(a.place, a.task);
         return { ok: true, data: { result: r, view: view(a!.place) } };
       } catch (e) { return fail(e); }
     },

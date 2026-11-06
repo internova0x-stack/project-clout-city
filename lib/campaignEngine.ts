@@ -390,21 +390,21 @@ export function setSlot(content: CampaignContent, state: CampaignState, index: n
 
 /** Answers an inbox message. A meeting books a slot (it happens at End Week); anything else happens now. */
 export function reply(content: CampaignContent, state: CampaignState, messageId: string, optionId: string, rng: Rng): string {
-  // Once the week is set (owner, Nov 6), messages can still be answered; only a reply that books a calendar slot waits.
+  // Once the week is set (owner, Nov 6), messages can still be answered. End Week has already opened the next week's empty
+  // calendar (state.slots), so a reply that books a meeting goes there ("the accept is to be sent as a message").
   if (state.phase !== "waiting") requirePlanning(state);
   const box = state.inbox.find((x) => x.id === messageId) ?? fail("unknown");
   if (box.status !== "new") fail("unknown");
   const msg = content.inbox.find((m) => m.id === messageId) ?? fail("unknown");
   const opt = msg.options.find((o) => o.id === optionId) ?? fail("unknown");
   if (opt.meeting) {
-    if (state.phase === "waiting") fail("week_set");
     if (state.slots.filter((s) => s?.kind === "meeting").length >= CAMPAIGN.maxMeetings) fail("meetings_full");
     const free = state.slots.findIndex((s) => s === null);
     if (free < 0) fail("no_slot");
     state.slots[free] = { kind: "meeting", message: msg.id, option: opt.id };
     box.status = "answered";
     box.option = opt.id;
-    box.receipt = "Booked. It's on the calendar.";
+    box.receipt = state.phase === "waiting" ? "Booked. It's on next week's calendar, waiting for you when the results are in." : "Booked. It's on the calendar.";
     return box.receipt;
   }
   box.status = "answered";
@@ -964,7 +964,7 @@ export interface CampaignView {
   slots: CampaignState["slots"];
   inbox: { message: InboxMessage; status: "new" | "answered" | "expired"; option?: string; at?: string; receipt?: string }[];
   /** Whether a reply that books a calendar slot can go in now, or why not (owner, Nov 6: declining always can). */
-  booking: "ok" | "full" | "meetings_full" | "week_set";
+  booking: "ok" | "full" | "meetings_full";
   pending: { situation: Situation; place?: string; target?: string }[];
   debate: (CampaignState["debate"] & { questions: string[] }) | null;
   debateWeek: boolean;
@@ -1037,8 +1037,7 @@ export function campaignView(content: CampaignContent, state: CampaignState, tod
     staff: content.staff.map((s) => { const x = state.staff.find((y) => y.id === s.id)!; return { id: s.id, name: s.name, role: s.role, job: s.job, age: s.age, vibe: s.vibe, morale: x.morale, loyalty: x.loyalty, out: x.out }; }),
     budget: state.budget,
     slots: state.slots,
-    booking: state.phase === "waiting" ? "week_set"
-      : state.slots.filter((s) => s?.kind === "meeting").length >= CAMPAIGN.maxMeetings ? "meetings_full"
+    booking: state.slots.filter((s) => s?.kind === "meeting").length >= CAMPAIGN.maxMeetings ? "meetings_full"
       : state.slots.some((s) => s === null) ? "ok" : "full",
     inbox: state.inbox.map((m) => ({ message: content.inbox.find((x) => x.id === m.id)!, status: m.status, option: m.option, at: m.at, receipt: m.receipt })).filter((m) => m.message)
       .map((m) => ({ ...m, message: hydrateMessage(content, state, m.message) })),

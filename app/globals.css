@@ -3399,3 +3399,24 @@ button.camp-task { background:none; border:0; border-top:1px solid var(--divider
 @keyframes camp-chant { 0%, 100% { transform:none; } 30% { transform:translateY(-6px) scale(1.06); } }
 @keyframes camp-load { from { transform:scaleX(.04); } to { transform:scaleX(1); } }
 @media (prefers-reduced-motion: reduce) { .camp-loading-ring, .camp-loading-chant span, .camp-loading-face img { animation:none; } .camp-loading-bar i { animation:none; } }
+
+/* Owner, Nov 6: on a place's card outside, a task row says it's done inside and, when you're there, a tap goes in. */
+.place-tasks li:has(> .place-task-go) { padding:0; }
+.place-task-go { display:flex; align-items:center; gap:10px; width:100%; padding:8px 10px; border:0; background:none; font:inherit; color:inherit; text-align:left; cursor:pointer; border-radius:inherit; }
+.place-task-title .place-task-where { display:block; margin-top:2px; color:var(--neon-text); font-weight:600; }
+
+/* Owner, Nov 6: an activity is done once a New York day; its row says so and the button is a green tick. */
+.action-row .action-done { color:var(--positive-text, #1E7A4C); font-weight:600; }
+.action-done-btn { background:#E3F4EA; color:#1E7A4C; font-size:18px; min-width:56px; opacity:1 !important; }
+
+/* Owner, Nov 6 ("The hosting chat banner is covering the mood pill, so I can't collapse it"): the open stats panel stays
+   under the HUD, and under the visit bar while hosting or visiting; it scrolls inside, with its collapse button pinned. */
+.stats.with-tips { max-height:calc(100dvh - var(--safe-top) - var(--safe-bottom) - 88px - 96px); overflow-y:auto; overscroll-behavior:contain; }
+.game.in-visit .stats.with-tips { max-height:calc(100dvh - var(--safe-top) - var(--safe-bottom) - 88px - 160px); }
+.stats.with-tips .stats-toggle { position:sticky; top:0; float:right; margin:-8px -8px 0 0; z-index:2; background:rgba(255,255,255,.85); }
+
+/* Owner, Nov 6: what enrolling gets you, one line each. */
+.campus-perks { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px; }
+.campus-perks li { display:flex; gap:10px; align-items:flex-start; font-size:14px; line-height:1.4; color:var(--text-2); }
+.campus-perks li > span:first-child { font-size:18px; line-height:1.2; }
+.campus-perks b { color:var(--text-1); }

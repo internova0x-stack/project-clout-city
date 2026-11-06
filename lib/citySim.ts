@@ -10,7 +10,7 @@ import type { ExclusiveEvent } from "./store.ts";
 import { cityMinutes } from "./cityClock.ts";
 import { lineFor, milesBetween, skipCost, travelQuote } from "./travel.ts";
 import { calendarLive, calendarReward, dressedUp, type CalendarData } from "./calendar.ts";
-import { DOOR_CLOUT, HOME_NEEDS_CLOUT, REWARD_KEEP, REWARD_ONLY, VIP_ALREADY, VIP_LOCKED, clubDoor, OUTFIT_NEEDS_CLOUT, SHIFT_LIMIT, activeGig, cityError, gigCloutReq, hasBar, isSupermarket, type CityApi, type CityResult, type CityState, type DailyTask, type Gain, type GigOffer } from "./cityState.ts";
+import { onceADay, DOOR_CLOUT, HOME_NEEDS_CLOUT, REWARD_KEEP, REWARD_ONLY, VIP_ALREADY, VIP_LOCKED, clubDoor, OUTFIT_NEEDS_CLOUT, SHIFT_LIMIT, activeGig, cityError, gigCloutReq, hasBar, isSupermarket, type CityApi, type CityResult, type CityState, type DailyTask, type Gain, type GigOffer } from "./cityState.ts";
 import { cardCells, isLottoPlace, lottoGame, prizeFor, type LottoCell } from "./lotto.ts";
 import { LEVEL_AT, PERK_ERRORS, SKILL_PERKS, perkOn, type PerksState, type SkillId, type SkillState } from "./skills.ts";
 import { placeStory, storyItemOpen, type StoryFeed } from "./storyFeed.ts";
@@ -105,7 +105,7 @@ export function sampleCityState(overrides: Partial<CityState["player"]> = {}, sk
     clockOffsetSeconds: 0,
     devTools: false,
     homeLayout: null,
-    restToday: { nap: 0, sit: 0 },
+    restToday: { nap: 0, sit: 0, sleep: 0 },
     actionsToday: ["flushing-meadows:hangout"],
     perks: { levels: levelsOf(skills), gigs: [], invites: [] },
     lotto: {
@@ -148,6 +148,8 @@ export type SimApi = CityApi & {
   lottoPot(): void;
   /** v0.11 gossip tasks: talking or listening in at a place completes its task (the find runs on the dev server). */
   gossipTask(placeId: string, via: "overheard" | "regular" | "restroom"): number;
+  /** An activity that is also a daily task (lib/placeLife.ts LifeActivity.task) ticks it, as complete_task does. */
+  lifeTask(placeId: string, actionId: string): number;
   /** Moral Choices in the preview (lib/choicesSim.ts): where the player is, and what a choice paid. */
   here(): string | null;
   choicePay(e: { cash?: number; clout?: number; mood?: number; energy?: number }): void;
@@ -220,6 +222,7 @@ export function createSimApi(
     lottoNext(times) { lottoQueue = [...times]; },
     lottoPot() { potNext = true; },
     gossipTask: (placeId, via) => completeTask(placeId, `gossip-${via}`),
+    lifeTask: (placeId, actionId) => completeTask(placeId, actionId),
 
     buyLottoCard(placeId, gameId, free) {
       const place = PLACES.find((x) => x.id === placeId);
@@ -343,7 +346,7 @@ export function createSimApi(
       if ((p().at_place ?? null) !== null) return fail("Go home first. Your bed and your kitchen are both there.");
       const used = s.restToday?.[kind] ?? 0;
       if (used >= r.perDay) return fail("You've rested enough for today. The couch needs a break from you.");
-      s.restToday = { nap: 0, sit: 0, ...s.restToday, [kind]: used + 1 };
+      s.restToday = { nap: 0, sit: 0, sleep: 0, ...s.restToday, [kind]: used + 1 };
       const energy = Math.min(100 - p().energy, r.energy);
       const mood = Math.min(100 - p().mood, r.mood);
       p().energy += energy;
@@ -403,6 +406,8 @@ export function createSimApi(
       if (p().bank_cash < price) return fail("Your card got declined. Loudly.");
       // v0.11 (0039): a work day is at most shiftsPerDay shifts, across every job.
       if (a.kind === "shift" && shiftsToday >= CITY_ECONOMY.shiftsPerDay) return fail(SHIFT_LIMIT);
+      // Migration 0165 (owner, Nov 6): an activity once a New York day; meals repeat.
+      if (onceADay(a.kind) && (s.actionsToday ?? []).includes(`${placeId}:${actionId}`)) return fail("Done that here today. Back tomorrow.");
       if (a.kind === "shift") shiftsToday += 1;
       const first = !s.visitsToday[placeId];
       if (first) s.regularDays = { ...s.regularDays, [placeId]: (s.regularDays?.[placeId] ?? 0) + 1 };

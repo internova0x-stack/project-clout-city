@@ -7,7 +7,7 @@ import { TRACKS } from "@/lib/careers";
 import { campusById } from "@/lib/campus";
 import { CITY_ECONOMY, CLUB_EVENTS, HOME_LOCATIONS, PLACES, boroughOf, eventOpen, eventToday, closedLine, formatCountdown, hoursLine, isHub, isStation, placeOpen, realMsUntilOpen, visitClout, type Place } from "@/lib/city";
 import { cityMinutes } from "@/lib/cityClock";
-import { actionAvailability, barDrinkAvailability, boostUsed, eventAvailability, groceryAvailability, hasBar, isSupermarket, taskRewardLine, taskTitle, tasksAt, type CityState, type DailyTask } from "@/lib/cityState";
+import { actionAvailability, barDrinkAvailability, boostUsed, eventAvailability, groceryAvailability, hasBar, isSupermarket, taskFloor, taskRewardLine, taskTitle, tasksAt, type CityState, type DailyTask } from "@/lib/cityState";
 import { GAME_CONFIG } from "@/lib/config";
 import { actionSeconds, OTHER_SECONDS } from "@/lib/actionTime";
 import { formatCash } from "@/lib/economy";
@@ -124,15 +124,23 @@ export interface PlaceHandlers {
 }
 
 /** One row per action, then any club events held here (C37, C26). */
-export function ActionList({ place, state, handlers, compact = false, preview }: {
+export function ActionList({ place, state, handlers, compact = false, preview, floor }: {
   place: Place; state: CityState; handlers: PlaceHandlers; compact?: boolean;
+  /**
+   * Inside a place with floors, the floor you're on (owner, Nov 6: "the quads actions should be different from the
+   * restroom"): its own actions and events; the place-wide rows (lotto, stations, groceries…) stay on the ground floor.
+   * Unset on the card outside, which lists everything.
+   */
+  floor?: number;
   /** #7 (owner, Oct 14): on the place card, rows only show what things cost; everything happens inside. A tap goes in. */
   preview?: { onTap?: () => void };
 }) {
   // Every second: closed doors count down live to opening (owner, Oct 15).
   const now = useGameNow(state.clockOffsetSeconds, 1000);
   const minutes = cityMinutes(now, GAME_CONFIG.cityClock);
-  const events = CLUB_EVENTS.filter((e) => e.placeId === place.id && eventToday(e));
+  const here = (f?: number) => floor === undefined || (f ?? 1) === floor;
+  const ground = floor === undefined || floor === 1;
+  const events = CLUB_EVENTS.filter((e) => e.placeId === place.id && eventToday(e) && here(e.floor));
   const { mood, confidence } = state.player;
   const world = placeStory(handlers.story ?? null, place);
   const storyTasks = (handlers.story?.tasks ?? []).filter((t) => t.do.place === place.id && !t.done);
@@ -143,7 +151,7 @@ export function ActionList({ place, state, handlers, compact = false, preview }:
   );
   return (
     <div className="stack-8">
-      {place.actions.filter((a) => !a.storyUnlock || world.unlocked.includes(a.id)).map((a) => {
+      {place.actions.filter((a) => (!a.storyUnlock || world.unlocked.includes(a.id)) && here(a.floor)).map((a) => {
         const base = actionAvailability(place.id, { ...a, price: Math.round((a.price ?? 0) * (world.price?.appliesTo === "visit_price" ? world.price.multiplier : 1)) }, state);
         // Story closures win; restrictions allow only listed actions (World State stacking rules). C2: then opening hours.
         const av = world.closed ? { ok: false as const, reason: world.closed.reason }
@@ -190,25 +198,26 @@ export function ActionList({ place, state, handlers, compact = false, preview }:
                   : null;
               })()}
               {task && <span className="meta" style={{ color: "var(--neon-text)", display: "block" }}>📰 Story task: {task.label} · +{task.clout} 🔥</span>}
-              {!av.ok && <span className="meta reason">{av.reason}</span>}
+              {!av.ok && <span className={`meta ${"done" in av && av.done ? "action-done" : "reason"}`}>{av.reason}</span>}
               {av.ok && av.note && <span className="meta">{av.note}</span>}
             </div>
             {preview ? pill(a.kind === "gigs" ? "Gigs" : spends ? formatCash(paid) : a.pay ? `+${formatCash(a.pay)}` : "Free") : away && a.kind !== "gigs" ? (
               <span className="lock-chip">On arrival</span>
             ) : (
               <button
-                className={"btn btn-taxi btn-sm"}
+                className={!av.ok && "done" in av && av.done ? "btn btn-sm action-done-btn" : "btn btn-taxi btn-sm"}
+                aria-label={!av.ok && "done" in av && av.done ? `${a.label}: done today` : undefined}
                 disabled={!av.ok || handlers.busy !== null}
                 onClick={() => (a.kind === "gigs" ? handlers.onOpenGigs() : handlers.onAction(place.id, a.id))}
               >
-                {handlers.busy === key ? "…" : a.kind === "gigs" ? "Open" : spends ? formatCash(paid) : a.kind === "shift" ? "Work" : "Go"}
+                {handlers.busy === key ? "…" : !av.ok && "done" in av && av.done ? "✓" : a.kind === "gigs" ? "Open" : spends ? formatCash(paid) : a.kind === "shift" ? "Work" : "Go"}
               </button>
             )}
           </div>
         );
       })}
       {/* C5: a gift box for a name-day party (the invite says to bring one). */}
-      {handlers.gift?.places.includes(place.id) && (
+      {ground && handlers.gift?.places.includes(place.id) && (
         <div className="action-row">
           <div style={{ minWidth: 0, flex: 1 }}>
             <span className="title" style={{ display: "block" }}>🎁 Gift box for a name day</span>
@@ -222,7 +231,8 @@ export function ActionList({ place, state, handlers, compact = false, preview }:
           )}
         </div>
       )}
-      {handlers.gossip && !world.closed && (
+      {/* Listening in is the ground floor's and the restroom's (where the gossip is juicier). */}
+      {handlers.gossip && !world.closed && (ground || floor === 0) && (
         <div className="action-row">
           <div style={{ minWidth: 0, flex: 1 }}>
             <span className="title" style={{ display: "block" }}>👂 Listen in</span>
@@ -239,7 +249,7 @@ export function ActionList({ place, state, handlers, compact = false, preview }:
           )}
         </div>
       )}
-      {handlers.onOpenLotto && state.lotto && isLottoPlace(place.tags) && !world.closed && (() => {
+      {ground && handlers.onOpenLotto && state.lotto && isLottoPlace(place.tags) && !world.closed && (() => {
         const l = state.lotto;
         const free = l.freeToday - l.freeUsed;
         return (
@@ -259,7 +269,7 @@ export function ActionList({ place, state, handlers, compact = false, preview }:
           </div>
         );
       })()}
-      {handlers.onStation && isStation(place) && !world.closed && STATION_ROWS.filter((r) => place.tags.includes(r.tag)).map((r) => (
+      {ground && handlers.onStation && isStation(place) && !world.closed && STATION_ROWS.filter((r) => place.tags.includes(r.tag)).map((r) => (
         <div className="action-row" key={r.what}>
           <div style={{ minWidth: 0, flex: 1 }}>
             <span className="title" style={{ display: "block" }}>{r.title}</span>
@@ -280,7 +290,7 @@ export function ActionList({ place, state, handlers, compact = false, preview }:
           <button className="btn btn-taxi btn-sm" onClick={() => handlers.onCampus!(place.id)}>Open</button>
         </div>
       )}
-      {handlers.onCrown && isCampus(place) && (
+      {ground && handlers.onCrown && isCampus(place) && (
         <div className="action-row">
           <div style={{ minWidth: 0, flex: 1 }}>
             <span className="title" style={{ display: "block" }}>🎓 University HQ</span>
@@ -289,7 +299,7 @@ export function ActionList({ place, state, handlers, compact = false, preview }:
           <button className="btn btn-secondary btn-sm" onClick={() => handlers.onCrown!(place.id)}>Open</button>
         </div>
       )}
-      {handlers.onBuyGroceries && isSupermarket(place.tags) && !world.closed && CITY_ECONOMY.groceries.bundles.map((b) => {
+      {ground && handlers.onBuyGroceries && isSupermarket(place.tags) && !world.closed && CITY_ECONOMY.groceries.bundles.map((b) => {
         const av = groceryAvailability(b, state);
         const room = CITY_ECONOMY.groceries.fridgeMax - (state.player.fridge_meals ?? 0);
         return (
@@ -314,7 +324,7 @@ export function ActionList({ place, state, handlers, compact = false, preview }:
           </div>
         );
       })}
-      {handlers.onBarDrink && hasBar(place.tags) && !world.closed && (() => {
+      {ground && handlers.onBarDrink && hasBar(place.tags) && !world.closed && (() => {
         const av = barDrinkAvailability(state);
         const { price, energy } = CITY_ECONOMY.barDrink;
         return (
@@ -366,7 +376,7 @@ export function ActionList({ place, state, handlers, compact = false, preview }:
           </div>
         );
       })}
-      {world.events.map((ev) => {
+      {ground && world.events.map((ev) => {
         const went = state.attendedToday.includes(ev.id);
         const task = (handlers.story?.tasks ?? []).find((t) => t.do.event === ev.id && !t.done);
         return (
@@ -403,18 +413,32 @@ function TaskTick({ t }: { t: DailyTask }) {
 }
 
 /** Every daily task at this place, ticked when done: shown even while the actions are folded away. */
-export function PlaceTasks({ place, state }: { place: Place; state: CityState }) {
-  const tasks = tasksAt(state, place.id);
+/**
+ * Today's tasks at a place. On the card outside (`outside`), a task is done inside (owner, Nov 6: "Tasks attached to a
+ * location should be done inside the location"), so each row says so and, when you're here, a tap goes in.
+ */
+export function PlaceTasks({ place, state, outside, floor }: { place: Place; state: CityState; outside?: { onGoInside?: () => void }; floor?: number }) {
+  // Inside, only this floor's tasks (owner, Nov 6); the card outside lists them all.
+  const tasks = tasksAt(state, place.id).filter((t) => floor === undefined || taskFloor(t) === floor);
   if (!tasks.length) return null;
   return (
     <ul className="place-tasks" aria-label="Daily tasks here">
-      {tasks.map((t) => (
-        <li key={t.id} className={t.done_at ? "done" : ""}>
-          <span className="task-box" aria-hidden="true">{t.done_at ? "✓" : ""}</span>
-          <span className="place-task-title">{taskTitle(t)}</span>
-          <span className="meta">{t.done_at ? "Done" : taskRewardLine(t)}</span>
-        </li>
-      ))}
+      {tasks.map((t) => {
+        const body = (
+          <>
+            <span className="task-box" aria-hidden="true">{t.done_at ? "✓" : ""}</span>
+            <span className="place-task-title">{taskTitle(t)}{outside && !t.done_at && <span className="meta place-task-where">{outside.onGoInside ? "Go inside to do it ›" : "Done inside, once you're there"}</span>}</span>
+            <span className="meta">{t.done_at ? "Done" : taskRewardLine(t)}</span>
+          </>
+        );
+        return (
+          <li key={t.id} className={t.done_at ? "done" : ""}>
+            {outside?.onGoInside && !t.done_at
+              ? <button className="place-task-go" onClick={outside.onGoInside} aria-label={`${taskTitle(t)}: go inside to do it`}>{body}</button>
+              : body}
+          </li>
+        );
+      })}
     </ul>
   );
 }
@@ -457,7 +481,7 @@ function ActionsSection({ place, state, handlers, enterable, onGoInside }: { pla
         </span>
         <ChevronDownIcon size={20} className="actions-fold-chev" />
       </button>
-      {!open && <PlaceTasks place={place} state={state} />}
+      {!open && <PlaceTasks place={place} state={state} outside={enterable ? { onGoInside } : undefined} />}
       {open && <ActionList place={place} state={state} handlers={handlers} preview={enterable ? { onTap: onGoInside } : undefined} />}
     </section>
   );
@@ -705,8 +729,9 @@ export function LocationSheet({
             <button className="btn btn-taxi" onClick={() => onGoInside(place)}>Go inside</button>
           )}
           {handlers.crew?.outings.filter((o) => o.placeId === place.id).map((o) => <CrewProgress key={o.id} outing={o} />)}
-          {/* Owner, Oct 27: Sir Barksley, the billionaire's depressed dog, on his bench in Astoria Park. */}
-          {handlers.onBarksley && place.id === BARKSLEY.placeId && <BarksleyRow onOpen={handlers.onBarksley} today={state.today} />}
+          {/* Owner, Oct 27: Sir Barksley, the billionaire's depressed dog, on his bench in Astoria Park. Owner, Nov 6: you see
+              him inside the park (his walk is a thing to do in there), so the card outside only says he's there. */}
+          {place.id === BARKSLEY.placeId && <p className="meta" style={{ margin: "6px 0 0" }}>🐕 {BARKSLEY.name} is on his bench inside{here ? "" : ". Go there and step in to see him"}.</p>}
           {/* C6: Lola's four New York date spots get her line (content/culture/date-spots.json). */}
           {handlers.dating && (() => {
             const spot = DATE_SPOTS.spots.find((d) => d.place === place.id);
@@ -773,8 +798,10 @@ function StoryBanners({ place, story }: { place: Place; story: StoryFeed | null 
 
 /** C38 (3D): the walkable interior. Tap things in the room, or open the actions list. */
 export function InteriorScene({
-  place, state, handlers, onBack, room, talkNonce = 0, here, life, sign,
+  place, state, handlers, onBack, room, talkNonce = 0, here, life, sign, floor = 1,
 }: {
+  /** The floor you're on: its own actions, events and tasks (owner, Nov 6). */
+  floor?: number;
   place: Place;
   state: CityState;
   handlers: PlaceHandlers;
@@ -834,13 +861,15 @@ export function InteriorScene({
           </button>
         </div>
         <RegularTalk place={place} talk={handlers.regular} hunt={handlers.hunt} gossip={handlers.gossip} nonce={talkNonce} favor={handlers.favor} />
-        {life}
+        {floor === 1 && life}
+        {/* Owner, Nov 6: Sir Barksley lives inside the park now (his row left the card outside). */}
+        {handlers.onBarksley && place.id === BARKSLEY.placeId && <BarksleyRow onOpen={handlers.onBarksley} today={state.today} />}
         {open ? (
-          <ActionList place={place} state={state} handlers={handlers} compact />
+          <ActionList place={place} state={state} handlers={handlers} compact floor={floor} />
         ) : (
           <>
             <p className="meta" style={{ margin: "4px 0 0" }}>Tap the floor to walk, tap things to use them, or 💬 to talk.</p>
-            <PlaceTasks place={place} state={state} />
+            <PlaceTasks place={place} state={state} floor={floor} />
           </>
         )}
       </section>

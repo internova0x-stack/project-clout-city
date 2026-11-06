@@ -122,7 +122,7 @@ export interface CityState {
   /** Studio-approved lines for the regulars live today (migration 0016): regular id → lines. */
   npcLines?: Record<string, string[]>;
   /** v0.8 rest at home (migration 0026): naps and sits used today. Missing until 0026 runs. */
-  restToday?: { nap: number; sit: number };
+  restToday?: { nap: number; sit: number; sleep?: number };
   /** v0.10 Lucky Star Lotto (migration 0032): today's cards and the week's jackpot. Missing until 0032 runs. */
   lotto?: LottoState;
   /** Skill perks (migration 0092): levels, this week's skill gigs and accepted invites. Missing until 0092 runs. */
@@ -235,6 +235,7 @@ export const OUTFIT_NEEDS_CLOUT = "The fitting room won't even let you in yet. E
 // Error codes raised by the SQL functions, in the game's voice.
 // ---------------------------------------------------------------------------
 const ERRORS: Record<string, string> = {
+  done_today: "Done that here today. Back tomorrow.",
   one_per_slot: "One top, one bottom, one pair of shoes. You're not a closet.",
   bad_covering: "That hat isn't in the city yet.",
   bad_fit: "That isn't one of your starter pieces.",
@@ -350,7 +351,17 @@ export function cityError(message: string | undefined): string {
 // ---------------------------------------------------------------------------
 // Display rules
 // ---------------------------------------------------------------------------
-export type Availability = { ok: true; note?: string } | { ok: false; reason: string };
+export type Availability = { ok: true; note?: string } | { ok: false; reason: string; done?: boolean };
+
+/**
+ * Owner, Nov 6 ("the player can tap Go endlessly… should be able to take those actions once. And it should be ticked off"):
+ * a place's activity (a visit or a hangout) is done once a New York day (migration 0165, do_action's 'done_today'). Meals
+ * stay repeatable (they're how Energy comes back), shifts keep their own cap (shiftsPerDay, the main income) and the gig
+ * board is only a door.
+ */
+export const onceADay = (kind: PlaceAction["kind"]): boolean => kind === "visit" || kind === "hangout";
+export const doneToday = (placeId: string, action: Pick<PlaceAction, "id" | "kind">, s: CityState): boolean =>
+  onceADay(action.kind) && !!s.actionsToday?.includes(`${placeId}:${action.id}`);
 
 /** Mood and Confidence already collected today: per activity (0031), or per place before it. */
 export function boostUsed(placeId: string, actionId: string, s: CityState): boolean {
@@ -360,6 +371,7 @@ export function boostUsed(placeId: string, actionId: string, s: CityState): bool
 /** Mirrors do_action: Energy first (meals always work), then cash. Repeat visits are allowed but pay no clout. */
 export function actionAvailability(placeId: string, action: PlaceAction, s: CityState): Availability {
   if (action.kind === "gigs") return { ok: true };
+  if (doneToday(placeId, action, s)) return { ok: false, reason: "✓ Done today · back tomorrow", done: true };
   if (action.energy > 0 && s.player.energy < action.energy) return { ok: false, reason: "Not enough Energy" };
   if ((action.price ?? 0) > s.player.bank_cash) return { ok: false, reason: "Not enough cash" };
   const usedToday = (s.visitsToday[placeId] ?? 0) > 0;
@@ -376,7 +388,7 @@ export function eventAvailability(ev: ClubEvent, open: boolean, s: CityState): A
   return { ok: true };
 }
 
-export type RestKind = "nap" | "sit";
+export type RestKind = "nap" | "sit" | "sleep";
 
 /** Mirrors rest(): home only, capped per New York day. */
 export function restAvailability(kind: RestKind, s: CityState): Availability & { used: number; perDay: number } {
@@ -644,7 +656,22 @@ export function taskTitle(t: Pick<DailyTask, "kind" | "place_id" | "action_id" |
   if (t.kind.startsWith("style:")) return `Wear a full ${LOOK_LABEL[t.kind.slice(6)] ?? "matching"} look to ${placeById(t.place_id)?.name ?? "a place"}`;
   // v0.11 gossip tasks (migration 0036): the next stop on the player's gossip trail.
   if (t.kind === "gossip") return leadAction({ place: t.place_id, source: t.action_id === "gossip-regular" ? "regular" : t.action_id === "gossip-restroom" ? "restroom" : "overheard", hours: null, title: topic });
-  return `${TASK_VERB[t.kind as Exclude<DailyTask["kind"], StyleTaskKind>]} ${placeById(t.place_id)?.name ?? "a place"}`;
+  // Owner, Nov 6: "Don't use the 'Be seen at...' task type… The player should take a specific action": a task is the
+  // action it's done by ("Catch a lecture in the big hall at Queensborough University"); the verb only when there's none.
+  const place = placeById(t.place_id);
+  const act = place?.actions.find((a) => a.id === t.action_id);
+  if (act && place) return `${act.label} at ${place.name}`;
+  return `${TASK_VERB[t.kind as Exclude<DailyTask["kind"], StyleTaskKind>]} ${place?.name ?? "a place"}`;
+}
+
+/**
+ * The floor a daily task happens on (owner, Nov 6: each floor has its own things to do): its action's or event's floor,
+ * the restroom (0) for restroom gossip, else the ground floor.
+ */
+export function taskFloor(t: Pick<DailyTask, "kind" | "place_id" | "action_id">): number {
+  if (t.kind === "gossip") return t.action_id === "gossip-restroom" ? 0 : 1;
+  if (t.kind === "event") return eventById(t.action_id)?.floor ?? 1;
+  return placeById(t.place_id)?.actions.find((a) => a.id === t.action_id)?.floor ?? 1;
 }
 
 /** v0.11 (spec section 11): today's daily tasks at a place, for its checkboxes. */

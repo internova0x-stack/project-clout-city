@@ -351,6 +351,7 @@ export function PreviewHome({
     regularDays: () => 4,
     conditions: () => [],
     pay: (r) => sim.choicePay({ cash: r.cash, clout: r.clout, mood: r.mood, energy: -r.energy }),
+    task: (place, action) => { sim.lifeTask(place, action); },
   }), [lifePreset, sim]);
   const galaApi = useMemo(() => createGalaSim(galaPreset ?? null, {
     here: () => simRef.current.here(), bank: () => player.bank_cash,

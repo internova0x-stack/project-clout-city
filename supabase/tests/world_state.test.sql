@@ -175,6 +175,10 @@ do $$ begin
   begin perform pg_temp.act('radiant-harbor', 'visit'); raise exception 'FAIL: church open on Day 9';
   exception when sqlstate '22023' then null; end;
 end $$;
+-- Migration 0165: the lobby was already visited today, so clear that first (the restriction is what's being checked).
+reset role;
+delete from public.action_uses where place_id = 'skyline-pier' and action_id = 'lobby';
+set role authenticated;
 select 1 from pg_temp.act('skyline-pier', 'lobby'); -- restriction lifted
 
 -- ---- Day 10: memorial wall; hoodie gone from the Shop but kept by buyers ----

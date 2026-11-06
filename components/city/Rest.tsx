@@ -7,6 +7,7 @@ import { Sheet } from "../Sheet";
 import { EffectChips } from "./Common";
 
 const COPY: Record<RestKind, { title: string; blurb: string; go: string }> = {
+  sleep: { title: "🛏️ Go to sleep", blurb: "Phone on the charger, alarm set, a full night in twenty seconds. Once a day.", go: "Sleep" },
   nap: { title: "😴 Take a nap", blurb: "Twenty minutes, they said. Your body heard \"until dinner\".", go: "Nap" },
   sit: { title: "🛋️ Sit a while", blurb: "Phone face down. A rare and powerful move.", go: "Sit down" },
 };
@@ -38,7 +39,7 @@ export function RestSheet({ kind, state, busy, onClose, onRest, onGoHome }: {
   return (
     <Sheet open onClose={onClose} label={COPY[kind].title}>
       {napping ? (
-        <Countdown seconds={r.seconds} emoji={kind === "nap" ? "💤" : "🛋️"} label={kind === "nap" ? "Napping" : "Sitting"} onDone={onClose} />
+        <Countdown seconds={r.seconds} emoji={kind === "sit" ? "🛋️" : "💤"} label={kind === "sleep" ? "Sleeping" : kind === "nap" ? "Napping" : "Sitting"} onDone={onClose} />
       ) : (
         <div className="stack-12">
           <div>

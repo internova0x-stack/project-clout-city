@@ -71,7 +71,9 @@ reset role;
 update public.players set at_place = 'lucky-seven-deli', energy = 100, bank_cash = 1000 where display_name = 'chef';
 set role authenticated;
 select 1 from public.do_action('lucky-seven-deli', 'speed-meet');
-select 1 from public.do_action('lucky-seven-deli', 'speed-meet');
+-- Migration 0165: a second go the same day is refused (done_today), so it can't practise twice either.
+do $$ begin perform public.do_action('lucky-seven-deli', 'speed-meet'); raise exception 'FAIL: speed-meet twice';
+exception when others then if sqlerrm not like '%done_today%' then raise; end if; end $$;
 select 1 from public.do_action('lucky-seven-deli', 'spill');
 select pg_temp.assert((select practice = 1 from public.player_skills where player_id = auth.uid() and skill = 'charisma'), 'one charisma practice a day');
 select pg_temp.assert((select practice = 1 from public.player_skills where player_id = auth.uid() and skill = 'gossip'), 'one gossip practice');

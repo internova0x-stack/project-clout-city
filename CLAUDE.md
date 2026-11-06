@@ -756,6 +756,13 @@ components live in `app/globals.css`.
   Migration 0155 (owner, Nov 1): asset sales skip the weekly cap (`economy_can` ignores it for 'asset'; they still count) and sell
   within 80-120% of the appraisal (`asset_band`, `asset_band_check`, asset_sales.band, lib/assetSales.ts `ASSET_BAND`).
   `?assets=sell|offer|cooling|done|off`.
+- Once a day, Sleep and floors (migration 0165, owner Nov 6): a visit or hangout is done once a New York day (`do_action` refuses
+  'done_today'; the old body is `do_action_v0039`; meals and shifts repeat, shifts keep shiftsPerDay); the row shows "✓ Done today"
+  (`onceADay`, `doneToday` in lib/cityState.ts). Sleep at home (`rest('sleep')`, economy.rest.sleep: +80 Energy, once a day; the bed opens
+  it). Actions and events may carry `floor` (campus Lecture Hall 2, Library 3, Greek Row 5; the Hub's game room 2, lounge 3): inside, the
+  panel lists only that floor's (`ActionList`/`PlaceTasks` `floor`, `taskFloor`); place-wide rows stay on the ground floor. Task titles
+  name the action ("<action label> at <place>", never "Be seen at"). A list action plays out in the room: Room3D `act` walks the avatar
+  to its piece (sofa, bed, counter) and poses without calling onUse again.
 - Players see "Crew" for their invited friends; code, types and database tables still say `clique`
   (renaming stored data isn't worth the risk). Keep player-facing copy on "crew".
 - Culture packs (docs/culture/, one at a time, only when the owner says "Build C<number>"): slang, invented stand-ins
