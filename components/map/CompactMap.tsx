@@ -10,6 +10,7 @@ import { BOROUGHS, type BoroughId } from "@/lib/map/boroughs";
 import type { LatLng } from "@/lib/map/geo";
 import { PLACES } from "@/lib/city";
 import { screenReady } from "@/lib/splash";
+import { sceneFailed, sceneReady, watchContext } from "@/lib/loadStats";
 import { DISTRICTS, ISLAND_CARD_AT, labelPriority, pickLabels, SPOTS, STREET_NAMES, WORLD_SIZE, COMPACT_GRID, gridToWorld, makeProjector } from "@/lib/compactMap";
 import { frameWatch, lowGraphics, renderQuality, setAutoLowGraphics } from "@/lib/graphics";
 import type { PlacePin } from "@/lib/places";
@@ -66,8 +67,10 @@ export const CompactMap = forwardRef<MapApi, CityMapProps>(function CompactMap(
     } catch {
       setFailed(true);
       screenReady();
+      sceneFailed("map", "no_webgl");
       return;
     }
+    watchContext(scene.canvas, "map");
     sceneRef.current = scene;
     scene.canvas.style.width = "100%";
     scene.canvas.style.height = "100%";
@@ -106,7 +109,7 @@ export const CompactMap = forwardRef<MapApi, CityMapProps>(function CompactMap(
       if (building) {
         building = scene.buildMore([viewRef.current.x, viewRef.current.z], 8);
         // The nearest blocks build first: the launch splash may go once the view is filled (or everything is built).
-        if (!building || ++buildFrames === 30 || now - started > 1500) requestAnimationFrame(screenReady);
+        if (!building || ++buildFrames === 30 || now - started > 1500) requestAnimationFrame(() => { screenReady(); sceneReady("map"); });
         dirtyRef.current = true;
       }
       // Traffic, people and the searchlights at night: 30 frames a second (20 in low graphics). Only the 3D view

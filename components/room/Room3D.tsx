@@ -1,5 +1,6 @@
 "use client";
 
+import { sceneFailed, sceneReady, watchContext } from "@/lib/loadStats";
 import { useEffect, useRef, useState } from "react";
 import {
   ACESFilmicToneMapping, AmbientLight, BoxGeometry, CanvasTexture, Color, DirectionalLight, Fog, Group, HemisphereLight, Mesh,
@@ -201,8 +202,10 @@ export default function Room3D(props: Room3DProps) {
       renderer = new WebGLRenderer({ antialias: quality.antialias, alpha: true, powerPreference: "low-power" });
     } catch {
       setFailed(true);
+      sceneFailed("room", "no_webgl");
       return;
     }
+    watchContext(renderer.domElement, "room");
     renderer.setPixelRatio(quality.pixelRatio);
     renderer.outputColorSpace = SRGBColorSpace;
     renderer.toneMapping = ACESFilmicToneMapping;
@@ -902,6 +905,7 @@ export default function Room3D(props: Room3DProps) {
       void (parts.ready ?? Promise.resolve()).then(() => requestAnimationFrame(() => {
         if (readySent.current) return;
         readySent.current = true;
+        sceneReady("room");
         onReadyRef.current?.();
       }));
     }
