@@ -49,6 +49,26 @@ function finish(a: Archetype, look: Look): QuickCharacter {
   return { name: `${handle}_${1000 + Math.floor(Math.random() * 9000)}`, look, cash, homeId: "astoria_share", traits: [] };
 }
 
+const PICK_KEY = "cc-demo-character";
+
+/**
+ * Owner, Nov 7 ("before the player logs in, they shouldn't have to select clothes. They should go straight into being
+ * able to explore the map with default clothes"): the demo starts as one of the four ready-made New Yorkers in their
+ * starting look, chosen once per visit and kept in sessionStorage, so the guest screen can download that avatar's files
+ * before Play now is tapped.
+ */
+export function defaultCharacter(): QuickCharacter {
+  try {
+    const kept = sessionStorage.getItem(PICK_KEY);
+    if (kept) return JSON.parse(kept) as QuickCharacter;
+  } catch { /* private mode */ }
+  const a = ARCHETYPES[Math.floor(Math.random() * ARCHETYPES.length)];
+  const body: Look["body"] = Math.random() < 0.5 ? "curvy" : "straight";
+  const c = finish(a, lookFor(a, body));
+  try { sessionStorage.setItem(PICK_KEY, JSON.stringify(c)); } catch { /* private mode */ }
+  return c;
+}
+
 export function QuickPick({ onPick }: { onPick: (c: QuickCharacter) => void }) {
   const [pick, setPick] = useState(ARCHETYPES[0]);
   // One switch for every card (so a Female pick never shows "The Finance Bro" beside it).

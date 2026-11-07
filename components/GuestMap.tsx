@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { GUEST_START, type PlacePin } from "@/lib/places";
 import { PLACES, placeById } from "@/lib/city";
@@ -72,6 +73,19 @@ export function GuestMap({ invited, authError, at, creator, openSignUp = false }
     supabase.rpc("recent_arrivals", { p_limit: 8 }).then(({ data }) => {
       if (Array.isArray(data)) setArrivals(data as Arrival[]);
     });
+  }, []);
+
+  // Owner, Nov 7: the demo's character is chosen here and its avatar files download while the guest looks at the map,
+  // so Play now opens on a ready avatar. Waits for the map to settle; skipped on data saver.
+  useEffect(() => {
+    const save = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData;
+    if (save) return;
+    const t = setTimeout(() => {
+      void Promise.all([import("./demo/QuickPick"), import("./avatar/baseAvatar")])
+        .then(([q, a]) => a.preloadBaseAvatar(q.defaultCharacter().look))
+        .catch(() => {});
+    }, 2500);
+    return () => clearTimeout(t);
   }, []);
 
   // The ticker rotates every 4 seconds (C22).
@@ -162,11 +176,12 @@ export function GuestMap({ invited, authError, at, creator, openSignUp = false }
                 <button className="btn btn-taxi" style={{ flex: 3 }} onClick={signUp}>Sign up free</button>
                 <button className="btn btn-secondary on-dark-secondary" style={{ flex: 1.2 }} onClick={() => { startMusic(); setAuth("login"); }}>Log in</button>
               </div>
-              <a className="guest-demo-link" href="/demo">Not sure yet? Play a quick demo, no sign-up ›</a>
+              <Link className="guest-demo-link" href="/demo" prefetch>Not sure yet? Play a quick demo, no sign-up ›</Link>
             </>
           ) : (
             <>
-              <a className="btn btn-taxi" style={{ marginTop: 12, textDecoration: "none" }} href="/demo">Play now, no sign-up ›</a>
+              {/* Owner, Nov 7: a client-side move to the demo, so the map's code and the avatar downloaded here carry over. */}
+              <Link className="btn btn-taxi" style={{ marginTop: 12, textDecoration: "none" }} href="/demo" prefetch>Play now, no sign-up ›</Link>
               {/* Owner, Oct 28: one Sign in button for both (SignUpSheet's "signin" mode works out which). */}
               <button className="btn btn-secondary on-dark-secondary" style={{ marginTop: 8, width: "100%" }} onClick={() => { startMusic(); setAuth("signin"); }}>Sign in</button>
             </>

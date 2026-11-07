@@ -299,6 +299,7 @@ export function GameShell({
   deleteAccount,
   lockAppsPreview,
   demo,
+  startTab,
   crew,
   party,
   partyRoom,
@@ -378,6 +379,8 @@ export function GameShell({
   lockAppsPreview?: boolean;
   /** Demo mode (owner, Oct 27; components/demo): inviting and the end of the first session ask the guest to sign up. */
   demo?: { signUp: (why: "invite" | "end") => void };
+  /** The tab the game opens on (owner, Nov 7: the demo opens on the map); Home when unset. */
+  startTab?: "home" | "map";
   /** Having people over (migration 0121): hangouts and house parties at home. */
   visits?: VisitApi;
   homeScoreApi?: { state(): Promise<{ ok: true; data: HomeScore & { paid: { score: number; clout: number }[]; reached: number[] } } | { ok: false; error: string }> };
@@ -476,7 +479,7 @@ export function GameShell({
   } : undefined), [chatIn]);
   const clock = useCityClock(city?.clockOffsetSeconds ?? 0);
   const daytime = daytimeOverride ?? clock.daytime;
-  const [tab, setTab] = useState<Tab>("home");
+  const [tab, setTab] = useState<Tab>(startTab ?? "home");
 
   const [soon, setSoon] = useState<{ key: ComingSoonKey; title?: string } | null>(null);
   const [panel, setPanel] = useState<Panel>(null);

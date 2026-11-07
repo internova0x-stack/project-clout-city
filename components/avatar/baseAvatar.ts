@@ -415,6 +415,19 @@ function measureThigh(mesh: SkinnedMesh, body: Group, bones: Map<string, Bone>):
 }
 
 /** `bare` (previews only): the body in its base layer, nothing worn. */
+/**
+ * Downloads a look's avatar files ahead of time (owner, Nov 7: the guest's avatar "already rendered" when the demo
+ * opens): the body, its moves, the starting outfit's garments and the hair, into the same cache buildBaseAvatar reads.
+ */
+export function preloadBaseAvatar(look: Look): void {
+  const sex = modelSex(look);
+  const low = lowGraphics() ? "-low" : "";
+  load(`/avatars/body/${sex}${low}.glb`).catch(() => null);
+  for (const g of garmentsFor(starterOutfit(getStyle(look.style), look.body, look.fit), sex)) load(`/avatars/garments/${g.file}-${sex}${low}.glb`).catch(() => null);
+  if (look.hair !== "bald") load(`/avatars/hair/${sex}${low}.glb`).catch(() => null);
+  load(`/avatars/body/${sex}-anims.glb`).catch(() => null);
+}
+
 export function buildBaseAvatar(look: Look, opts: ModelAvatarOptions & { bare?: boolean } = {}): AvatarParts {
   const fullOutfit: Outfit = opts.outfit ?? starterOutfit(getStyle(look.style), look.body, look.fit);
   // A durag, turban, headwrap or kippah from the Shop (owner, Oct 22) is worn as the covering it used to be for free:
@@ -492,6 +505,14 @@ export function buildBaseAvatar(look: Look, opts: ModelAvatarOptions & { bare?: 
   const widen = { value: new Vector2(build.w - 1, build.l - 1) };
 
   const ready = (async () => {
+    // Owner, Nov 7 ("the avatars don't load"): every file starts downloading now, side by side, instead of one after the
+    // other (body, then clothes, then hair, then moves); the awaits below then find them in the cache.
+    {
+      const low = lowGraphics() ? "-low" : "";
+      if (!opts.bare) for (const g of garmentsFor(outfit, sex)) load(`/avatars/garments/${g.file}-${sex}${low}.glb`).catch(() => null);
+      if (look.hair !== "bald") load(`/avatars/hair/${sex}${low}.glb`).catch(() => null);
+      load(`/avatars/body/${sex}-anims.glb`).catch(() => null);
+    }
     const gltf = await load(`/avatars/body/${sex}${lowGraphics() ? "-low" : ""}.glb`);
     if (disposed) return;
     const rig = cloneSkinned(gltf.scene);
