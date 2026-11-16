@@ -490,7 +490,9 @@ components live in `app/globals.css`.
   the game's and the guest screen's map (props and `MapApi` in components/map/types.ts); components/map/compactScene.ts draws it with the landmark models,
   storefronts (`STOREFRONTS`), filler blocks and street life. Street life moves (owner, Oct 30): lib/streetTraffic.ts
   (pure, tests/streetTraffic.test.ts: right-hand lanes, curved corners, a light at every intersection, queues; people round
-  their block) drawn by components/map/streetLife.ts (instanced, open boroughs only); at night lamps at every corner and
+  their block) drawn by components/map/streetLife.ts (instanced, open boroughs only); buses (owner, Nov 16: `busRoutes` loops a block
+  in from each open borough's edge, two in Queens; `BUS` in lib/streetTraffic.ts) pull in at a shelter on every other block, wait for
+  the riders gathered there and carry on, obeying the lights, with cars queueing behind; at night lamps at every corner and
   mid-block pool light on the street, filler windows light up, cars show head- and taillights. Only the 3D view redraws
   for it (30 fps, 20 in low graphics); the shadow map redraws only when something static changes. Only the picture changes: travel, prices and lines keep
   real lat/lng (`makeProjector` places any lat/lng among its nearest places). Names only for the most relevant places

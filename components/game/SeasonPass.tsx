@@ -11,11 +11,25 @@ const itemName = (sku: string) => itemBySku(sku)?.name;
 const rewardEmoji = (r: PassReward) =>
   r.kind === "cash" ? "💵" : r.kind === "clout" ? "🔥" : r.kind === "badge" ? "🏅" : itemBySku(r.sku)?.emoji ?? "🎁";
 
+/**
+ * What a reward is, in a few words under its name (owner, Nov 16: "I don't understand what Free $100 means… is that
+ * a reward"): cash for the bank, clout, something to wear, something for your home, a badge.
+ */
+function rewardKind(r: PassReward): string {
+  if (r.kind === "cash") return "Cash for your bank";
+  if (r.kind === "clout") return "Clout for your rank";
+  if (r.kind === "badge") return "A badge for your profile";
+  return itemBySku(r.sku)?.category === "home" ? "Furniture for your home" : "Clothes to wear";
+}
+
 function Reward({ r, locked }: { r: PassReward; locked?: boolean }) {
   return (
     <span className="pass-reward" data-locked={locked || undefined}>
       <span aria-hidden>{rewardEmoji(r)}</span>
-      <span>{rewardLabel(r, itemName)}</span>
+      <span className="pass-reward-text">
+        <span>{rewardLabel(r, itemName)}</span>
+        <small>{rewardKind(r)}</small>
+      </span>
     </span>
   );
 }
@@ -103,12 +117,12 @@ export function PassTab({ state, today, busy, price, onClaim, onBuy, starter }: 
 
       {/* Owner, Nov 16 ("I don't understand the tier, free, clout pass"): say how a row works before the rows. */}
       <p className="pass-legend">
-        Each level you reach unlocks <b>two rewards</b>: the <b>free</b> one is everyone&apos;s, the <b className="pass-legend-paid">Clout Pass</b> one
-        is {state.paid ? "yours too" : "for Clout Pass owners"}. Tap Claim to collect.
+        Each level you reach unlocks <b>two rewards</b>. The left one is <b>free for everyone</b>; the right one is
+        {state.paid ? " yours too, with your " : " only for people who buy the "}<b className="pass-legend-paid">Clout Pass</b>. Tap Claim to collect.
       </p>
       <div className="pass-grid" role="table" aria-label="Season rewards">
         <div className="pass-row pass-head" role="row">
-          <span role="columnheader">Level</span><span role="columnheader">Free for all</span><span role="columnheader">{PASS_EMOJI} Clout Pass</span>
+          <span role="columnheader">Level</span><span role="columnheader">Everyone gets</span><span role="columnheader">{PASS_EMOJI} With the pass</span>
         </div>
         {s.tiers.map((t) => {
           const reached = t.tier <= tier;

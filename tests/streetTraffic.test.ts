@@ -87,3 +87,42 @@ test("people walk round their block on the sidewalk and stop now and then", () =
   assert.ok(paused > 0);
   assert.ok(crowd.every((c) => c.s > 20));
 });
+
+test("buses (owner, Nov 16): closed loops on real streets, a stop at every other block", async () => {
+  const { busRoutes, legStart } = await import("../lib/streetTraffic.ts");
+  for (const [id, g] of [["queens", grid], ["brooklyn", { x0: 5, y0: 14, x1: 13, y1: 16 }], ["staten", { x0: 0, y0: 18, x1: 3, y1: 19 }]] as const) {
+    const routes = busRoutes(g, id);
+    assert.ok(routes.length >= 1, id);
+    for (const r of routes) {
+      assert.deepEqual(legStart(r, r.path.length), r.start, `${r.id} closes its loop`);
+      for (let k = 0; k < r.path.length; k++) {
+        const [x, z] = legStart(r, k);
+        assert.ok(x >= g.x0 && x <= g.x1 + 1 && z >= g.y0 && z <= g.y1 + 1, `${r.id} stays on the island's streets`);
+      }
+      assert.ok(r.stops.length >= 2, `${r.id} has stops`);
+    }
+  }
+  assert.equal(busRoutes(grid, "queens").length, 2, "Queens is wide enough for two routes");
+});
+
+test("a bus pulls in at each stop, waits for its riders, and goes round its loop; cars behind it wait", async () => {
+  const { BUS, busRoutes, spawnBuses } = await import("../lib/streetTraffic.ts");
+  const r = busRoutes(grid, "queens")[0];
+  const [bus] = spawnBuses(r, 1, CELL);
+  const rng = seeded(4);
+  const cars = [bus, ...spawnCars(grid, 25, CELL, rng)];
+  const served: number[] = [];
+  let pulled = 0;
+  for (let t = 0; t < 900; t += 0.05) {
+    stepCars(cars, grid, CELL, 0.05, t, rng, (b) => { served.push(b.leg!); return BUS.dwell; });
+    if ((bus.dwell ?? 0) > 0) {
+      const p = carPose(bus, CELL);
+      const plain = carPose({ ...bus, route: undefined }, CELL);
+      pulled = Math.max(pulled, Math.hypot(p.x - plain.x, p.z - plain.z));
+    }
+  }
+  for (const k of r.stops) assert.ok(served.includes(k), `stopped at block ${k}`);
+  assert.ok(served.length > r.stops.length, "and kept going round");
+  assert.ok(pulled > 1, "pulled in toward the curb");
+  for (const c of cars) assert.ok(Number.isFinite(c.s) && c.v >= 0, "nothing stuck or broken");
+});
