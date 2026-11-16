@@ -11,6 +11,10 @@ import { Sheet } from "../Sheet";
 
 const hourLabel = (h: number) => { const x = ((h % 24) + 24) % 24; return `${x % 12 === 0 ? 12 : x % 12} ${x < 12 ? "AM" : "PM"}`; };
 
+/** What a regular-card milestone pays: "+C$40 · +25 🔥". */
+const perkReward = (p: { cash?: number; clout?: number }) =>
+  [p.cash ? `+C$${p.cash.toLocaleString("en-US")}` : "", p.clout ? `+${p.clout} 🔥` : ""].filter(Boolean).join(" · ");
+
 /** The strip on the place panel: Happening now, Things to do, the regular card. */
 export function LifeStrip({ view, onOpen, onStamp, busy }: {
   view: LifeView;
@@ -40,14 +44,15 @@ export function LifeStrip({ view, onOpen, onStamp, busy }: {
         </div>
       )}
       {st && (
+        // Owner, Nov 16: the three dots read as page dots and "3/7 days · next:" as a riddle. Spelled out instead, and the
+        // line wraps: how many days you've come, and what the next milestone gives.
         <div className="life-stamps">
-          <span className="life-stamp-dots" aria-label={`${st.days} days visited`}>
-            {[3, 7, 15].map((d) => <i key={d} className={st.days >= d ? "on" : ""} />)}
-          </span>
+          <span aria-hidden="true" className="life-stamp-icon">🎟️</span>
           <span className="life-stamp-text">
-            {st.claimable.length ? <b>🎟️ Regular card: a reward's waiting</b>
-              : st.next ? <>🎟️ <b>{st.days}/{st.next.days} days</b> · next: {st.next.text}</>
-              : <>🎟️ <b>Regular here</b> · {st.unlocked[st.unlocked.length - 1]?.text}</>}
+            {st.claimable.length ? <b>Regular card: a reward is waiting</b>
+              : st.next ? <><b>Regular card</b> · you've come {st.days} {st.days === 1 ? "day" : "days"} of {st.next.days}
+                <span className="life-stamp-next">Day {st.next.days}: {st.next.text}{perkReward(st.next) && <b> {perkReward(st.next)}</b>}</span></>
+              : <><b>You're a regular here</b><span className="life-stamp-next">{st.unlocked[st.unlocked.length - 1]?.text}</span></>}
           </span>
           {st.claimable[0] && <button className="btn btn-xs btn-taxi" disabled={busy} onClick={() => onStamp(st.claimable[0].days)}>Claim</button>}
         </div>

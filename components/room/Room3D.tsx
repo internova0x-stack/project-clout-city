@@ -1052,11 +1052,17 @@ export default function Room3D(props: Room3DProps) {
     const want = act.use;
     if (typeof want !== "string") {
       const strolls = /dog|lap|walk|run|jog/.test(want.action);
-      const matched = itemsRef.current.find((i) => i.use?.kind === "action" && (i.use.actionId === want.action || (want.index !== undefined && i.use.actionId === `*${want.index}`))) ?? null;
+      const exact = itemsRef.current.find((i) => i.use?.kind === "action" && (i.use.actionId === want.action || (want.index !== undefined && i.use.actionId === `*${want.index}`))) ?? null;
+      // Owner, Nov 16 ("what happens when Pet Also Sal is selected?"): an action with no piece of its own goes to the
+      // piece it's about (the deli's cat), and a second meal at a counter goes to the counter.
+      const about = /cat/.test(want.action) ? itemsRef.current.find((i) => i.kind === "cat") : null;
+      const counter = want.kind === "eat" ? itemsRef.current.find((i) => i.use?.kind === "action" && i.use.actionId === "eat") : null;
+      const matched = exact ?? (about ? { ...about, use: { kind: "action" as const, actionId: want.action } } : null) ?? counter ?? null;
       // A dog walk or a lap is a stroll; a meal or a hangout sits you near its table; else walk to its piece, or stroll.
       if (strolls && (want.kind === "shift" || want.kind === "visit" || want.kind === "hangout")) { actionsRef.current?.stroll(want.seconds ?? 8, /dog/.test(want.action)); return; }
       if ((want.kind === "eat" || want.kind === "hangout") && actionsRef.current?.sitNear(matched)) return;
       if (!matched && (want.kind === "shift" || want.kind === "visit")) { actionsRef.current?.stroll(want.seconds ?? 8, false); return; }
+      if (matched && matched !== exact) { actionsRef.current?.goUse(matched, true); return; }
     }
     const fits = itemsRef.current.filter((i) => {
       const u = i.use;
