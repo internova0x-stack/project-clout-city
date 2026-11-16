@@ -152,7 +152,7 @@ function Browse({ s, cash, busy, canTrade, onBuy, onOpen }: {
           {pick === l.id && p && (
             <>
               <div className="ledger-row" style={{ padding: 0, border: 0 }}><span className="body">You pay</span><span className="body-strong">{formatCash(p.price)}</span></div>
-              <div className="ledger-row" style={{ padding: 0, border: 0 }}><span className="body">Bank after</span><span className={`body-strong${cash < p.price ? " money-neg" : ""}`}>{formatCash(Math.max(0, cash - p.price))}</span></div>
+              <div className="ledger-row" style={{ padding: 0, border: 0 }}><span className="body">Left in your bank</span><span className={`body-strong${cash < p.price ? " money-neg" : ""}`}>{formatCash(Math.max(0, cash - p.price))}</span></div>
               <p className="meta" style={{ margin: 0 }}>
                 They get {formatCash(sellerGets(p.price))} after the {formatCash(saleFee(p.price))} city fee. Yours to keep, not to flip, for {PLAYER_ECONOMY.noResaleDays} days.
                 {p.skuLeft <= 1 ? ` You can get ${p.skuLeft} more of these from the Market this week.` : ""}

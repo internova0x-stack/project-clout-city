@@ -1276,7 +1276,7 @@ export function GameShell({
   const [trip, setTrip] = useState<Trip | null>(null);
   const [restKind, setRestKind] = useState<RestKind | null>(null);
   // Owner, Nov 6: an action started from a list plays out in the room (the avatar walks to the sofa, the bed, the counter).
-  const [roomAct, setRoomAct] = useState<{ use: "sit" | "sleep" | "cook" | { action: string; index?: number }; key: number } | null>(null);
+  const [roomAct, setRoomAct] = useState<{ use: "sit" | "sleep" | "cook" | { action: string; index?: number; kind?: string; seconds?: number }; key: number } | null>(null);
   useEffect(() => { setRoomAct(null); }, [inside?.id, tab, insideFloor]);
   const [kitchenOpen, setKitchenOpen] = useState(false);
   // v0.10 Lucky Star Lotto (migration 0032): lotto state is missing until it runs.
@@ -2431,7 +2431,7 @@ export function GameShell({
       if (!cityApi) return;
       const act = placeById(pl)?.actions.find((x) => x.id === a);
       const v = act ? actionVerb(act) : { emoji: "✨", label: "On it" };
-      if (act && inside?.id === pl) setRoomAct({ use: { action: a, index: placeById(pl)!.actions.indexOf(act) }, key: Date.now() });
+      if (act && inside?.id === pl) setRoomAct({ use: { action: a, index: placeById(pl)!.actions.indexOf(act), kind: act.kind, seconds: actionSeconds(act) }, key: Date.now() });
       // v0.13: a together plan for this activity pays its bonus once both have done it.
       void cityThenStory(`${pl}:${a}`, timed(v.emoji, v.label, act ? actionSeconds(act) : 0, () => cityApi.doAction(pl, a))).then((ok) => {
         void claimTogether(pl, a);
