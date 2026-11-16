@@ -122,7 +122,7 @@ export function PassTab({ state, today, busy, price, onClaim, onBuy, starter }: 
       </p>
       <div className="pass-grid" role="table" aria-label="Season rewards">
         <div className="pass-row pass-head" role="row">
-          <span role="columnheader">Level</span><span role="columnheader">Everyone gets</span><span role="columnheader">{PASS_EMOJI} With the pass</span>
+          <span role="columnheader">Level</span><span role="columnheader">Free reward</span><span role="columnheader">{PASS_EMOJI} Pass reward</span>
         </div>
         {s.tiers.map((t) => {
           const reached = t.tier <= tier;
