@@ -108,7 +108,7 @@ function play(candidate: CandidateId, style: Style, seed: number) {
     const spend = Math.floor(room * 0.6);
     setBudget(state, { digital: Math.floor(spend / 3), street: Math.floor(spend / 3), tv: Math.floor(spend / 3) });
     if (state.week === CAMPAIGN.debateWeek) {
-      for (let i = 0; i < 4 && !state.debate?.done; i++) {
+      for (let i = 0; i < 5 && !state.debate?.done; i++) {
         const q = campaignView(content, state, day).debate!.questions[state.debate?.round ?? 0] ?? "";
         debateRound(content, state, q.startsWith("Papa-Dani") ? "deflect" : state.intel > 0 ? "attack" : "facts", r);
       }

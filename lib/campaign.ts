@@ -20,6 +20,12 @@ export const CAMPAIGN = {
   slots: 10,
   maxMeetings: 3,
   debateWeek: 3,
+  /**
+   * What the debate does to the poll (owner, Nov 16: "I won the debate but it did not give me a big swing"). A win is
+   * winBase + winPer × crowd points, between winMin and winMax; a loss the same from the lose numbers, taken off; a tie
+   * (crowd 0) nothing. A win is on every channel, so it reaches the other boroughs in full (a loss at the usual half). The Mayor loses half of a swing.
+   */
+  debateSwing: { winBase: 2, winPer: 0.5, winMin: 2.5, winMax: 5, loseBase: 0.5, losePer: 0.25, loseMin: 1, loseMax: 2 },
   galaWeek: 2,
   /** Seeding from the manager's own bank, once, at the start (the test build has one act of money). */
   seedMax: 1000,
@@ -295,7 +301,11 @@ export interface Recap {
   revealOn: string;
 }
 
-export interface DebateState { round: number; crowd: number; rounds: { q: string; style: DebateStyle; delta: number; line: string }[]; done: boolean; won?: boolean }
+export interface DebateState {
+  round: number; crowd: number; rounds: { q: string; style: DebateStyle; delta: number; line: string }[]; done: boolean; won?: boolean;
+  /** Once done: the points it moved, and the citywide poll before and after (for the results card). */
+  swing?: number; before?: number; after?: number;
+}
 
 /** borough: one of the other four boroughs (they report first on election night). */
 export interface ElectionResult { place: string; you: number; mayor: number; turnout: number; borough?: boolean }

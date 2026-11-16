@@ -422,8 +422,8 @@
       "id": "sal-cat",
       "place": "ditmars-deli",
       "emoji": "🐈",
-      "title": "Win over Meatball",
-      "blurb": "The deli cat, Meatball, sleeps on the bread. She has never once acknowledged a customer. Some say she can't.",
+      "title": "Win over Also Sal",
+      "blurb": "Also Sal, the deli cat, sleeps on the bread. He lets you pet him, but he has never once looked at a customer. Some say he can't.",
       "energy": 0,
       "options": [
         {
@@ -434,13 +434,13 @@
           "outcomes": [
             {
               "weight": 1,
-              "text": "Eleven minutes. Then she walks over and sits on your foot. Sal drops a tray. \"She never does that.\"",
+              "text": "Eleven minutes. Then he walks over and sits on your foot. Sal drops a tray. \"He never does that.\"",
               "mood": 10,
               "clout": 10
             },
             {
               "weight": 3,
-              "text": "Meatball looks at you, yawns, and turns to face the wall. A clear message.",
+              "text": "Also Sal looks at you, yawns, and turns to face the wall. A clear message.",
               "mood": 1
             }
           ]
@@ -453,13 +453,13 @@
           "outcomes": [
             {
               "weight": 2,
-              "text": "She takes the turkey and lets you touch her head for one second. Transactional. Like New York.",
+              "text": "He takes the turkey and lets you touch his head for one second. Transactional. Like New York.",
               "cash": -6,
               "mood": 5
             },
             {
               "weight": 1,
-              "text": "She takes the turkey and leaves. Sal: \"She's smarter than you.\"",
+              "text": "He takes the turkey and leaves. Sal: \"He's smarter than you.\"",
               "cash": -6
             }
           ]
@@ -3461,7 +3461,7 @@
       },
       {
         "days": 7,
-        "text": "Meatball the cat tolerates you. This is unprecedented.",
+        "text": "Also Sal the cat looks at you. On purpose. This is unprecedented.",
         "clout": 25
       },
       {

@@ -8,6 +8,7 @@ import {
 } from "@/lib/campaign";
 import type { CampaignView } from "@/lib/campaignEngine";
 import { RANKS } from "@/lib/ranks";
+import { celebrate } from "@/components/Celebrate";
 
 // Campaign Mode (docs/CAMPAIGN-MODE.md): the player manages a challenger's campaign against Mayor Papa-Dani. One
 // sheet, opened from the Phone's Campaign app (or Campaign HQ on the map): the teaser before Rank 2, the candidate
@@ -449,7 +450,7 @@ function Week({ data, v, busy, api, run, onInbox, editing, setEditing, onTask }:
     return <SlotPicker key={editing.index} v={v} data={data} index={editing.index} hint={editing.hint} busy={busy} onClose={() => setEditing(null)}
       onSet={async (a) => { const at = editing.index; const r = await run(api.slot(at, a), false); if (r) { setEditing(null); if (a) setJust(at); } }} />;
   }
-  if (debate && v.debate) return <Debate v={v} busy={busy} onClose={() => setDebate(false)} onStyle={(st) => run(api.debate(st), false)} />;
+  if (debate && v.debate) return <Debate v={v} who={data.candidates.find((c) => c.id === v.candidate)?.short ?? "You"} busy={busy} onClose={() => setDebate(false)} onStyle={(st) => run(api.debate(st), false)} />;
   return (
     <div className="stack-16">
       {v.recap && v.recap.week === v.week - 1 && <Paper v={v} />}
@@ -853,15 +854,31 @@ function Inbox({ v, busy, onReply, read, initial = null }: { v: CampaignView; bu
         </div>
         {m.status === "answered" && mine && (
           <>
-            <div className="camp-bubble me camp-pop">{mine.label}<span className="camp-bubble-meta">Sent ✓</span></div>
-            {/* After a reply (owner, Nov 6: a state in the thread, not a toast): what it did, in the reply's own words. */}
-            <div className="camp-outcome camp-pop late" role="status">
-              <span className="camp-outcome-icon" aria-hidden="true">{mine.meeting ? "📅" : "📨"}</span>
-              <span className="stack-4" style={{ minWidth: 0 }}>
-                <span className="title">{mine.meeting ? "Booked on your calendar" : `You went with “${mine.label}”`}</span>
-                {m.receipt && <span className="subtext">{m.receipt}</span>}
-                <span className="camp-outcome-chips"><span className="fx fx-pay">{mine.get}</span><span className="fx fx-cost">{mine.cost}</span></span>
-              </span>
+            {/* Owner, Nov 16 (option A): not a fake text bubble. Your call, stamped; what happened; each effect on its own line. */}
+            <div className="camp-decision camp-pop" role="status">
+              <span className={`camp-decision-stamp${mine.meeting ? " good" : ""}`} aria-hidden="true">{mine.meeting ? "BOOKED" : "DECIDED"}</span>
+              <div className="camp-decision-top">
+                <span className="camp-decision-icon" aria-hidden="true">{mine.meeting ? "📅" : "✉️"}</span>
+                <span className="stack-2" style={{ minWidth: 0 }}>
+                  <span className="overline">Your call</span>
+                  <span className="camp-decision-pick">{mine.label}</span>
+                </span>
+              </div>
+              <div className="camp-decision-body">
+                {mine.meeting && (
+                  <div className="camp-ticket">
+                    <span className="camp-ticket-day" aria-hidden="true"><span>BOOKED</span><b>✓</b></span>
+                    <span className="stack-2" style={{ minWidth: 0 }}><b>{m.message.subject}</b><span className="meta">On your calendar · takes one slot</span></span>
+                  </div>
+                )}
+                {m.receipt && <p className="camp-decision-story">{m.receipt}</p>}
+                <div className="camp-decision-fx">
+                  <span className="camp-fx good"><i aria-hidden="true">+</i>{mine.get}</span>
+                  {mine.cost && !/^nothing$/i.test(mine.cost.trim()) && (
+                    <span className={`camp-fx ${/slot/i.test(mine.cost) ? "neutral" : "bad"}`}><i aria-hidden="true">{/slot/i.test(mine.cost) ? "•" : "−"}</i>{mine.cost}</span>
+                  )}
+                </div>
+              </div>
             </div>
             <button className="btn btn-secondary" onClick={() => setOpen(null)}>Back to inbox</button>
           </>
@@ -1094,35 +1111,98 @@ const STYLE_LABEL: Record<DebateStyle, { label: string; p: Preview }> = {
   own: { label: "🙋 Own it", p: { get: "Stops a scandal's bleeding", cost: "A short-term hit" } },
 };
 
-function Debate({ v, busy, onClose, onStyle }: { v: CampaignView; busy: boolean; onClose: () => void; onStyle: (s: DebateStyle) => Promise<CampaignScreen | null> }) {
-  const [last, setLast] = useState<{ delta: number; line: string } | null>(null);
+/**
+ * The debate (owner, Nov 16: "each question should be demarcated clearly", "the after treatment… can be improved", a win
+ * with "a big swing" and a celebration; five questions). Q1-Q5 tabs on top carry each answer's score, so only the question
+ * you're on is on screen; pick an answer, then its result takes the question's place until Next question. The last answer
+ * opens the results card (won, lost or a tie) with the points it moved citywide.
+ */
+function Debate({ v, who, busy, onClose, onStyle }: { v: CampaignView; who: string; busy: boolean; onClose: () => void; onStyle: (s: DebateStyle) => Promise<CampaignScreen | null> }) {
   const d = v.debate!;
+  const [sel, setSel] = useState<DebateStyle | null>(null);
+  // The answer just given, shown in place of the question until Next question.
+  const [shown, setShown] = useState<{ index: number; style: DebateStyle; delta: number; line: string } | null>(null);
+  const total = d.questions.length;
   const q = d.questions[d.round];
+  const finish = () => {
+    if (d.won == null && d.swing == null) return;
+    const swing = d.swing ?? 0;
+    const tone = swing > 0 ? "win" : swing < 0 ? "lose" : "warn";
+    celebrate({
+      rung: 3, cta: swing > 0 ? "Back to HQ" : "Back to the calendar", emoji: swing > 0 ? "🏆" : swing < 0 ? "🎤" : "🤝", tag: "The debate",
+      title: swing > 0 ? "You won the debate" : swing < 0 ? "Rough night on stage" : "A dead heat",
+      result: {
+        tone,
+        stamp: { text: swing > 0 ? "YOU WON" : swing < 0 ? "LOST THIS ONE" : "A TIE", tone: swing > 0 ? "good" : "warn" },
+        ...(swing ? { amount: Math.abs(swing), plain: true, unit: swing > 0 ? "points" : "points lost" } : { big: "±0" }),
+        story: `Crowd ${d.crowd > 0 ? "+" : ""}${d.crowd} over ${total} questions. ${swing > 0 ? `The snap poll swings to ${who} across the city.` : swing < 0 ? "The clip everyone's sharing isn't a good one." : "Nobody moved. The moderator looked relieved."}`,
+        ...(d.before != null && d.after != null ? { meter: { label: `${who} in the poll`, have: Math.round(d.after), need: 50, max: 100, say: `${Math.round(d.before)}% → ${Math.round(d.after)}%` } } : {}),
+        keep: swing > 0 ? ["📈 Momentum up next week"] : [],
+      },
+    });
+  };
+  const answer = async () => {
+    if (!sel) return;
+    const index = d.round;
+    const r = await onStyle(sel);
+    if (r?.round) { setShown({ index, style: sel, delta: r.round.delta, line: r.round.line }); setSel(null); }
+  };
+  const crowdPos = 50 + Math.max(-45, Math.min(45, d.crowd * 6));
   return (
-      <div className="stack-16">
-        <button className="btn btn-ghost" style={{ width: "auto", paddingLeft: 0 }} onClick={onClose}>‹ The week</button>
-        <p className="overline" style={{ margin: 0 }}>🎤 The debate · round {Math.min(d.round + 1, d.questions.length)} of {d.questions.length}</p>
-        <div className="camp-crowd" aria-label={`Crowd ${d.crowd}`}><span style={{ left: `${50 + Math.max(-45, Math.min(45, d.crowd * 6))}%` }} /></div>
-        <span className="meta">Crowd {d.crowd > 0 ? "+" : ""}{d.crowd}</span>
-        {last && <div className={`card ${last.delta > 0 ? "camp-good" : "camp-bad"}`}><span className="title">{last.delta > 0 ? `+${last.delta}` : last.delta}</span> <span className="subtext">{last.line}</span></div>}
-        {!d.done && q ? (
-          <>
-            <div className="card"><p className="title" style={{ margin: 0 }}>{q}</p></div>
-            <p className="meta" style={{ margin: 0 }}>Call the play:</p>
-            {STYLES.map((s) => (
-              <button key={s} className="camp-option" disabled={busy} onClick={async () => { const r = await onStyle(s); if (r?.round) setLast(r.round); }}>
-                <span className="title">{STYLE_LABEL[s].label}</span><PreviewLines p={STYLE_LABEL[s].p} />
+    <div className="stack-16">
+      <button className="btn btn-ghost" style={{ width: "auto", paddingLeft: 0 }} onClick={onClose}>‹ The week</button>
+      <p className="overline" style={{ margin: 0 }}>🎤 The debate · {who} vs Papa-Dani</p>
+      <div className="debate-steps" role="list" aria-label="Questions">
+        {d.questions.map((_, i) => {
+          const r = d.rounds[i];
+          const cls = r ? (r.delta > 0 ? "up" : r.delta < 0 ? "down" : "even") : !d.done && i === d.round && !shown ? "now" : "";
+          return <span key={i} role="listitem" className={`debate-step ${cls}`}>Q{i + 1}{r ? ` ${r.delta > 0 ? "+" : ""}${r.delta}` : ""}</span>;
+        })}
+      </div>
+      <div className="debate-crowd" aria-label={`Crowd ${d.crowd}`}>
+        <div className="debate-crowd-bar"><span style={{ left: `${crowdPos}%` }} /></div>
+        <div className="debate-crowd-lab"><span>Crowd boos</span><b>Crowd {d.crowd > 0 ? "+" : ""}{d.crowd}</b><span>Crowd cheers</span></div>
+      </div>
+      {shown ? (
+        <>
+          <div className={`debate-reveal camp-pop ${shown.delta > 0 ? "up" : shown.delta < 0 ? "down" : ""}`} role="status">
+            <span className="overline">Question {shown.index + 1} · {STYLE_LABEL[shown.style].label}</span>
+            <span className="debate-reveal-big">{shown.delta > 0 ? "+" : ""}{shown.delta}</span>
+            <span className="title">{shown.delta > 0 ? "The crowd's with you" : shown.delta < 0 ? "That one hurt" : "The room shrugged"}</span>
+            <p className="subtext" style={{ margin: 0 }}>{shown.line}</p>
+          </div>
+          {d.done ? (
+            <button className="btn btn-taxi" onClick={() => { setShown(null); finish(); }}>See how the night went ›</button>
+          ) : (
+            <button className="btn btn-taxi" onClick={() => setShown(null)}>Next question ›</button>
+          )}
+        </>
+      ) : !d.done && q ? (
+        <>
+          <div className="debate-q">
+            <span className="debate-q-who"><span aria-hidden="true">{q.startsWith("Papa-Dani") ? "🎩" : "🎙️"}</span>{q.startsWith("Papa-Dani") ? "Papa-Dani jabs" : "The moderator asks"} · Question {d.round + 1} of {total}</span>
+            <p>{q}</p>
+          </div>
+          <p className="overline" style={{ margin: "2px 0 0" }}>Pick your answer</p>
+          <div className="debate-plays" role="radiogroup" aria-label="Your answer">
+            {STYLES.map((st) => (
+              <button key={st} role="radio" aria-checked={sel === st} className={`debate-play${st === "own" ? " wide" : ""}`} disabled={busy} onClick={() => setSel(st)}>
+                <b>{STYLE_LABEL[st].label}</b>
+                <small>{STYLE_LABEL[st].p.get}{st === "attack" ? ` (you have ${v.intel})` : ""}</small>
               </button>
             ))}
-          </>
-        ) : (
-          <div className="stack-12">
-            <p className="display-md" style={{ margin: 0 }}>{d.won ? "You won the debate 🎉" : "Rough night 😬"}</p>
-            <p className="subtext" style={{ margin: 0 }}>The snap poll is in. Now get back to the calendar.</p>
-            <button className="btn btn-taxi" onClick={onClose}>Back to HQ</button>
           </div>
-        )}
-      </div>
+          <button className="btn btn-taxi" disabled={busy || !sel} onClick={() => void answer()}>{busy ? "…" : sel ? `Answer with ${STYLE_LABEL[sel].label.replace(/^\S+\s/, "")}` : "Pick an answer"}</button>
+        </>
+      ) : (
+        <div className="stack-12">
+          <p className="display-md" style={{ margin: 0 }}>{(d.swing ?? 0) > 0 ? "You won the debate 🎉" : (d.swing ?? 0) < 0 ? "Rough night 😬" : "A dead heat 🤝"}</p>
+          <p className="subtext" style={{ margin: 0 }}>{d.swing ? `${d.swing > 0 ? "+" : ""}${d.swing} points citywide. ` : ""}Now get back to the calendar.</p>
+          <button className="btn btn-secondary" onClick={finish}>See the results card</button>
+          <button className="btn btn-taxi" onClick={onClose}>Back to HQ</button>
+        </div>
+      )}
+    </div>
   );
 }
 

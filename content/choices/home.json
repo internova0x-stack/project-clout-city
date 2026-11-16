@@ -515,7 +515,7 @@
     "base": "porch-pickup",
     "area": "home",
     "emoji": "🏠",
-    "title": "A stoop on 30th Avenue: eight boxes, nobody home. Your neighbor's 'pickup crew' is one short: C$300.",
+    "title": "Eight packages on a stoop, nobody home. Your neighbor steals them to resell: C$300 if you help for an hour.",
     "where": {
       "tags": [
         "astoria"
@@ -528,7 +528,7 @@
     "options": [
       {
         "id": "no",
-        "label": "Keep walking",
+        "label": "Walk on by",
         "get": "Your hands clean",
         "cost": "C$300",
         "risk": "low",
@@ -545,7 +545,7 @@
       },
       {
         "id": "lift",
-        "label": "Do the hour",
+        "label": "Help him take them",
         "get": "C$300",
         "cost": "Eight neighbors' deliveries",
         "risk": "high",
@@ -586,7 +586,7 @@
       },
       {
         "id": "knock",
-        "label": "Knock next door",
+        "label": "Ask next door to hold them",
         "get": "Packages kept safe",
         "cost": "Ten minutes",
         "risk": "low",

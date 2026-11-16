@@ -277,7 +277,7 @@
     { "text": "Third stall's been 'on a call' for forty minutes.", "at": ["restroom"] },
     { "text": "Somebody wrote 'Tea is free, therapy isn't' on the mirror. Nobody's cleaned it.", "at": ["restroom"] },
     { "text": "The hand dryer here could launch a satellite.", "at": ["restroom"] },
-    { "text": "Meatball the cat has bitten two health inspectors. Both passed the deli anyway.", "places": ["ditmars-deli"] },
+    { "text": "Also Sal the cat has bitten two health inspectors. Both passed the deli anyway.", "places": ["ditmars-deli"] },
     { "text": "Sal's coffee is a dollar. It's been a dollar since the Flushing Meteors were good.", "places": ["ditmars-deli"] },
     { "text": "Morning rush at Sal's is thirty hard hats and one guy ordering a matcha. Sal pretends not to hear him.", "places": ["ditmars-deli"], "time": ["morning"] },
     { "text": "Everybody's in here because it's the only place with AC.", "condition": ["heatwave"] },
