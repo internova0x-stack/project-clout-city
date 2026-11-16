@@ -416,8 +416,9 @@ components live in `app/globals.css`.
   (`GuestGoSheet`): `LookPicker` (components/demo/QuickPick.tsx) in four named layers, Gender, Shape (body type), Skin tone (any of
   the eight), Style (`LOOKS`: Casual, Sporty, Street, Nerdy, Gothic, Future mogul, Flashy/Glam, Artsy: one per starting outfit,
   each with its own him and her hair, glasses and line), on a light stage; then Sign up or Sign in. The look waits on the device
-  (lib/guestLook.ts, `cc-guest-look`) and the creator's Look step opens wearing it (new accounts only). No "play without an account"
-  from the map; `/demo` stays for invites' "Not sure yet?" link.
+  (lib/guestLook.ts, `cc-guest-look`) and the creator's Look step opens wearing it (new accounts only). No play without an account
+  anywhere (owner, Nov 16: the demo links are gone, the expired-link card has one Sign in; `/demo` still works for old links).
+  PostHog funnel: 'guest_place_opened' {place} → 'guest_go_tapped' {place} → 'signup_started' → 'signup_completed'.
 - Demo mode (owner, Oct 27): `/demo` (components/demo/DemoGame.tsx) starts as one of four ready-made New Yorkers (owner, Nov 7:
   no pick before sign-up: `defaultCharacter()` in QuickPick.tsx, chosen once per visit in sessionStorage 'cc-demo-character', a
   made-up name, a lottery roll, the room share) straight onto the map (GameShell `startTab="map"`); the guest screen downloads that

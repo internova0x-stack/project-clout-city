@@ -21,7 +21,10 @@ export type AnalyticsEvent =
   | "starter_week_finished"
   // Owner, Nov 7: how long the 3D scenes take, and when 3D fails (lib/loadStats.ts).
   | "scene_ready"
-  | "scene_failed";
+  | "scene_failed"
+  // Owner, Nov 16: the guest map's funnel: a place card opened, then "Go" (then signup_started, signup_completed).
+  | "guest_place_opened"
+  | "guest_go_tapped";
 
 export type EventProps = Record<string, string | number | boolean | null>;
 export interface Tracked { event: AnalyticsEvent; props: EventProps }

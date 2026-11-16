@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState } from "react";
 import type { Place } from "@/lib/city";
@@ -12,6 +11,7 @@ import { CompactMap } from "./map/CompactMap";
 import { SignUpSheet, type AuthMode } from "./SignUpSheet";
 import { useCityClock } from "./useCityClock";
 import { handle } from "@/lib/validation";
+import { track } from "@/lib/analytics";
 import { itemBySku } from "@/lib/city";
 
 // The place card and the Go sheet (with its live avatar) download on the first tap, not with the map.
@@ -117,7 +117,9 @@ export function GuestMap({ invited, authError, at, creator, openSignUp = false }
   const openPlace = (pin: PlacePin) => {
     startMusic();
     const p = placeById(pin.id);
-    if (p) setCard(p);
+    if (!p) return;
+    setCard(p);
+    track("guest_place_opened", { place: p.id });
   };
   // A plain visit gets the slim bar; an invite, a creator's link or an expired sign-in link keep the full card.
   const slim = !invited && !creator && !authError;
@@ -193,21 +195,15 @@ export function GuestMap({ invited, authError, at, creator, openSignUp = false }
           )}
           {/* Owner, Oct 28: Play now (the demo, no account) leads for a plain visit; an invite or a creator's link leads
               with Sign up, since their reward needs an account. */}
+          {/* Owner, Nov 16: no play without an account anywhere (the demo links are gone; /demo stays for old links). */}
           {invited || creator ? (
-            <>
-              <div className="row" style={{ gap: 8, marginTop: 12 }}>
-                <button className="btn btn-taxi" style={{ flex: 3 }} onClick={signUp}>Sign up free</button>
-                <button className="btn btn-secondary on-dark-secondary" style={{ flex: 1.2 }} onClick={() => { startMusic(); setAuth("login"); }}>Log in</button>
-              </div>
-              <Link className="guest-demo-link" href="/demo" prefetch>Not sure yet? Play a quick demo, no sign-up ›</Link>
-            </>
+            <div className="row" style={{ gap: 8, marginTop: 12 }}>
+              <button className="btn btn-taxi" style={{ flex: 3 }} onClick={signUp}>Sign up free</button>
+              <button className="btn btn-secondary on-dark-secondary" style={{ flex: 1.2 }} onClick={() => { startMusic(); setAuth("login"); }}>Log in</button>
+            </div>
           ) : (
-            <>
-              {/* Owner, Nov 7: a client-side move to the demo, so the map's code and the avatar downloaded here carry over. */}
-              <Link className="btn btn-taxi" style={{ marginTop: 12, textDecoration: "none" }} href="/demo" prefetch>Play now, no sign-up ›</Link>
-              {/* Owner, Oct 28: one Sign in button for both (SignUpSheet's "signin" mode works out which). */}
-              <button className="btn btn-secondary on-dark-secondary" style={{ marginTop: 8, width: "100%" }} onClick={() => { startMusic(); setAuth("signin"); }}>Sign in</button>
-            </>
+            // An expired sign-in link: one Sign in button for both (owner, Oct 28: SignUpSheet's "signin" mode works out which).
+            <button className="btn btn-taxi" style={{ marginTop: 12, width: "100%" }} onClick={() => { startMusic(); setAuth("signin"); }}>Sign in</button>
           )}
           <p className="meta guest-foot">
             A parody · 18+ · <a href="/terms">Terms</a> · <a href="/privacy">Privacy</a> · No ad trackers
@@ -216,7 +212,7 @@ export function GuestMap({ invited, authError, at, creator, openSignUp = false }
         )}
       </div>
 
-      {slim && <GuestPlaceCard place={card} daytime={daytime} onClose={() => setCard(null)} onGo={(p) => { setCard(null); setGoing(p); }} />}
+      {slim && <GuestPlaceCard place={card} daytime={daytime} onClose={() => setCard(null)} onGo={(p) => { setCard(null); setGoing(p); track("guest_go_tapped", { place: p.id }); }} />}
       {slim && (
         <GuestGoSheet place={going} onClose={() => setGoing(null)}
           onSignUp={() => { setGoing(null); setAuth("signup"); }} onSignIn={() => { setGoing(null); setAuth("signin"); }} />
