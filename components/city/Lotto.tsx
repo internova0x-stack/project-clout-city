@@ -97,7 +97,7 @@ export function LottoSheet({ open, state, placeId, busy, onClose, onBuy, onScrat
         <div className="stack-16 lotto-warn">
           {/* Owner, Nov 16: the 🧾 emoji looked botched on phones; a drawn house with a warning badge reads everywhere. */}
           <div className="lotto-warn-art" aria-hidden="true">
-            <svg viewBox="0 0 64 64" width="44" height="44">
+            <svg viewBox="0 0 64 64" width="34" height="34">
               <path d="M10 30 L32 11 L54 30" fill="none" stroke="#14111A" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round" />
               <path d="M16 27 V52 H48 V27" fill="#FFF6E0" stroke="#14111A" strokeWidth="4.5" strokeLinejoin="round" />
               <rect x="27" y="36" width="10" height="16" rx="1.5" fill="#14111A" />
