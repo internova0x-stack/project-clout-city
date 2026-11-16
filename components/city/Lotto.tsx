@@ -44,7 +44,20 @@ export function LottoSheet({ open, state, placeId, busy, onClose, onBuy, onScrat
   const freeGame = lottoGame(CITY_ECONOMY.lotto.freeGame)!;
   const row = (g: LottoGame) => (
     <GameRow key={g.id} game={g} pot={lotto.pots?.find((x) => x.game === g.id)} lotto={lotto} cash={state.player.bank_cash} busy={busy}
-      onBuy={(free) => void buy(g, free)} onOdds={() => setOdds(g)} />
+      onBuy={(free) => void buy(g, free)} onOdds={() => setOdds(g)}
+      // Owner, Nov 16: the free plays live on the game they're for, not in a separate banner.
+      free={g.id === freeGame.id ? (
+        <div className={`lotto-game-free${freeLeft ? "" : " used"}`} role="status">
+          <span aria-hidden="true">🎟️</span>
+          <span style={{ flex: 1, minWidth: 0 }}>
+            <b>{freeLeft ? `${freeLeft} free ${freeLeft === 1 ? "play" : "plays"} left today` : "Free play used today"}</b>
+            <small>{freeLeft ? "New ones at midnight" : "Back at midnight"}{lotto.beginnerUntil ? ` · 🍀 beginner's luck until ${localDate(lotto.beginnerUntil)}` : ""}</small>
+          </span>
+          <span className="lotto-pips" aria-hidden="true">
+            {Array.from({ length: lotto.freeToday }, (_, i) => <i key={i} className={i < lotto.freeUsed ? "used" : ""} />)}
+          </span>
+        </div>
+      ) : undefined} />
   );
   return (
     <Sheet open={open} onClose={onClose} label="Lucky Star Lotto" tall>
@@ -79,16 +92,6 @@ export function LottoSheet({ open, state, placeId, busy, onClose, onBuy, onScrat
               <button className="btn btn-night btn-sm" onClick={() => setCard({ id: resume.id, game: resume.game })}>Scratch</button>
             </div>
           )}
-          <div className={`lotto-free${freeLeft ? "" : " used"}`} role="status">
-            <span className="lotto-free-icon" aria-hidden="true">🎟️</span>
-            <span style={{ flex: 1, minWidth: 0 }}>
-              <b>Free plays: {freeLeft} of {lotto.freeToday} left today</b>
-              <small>{freeGame.name} · {freeLeft ? "new ones at midnight" : "back at midnight"}{lotto.beginnerUntil ? ` · 🍀 beginner's luck until ${localDate(lotto.beginnerUntil)}` : ""}</small>
-            </span>
-            <span className="lotto-pips" aria-hidden="true">
-              {Array.from({ length: lotto.freeToday }, (_, i) => <i key={i} className={i < lotto.freeUsed ? "used" : ""} />)}
-            </span>
-          </div>
           <div className="lotto-sec"><b>Daily pots</b><span>New numbers {untilMidnight(nowMs)}</span></div>
           {LOTTO_GAMES.filter((g) => g.period === "day").map(row)}
           <div className="lotto-sec"><b>Weekly pots</b><span>New numbers {nyMidnightLine(nextNyMonday(nowMs)).replace(/^Monday at midnight$/, "Monday")}</span></div>
@@ -112,14 +115,17 @@ function untilMidnight(nowMs: number): string {
 }
 
 /** One game at the counter: its lucky number on a ball, its pot, and the button to play. */
-function GameRow({ game, pot, lotto, cash, busy, onBuy, onOdds }: {
+function GameRow({ game, pot, lotto, cash, busy, onBuy, onOdds, free }: {
   game: LottoGame; pot?: LottoPot; lotto: LottoState; cash: number; busy: boolean; onBuy: (free: boolean) => void; onOdds: () => void;
+  /** The free plays' line, on the free game's card. */
+  free?: React.ReactNode;
 }) {
   const isFree = game.id === CITY_ECONOMY.lotto.freeGame && freeCardAvailability(lotto).ok;
   const bought = buyCardAvailability(game, lotto, cash);
   const weekly = game.period === "week";
   return (
-    <div className={`lotto-game${weekly ? " weekly" : ""}`}>
+    <div className={`lotto-game${weekly ? " weekly" : ""}${free ? " has-free" : ""}`}>
+      <div className="lotto-game-main">
       <span className="lotto-ball" style={{ "--ball": game.color } as CSSProperties} aria-label={pot ? `Lucky number ${pot.lucky}` : undefined}>{pot?.lucky ?? "?"}</span>
       <button className="lotto-game-info" onClick={onOdds} aria-label={`${game.name}: the odds`}>
         <b>{game.name}</b>
@@ -132,6 +138,8 @@ function GameRow({ game, pot, lotto, cash, busy, onBuy, onOdds }: {
           {formatCash(game.price)}
         </button>
       )}
+      </div>
+      {free}
     </div>
   );
 }

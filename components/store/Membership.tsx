@@ -21,7 +21,7 @@ function PassRow({ pass, onOpen }: { pass: { state: PassState; price: string | n
   const t = tierFor(s.xp, s.season);
   const line = s.vip ? `${s.season.name} · included with your VIP`
     : s.paid ? `${s.season.name} · yours for the season`
-    : `${s.season.name} · tier ${t.tier}, paid row${pass.price ? ` ${pass.price}` : " on sale"}`;
+    : `${s.season.name} · level ${t.tier}, paid row${pass.price ? ` ${pass.price}` : " on sale"}`;
   return (
     <button className="member-pass" onClick={onOpen ?? pass.onOpen}>
       <span aria-hidden="true" className="member-emoji">{PASS_EMOJI}</span>

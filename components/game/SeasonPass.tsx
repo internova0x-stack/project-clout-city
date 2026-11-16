@@ -33,11 +33,11 @@ export function PassPill({ state, today, onOpen }: { state: PassState; today: st
   const left = daysLeft(today, state.season);
   return (
     <button className={`pill-glass glass-hud pass-pill${n ? " ready" : ""}`} onClick={onOpen}
-      aria-label={`Clout Pass, tier ${t.tier} of ${state.season.tiers.length}${n ? `, ${n} reward${n === 1 ? "" : "s"} to collect` : ""}`}>
+      aria-label={`Clout Pass, level ${t.tier} of ${state.season.tiers.length}${n ? `, ${n} reward${n === 1 ? "" : "s"} to collect` : ""}`}>
       <span className="pass-ring" style={{ ["--p" as string]: `${pct}%` }} aria-hidden="true"><b>{t.tier}</b></span>
       <span className="pass-label" aria-hidden="true">
         <small>{PASS_EMOJI} {state.season.name}</small>
-        {n ? `🎁 ${n} reward${n === 1 ? "" : "s"} to collect` : state.phase === "claim" ? "Claim before it closes" : `Tier ${t.tier + (t.max ? 0 : 1)} next · ${left}d left`}
+        {n ? `🎁 ${n} reward${n === 1 ? "" : "s"} to collect` : state.phase === "claim" ? "Claim before it closes" : `Level ${t.tier + (t.max ? 0 : 1)} next · ${left}d left`}
       </span>
       <span aria-hidden="true">›</span>
     </button>
@@ -66,14 +66,14 @@ export function PassTab({ state, today, busy, price, onClaim, onBuy, starter }: 
         <div className="pass-hero-kicker">Clout Pass · Season 1</div>
         <div className="pass-hero-title">{PASS_EMOJI} {s.name}</div>
         <div className="row" style={{ justifyContent: "space-between", marginTop: 14 }}>
-          <span className="title">Tier {tier} of {s.tiers.length}</span>
+          <span className="title">Level {tier} of {s.tiers.length}</span>
           <span className="pass-hero-meta">
             {state.phase === "soon" ? `Starts ${new Date(s.starts + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })}`
               : state.phase === "on" ? `${left} day${left === 1 ? "" : "s"} left`
               : state.phase === "claim" ? "Claim what you earned" : "Season over"}
           </span>
         </div>
-        <div className="pass-bar" role="progressbar" aria-valuemin={0} aria-valuemax={need} aria-valuenow={into} aria-label="XP to the next tier">
+        <div className="pass-bar" role="progressbar" aria-valuemin={0} aria-valuemax={need} aria-valuenow={into} aria-label="XP to the next level">
           <span style={{ width: `${Math.round((into / need) * 100)}%` }} />
         </div>
         <div className="pass-hero-meta" style={{ marginTop: 6 }}>{max ? "Every tier reached" : `${into} / ${need} XP`}</div>
@@ -101,17 +101,26 @@ export function PassTab({ state, today, busy, price, onClaim, onBuy, starter }: 
       )}
       {state.paid && <p className="meta" style={{ margin: 0 }}>{state.vip ? "👑 Included with VIP." : "✅ Clout Pass unlocked."}</p>}
 
+      {/* Owner, Nov 16 ("I don't understand the tier, free, clout pass"): say how a row works before the rows. */}
+      <p className="pass-legend">
+        Each level you reach unlocks <b>two rewards</b>: the <b>free</b> one is everyone&apos;s, the <b className="pass-legend-paid">Clout Pass</b> one
+        is {state.paid ? "yours too" : "for Clout Pass owners"}. Tap Claim to collect.
+      </p>
       <div className="pass-grid" role="table" aria-label="Season rewards">
         <div className="pass-row pass-head" role="row">
-          <span role="columnheader">Tier</span><span role="columnheader">Free</span><span role="columnheader">Clout Pass</span>
+          <span role="columnheader">Level</span><span role="columnheader">Free for all</span><span role="columnheader">{PASS_EMOJI} Clout Pass</span>
         </div>
         {s.tiers.map((t) => {
           const reached = t.tier <= tier;
+          const next = !max && t.tier === tier + 1;
           const freeDone = state.claimed.free.includes(t.tier);
           const paidDone = state.claimed.paid.includes(t.tier);
           return (
-            <div key={t.tier} className="pass-row" role="row" data-reached={reached || undefined}>
-              <span className="pass-tier" role="cell">{t.tier}</span>
+            <div key={t.tier} className="pass-row" role="row" data-reached={reached || undefined} data-next={next || undefined}>
+              <span className="pass-tier" role="cell">
+                {t.tier}
+                <small>{reached ? "✓" : next ? `${need - into} to go` : `${(t.tier * s.xpPerTier).toLocaleString()} XP`}</small>
+              </span>
               <span role="cell" className="pass-cell" data-done={freeDone || undefined}>
                 {t.free.map((r, i) => <Reward key={i} r={r} />)}
                 {freeDone && <span className="pass-check" aria-label="claimed">✓</span>}
@@ -138,8 +147,8 @@ function HowItWorks({ season: s, price }: { season: PassState["season"]; price: 
   }, []);
   const steps: [string, string, React.ReactNode][] = [
     ["🎯", "Play like you already do", <>Daily tasks <b>+{s.xp.daily_task} XP</b>, all five in a day <b>+{s.xp.daily_bonus}</b>, each goal <b>+{s.xp.goal}</b>.</>],
-    ["🪜", "Climb the tiers", <>Every {s.xpPerTier} XP is a new tier. Each one has a free reward: C$, clout or a piece for your place.</>],
-    ["✨", "The Clout Pass adds the good stuff", <>One payment for the season{price ? ` (${price})` : ""}, or free with VIP: an exclusive outfit or furniture piece on every tier. Looks only. XP you already have counts.</>],
+    ["🪜", "Climb the levels", <>Every {s.xpPerTier} XP is a new level. Each one has a free reward: C$, clout or a piece for your place.</>],
+    ["✨", "The Clout Pass adds the good stuff", <>One payment for the season{price ? ` (${price})` : ""}, or free with VIP: an exclusive outfit or furniture piece on every level. Looks only. XP you already have counts.</>],
     ["⏳", "It's a season", <>Ends {new Date(s.ends + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })}. You get {s.claimDays} more days to claim, then a new season starts.</>],
   ];
   return (

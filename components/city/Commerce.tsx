@@ -342,14 +342,14 @@ export function NetWorthSheet({
                     </button>
                   );
                 })}
-                {starters.map((s) => (
+                {starters.map((s, k) => (
                   <div key={s} className="list-row static">
-                    <IconTile emoji="🧺" size={40} />
+                    <StarterTile style={style} index={k} />
                     <span style={{ flex: 1, minWidth: 0 }}>
                       <span className="title" style={{ display: "block" }}>{s}</span>
                       <span className="meta">Starter · Can&apos;t be sold</span>
                     </span>
-                    <span className="body-strong tabular">{formatCash(0)}</span>
+                    <span className="body-strong tabular">Free</span>
                   </div>
                 ))}
               </div>
@@ -704,4 +704,28 @@ function LookHint({ item, counts }: { item: ShopCardItem; counts?: Record<string
   const name = LOOK_LABEL[best.l] ?? best.l;
   const line = best.have >= STYLE.fullMin ? `Matches your ${name} look` : best.have + 1 >= STYLE.fullMin ? `Completes your ${name} look` : `${name} look: you wear ${best.have} of ${STYLE.fullMin}`;
   return <span className="meta">✨ {line}</span>;
+}
+
+/** Pictures shipped for the starter pieces (public/look-img), tinted to the look's color. */
+const STARTER_PICS: ReadonlySet<string> = new Set(["puffer", "cardigan", "vest", "hoodie", "crop", "zip", "blazer", "tee", "pants", "skirt", "shorts", "leggings", "sneakers", "cap"]);
+const STARTER_EXTRA: Record<string, string> = { gymbag: "👜", lanyard: "🪪", phone: "📱", tote: "👜", choker: "📿", headphones: "🎧", boots: "👢" };
+
+/**
+ * A starter piece's picture in the Net Worth list (owner, Nov 16: "some items have no image or price"). starterItems
+ * list the top, the bottom, the shoes and the signature piece, in that order (lib/styles.ts).
+ */
+function StarterTile({ style, index }: { style: StyleId; index: number }) {
+  const o = getStyle(style).outfit;
+  const [kind, color] = index === 0 ? [o.top, o.topColor] : index === 1 ? [o.bottom, o.bottomColor]
+    : index === 2 ? [o.shoes === "boots" ? "boots" : "sneakers", o.shoeColor] : [o.accessory, o.accessoryColor];
+  if (!STARTER_PICS.has(kind)) return <IconTile emoji={STARTER_EXTRA[kind] ?? "🧺"} size={40} />;
+  const src = `/look-img/${kind}.webp`;
+  return (
+    <span className="icon-tile" style={{ width: 40, height: 40, padding: 5 }} aria-hidden="true">
+      <span className="look-tint" style={{ background: color, WebkitMaskImage: `url(${src})`, maskImage: `url(${src})` }}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={src} alt="" />
+      </span>
+    </span>
+  );
 }

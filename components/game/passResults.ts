@@ -28,13 +28,13 @@ export function passMaxCelebration(s: PassState, onOpen?: () => void): Celebrati
   const ready = claimable(s);
   const waiting = ready.free.length + ready.paid.length;
   return {
-    rung: 4, emoji: PASS_EMOJI, tag: "Clout Pass", num: String(n), unit: "tiers",
-    title: `Every tier of ${s.season.name}`,
+    rung: 4, emoji: PASS_EMOJI, tag: "Clout Pass", num: String(n), unit: "levels",
+    title: `Every level of ${s.season.name}`,
     line: "You did the daily tasks so many times the tasks started doing you.",
     rewards: s.paid ? [{ text: `${s.season.badge.emoji} ${s.season.badge.name} badge` }] : undefined,
     lola: "Maxed the pass. Your landlord is impressed and also raising the rent.",
     cta: waiting ? "Collect your rewards" : "Nice", onCta: waiting ? onOpen : undefined,
-    share: `I maxed out all ${n} tiers of ${s.season.name} in Clout City.`,
+    share: `I maxed out all ${n} levels of ${s.season.name} in Clout City.`,
   };
 }
 
@@ -83,10 +83,10 @@ export function passWrapResult(s: PassState, name: Name, onOpen?: () => void): C
     result: {
       tone: all ? "win" : "warn",
       stamp: all ? { text: "MAXED", tone: "good" } : { text: "SEASON OVER", tone: "warn" },
-      amount: tier, plain: true, unit: `of ${n} tiers`,
-      story: all ? "Every tier, every task. The city noticed, then asked what a tier is." : "The season's over. The pieces stay. So does the sweater.",
-      meter: { label: "Tiers reached", have: tier, need: n, max: n,
-        say: waiting ? `${waiting} reward${waiting === 1 ? "" : "s"} still to claim.` : all ? "Every tier." : `${n - tier} short of the top. Next season.` },
+      amount: tier, plain: true, unit: `of ${n} levels`,
+      story: all ? "Every level, every task. The city noticed, then asked what a level is." : "The season's over. The pieces stay. So does the sweater.",
+      meter: { label: "Levels reached", have: tier, need: n, max: n,
+        say: waiting ? `${waiting} reward${waiting === 1 ? "" : "s"} still to claim.` : all ? "Every level." : `${n - tier} short of the top. Next season.` },
       keep,
     },
   };
