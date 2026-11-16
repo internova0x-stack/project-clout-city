@@ -11,25 +11,11 @@ const itemName = (sku: string) => itemBySku(sku)?.name;
 const rewardEmoji = (r: PassReward) =>
   r.kind === "cash" ? "💵" : r.kind === "clout" ? "🔥" : r.kind === "badge" ? "🏅" : itemBySku(r.sku)?.emoji ?? "🎁";
 
-/**
- * What a reward is, in a few words under its name (owner, Nov 16: "I don't understand what Free $100 means… is that
- * a reward"): cash for the bank, clout, something to wear, something for your home, a badge.
- */
-function rewardKind(r: PassReward): string {
-  if (r.kind === "cash") return "Cash for your bank";
-  if (r.kind === "clout") return "Clout for your rank";
-  if (r.kind === "badge") return "A badge for your profile";
-  return itemBySku(r.sku)?.category === "home" ? "Furniture for your home" : "Clothes to wear";
-}
-
 function Reward({ r, locked }: { r: PassReward; locked?: boolean }) {
   return (
     <span className="pass-reward" data-locked={locked || undefined}>
       <span aria-hidden>{rewardEmoji(r)}</span>
-      <span className="pass-reward-text">
-        <span>{rewardLabel(r, itemName)}</span>
-        <small>{rewardKind(r)}</small>
-      </span>
+      <span>{rewardLabel(r, itemName)}</span>
     </span>
   );
 }
