@@ -371,6 +371,28 @@ a { color:inherit; }
 .guest-card { border-radius:var(--r-lg); padding:16px; box-shadow:var(--elev-3); color:var(--text-on-dark); animation:rise-in .4s ease-out; }
 .guest-foot { margin:12px 0 0; text-align:center; color:rgba(255,246,224,.55); }
 .guest-foot a { color:inherit; }
+/* The guest's slim bar (owner, Nov 16: no sign-up card over the map), the guest place card's list and the Go sheet's look pick. */
+.guest-bar { display:flex; align-items:center; gap:10px; padding:8px 8px 8px 14px; border-radius:999px; box-shadow:var(--elev-2); color:var(--text-1); animation:rise-in .4s ease-out; }
+.guest-bar-logo { font-size:17px; line-height:1; white-space:nowrap; }
+.guest-bar-line { flex:1; min-width:0; font-size:13px; font-weight:600; color:var(--text-2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.guest-bar .btn.guest-bar-signin { width:auto; min-height:36px; padding:0 14px; font-size:14px; border-radius:999px; background:#fff; border:1px solid #E2DBD0; color:var(--night-900); }
+.guest-things { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px; }
+.guest-things li { font-size:14px; line-height:1.35; }
+.guest-signin-link { background:none; border:0; padding:6px; font:inherit; font-size:14px; color:var(--text-2); cursor:pointer; }
+.look-pick { display:flex; flex-direction:column; gap:12px; }
+.look-pick-stage { position:relative; height:min(34vh, 270px); border-radius:var(--r-lg); overflow:hidden; background:linear-gradient(180deg,#2A2140,#14101F); }
+.look-pick-tag { position:absolute; left:10px; top:10px; padding:6px 12px; border-radius:999px; background:rgba(255,255,255,.92); font-size:14px; font-weight:700; color:var(--night-900); }
+.look-pick-gender { position:absolute; right:10px; top:10px; display:flex; padding:3px; gap:2px; border-radius:999px; background:rgba(255,255,255,.92); }
+.look-pick-gender button { border:0; background:none; font:inherit; font-size:14px; font-weight:700; padding:5px 14px; border-radius:999px; color:var(--night-900); cursor:pointer; }
+.look-pick-gender button[aria-pressed="true"] { background:var(--night-900); color:#fff; }
+.look-pick-line { margin:-4px 0 0; font-size:14px; text-align:center; }
+.look-pick-row { display:flex; gap:8px; overflow-x:auto; padding-bottom:2px; scrollbar-width:none; }
+.look-pick-row::-webkit-scrollbar { display:none; }
+.look-pick-chip { flex:none; display:inline-flex; gap:6px; align-items:center; min-height:40px; padding:0 14px; border-radius:999px; border:1.5px solid var(--line, #E2DBD0); background:#fff; font:inherit; font-size:14px; font-weight:600; color:var(--text-1); cursor:pointer; }
+.look-pick-chip[aria-checked="true"] { border-color:var(--night-900); background:var(--night-900); color:#fff; }
+.look-pick-skins { display:flex; gap:8px; justify-content:space-between; }
+.look-pick-skin { width:32px; height:32px; border-radius:50%; border:2px solid #fff; box-shadow:0 0 0 1px rgba(0,0,0,.15); cursor:pointer; padding:0; }
+.look-pick-skin[aria-checked="true"] { box-shadow:0 0 0 2.5px var(--night-900); }
 
 /* Live ticker (C22) */
 .ticker { height:32px; border-radius:var(--r-pill); display:flex; align-items:center; gap:8px; padding:0 12px 0 7px; box-shadow:var(--elev-2); overflow:hidden; }
