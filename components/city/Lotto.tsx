@@ -94,7 +94,7 @@ export function LottoSheet({ open, state, placeId, busy, onClose, onBuy, onScrat
           onDone={onClose}
         />
       ) : warn ? (
-        <div className="stack-16 lotto-warn">
+        <div className="lotto-warn">
           {/* Owner, Nov 16: the 🧾 emoji looked botched on phones; a drawn house with a warning badge reads everywhere. */}
           <div className="lotto-warn-art" aria-hidden="true">
             <svg viewBox="0 0 64 64" width="34" height="34">
@@ -104,14 +104,16 @@ export function LottoSheet({ open, state, placeId, busy, onClose, onBuy, onScrat
             </svg>
             <span className="lotto-warn-badge">!</span>
           </div>
-          <h2 className="display-md" style={{ margin: 0 }}>That&apos;s your rent, babe.</h2>
-          <p className="body" style={{ margin: 0 }}>
+          <h2 className="display-md lotto-warn-title">That&apos;s your rent, babe.</h2>
+          <p className="body lotto-warn-body">
             A {warn.game.name} card is {formatCash(warn.game.price)}. After it you&apos;d have {formatCash(Math.max(0, state.player.bank_cash - warn.game.price))},
             and you owe {formatCash(warn.owed)} in rent and bills by {localDate(warn.due + "T12:00:00")}.
           </p>
-          <p className="meta" style={{ margin: 0 }}>Late rent drops your Mood every day, and after a week you&apos;re out. Benny will still be here on payday.</p>
-          <button className="btn btn-taxi" onClick={() => setWarn(null)}>Not today</button>
-          <button className="btn btn-secondary" disabled={busy} onClick={() => void buy(warn.game, false, true)}>Still scratching · {formatCash(warn.game.price)}</button>
+          <p className="meta lotto-warn-note">Late rent drops your Mood every day, and after a week you&apos;re out. Benny will still be here on payday.</p>
+          <div className="lotto-warn-actions">
+            <button className="btn btn-taxi" onClick={() => setWarn(null)}>Not today</button>
+            <button className="btn btn-secondary" disabled={busy} onClick={() => void buy(warn.game, false, true)}>Still scratching · {formatCash(warn.game.price)}</button>
+          </div>
         </div>
       ) : odds ? (
         <OddsView game={odds} onBack={() => setOdds(null)} />
