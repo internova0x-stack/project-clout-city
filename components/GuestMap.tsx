@@ -168,7 +168,7 @@ export function GuestMap({ invited, authError, at, creator, openSignUp = false }
         {slim ? (
           <section className="guest-bar glass-hud" aria-label="Clout City">
             <span className="studio-mark guest-bar-logo">Clout City</span>
-            <span className="guest-bar-line">👆 Tap a spot to explore</span>
+            <span className="guest-bar-line">👆 Tap any spot</span>
             <button className="btn btn-secondary on-dark-secondary guest-bar-signin" onClick={() => { startMusic(); setAuth("signin"); }}>Sign in</button>
           </section>
         ) : (
