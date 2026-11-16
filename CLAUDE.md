@@ -390,6 +390,9 @@ components live in `app/globals.css`.
   celebrity influencer Peyton Pastel's, on tickets "found" at a coat check (FirstSession.tsx `PARTY_HOST`). Sir Barksley
   (lib/barksley.ts, components/city/Barksley.tsx): the billionaire's depressed Pomeranian in Astoria Park; his scene opens on
   the first visit during Starter Week (met once per device), then a row on the park card with Dmitri's daily update.
+- Load stats (owner, Nov 7; lib/loadStats.ts): PostHog replays can't show WebGL, so the map and rooms send 'scene_ready' {scene, ms,
+  graphics, page, net} once per page load and 'scene_failed' {reason: no_webgl | context_lost}. The avatar's files download side by
+  side (baseAvatar). The consent banner is a slim strip at the top (it used to cover Play now).
 - Analytics (owner, Oct 27): PostHog starts in `instrumentation-client.ts` (Next 15.3+; env `NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN`,
   `NEXT_PUBLIC_POSTHOG_HOST`; no token, nothing starts): autocapture, page views, session replay with every input masked and
   `.ph-sensitive` masked (put that class on anything players type for others: chat, letters, shoutouts, notes; autocapture skips
@@ -406,8 +409,10 @@ components live in `app/globals.css`.
   never counted; over a limit is HTTP 429 'rate_limited'; a broken check lets requests through. game_settings 'rate_limits',
   mirrored by lib/rateLimits.ts (tests/rateLimits.test.ts). The browser client shows "slow down" (`SLOW_DOWN_EVENT`, GameShell).
   A new function players can spam: add it to a bucket.
-- Demo mode (owner, Oct 27): `/demo` (components/demo/DemoGame.tsx) runs a one-tap character pick (QuickPick, owner Oct 28: four
-  ready-made New Yorkers, a made-up name, a lottery roll, the room share) and the first session on the in-memory
+- Demo mode (owner, Oct 27): `/demo` (components/demo/DemoGame.tsx) starts as one of four ready-made New Yorkers (owner, Nov 7:
+  no pick before sign-up: `defaultCharacter()` in QuickPick.tsx, chosen once per visit in sessionStorage 'cc-demo-character', a
+  made-up name, a lottery roll, the room share) straight onto the map (GameShell `startTab="map"`); the guest screen downloads that
+  avatar's files first (`preloadBaseAvatar`, after 2.5 s, not on data saver) and Play now is a client-side Link. Then the first session on the in-memory
   city (lib/citySim.ts) in the browser only: nothing reaches the server, no social features. A top strip and `DemoSignUp`
   (GameShell's `demo` prop: "Invite your Crew" and the end of the first session) send guests to `/?signup=1`. The guest card leads
   with "Play now, no sign-up", then one "Sign in" for both (SignUpSheet mode 'signin': a known email gets its link, a new one

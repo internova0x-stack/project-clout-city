@@ -1,12 +1,12 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import CALENDAR_FILE from "@/content/culture/calendar.json";
 import { GameShell, type Flow } from "@/components/GameShell";
 import type { CalendarData } from "@/lib/calendar";
 import { createSimApi, sampleCityState, sampleSkills } from "@/lib/citySim";
 import { lookChoices } from "@/lib/look";
-import { QuickPick, type QuickCharacter } from "./QuickPick";
+import { defaultCharacter, type QuickCharacter } from "./QuickPick";
 import type { CityResult } from "@/lib/cityState";
 import type { Player } from "@/lib/player";
 import { createStarterSim } from "@/lib/starterSim";
@@ -21,15 +21,11 @@ const noop = async () => {};
 const SIGN_UP = "/?signup=1";
 
 export function DemoGame() {
+  // Owner, Nov 7: no character pick before signing up; the guest is a ready-made New Yorker in their starting look,
+  // straight onto the map (defaultCharacter, chosen on the guest screen so its avatar is already downloaded).
   const [player, setPlayer] = useState<Player | null>(null);
-  if (!player) {
-    return (
-      <div className="demo-mode">
-        <DemoBanner />
-        <QuickPick onPick={(c) => setPlayer(demoPlayer(c))} />
-      </div>
-    );
-  }
+  useEffect(() => { setPlayer(demoPlayer(defaultCharacter())); }, []);
+  if (!player) return <div className="demo-mode"><DemoBanner /></div>;
   return <DemoCity player={player} />;
 }
 
@@ -99,6 +95,7 @@ function DemoCity({ player }: { player: Player }) {
         cityApi={api}
         starter={starter.api}
         demo={{ signUp: setAsk }}
+        startTab="map"
         previewFlow={devFlow}
         leaderboardRows={async (scope, clout) => demoLeaderboard(scope, clout, player)}
         actions={{

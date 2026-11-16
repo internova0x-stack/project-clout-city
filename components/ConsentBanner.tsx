@@ -25,14 +25,15 @@ export function ConsentBanner() {
   const [c] = useConsent();
   if (c !== "pending") return null;
   return (
+    // Owner, Nov 7: a slim strip at the top, so it never covers Play now or the game's own buttons.
     <div className="consent-banner" role="dialog" aria-label="Cookies and analytics">
       <p className="body" style={{ margin: 0 }}>
-        🍪 We&apos;d like to use cookies to see how people play and to record game sessions, so we can fix what&apos;s
-        confusing. What you type and your chats are never recorded. <Link href="/privacy">Privacy policy</Link>
+        🍪 Cookies help us see how people play and record sessions to fix what&apos;s confusing. Typing and chats are never
+        recorded. <Link href="/privacy">Privacy</Link>
       </p>
-      <div className="row" style={{ gap: 8 }}>
-        <button className="btn btn-secondary btn-sm" style={{ flex: 1 }} onClick={() => setConsent(false)}>Reject</button>
-        <button className="btn btn-taxi btn-sm" style={{ flex: 1 }} onClick={() => setConsent(true)}>Accept</button>
+      <div className="row consent-buttons">
+        <button className="btn btn-secondary btn-sm" onClick={() => setConsent(false)}>Reject</button>
+        <button className="btn btn-taxi btn-sm" onClick={() => setConsent(true)}>Accept</button>
       </div>
     </div>
   );

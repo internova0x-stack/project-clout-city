@@ -18,7 +18,10 @@ export type AnalyticsEvent =
   | "chat_message_sent"
   | "purchase_completed"
   | "starter_mission_done"
-  | "starter_week_finished";
+  | "starter_week_finished"
+  // Owner, Nov 7: how long the 3D scenes take, and when 3D fails (lib/loadStats.ts).
+  | "scene_ready"
+  | "scene_failed";
 
 export type EventProps = Record<string, string | number | boolean | null>;
 export interface Tracked { event: AnalyticsEvent; props: EventProps }
