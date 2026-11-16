@@ -3426,3 +3426,16 @@ button.camp-task { background:none; border:0; border-top:1px solid var(--divider
 .consent-banner .body { font-size:12.5px; line-height:1.35; flex:1; min-width:0; }
 .consent-banner .consent-buttons { gap:6px; flex-direction:column; flex:none; }
 .consent-banner .consent-buttons .btn { height:34px; min-width:78px; padding:0 12px; font-size:14px; }
+
+/* The Clout Pass pill (owner, Nov 16): under the Starter Week pill on the home screen. The season's pink ring fills toward
+   the next tier; with rewards waiting it glows and gently pulses (none for reduced motion). */
+.pass-pill { display:flex; align-items:center; gap:8px; padding:3px 12px 3px 3px; white-space:nowrap; max-width:calc(100vw - 110px); }
+.pass-ring { position:relative; flex:none; width:30px; height:30px; border-radius:50%; display:grid; place-items:center;
+  background:conic-gradient(#FF4FA3 var(--p), rgba(20,17,26,.12) 0); }
+.pass-ring::after { content:""; position:absolute; inset:3.5px; border-radius:50%; background:#fff; }
+.pass-ring b { position:relative; z-index:1; font-size:13px; font-weight:800; color:var(--night-900); }
+.pass-label { display:flex; flex-direction:column; align-items:flex-start; min-width:0; line-height:1.15; font-size:13px; font-weight:700; color:var(--text-1); }
+.pass-label small { font-size:10.5px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--neon-text); }
+.pass-pill.ready { box-shadow:0 0 0 2px #FF4FA3, 0 6px 22px rgba(255,79,163,.45); animation:pass-glow 2.2s ease-in-out infinite; }
+@keyframes pass-glow { 0%, 100% { box-shadow:0 0 0 2px #FF4FA3, 0 6px 18px rgba(255,79,163,.35); } 50% { box-shadow:0 0 0 2px #FF4FA3, 0 6px 28px rgba(255,79,163,.7); } }
+@media (prefers-reduced-motion: reduce) { .pass-pill.ready { animation:none; } }
