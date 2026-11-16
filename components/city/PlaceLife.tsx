@@ -43,20 +43,39 @@ export function LifeStrip({ view, onOpen, onStamp, busy }: {
           ))}
         </div>
       )}
-      {st && (
-        // Owner, Nov 16: the three dots read as page dots and "3/7 days · next:" as a riddle. Spelled out instead, and the
-        // line wraps: how many days you've come, and what the next milestone gives.
-        <div className="life-stamps">
-          <span aria-hidden="true" className="life-stamp-icon">🎟️</span>
-          <span className="life-stamp-text">
-            {st.claimable.length ? <b>Regular card: a reward is waiting</b>
-              : st.next ? <><b>Regular card</b> · you've come {st.days} {st.days === 1 ? "day" : "days"} of {st.next.days}
-                <span className="life-stamp-next">Day {st.next.days}: {st.next.text}{perkReward(st.next) && <b> {perkReward(st.next)}</b>}</span></>
-              : <><b>You're a regular here</b><span className="life-stamp-next">{st.unlocked[st.unlocked.length - 1]?.text}</span></>}
-          </span>
-          {st.claimable[0] && <button className="btn btn-xs btn-taxi" disabled={busy} onClick={() => onStamp(st.claimable[0].days)}>Claim</button>}
-        </div>
-      )}
+      {st && (() => {
+        // Owner, Nov 16: the row read as a riddle. A small card instead: what it is and your count, the three milestones
+        // on a bar, then one line, the reward that's ready (with Claim) or the next one.
+        const ready = st.claimable[0];
+        const stops = st.stops ?? [...st.unlocked, ...(st.next ? [st.next] : [])].map((pk) => pk.days);
+        const last = stops[stops.length - 1] ?? 15;
+        const shown = ready ?? st.next;
+        return (
+          <div className={`life-reg${ready ? " ready" : ""}`}>
+            <div className="life-reg-head">
+              <span className="life-reg-title">🎟️ Regular card</span>
+              <span className="life-reg-count">{st.days} {st.days === 1 ? "day" : "days"} here</span>
+            </div>
+            <div className="life-reg-bar" aria-hidden="true">
+              <span className="life-reg-fill" style={{ width: `${Math.min(100, (st.days / last) * 100)}%` }} />
+              {stops.map((d) => (
+                <span key={d} className={`life-reg-stop${st.days >= d ? " on" : ""}`} style={{ left: `${(d / last) * 100}%` }}>
+                  <i>{st.days >= d ? "✓" : ""}</i><b>Day {d}</b>
+                </span>
+              ))}
+            </div>
+            {shown ? (
+              <p className="life-reg-line">
+                <span className="life-reg-label">{ready ? `Day ${ready.days} reward ready` : `Come back ${shown.days - st.days} more ${shown.days - st.days === 1 ? "day" : "days"}`}</span>
+                {shown.text}{!ready && perkReward(shown) && <b className="life-reg-reward"> {perkReward(shown)}</b>}
+              </p>
+            ) : (
+              <p className="life-reg-line"><span className="life-reg-label">You're a regular here</span>{st.unlocked[st.unlocked.length - 1]?.text}</p>
+            )}
+            {ready && <button className="btn btn-taxi life-reg-claim" disabled={busy} onClick={() => onStamp(ready.days)}>Claim {perkReward(ready)}</button>}
+          </div>
+        );
+      })()}
     </div>
   );
 }

@@ -2909,13 +2909,23 @@ button.camp-task { background:none; border:0; border-top:1px solid var(--divider
 .life-card-emoji { font-size:22px; line-height:1; }
 .life-card-title { font-size:13px; font-weight:700; line-height:16px; color:var(--night-900); }
 .life-card-meta { font-size:11px; font-weight:600; color:var(--text-3); }
-.life-stamps { display:flex; align-items:center; gap:8px; font-size:12px; color:var(--text-2); }
-.life-stamp-text { flex:1; min-width:0; line-height:16px; }
-.life-stamp-icon { flex:none; font-size:16px; align-self:flex-start; }
-.life-stamp-next { display:block; color:var(--text-3); }
-.life-stamp-dots { display:flex; gap:3px; flex:none; }
-.life-stamp-dots i { width:8px; height:8px; border-radius:50%; background:#E2DBD0; }
-.life-stamp-dots i.on { background:var(--green-500); }
+.life-reg { display:flex; flex-direction:column; gap:10px; padding:12px 14px 14px; border-radius:16px; background:#fff; box-shadow:var(--elev-1); }
+.life-reg.ready { box-shadow:inset 0 0 0 1.5px var(--green-500), var(--elev-1); }
+.life-reg-head { display:flex; align-items:baseline; justify-content:space-between; gap:8px; }
+.life-reg-title { font-size:14px; font-weight:700; color:var(--night-900); }
+.life-reg-count { font-size:12px; font-weight:600; color:var(--text-3); }
+.life-reg-bar { position:relative; height:6px; margin:4px 8px 20px 0; border-radius:3px; background:#ECE6DC; }
+.life-reg-fill { position:absolute; left:0; top:0; bottom:0; border-radius:3px; background:var(--green-500); }
+.life-reg-stop { position:absolute; top:50%; transform:translate(-50%,-50%); display:flex; flex-direction:column; align-items:center; }
+.life-reg-stop i { width:16px; height:16px; border-radius:50%; background:#fff; border:2px solid #D8D0C4; font-style:normal; font-size:10px; line-height:12px; text-align:center; color:#fff; }
+.life-reg-stop.on i { background:var(--green-500); border-color:var(--green-500); }
+.life-reg-stop b { position:absolute; top:20px; font-size:10px; font-weight:600; color:var(--text-3); white-space:nowrap; }
+.life-reg-stop:last-child b { right:-6px; }
+.life-reg-line { margin:0; font-size:13px; line-height:18px; color:var(--text-2); }
+.life-reg-label { display:block; font-size:12px; font-weight:700; color:var(--night-900); margin-bottom:2px; }
+.life-reg.ready .life-reg-label { color:var(--green-600, #1F8A5B); }
+.life-reg-reward { color:var(--night-900); white-space:nowrap; }
+.life-reg-claim { width:100%; }
 /* Today's pick (owner, Nov 1: "a pop up instead of a modal"; components/city/DailyPick.tsx): a floating card, no scrim. */
 .daily-pop { position:fixed; z-index:60; left:50%; top:calc(118px + var(--safe-top)); transform:translateX(-50%); width:min(358px, calc(100% - 32px));
   display:flex; flex-direction:column; gap:10px; padding:14px; border-radius:20px; background:#fff; color:var(--night-900); text-shadow:none;

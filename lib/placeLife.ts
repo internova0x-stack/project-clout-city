@@ -114,7 +114,7 @@ export type OptionView = Pick<LifeOption, "id" | "label" | "get" | "cost">;
 export interface ActivityView { id: string; emoji: string; title: string; blurb: string; energy: number; happening: string | null; done: boolean; options: OptionView[] }
 export interface MomentView { id: string; emoji: string; title: string; blurb: string; options: OptionView[] }
 export interface HappeningView { id: string; emoji: string; title: string; blurb: string; until: number | null }
-export interface StampView { days: number; next: StampPerk | null; unlocked: StampPerk[]; claimable: StampPerk[] }
+export interface StampView { days: number; next: StampPerk | null; unlocked: StampPerk[]; claimable: StampPerk[]; /** Every milestone's day (3, 7, 15). */ stops?: number[] }
 export interface LifeView { place: string; happenings: HappeningView[]; activities: ActivityView[]; stamps: StampView | null; momentsLeft: number }
 
 const optionView = (o: LifeOption): OptionView => ({ id: o.id, label: o.label, get: o.get, cost: o.cost });
@@ -134,6 +134,7 @@ export function lifeView(c: LifeContent, place: string, s: LifeScene, done: Life
     })),
     stamps: stamps ? {
       days: regularDays,
+      stops: stamps.map((p) => p.days),
       unlocked: stamps.filter((p) => regularDays >= p.days),
       next: stamps.find((p) => regularDays < p.days) ?? null,
       claimable: stamps.filter((p) => regularDays >= p.days && (p.cash || p.clout) && !done.refs.has(`s:${place}:${p.days}`)),
