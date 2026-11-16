@@ -64,9 +64,9 @@ export const STARTING_STYLES: StartingStyle[] = [
     label: "Everyday Casual",
     emoji: "😎",
     blurb: "Tee, jeans, no plans. The plan is no plans.",
-    starterItems: ["Sky-blue tee", "Straight jeans", "White sneakers"],
+    starterItems: ["Sage-green tee", "Straight jeans", "White sneakers"],
     outfit: {
-      top: "tee", topColor: "#6FA8DC", topAccent: "#F4F1EA",
+      top: "tee", topColor: "#7FA37A", topAccent: "#F4F1EA",
       bottom: "pants", bottomColor: "#4A5F7E", shoeColor: "#F4F1EA",
       accessory: "none", accessoryColor: "#000000",
     },
@@ -76,9 +76,9 @@ export const STARTING_STYLES: StartingStyle[] = [
     label: "Gym Regular",
     emoji: "🏃",
     blurb: "Training for something. Won't say what.",
-    starterItems: ["Royal-blue hoodie", "Running shorts", "Trainers", "Gym bag"],
+    starterItems: ["Red track hoodie", "Running shorts", "Trainers", "Gym bag"],
     outfit: {
-      top: "hoodie", topColor: "#2F6FDB", topAccent: "#F4F1EA",
+      top: "hoodie", topColor: "#D93A35", topAccent: "#F4F1EA",
       bottom: "shorts", bottomColor: "#26232D", shoeColor: "#FFFFFF",
       accessory: "gymbag", accessoryColor: "#26232D",
     },
@@ -88,9 +88,9 @@ export const STARTING_STYLES: StartingStyle[] = [
     label: "Bodega Streetwear",
     emoji: "🧢",
     blurb: "Knows the deli cat by name. The deli cat does not know you.",
-    starterItems: ["Cobalt puffer", "Cargo pants", "Box-fresh white sneakers", "Fitted cap"],
+    starterItems: ["Mustard puffer", "Cargo pants", "Box-fresh white sneakers", "Fitted cap"],
     outfit: {
-      top: "puffer", topColor: "#1F4FB5", topAccent: "#1F1B26",
+      top: "puffer", topColor: "#E0A030", topAccent: "#1F1B26",
       bottom: "pants", bottomColor: "#5B5A4A", shoeColor: "#F4F1EA",
       // The fitted cap is headwear since v0.7 (look.covering): older rows without a headwear pick get it.
       accessory: "cap", accessoryColor: "#1F1B26",
@@ -101,10 +101,10 @@ export const STARTING_STYLES: StartingStyle[] = [
     label: "Midtown Corporate",
     emoji: "💼",
     blurb: "Firm handshake, two phones, zero personality. Bullish.",
-    starterItems: ["Navy blazer", "Charcoal trousers", "Dress shoes", "Office lanyard"],
+    starterItems: ["Charcoal suit jacket", "Charcoal trousers", "Dress shoes", "Office lanyard"],
     outfit: {
-      top: "blazer", topColor: "#23314F", topAccent: "#A9C3E8",
-      bottom: "pants", bottomColor: "#3A3742", shoeColor: "#1F1B26", shoes: "boots", shoeAccent: "#14111A",
+      top: "blazer", topColor: "#34343C", topAccent: "#F4F1EA",
+      bottom: "pants", bottomColor: "#2C2C33", shoeColor: "#1F1B26", shoes: "boots", shoeAccent: "#14111A",
       accessory: "lanyard", accessoryColor: "#2F6FDB",
     },
   },
@@ -113,9 +113,9 @@ export const STARTING_STYLES: StartingStyle[] = [
     label: "New Money",
     emoji: "💸",
     blurb: "Got rich last Tuesday. Has mentioned it since Tuesday.",
-    starterItems: ["Electric-blue blazer", "Linen shorts", "Loafers, no socks", "The newest phone"],
+    starterItems: ["Hot-pink blazer", "Linen shorts", "Loafers, no socks", "The newest phone"],
     outfit: {
-      top: "blazer", topColor: "#3B6FF6", topAccent: "#F4F1EA",
+      top: "blazer", topColor: "#E2497F", topAccent: "#F4F1EA",
       bottom: "shorts", bottomColor: "#F1E6D4", shoeColor: "#8A6A52", shoes: "boots", shoeAccent: "#5A3420",
       accessory: "phone", accessoryColor: "#C9C3CF",
     },
@@ -125,10 +125,10 @@ export const STARTING_STYLES: StartingStyle[] = [
     label: "Thrift Store Regular",
     emoji: "🧶",
     blurb: "Paid C$4 for this cardigan and will tell you about it.",
-    starterItems: ["Denim-blue grandpa cardigan", "Corduroy pants", "Scuffed boots", "Canvas tote"],
+    starterItems: ["Rust grandpa cardigan", "Corduroy pants", "Scuffed boots", "Canvas tote"],
     outfit: {
-      top: "cardigan", topColor: "#4C6A92", topAccent: "#D9A43A",
-      bottom: "pants", bottomColor: "#8A5A3C", shoeColor: "#3A2418", shoes: "boots", shoeAccent: "#2A1A10",
+      top: "cardigan", topColor: "#B4562E", topAccent: "#D9A43A",
+      bottom: "pants", bottomColor: "#6B6440", shoeColor: "#3A2418", shoes: "boots", shoeAccent: "#2A1A10",
       accessory: "tote", accessoryColor: "#E9DFC9",
     },
   },
@@ -137,9 +137,9 @@ export const STARTING_STYLES: StartingStyle[] = [
     label: "Arcade Prep",
     emoji: "🤓",
     blurb: "Sweater vest, high score on every machine in Astoria. Low score in sunlight.",
-    starterItems: ["Powder-blue sweater vest", "Pressed shorts", "Red high-tops", "Over-ear headphones"],
+    starterItems: ["Forest-green sweater vest", "Pressed shorts", "Red high-tops", "Over-ear headphones"],
     outfit: {
-      top: "vest", topColor: "#8FA6E8", topAccent: "#F4F1EA",
+      top: "vest", topColor: "#3E7A50", topAccent: "#F4F1EA",
       bottom: "shorts", bottomColor: "#C2AE86", shoeColor: "#D93A2F",
       accessory: "headphones", accessoryColor: "#14111A",
     },
@@ -149,9 +149,9 @@ export const STARTING_STYLES: StartingStyle[] = [
     label: "Night Owl Goth",
     emoji: "🦇",
     blurb: "Hasn't seen the sun since 2019. Thriving.",
-    starterItems: ["Midnight-blue hoodie", "Black jeans", "Platform boots", "Ring choker"],
+    starterItems: ["Black hoodie", "Black jeans", "Platform boots", "Ring choker"],
     outfit: {
-      top: "hoodie", topColor: "#26346B", topAccent: "#6E2B5E",
+      top: "hoodie", topColor: "#1C1A22", topAccent: "#7A2E68",
       bottom: "pants", bottomColor: "#14111A", shoeColor: "#0E0C12", shoes: "boots", shoeAccent: "#2A2733",
       accessory: "choker", accessoryColor: "#C9C3CF",
     },
@@ -203,8 +203,8 @@ export const BOTTOM_LABEL: Record<BottomKind, string> = { pants: "Pants", skirt:
 
 /**
  * Every style offers a tee and pants on top of its own pieces (owner, Oct 22), and the zip-up isn't a free top (it's
- * something to buy). No color picker (owner, Oct 22): each look comes in its own colors, every top a shade of blue
- * (owner, Oct 30: "the starting color should be blue"); a fit saved in another color wears these (storedFit, starterOutfit).
+ * something to buy). No color picker (owner, Oct 22): each look comes in its own colors (owner, Nov 16: "give every outfit
+ * its own color", after the Oct 30 all-blue tops); a fit saved in another color wears these (storedFit, starterOutfit).
  */
 const BASIC_TOPS: TopKind[] = ["tee"];
 const BASIC_BOTTOMS: BottomKind[] = ["pants"];

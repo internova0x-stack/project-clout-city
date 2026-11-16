@@ -1,7 +1,8 @@
 "use client";
 
-import Link from "next/link";
+import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState } from "react";
+import type { Place } from "@/lib/city";
 import { GUEST_START, type PlacePin } from "@/lib/places";
 import { PLACES, placeById } from "@/lib/city";
 import { music, readLocalMuted } from "@/lib/music";
@@ -10,7 +11,12 @@ import { CompactMap } from "./map/CompactMap";
 import { SignUpSheet, type AuthMode } from "./SignUpSheet";
 import { useCityClock } from "./useCityClock";
 import { handle } from "@/lib/validation";
+import { track } from "@/lib/analytics";
 import { itemBySku } from "@/lib/city";
+
+// The place card and the Go sheet (with its live avatar) download on the first tap, not with the map.
+const GuestPlaceCard = dynamic(() => import("./guest/GuestPlace").then((m) => m.GuestPlaceCard), { ssr: false });
+const GuestGoSheet = dynamic(() => import("./guest/GuestPlace").then((m) => m.GuestGoSheet), { ssr: false });
 
 /** A creator's link brought this guest here (spec section 21): who, and the welcome gift waiting at sign-up. */
 export interface CreatorWelcome { name: string; giftCash: number; giftItem: string | null }
@@ -44,7 +50,8 @@ function timeAgo(iso: string): string {
 // The guest screen (Clarifications section 1, step 1), laid out after the SF
 // Life reference in Clout City's dark glass: a slim brand bar, live city pills
 // with real numbers, map filter chips (C10), the live ticker (C22) and a
-// sign-up card. Guests pan, zoom and filter freely; tapping a place opens sign-up.
+// sign-up card. Guests pan, zoom and filter freely. Owner, Nov 16: no sign-up card over the map for a plain visit (a slim
+// bar instead); a tap on a place opens its card, and only "Go" asks who they are and offers sign-up or the demo.
 export function GuestMap({ invited, authError, at, creator, openSignUp = false }: {
   invited: boolean;
   authError: boolean;
@@ -62,6 +69,8 @@ export function GuestMap({ invited, authError, at, creator, openSignUp = false }
   const [residents, setResidents] = useState<number | null>(null);
   const [arrivals, setArrivals] = useState<Arrival[]>([]);
   const [tick, setTick] = useState(0);
+  const [card, setCard] = useState<Place | null>(null);
+  const [going, setGoing] = useState<Place | null>(null);
 
   useEffect(() => {
     const supabase = getBrowserSupabase();
@@ -105,6 +114,15 @@ export function GuestMap({ invited, authError, at, creator, openSignUp = false }
     startMusic();
     setAuth("signup");
   };
+  const openPlace = (pin: PlacePin) => {
+    startMusic();
+    const p = placeById(pin.id);
+    if (!p) return;
+    setCard(p);
+    track("guest_place_opened", { place: p.id });
+  };
+  // A plain visit gets the slim bar; an invite, a creator's link or an expired sign-in link keep the full card.
+  const slim = !invited && !creator && !authError;
   // The compact map is the only map (owner, Oct 30: the classic street map is retired).
   const MapView = CompactMap;
   const arrival = arrivals.length ? arrivals[tick % arrivals.length] : null;
@@ -117,8 +135,8 @@ export function GuestMap({ invited, authError, at, creator, openSignUp = false }
         initialZoom={invitedTo ? 15.5 : GUEST_START.zoom}
         initialPitch={GUEST_START.pitch}
         daytime={daytime}
-        onPinTap={signUp}
-        onLockedTap={signUp}
+        onPinTap={slim ? openPlace : signUp}
+        onLockedTap={slim ? undefined : signUp}
         attributionControl={false}
       />
 
@@ -149,6 +167,13 @@ export function GuestMap({ invited, authError, at, creator, openSignUp = false }
             <span className="meta ticker-time">{timeAgo(arrival.arrived_at)}</span>
           </div>
         )}
+        {slim ? (
+          <section className="guest-bar glass-hud" aria-label="Clout City">
+            <span className="studio-mark guest-bar-logo">Clout City</span>
+            <span className="guest-bar-line">👆 Tap any spot</span>
+            <button className="btn btn-secondary on-dark-secondary guest-bar-signin" onClick={() => { startMusic(); setAuth("signin"); }}>Sign in</button>
+          </section>
+        ) : (
         <section className="guest-card glass-hud" aria-label="Join Clout City">
           {/* Owner, Oct 14: the game uses the Studio's wordmark (the neon "Clout City"), not the gold image. */}
           <h1 className="studio-mark guest-card-logo">Clout City</h1>
@@ -170,27 +195,28 @@ export function GuestMap({ invited, authError, at, creator, openSignUp = false }
           )}
           {/* Owner, Oct 28: Play now (the demo, no account) leads for a plain visit; an invite or a creator's link leads
               with Sign up, since their reward needs an account. */}
+          {/* Owner, Nov 16: no play without an account anywhere (the demo links are gone; /demo stays for old links). */}
           {invited || creator ? (
-            <>
-              <div className="row" style={{ gap: 8, marginTop: 12 }}>
-                <button className="btn btn-taxi" style={{ flex: 3 }} onClick={signUp}>Sign up free</button>
-                <button className="btn btn-secondary on-dark-secondary" style={{ flex: 1.2 }} onClick={() => { startMusic(); setAuth("login"); }}>Log in</button>
-              </div>
-              <Link className="guest-demo-link" href="/demo" prefetch>Not sure yet? Play a quick demo, no sign-up ›</Link>
-            </>
+            <div className="row" style={{ gap: 8, marginTop: 12 }}>
+              <button className="btn btn-taxi" style={{ flex: 3 }} onClick={signUp}>Sign up free</button>
+              <button className="btn btn-secondary on-dark-secondary" style={{ flex: 1.2 }} onClick={() => { startMusic(); setAuth("login"); }}>Log in</button>
+            </div>
           ) : (
-            <>
-              {/* Owner, Nov 7: a client-side move to the demo, so the map's code and the avatar downloaded here carry over. */}
-              <Link className="btn btn-taxi" style={{ marginTop: 12, textDecoration: "none" }} href="/demo" prefetch>Play now, no sign-up ›</Link>
-              {/* Owner, Oct 28: one Sign in button for both (SignUpSheet's "signin" mode works out which). */}
-              <button className="btn btn-secondary on-dark-secondary" style={{ marginTop: 8, width: "100%" }} onClick={() => { startMusic(); setAuth("signin"); }}>Sign in</button>
-            </>
+            // An expired sign-in link: one Sign in button for both (owner, Oct 28: SignUpSheet's "signin" mode works out which).
+            <button className="btn btn-taxi" style={{ marginTop: 12, width: "100%" }} onClick={() => { startMusic(); setAuth("signin"); }}>Sign in</button>
           )}
           <p className="meta guest-foot">
             A parody · 18+ · <a href="/terms">Terms</a> · <a href="/privacy">Privacy</a> · No ad trackers
           </p>
         </section>
+        )}
       </div>
+
+      {slim && <GuestPlaceCard place={card} daytime={daytime} onClose={() => setCard(null)} onGo={(p) => { setCard(null); setGoing(p); track("guest_go_tapped", { place: p.id }); }} />}
+      {slim && (
+        <GuestGoSheet place={going} onClose={() => setGoing(null)}
+          onSignUp={() => { setGoing(null); setAuth("signup"); }} onSignIn={() => { setGoing(null); setAuth("signin"); }} />
+      )}
 
       <SignUpSheet open={auth !== null} mode={auth ?? "signup"} onClose={() => setAuth(null)} onSwitchMode={setAuth} invited={invited} creator={creator?.name} gift={gift} />
     </main>

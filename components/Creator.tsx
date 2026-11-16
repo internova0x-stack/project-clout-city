@@ -4,6 +4,7 @@ import { isAdult, validBirthdate } from "@/lib/age";
 import { AgeBlockedNote, BirthdateField, useAgeBlocked, type PartialBirthdate } from "./AgeGate";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
+import { takeGuestLook } from "@/lib/guestLook";
 import { useEffect, useRef, useState, useTransition, type ReactNode } from "react";
 import type { CreateResult } from "@/app/create/actions";
 import { ECONOMY, SIGNUP_HOMES, TRAITS, TRAIT_COUNT, canAfford, formatCash, lotteryLine } from "@/lib/economy";
@@ -68,6 +69,12 @@ export function Creator({
   const [step, setStep] = useState<CreatorStep>(initialStep);
   const [furthest, setFurthest] = useState<CreatorStep>(initialStep);
   const [look, setLook] = useState<Look>(initialLook ?? DEFAULT_LOOK);
+  // A guest who picked a look on the map (lib/guestLook.ts) starts the Look step wearing it; new accounts only.
+  useEffect(() => {
+    if (initialLook || initialStep !== 0 || restarting) return;
+    const g = takeGuestLook();
+    if (g) setLook(g);
+  }, [initialLook, initialStep, restarting]);
   const [traits, setTraits] = useState<string[]>(initialTraits ?? []);
   const [cash, setCash] = useState<number | null>(initialCash ?? null);
   const lookLocked = initialStep > 0 || furthest > 0;
