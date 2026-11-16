@@ -1710,7 +1710,8 @@ body:has(.game, .creator-sheet) { position:fixed; inset:0; width:100%; }
 .lotto-live { flex:none; background:#EA2B45; color:#fff; font-family:var(--font-label); font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; padding:2px 6px; border-radius:6px; }
 .lotto-ticker-time { flex:none; color:#BDB4A6; }
 .lotto-warn { padding-top:8px; }
-.lotto-warn-emoji { font-size:44px; line-height:1; }
+.lotto-warn-art { position:relative; width:72px; height:72px; border-radius:22px; display:grid; place-items:center; background:var(--taxi-tint); box-shadow:inset 0 0 0 1.5px rgba(242,169,0,.35); }
+.lotto-warn-badge { position:absolute; right:-6px; top:-6px; width:26px; height:26px; border-radius:50%; display:grid; place-items:center; background:#EA2B45; color:#fff; font-weight:800; font-size:16px; line-height:1; box-shadow:0 0 0 3px var(--surface-sheet); }
 .lotto-game.has-free { box-shadow:inset 0 0 0 1.5px var(--green-text, #2E8B57); }
 .lotto-game-free { display:flex; align-items:center; gap:8px; padding:8px 10px; border-radius:12px; background:var(--green-tint); font-size:18px; }
 .lotto-game-free b { display:block; font-size:13.5px; color:var(--text-1); }

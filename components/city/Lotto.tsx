@@ -95,7 +95,15 @@ export function LottoSheet({ open, state, placeId, busy, onClose, onBuy, onScrat
         />
       ) : warn ? (
         <div className="stack-16 lotto-warn">
-          <div className="lotto-warn-emoji" aria-hidden="true">🧾</div>
+          {/* Owner, Nov 16: the 🧾 emoji looked botched on phones; a drawn house with a warning badge reads everywhere. */}
+          <div className="lotto-warn-art" aria-hidden="true">
+            <svg viewBox="0 0 64 64" width="44" height="44">
+              <path d="M10 30 L32 11 L54 30" fill="none" stroke="#14111A" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M16 27 V52 H48 V27" fill="#FFF6E0" stroke="#14111A" strokeWidth="4.5" strokeLinejoin="round" />
+              <rect x="27" y="36" width="10" height="16" rx="1.5" fill="#14111A" />
+            </svg>
+            <span className="lotto-warn-badge">!</span>
+          </div>
           <h2 className="display-md" style={{ margin: 0 }}>That&apos;s your rent, babe.</h2>
           <p className="body" style={{ margin: 0 }}>
             A {warn.game.name} card is {formatCash(warn.game.price)}. After it you&apos;d have {formatCash(Math.max(0, state.player.bank_cash - warn.game.price))},
