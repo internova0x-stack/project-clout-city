@@ -491,6 +491,10 @@ components live in `app/globals.css`.
   real lat/lng (`makeProjector` places any lat/lng among its nearest places). Names only for the most relevant places
   (`labelPriority`, `FEATURED`, `pickLabels`: never overlapping), dots for the rest; a tap on a dot, name or building
   opens the place's card. Story-only places stand there only while their story runs.
+  Trips (owner, Nov 16: "the route just goes across all buildings", the ride and the route didn't match): lib/compactRoute.ts
+  `streetRoute` (pure, tests/compactRoute.test.ts) runs the route along the street grid (out to the curb, along one street, one
+  turn, to the destination's curb); `MapApi.tripOnScreen` draws that polyline and puts the ride on it (`pointAlong`), and
+  `frameTrip` zooms out until the whole route fits a phone screen (up to `DIST.trip`). The player's own marker hides during a trip.
 - Age screen (owner, Oct 27; COPPA/FTC): sign-up asks a neutral date of birth (components/AgeGate.tsx `BirthdateField`, lib/age.ts,
   tests/age.test.ts), never stored: metadata keeps `age_confirmed` + `age_check: 'birthdate'`. Under 18 closes sign-up on the device
   for a year (`cc_age_no` cookie + local storage; `createPlayer` refuses it too). The creator asks it when sign-up didn't (Google

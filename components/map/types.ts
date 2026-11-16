@@ -19,6 +19,12 @@ export interface MapApi {
   frameTrip(from: LatLng, to: LatLng): void;
   /** Screen position of a point on the map, for overlays such as the moving taxi. */
   project(at: LatLng): { x: number; y: number } | null;
+  /**
+   * A trip's route along the streets on screen, and where the ride is a share `t` (0 to 1) of the way along it (owner,
+   * Nov 16: the route went through buildings and the ride wasn't on it). Both come from one street path
+   * (lib/compactRoute.ts), so the ride is always on the line.
+   */
+  tripOnScreen(from: LatLng, to: LatLng, t: number): { points: { x: number; y: number }[]; at: { x: number; y: number } | null } | null;
 }
 
 export interface CityMapProps {
