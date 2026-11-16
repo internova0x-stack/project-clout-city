@@ -27,6 +27,8 @@ export interface LottoState {
   freeToday: number;
   /** Bought cards today. */
   bought: number;
+  /** Bought cards this week, New York Monday to Sunday (migration 0166; missing before it). */
+  boughtWeek?: number;
   /** When beginner's luck ends (ISO), or null once it has. */
   beginnerUntil: string | null;
   /** Every game's lucky number and pot (migration 0041). */
@@ -91,8 +93,8 @@ export function potOdds(game: LottoGame): { seed: number; oneIn: number; share: 
   return { seed: game.pot.seed, oneIn: game.pot.oneIn, share: game.pot.seed / game.pot.oneIn / game.price };
 }
 
-/** "C$5 game · new number at midnight" / "… every Monday". */
-export const periodLine = (game: LottoGame) => (game.period === "day" ? "New number and pot every midnight" : "New number every Monday; the pot grows all week");
+/** "New number every midnight" / "… every Monday". */
+export const periodLine = (game: LottoGame) => (game.period === "day" ? "New number every midnight" : "New number every Monday");
 
 /**
  * The player's numbers on a card, as the server lays them out (lotto_numbers, migration 0041): a
@@ -117,9 +119,20 @@ export function cardCells(price: number, prize: number, pot: number, lucky: numb
   return cells;
 }
 
+/** The weekly limit's line (owner, Nov 16: the safeguard on the generous pots). */
+const WEEKLY_CAP = `That's ${CITY_ECONOMY.lotto.buyPerWeek} cards this week. Benny says pace yourself. New cards on Monday.`;
+
+/**
+ * The rent warning (owner, Nov 16): would this card leave the bank short of the rent coming up? Returns what's owed and
+ * when, or null. `owed` is the rent (and any bills already due) the player still has to pay.
+ */
+export function rentShortAfter(price: number, bankCash: number, owed: number): boolean {
+  return owed > 0 && bankCash - price < owed;
+}
+
 export type LottoAvailability = { ok: true } | { ok: false; reason: string };
 
-/** Mirrors buy_lotto_card for the free card: the C$5 game, while today's free cards last. */
+/** Mirrors buy_lotto_card for the free card: the cheapest game, while today's free cards last. */
 export function freeCardAvailability(s: LottoState): LottoAvailability {
   if (s.freeUsed >= s.freeToday) return { ok: false, reason: "Free cards are used up today. New ones at midnight." };
   return { ok: true };
@@ -128,6 +141,7 @@ export function freeCardAvailability(s: LottoState): LottoAvailability {
 /** Mirrors buy_lotto_card for a bought card: today's cap, then the cash. */
 export function buyCardAvailability(game: LottoGame, s: LottoState, bankCash: number): LottoAvailability {
   if (s.bought >= CITY_ECONOMY.lotto.buyPerDay) return { ok: false, reason: `That's ${CITY_ECONOMY.lotto.buyPerDay} cards today. Benny cuts everyone off. New cards at midnight.` };
+  if ((s.boughtWeek ?? 0) >= CITY_ECONOMY.lotto.buyPerWeek) return { ok: false, reason: WEEKLY_CAP };
   if (bankCash < game.price) return { ok: false, reason: "Not enough cash for this card." };
   return { ok: true };
 }
@@ -174,6 +188,7 @@ const ERRORS: Record<string, string> = {
   lotto_free_used: "Free cards are used up today. New ones at midnight.",
   lotto_not_free_game: "The free card is the Corner Store Classic.",
   lotto_daily_cap: `That's ${CITY_ECONOMY.lotto.buyPerDay} cards today. Benny cuts everyone off. New cards at midnight.`,
+  lotto_weekly_cap: WEEKLY_CAP,
   lotto_cant_afford: "Not enough cash for this card.",
   lotto_unknown_game: "Benny's never heard of that one.",
   lotto_unknown_card: "That card isn't yours to scratch.",

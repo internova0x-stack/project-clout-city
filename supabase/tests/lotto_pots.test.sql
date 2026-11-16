@@ -13,12 +13,12 @@ begin execute stmt; return false; exception when others then if sqlerrm like '%'
 select pg_temp.assert(min(v) = 0 and max(v) = 2 and count(distinct v) = 3, 'lotto_rand(3) covers 0, 1 and 2')
   from (select public.lotto_rand(3) v from generate_series(1, 300)) s;
 
--- The settings: pots get harder with every game; the small games are daily, the big ones weekly.
+-- The settings (owner, Nov 16, migration 0166): pots you can believe in; the small games are daily, the big ones weekly.
 select pg_temp.assert(
   (select string_agg(g ->> 'id' || ':' || (g -> 'pot' ->> 'seed') || '/' || (g -> 'pot' ->> 'oneIn') || ':' || (g ->> 'period'), ' ' order by (g ->> 'price')::int)
      from jsonb_array_elements(public.city() -> 'economy' -> 'lotto' -> 'games') g)
-  = 'corner-store:5000/5000:day bodega-cat:10000/10000:day rents-due:15000/20000:day penthouse-dreams:50000/50000:week main-character:100000/100000:week',
-  'pots 5k to 100k, 1 in 5k to 1 in 100k, daily then weekly');
+  = 'corner-store:5000/25:day bodega-cat:10000/30:day rents-due:20000/40:day penthouse-dreams:50000/50:week main-character:100000/100:week',
+  'pots 5k to 100k, 1 in 25 to 1 in 100, daily then weekly');
 
 -- The weekly draw is retired.
 select pg_temp.assert(public.lotto_settle() = 0, 'lotto_settle is a no-op now');
@@ -34,7 +34,7 @@ select pg_temp.as_(2);
 select 1 from public.create_player('bobby', 'bodega_drip', '{}', null, true);
 select 1 from public.set_traits(array['loud', 'hustler']); select 1 from public.roll_birth_lottery(); select 1 from public.move_in('astoria_studio');
 reset role;
-update public.players set bank_cash = 2000, energy = 100, at_place = 'lucky-star';
+update public.players set bank_cash = 5000, energy = 100, at_place = 'lucky-star';
 update public.game_settings set value = jsonb_set(coalesce(value, '{}'), '{clockOffsetSeconds}', to_jsonb(0)) where key = 'dev';
 
 -- Players can't read pots, wins or rolls directly.
@@ -51,7 +51,7 @@ select pg_temp.as_(2);
 select pg_temp.assert((select s -> 'pots' from s1) = public.lotto_state() -> 'pots', 'one number and pot per game for everyone');
 select pg_temp.assert((select (p ->> 'pool')::int from jsonb_array_elements(public.lotto_state() -> 'pots') p where p ->> 'game' = 'penthouse-dreams') = 50000, 'pots start at their seed');
 
--- Force a pot win: make Penthouse Dreams' pot 1 in 1. ana buys a card (C$5 into the pot first).
+-- Force a pot win: make Penthouse Dreams' pot 1 in 1. ana buys a card (pots are fixed since 0166: nothing goes in).
 reset role;
 update public.game_settings set value = jsonb_set(value, '{economy,lotto,games,3,pot,oneIn}', '1') where key = 'city';
 create temp table cash0 as select id, bank_cash from public.players;
@@ -61,16 +61,16 @@ create temp table k as select public.buy_lotto_card('lucky-star', 'penthouse-dre
 select pg_temp.assert(not ((select r from k) ? 'pot'), 'the pot win stays hidden until scratched');
 -- The pot shows as still there until the card is scratched (security review, 0130: its size never gives the win away);
 -- the News doesn't show the win before it's scratched.
-select pg_temp.assert((select (p ->> 'pool')::int from jsonb_array_elements(public.lotto_state() -> 'pots') p where p ->> 'game' = 'penthouse-dreams') = 50005, 'a won pot shows until its card is scratched');
+select pg_temp.assert((select (p ->> 'pool')::int from jsonb_array_elements(public.lotto_state() -> 'pots') p where p ->> 'game' = 'penthouse-dreams') = 50000, 'a won pot shows until its card is scratched');
 select pg_temp.assert(jsonb_array_length(public.lotto_state() -> 'wins') = 0, 'no win in the News before the scratch');
 create temp table sc as select public.scratch_lotto_card((select (r ->> 'id')::bigint from k)) as r;
-select pg_temp.assert((select (r ->> 'pot')::int from sc) = 50005, 'the pot: seed plus this card''s 10%');
+select pg_temp.assert((select (r ->> 'pot')::int from sc) = 50000, 'the pot: its full amount, every time');
 select pg_temp.assert((select (p ->> 'pool')::int from jsonb_array_elements(public.lotto_state() -> 'pots') p where p ->> 'game' = 'penthouse-dreams') = 50000, 'scratched: the pot starts again at its seed');
-select pg_temp.assert((select count(*) from jsonb_array_elements((select r -> 'numbers' from sc)) c where (c ->> 'n')::int = 0 and (c ->> 'prize')::int = 50005) = 1, 'one star on the card, with the pot under it');
+select pg_temp.assert((select count(*) from jsonb_array_elements((select r -> 'numbers' from sc)) c where (c ->> 'n')::int = 0 and (c ->> 'prize')::int = 50000) = 1, 'one star on the card, with the pot under it');
 reset role;
 select pg_temp.assert((select p.bank_cash - c.bank_cash from public.players p join cash0 c using (id) where p.display_name = 'anabel')
-  = -50 + 50005 + (select (r ->> 'prize')::int from sc), 'paid the pot and the prize, minus the card');
-select pg_temp.assert((select count(*) from public.ledger where kind = 'lotto_pot' and amount = 50005) = 1, 'one pot ledger row');
+  = -500 + 50000 + (select (r ->> 'prize')::int from sc), 'paid the pot and the prize, minus the card');
+select pg_temp.assert((select count(*) from public.ledger where kind = 'lotto_pot' and amount = 50000) = 1, 'one pot ledger row');
 select pg_temp.assert((select count(*) from public.player_badges b join public.players p on p.id = b.player_id where p.display_name = 'anabel' and b.badge_id = 'lotto-jackpot') = 1, 'the winner gets the badge');
 
 -- The News card: the winner sees "mine"; others see the name, unless the winner opted out.
@@ -86,7 +86,7 @@ select pg_temp.assert((public.lotto_state() -> 'wins' -> 0 ->> 'mine')::boolean,
 
 -- A new day: daily pots and numbers start over; weekly ones run until Monday.
 reset role;
-update public.game_settings set value = jsonb_set(value, '{economy,lotto,games,3,pot,oneIn}', '50000') where key = 'city';
+update public.game_settings set value = jsonb_set(value, '{economy,lotto,games,3,pot,oneIn}', '50') where key = 'city';
 create temp table p0 as select game, period from public.lotto_pots;
 update public.game_settings set value = jsonb_set(value, '{clockOffsetSeconds}', to_jsonb(86400)) where key = 'dev';
 set role authenticated;

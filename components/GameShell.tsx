@@ -2435,6 +2435,8 @@ export function GameShell({
       // v0.13: a together plan for this activity pays its bonus once both have done it.
       void cityThenStory(`${pl}:${a}`, timed(v.emoji, v.label, act ? actionSeconds(act) : 0, () => cityApi.doAction(pl, a))).then((ok) => {
         void claimTogether(pl, a);
+        // Owner, Nov 16 ("Nothing happens on that action"): say what happened, in the action's own line.
+        if (ok && act?.blurb && act.kind !== "gigs") setToast(`${v.emoji === "✨" ? placeById(pl)?.emoji ?? "✨" : v.emoji} ${act.blurb}`);
         // Moral Choices: a shift, a meal or a visit can bring a card that fits it.
         if (ok && act) askChoice(act.kind === "shift" ? "shift" : act.kind === "eat" ? "eat" : act.kind === "hangout" ? "hangout" : "visit");
       });

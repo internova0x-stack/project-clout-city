@@ -1701,7 +1701,26 @@ body:has(.game, .creator-sheet) { position:fixed; inset:0; width:100%; }
 .lotto-sec { display:flex; align-items:baseline; justify-content:space-between; gap:8px; margin:6px 2px -4px; }
 .lotto-sec b { font-family:var(--font-display); font-size:12px; letter-spacing:.1em; text-transform:uppercase; color:var(--text-3); font-weight:400; }
 .lotto-sec span { font-size:12px; color:var(--text-3); text-align:right; }
-.lotto-game { display:flex; align-items:center; gap:12px; padding:10px; border-radius:18px; background:var(--surface-raised); box-shadow:inset 0 0 0 1.5px var(--divider); }
+.lotto-game { display:flex; flex-direction:column; gap:8px; padding:10px; border-radius:18px; background:var(--surface-raised); box-shadow:inset 0 0 0 1.5px var(--divider); }
+.lotto-game-main { display:flex; align-items:center; gap:12px; }
+.lotto-odds-chip { display:inline-block; margin-left:4px; padding:0 6px; border-radius:8px; background:var(--green-tint); color:var(--green-text); font-size:11px; font-weight:700; }
+.lotto-game.weekly .lotto-odds-chip { background:rgba(255,255,255,.14); color:#E9DCFF; }
+.lotto-ticker { display:flex; align-items:center; gap:8px; padding:8px 10px; border-radius:14px; background:var(--night-800); color:var(--text-on-dark); font-size:12.5px; }
+.lotto-ticker b { color:#fff; }
+.lotto-live { flex:none; background:#EA2B45; color:#fff; font-family:var(--font-label); font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; padding:2px 6px; border-radius:6px; }
+.lotto-ticker-time { flex:none; color:#BDB4A6; }
+.lotto-warn { padding-top:8px; }
+.lotto-warn-title { margin:0 0 10px; }
+.lotto-warn-body { margin:0 0 12px; line-height:1.5; }
+.lotto-warn-note { margin:0; font-size:13px; line-height:1.45; }
+.lotto-warn-actions { display:flex; flex-direction:column; gap:10px; margin-top:24px; }
+.lotto-warn-art { position:relative; width:56px; height:56px; margin:4px 0 14px; border-radius:17px; display:grid; place-items:center; background:var(--taxi-tint); box-shadow:inset 0 0 0 1.5px rgba(242,169,0,.35); }
+.lotto-warn-badge { position:absolute; right:-5px; top:-5px; width:21px; height:21px; border-radius:50%; display:grid; place-items:center; background:#EA2B45; color:#fff; font-weight:800; font-size:13px; line-height:1; box-shadow:0 0 0 3px var(--surface-sheet); }
+.lotto-game.has-free { box-shadow:inset 0 0 0 1.5px var(--green-text, #2E8B57); }
+.lotto-game-free { display:flex; align-items:center; gap:8px; padding:8px 10px; border-radius:12px; background:var(--green-tint); font-size:18px; }
+.lotto-game-free b { display:block; font-size:13.5px; color:var(--text-1); }
+.lotto-game-free small { display:block; font-size:12px; font-weight:600; color:var(--green-text); }
+.lotto-game-free.used { background:var(--surface-card); } .lotto-game-free.used small { color:var(--text-3); }
 .lotto-game.weekly { background:linear-gradient(135deg, #2A2530, #3D2A55); box-shadow:none; color:#fff; }
 .lotto-game-info { flex:1; min-width:0; text-align:left; background:none; border:0; padding:0; color:inherit; cursor:pointer; }
 .lotto-game-info b { display:block; font-size:15px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
@@ -2852,10 +2871,14 @@ button.camp-task { background:none; border:0; border-top:1px solid var(--divider
   box-shadow:inset 0 0 0 1px #EADFC8; }
 .pass-upsell { border-radius:var(--r-lg); padding:14px 16px; background:var(--surface-card); box-shadow:inset 0 0 0 1px var(--gold-300); }
 .pass-grid { display:flex; flex-direction:column; gap:6px; }
-.pass-row { display:grid; grid-template-columns:36px 1fr 1fr; gap:8px; align-items:stretch; }
+.pass-row { display:grid; grid-template-columns:52px 1fr 1fr; gap:8px; align-items:stretch; }
 .pass-head { font-size:12px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--text-2); }
 .pass-head span:last-child { color:var(--gold-700); }
-.pass-tier { display:grid; place-items:center; font-weight:800; border-radius:var(--r-sm); background:var(--surface-card); color:var(--text-2); min-height:44px; }
+.pass-tier { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1px; font-weight:800; border-radius:var(--r-sm); background:var(--surface-card); color:var(--text-2); min-height:44px; }
+.pass-tier small { font-size:9.5px; font-weight:700; letter-spacing:0; opacity:.8; white-space:nowrap; }
+.pass-row[data-next] .pass-tier { background:var(--taxi-400, #FFC21A); color:var(--night-900); }
+.pass-legend { margin:0; font-size:14px; line-height:1.45; color:var(--text-2); }
+.pass-legend-paid { color:var(--gold-700); }
 .pass-row[data-reached] .pass-tier { background:var(--night-900); color:#fff; }
 .pass-cell { position:relative; display:flex; flex-direction:column; gap:2px; justify-content:center; padding:8px 26px 8px 10px; border-radius:var(--r-sm);
   background:var(--surface-card); font-size:13px; line-height:1.25; min-height:44px; }

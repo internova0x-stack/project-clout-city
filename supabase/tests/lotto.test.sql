@@ -8,12 +8,13 @@ begin if not coalesce(ok, false) then raise exception 'FAIL: %', msg; end if; en
 create function pg_temp.raises(stmt text, err text) returns boolean language plpgsql as $$
 begin execute stmt; return false; exception when others then if sqlerrm like '%' || err || '%' then return true; end if; raise; end $$;
 
--- The prize table, exactly: across all 100,000 rolls a C$100 card pays C$6,050,000 (60.5%), 32,771
--- rolls win something, 21 are big prizes (100 times the card or more) and one is the top prize.
-select pg_temp.assert(sum(public.lotto_prize(100, r)) = 6050000, 'the average card pays back 60.5%') from generate_series(0, 99999) r;
-select pg_temp.assert(count(*) filter (where public.lotto_prize(100, r) > 0) = 32771, 'about 1 card in 3 wins') from generate_series(0, 99999) r;
-select pg_temp.assert(count(*) filter (where public.lotto_prize(100, r) >= 10000) = 21, '21 big prizes in 100,000') from generate_series(0, 99999) r;
-select pg_temp.assert(count(*) filter (where public.lotto_prize(100, r) = 100000) = 1, 'one top prize in 100,000') from generate_series(0, 99999) r;
+-- The prize table (migration 0166, owner Nov 16: nothing rarer than 1 in 100): across all 100,000 rolls a C$100 card
+-- pays C$7,250,000 in regular prizes (72.5%; the pots come on top), 33,500 rolls win something and 1,000 are the top
+-- prize, 20 times the card.
+select pg_temp.assert(sum(public.lotto_prize(100, r)) = 7250000, 'regular prizes pay back 72.5%') from generate_series(0, 99999) r;
+select pg_temp.assert(count(*) filter (where public.lotto_prize(100, r) > 0) = 33500, 'about 1 card in 3 wins') from generate_series(0, 99999) r;
+select pg_temp.assert(count(*) filter (where public.lotto_prize(100, r) = 2000) = 1000, 'the top prize is 1 in 100') from generate_series(0, 99999) r;
+select pg_temp.assert(max(public.lotto_prize(100, r)) = 2000, 'nothing bigger than 20 times the card') from generate_series(0, 99999) r;
 select pg_temp.assert(min(v) >= 0 and max(v) <= 99999 and count(distinct v) > 1900, 'rolls are spread over 0 to 99,999')
   from (select public.lotto_roll() v from generate_series(1, 2000)) s;
 
@@ -28,7 +29,7 @@ select pg_temp.as_(2);
 select 1 from public.create_player('snoop', 'bodega_drip', '{}', null, true);
 select 1 from public.set_traits(array['loud', 'hustler']); select 1 from public.roll_birth_lottery(); select 1 from public.move_in('astoria_studio');
 reset role;
-update public.players set bank_cash = 1000, energy = 100;
+update public.players set bank_cash = 10000, energy = 100;
 set role authenticated;
 select pg_temp.as_(1);
 
@@ -64,16 +65,17 @@ insert into cards (r) select public.buy_lotto_card('lucky-star', 'rents-due', fa
 insert into cards (r) select public.buy_lotto_card('lucky-star', 'main-character', false);
 insert into cards (r) select public.buy_lotto_card('lucky-star', 'corner-store', false);
 select pg_temp.assert(pg_temp.raises($$select public.buy_lotto_card('lucky-star', 'bodega-cat', false)$$, 'lotto_daily_cap'), 'five bought cards a day');
-select pg_temp.assert((select bank_cash from public.players where id = auth.uid()) = (select bank_cash from cash0) - 165, '3×C$20 + C$100 + C$5 = C$165');
+select pg_temp.assert((select bank_cash from public.players where id = auth.uid()) = (select bank_cash from cash0) - 2000, '3×C$400 + C$600 + C$200 = C$2,000');
 select pg_temp.assert((select count(*) from public.ledger where player_id = auth.uid() and kind = 'lotto_card') = 5, 'one ledger row per bought card');
 
 -- The counter's numbers: every game's pot and lucky number, and seven cards to scratch, no prizes.
--- The pots grow by 10% of bought cards: Rent's Due C$15,000 + 3 × C$2 (unless one was just won).
+-- Pots are fixed since 0166: Rent's Due is C$20,000 whatever was bought (and right after a win).
 create temp table st as select public.lotto_state() s;
 select pg_temp.assert(jsonb_array_length(s -> 'pots') = 5, 'a pot for every game') from st;
 select pg_temp.assert((select bool_and((p ->> 'lucky')::int between 1 and 40) from jsonb_array_elements(s -> 'pots') p), 'lucky numbers from 1 to 40') from st;
-select pg_temp.assert((select (p ->> 'pool')::int in (15006, 15000, 15002, 15004) from jsonb_array_elements(s -> 'pots') p where p ->> 'game' = 'rents-due'), 'the pot grows by 10% of bought cards') from st;
+select pg_temp.assert((select (p ->> 'pool')::int >= 20000 from jsonb_array_elements(s -> 'pots') p where p ->> 'game' = 'rents-due'), 'the pot stays at its amount') from st;
 select pg_temp.assert((s ->> 'bought')::int = 5 and (s ->> 'freeUsed')::int = 2, 'today''s counts') from st;
+select pg_temp.assert((s ->> 'boughtWeek')::int = 5, 'this week''s bought cards (free ones don''t count)') from st;
 select pg_temp.assert(jsonb_array_length(s -> 'unscratched') = 7, 'seven cards to scratch') from st;
 select pg_temp.assert(not (s::text like '%prize%') and not (s::text like '%numbers%'), 'no prizes or numbers before scratching') from st;
 
@@ -89,9 +91,9 @@ grant all on scratched to authenticated;
 insert into scratched select public.scratch_lotto_card((r ->> 'id')::bigint) from cards;
 reset role;
 select pg_temp.assert((select sum((r ->> 'prize')::int) from scratched) = (select sum(prize) from public.lotto_cards c join cards k on c.id = (k.r ->> 'id')::bigint), 'the prizes are the ones drawn at purchase');
-select pg_temp.assert((select bank_cash from public.players where display_name = 'lucky') = (select bank_cash from cash1) + (select sum((r ->> 'prize')::int) from scratched), 'prizes go to the bank');
+select pg_temp.assert((select bank_cash from public.players where display_name = 'lucky') = (select bank_cash from cash1) + (select sum((r ->> 'prize')::int + coalesce((r ->> 'pot')::int, 0)) from scratched), 'prizes (and any pot, 1 in 25 or better now) go to the bank');
 select pg_temp.assert((select coalesce(sum(amount), 0) from public.ledger l join public.players p on p.id = l.player_id where p.display_name = 'lucky' and kind = 'lotto_prize') = (select sum((r ->> 'prize')::int) from scratched), 'every prize is in the ledger');
-select pg_temp.assert((select bool_and(prize = 0 or prize in (5, 10, 25, 100, 500, 5000)) from public.lotto_cards where game = 'corner-store'), 'C$5 prizes come from its table');
+select pg_temp.assert((select bool_and(prize = 0 or prize in (200, 400, 1000, 4000)) from public.lotto_cards where game = 'corner-store'), 'C$200 prizes come from its table');
 -- Each card shows six numbers; a prize is the lucky number with that prize under it, and a card
 -- without a prize has no lucky number on it.
 select pg_temp.assert(bool_and(jsonb_array_length(r -> 'numbers') = 6), 'six numbers on every card') from scratched;
@@ -109,7 +111,7 @@ select pg_temp.assert(jsonb_array_length(public.lotto_state() -> 'unscratched') 
 -- A new day: new free cards and a fresh cap. Beginner's luck ends after 7 days.
 reset role;
 update public.game_settings set value = jsonb_set(coalesce(value, '{}'), '{clockOffsetSeconds}', to_jsonb(86400)) where key = 'dev';
-update public.players set bank_cash = 1000 where display_name = 'lucky';
+update public.players set bank_cash = 10000 where display_name = 'lucky';
 set role authenticated;
 select pg_temp.as_(1);
 select pg_temp.assert((public.lotto_state() ->> 'freeUsed')::int = 0 and (public.lotto_state() ->> 'bought')::int = 0, 'counts reset at midnight');
@@ -119,6 +121,18 @@ update public.players set created_at = created_at - interval '8 days' where disp
 set role authenticated;
 select pg_temp.as_(1);
 select pg_temp.assert((public.lotto_state() ->> 'freeToday')::int = 1 and public.lotto_state() ->> 'beginnerUntil' is null, 'one free card a day after the first week');
+
+-- The weekly limit (migration 0166): 15 bought cards a week, whatever the day. snoop's earlier cards this week are
+-- written straight in; their 16th is refused even with today's five untouched.
+reset role;
+insert into public.lotto_cards (player_id, game, price, paid, prize, ny_date, week)
+select p.id, 'corner-store', 200, 200, 0, date '2000-01-03', public.ny_week() from public.players p, generate_series(1, 15) where p.display_name = 'snoop';
+update public.players set bank_cash = 10000, at_place = 'lucky-star' where display_name = 'snoop';
+set role authenticated;
+select pg_temp.as_(2);
+select pg_temp.assert((public.lotto_state() ->> 'boughtWeek')::int = 15, 'fifteen this week');
+select pg_temp.assert(pg_temp.raises($$select public.buy_lotto_card('lucky-star', 'corner-store', false)$$, 'lotto_weekly_cap'), 'no sixteenth card this week');
+select pg_temp.assert(public.buy_lotto_card('lucky-star', 'corner-store', true) ? 'id', 'free cards don''t count against the week');
 
 rollback;
 \echo 'LOTTO CHECKS PASSED'

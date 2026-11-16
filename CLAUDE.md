@@ -900,6 +900,12 @@ components live in `app/globals.css`.
 - Lucky Star Lotto: the server draws every card's prize at purchase and pays it on scratch
   (`buy_lotto_card`/`scratch_lotto_card`, migrations 0032 and 0041: the prize, the pot win and the card's numbers); the browser only names a game. Never send
   a result, price or limit from the client, and real money never touches the lotto.
+  New odds (migration 0166, owner Nov 16: "I want people to believe they can win"): cards C$200 to C$600; fixed pots (no cut)
+  C$5,000 1 in 25, C$10,000 1 in 30, C$20,000 1 in 40, C$50,000 1 in 50, C$100,000 1 in 100, won again and again; regular prizes
+  1×/2×/5×/20× (nothing rarer than 1 in 100). Generous on purpose (cards pay back more than they cost); the safeguards are 15
+  bought cards a week (`buyPerWeek`, 'lotto_weekly_cap', lotto_state's `boughtWeek`) on top of 5 a day, and the client's rent
+  warning (components/city/Lotto.tsx, `rentShortAfter`: a card that would leave the bank short of rent and bills due within a
+  week asks first). The counter shows the latest pot winner (`wins[0]`).
 - Studio stories (migration 0080): approval alone never puts a story live; a main story needs a Day 1 (schedule,
   or `admin_story_go_live`: approve + today as Day 1, and its side stories waiting for review, migration 0081). `storyStage()` (lib/studio.ts) is the one status the Studio
   shows. A live story can't go back to review or be declined.

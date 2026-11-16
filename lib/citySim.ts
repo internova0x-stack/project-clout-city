@@ -109,10 +109,10 @@ export function sampleCityState(overrides: Partial<CityState["player"]> = {}, sk
     actionsToday: ["flushing-meadows:hangout"],
     perks: { levels: levelsOf(skills), gigs: [], invites: [] },
     lotto: {
-      freeUsed: 0, freeToday: 2, bought: 0, beginnerUntil: new Date(Date.now() + 4 * 86_400_000).toISOString(),
+      freeUsed: 0, freeToday: 2, bought: 0, boughtWeek: 0, beginnerUntil: new Date(Date.now() + 4 * 86_400_000).toISOString(),
       unscratched: [],
       // Sample pots: each game's lucky number and its pot a little above the seed.
-      pots: CITY_ECONOMY.lotto.games.map((g, i) => ({ game: g.id, lucky: [17, 8, 23, 4, 29][i], pool: Math.round(g.pot.seed * 1.06), period: g.period === "day" ? today : addDays(today, -1) })),
+      pots: CITY_ECONOMY.lotto.games.map((g, i) => ({ game: g.id, lucky: [17, 8, 23, 4, 29][i], pool: g.pot.seed, period: g.period === "day" ? today : addDays(today, -1) })),
       wins: [{ game: "bodega-cat", amount: 10_640, wonAt: new Date(Date.now() - 86_400_000).toISOString(), mine: false, winner: "dana.vibes" }],
     },
   };
@@ -237,8 +237,10 @@ export function createSimApi(
         l.freeUsed += 1;
       } else {
         if (l.bought >= CITY_ECONOMY.lotto.buyPerDay) return fail(`That's ${CITY_ECONOMY.lotto.buyPerDay} cards today. Benny cuts everyone off. New cards at midnight.`);
+        if ((l.boughtWeek ?? 0) >= CITY_ECONOMY.lotto.buyPerWeek) return fail(`That's ${CITY_ECONOMY.lotto.buyPerWeek} cards this week. Benny says pace yourself. New cards on Monday.`);
         if (p().bank_cash < game.price) return fail("Not enough cash for this card.");
         l.bought += 1;
+        l.boughtWeek = (l.boughtWeek ?? 0) + 1;
         p().bank_cash -= game.price;
       }
       const potRow = l.pots.find((x) => x.game === gameId)!;
