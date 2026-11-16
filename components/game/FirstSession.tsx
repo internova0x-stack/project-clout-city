@@ -1,5 +1,6 @@
 "use client";
 
+import { titleChipText } from "@/lib/seasonPass";
 import { CrownMark } from "../city/Common";
 import { useEffect, useState } from "react";
 import { ECONOMY, formatCash } from "@/lib/economy";
@@ -76,7 +77,7 @@ export interface Row { id?: string; rank: number; display_name: string; starting
 
 /** C27: the clout leaderboard, Queens or Crew. */
 export function LeaderboardSheet({
-  open, onClose, cta, myClout, onOpenPlayer, fetchRows, fetchCrowned,
+  open, onClose, cta, myClout, onOpenPlayer, fetchRows, fetchCrowned, fetchTitled,
 }: {
   open: boolean; onClose: () => void; cta?: { label: string; onClick: () => void }; myClout: number;
   /** v0.5: tap a row to open that player's card (and message them). */
@@ -85,10 +86,14 @@ export function LeaderboardSheet({
   fetchRows?: (scope: "queens" | "clique", myClout: number) => Promise<Row[]>;
   /** Clout Couture (migration 0103): Clout Crown owners, for the crown by their name. */
   fetchCrowned?: () => Promise<string[]>;
+  /** The Clout Pass (migration 0167): this season's title holders. */
+  fetchTitled?: () => Promise<string[]>;
 }) {
   const [scope, setScope] = useState<"queens" | "clique">("queens");
   const [rows, setRows] = useState<Row[] | null>(null);
   const [crowned, setCrowned] = useState<ReadonlySet<string>>(new Set());
+  const [titled, setTitled] = useState<ReadonlySet<string>>(new Set());
+  useEffect(() => { if (open && fetchTitled) void fetchTitled().then((ids) => setTitled(new Set(ids))).catch(() => undefined); }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
   // Once per opening (fetchCrowned is a fresh function on every render of the shell).
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { if (open && fetchCrowned) void fetchCrowned().then((ids) => setCrowned(new Set(ids))).catch(() => undefined); }, [open]);
@@ -148,7 +153,7 @@ export function LeaderboardSheet({
             >
               <span className="meta lb-rank">{r.rank}</span>
               <span className="lb-avatar" aria-hidden="true">{getStyle(r.starting_style).emoji}</span>
-              <span className="title lb-name">{handle(r.display_name)}{r.id && crowned.has(r.id) && <CrownMark />}{r.is_me ? " (you)" : ""}</span>
+              <span className="title lb-name">{handle(r.display_name)}{r.id && crowned.has(r.id) && <CrownMark />}{r.is_me ? " (you)" : ""}{r.id && titled.has(r.id) && <span className="title-chip">{titleChipText()}</span>}</span>
               <span className="hud-number lb-clout">🔥 {Number(r.clout).toLocaleString()}</span>
             </div>
           ))}

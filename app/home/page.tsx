@@ -24,7 +24,7 @@ import { loadCatalog, startCheckout } from "./storeActions";
 import { steamCheckout, steamFinish } from "./steamStoreActions";
 import { membershipPortal, membershipState } from "./membershipActions";
 import {
-  chatBlock, chatList, chatCrowned, chatReact, chatReport, chatSend, chatSetMessagesFrom, chatStatus, chatThread, mySkills, boroughState, placeCounts, placePresence, playerCard, sessionPing, skillsOf, track,
+  chatBlock, chatList, chatCrowned, chatTitled, chatReact, chatReport, chatSend, chatSetMessagesFrom, chatStatus, chatThread, mySkills, boroughState, placeCounts, placePresence, playerCard, sessionPing, skillsOf, track,
 } from "./chatActions";
 import { crewCreate, crewInbox, crewMembers, crewRespond } from "./crewActions";
 import { loadNews } from "./newsActions";
@@ -157,7 +157,7 @@ export default async function HomePage() {
       // Migration 0047 (owner, Oct 15: two players in the same café couldn't see each other, because
       // presence, place counts, reactions and the message setting were never passed in here).
       chat={chatOn ? {
-        list: chatList, thread: chatThread, crowned: chatCrowned, send: chatSend, status: chatStatus, block: chatBlock, report: chatReport, card: playerCard,
+        list: chatList, thread: chatThread, crowned: chatCrowned, titled: chatTitled, send: chatSend, status: chatStatus, block: chatBlock, report: chatReport, card: playerCard,
         react: chatReact, setMessagesFrom: chatSetMessagesFrom, presence: placePresence, counts: placeCounts, skills: skillsOf,
       } : undefined}
       track={chatOn ? track : undefined}

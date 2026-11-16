@@ -180,6 +180,7 @@ from (values
   ('0163_starter_days.sql', to_regprocedure('public.starter_day(uuid)') is not null),
   ('0164_starter_lola_text.sql', to_regprocedure('public.starter_lola_reply(integer)') is not null),
   ('0165_once_a_day_and_sleep.sql', to_regprocedure('public.do_action_v0039(text, text)') is not null),
-  ('0166_lotto_odds.sql', coalesce((select prosrc like '%lotto_weekly_cap%' from pg_proc where oid = to_regprocedure('public.buy_lotto_card(text, text, boolean)')), false))
+  ('0166_lotto_odds.sql', coalesce((select prosrc like '%lotto_weekly_cap%' from pg_proc where oid = to_regprocedure('public.buy_lotto_card(text, text, boolean)')), false)),
+  ('0167_season_pass_stakes.sql', to_regprocedure('public.season_titled()') is not null)
 ) as m(file, ran)
 order by (m.ran is distinct from false), m.file;

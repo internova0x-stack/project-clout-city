@@ -23,6 +23,10 @@ export async function chatList() {
 export async function chatCrowned() {
   return call<string[]>("crowned_players", {}, (d) => (Array.isArray(d) ? (d as string[]) : []));
 }
+/** The Clout Pass (migration 0167): this season's title holders, for the chip by their name. */
+export async function chatTitled() {
+  return call<string[]>("season_titled", {}, (d) => (Array.isArray(d) ? (d as string[]) : []));
+}
 export async function chatThread(withId: string) {
   return call<ChatThread>("chat_thread", { p_with: withId });
 }

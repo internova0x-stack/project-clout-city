@@ -11,12 +11,20 @@
 // Every piece is `reward: true` in lib/city.ts: never on sale, never sold back, traded or gifted, kept by Start over
 // (player_items acquired 'collector', value 0, so Net Worth and the Crib Rating don't move). This file is mirrored by
 // game_settings 'season_pass' and 'starter_pack' (tests/seasonPass.test.ts checks the migration's copy).
+//
+// Stakes (owner, Nov 16: "Clout pass seems to have no stakes… one just continues to play as usual"; migration 0167): most XP
+// now comes from three weekly challenges that expire on Sunday (`WEEKS`, from the `CHALLENGES` pool, counted by the server
+// from what the player did that New York week), daily play earns less (a task 5, all five 20, a level 200), the pass shows
+// whether you're on pace to finish (`pace`), and Level 18's free reward is a season title other players see by your name
+// (`TITLE`, the leaderboard, chat and the player card). Levels reached before the change were kept (the migration's carry).
 
 export type PassReward =
   | { kind: "cash"; amount: number }
   | { kind: "clout"; amount: number }
   | { kind: "item"; sku: string }
-  | { kind: "badge"; id: string };
+  | { kind: "badge"; id: string }
+  /** A season title shown by the player's name (Level 18's free reward). */
+  | { kind: "title"; id: string };
 
 export interface PassTier { tier: number; free: PassReward[]; paid: PassReward[] }
 
@@ -35,7 +43,57 @@ export interface Season {
   /** XP per ledger row of each kind (one per task, day or goal). */
   xp: Record<string, number>;
   badge: { id: string; emoji: string; name: string };
+  /** The title Level 18 gives, never given again after the season. */
+  title: { id: string; emoji: string; name: string };
   tiers: PassTier[];
+}
+
+/** Where a challenge's count comes from: ledger rows of these kinds that New York week, or Moral Choices made. */
+export type ChallengeSource = { ledger: string[] } | { choices: true };
+export interface Challenge { id: string; emoji: string; title: string; need: number; xp: number; source: ChallengeSource }
+
+/**
+ * The weekly challenges (owner, Nov 16), in three groups: one of each a week. Each counts something the player does in that
+ * New York week (Monday to Sunday) and pays its XP once when the count is reached.
+ */
+export const CHALLENGES: { social: Challenge[]; city: Challenge[]; routine: Challenge[] } = {
+  social: [
+    { id: "dates2", emoji: "💘", title: "Go on 2 date nights", need: 2, xp: 120, source: { ledger: ["date_night"] } },
+    { id: "host1", emoji: "🏠", title: "Have people over once", need: 1, xp: 90, source: { ledger: ["visit_host"] } },
+    { id: "guest1", emoji: "🛋️", title: "Go over to a friend's place", need: 1, xp: 90, source: { ledger: ["visit_guest"] } },
+    { id: "events2", emoji: "🎉", title: "Go to 2 events", need: 2, xp: 100, source: { ledger: ["event"] } },
+  ],
+  city: [
+    { id: "choices3", emoji: "🎭", title: "Make the call on 3 choices", need: 3, xp: 90, source: { choices: true } },
+    { id: "life3", emoji: "🗽", title: "Do 3 things around the city", need: 3, xp: 90, source: { ledger: ["place_life"] } },
+    { id: "shifts3", emoji: "🧾", title: "Work 3 shifts", need: 3, xp: 90, source: { ledger: ["shift"] } },
+  ],
+  routine: [
+    { id: "five4", emoji: "🔥", title: "All five daily tasks, 4 days this week", need: 4, xp: 100, source: { ledger: ["daily_bonus"] } },
+    { id: "goal1", emoji: "🎯", title: "Finish a goal", need: 1, xp: 90, source: { ledger: ["goal"] } },
+  ],
+};
+export const ALL_CHALLENGES: Challenge[] = [...CHALLENGES.social, ...CHALLENGES.city, ...CHALLENGES.routine];
+export const challengeById = (id: string) => ALL_CHALLENGES.find((c) => c.id === id) ?? null;
+
+const dayMs = 86_400_000;
+const utc = (d: string) => Date.UTC(+d.slice(0, 4), +d.slice(5, 7) - 1, +d.slice(8, 10));
+const iso = (t: number) => new Date(t).toISOString().slice(0, 10);
+/** The Monday of a New York date's week. */
+export function weekOf(day: string): string {
+  const t = utc(day);
+  const dow = (new Date(t).getUTCDay() + 6) % 7; // Monday 0
+  return iso(t - dow * dayMs);
+}
+
+/** Each week's three, from the first Monday of challenges to the season's end: rotating through each group. */
+export function seasonWeeks(from: string, ends: string): { from: string; ids: string[] }[] {
+  const out: { from: string; ids: string[] }[] = [];
+  for (let t = utc(from), i = 0; t <= utc(ends); t += 7 * dayMs, i++) {
+    const pick = <T,>(list: T[], k: number) => list[(i * k) % list.length];
+    out.push({ from: iso(t), ids: [pick(CHALLENGES.social, 1), pick(CHALLENGES.city, 2), pick(CHALLENGES.routine, 1)].map((c) => c.id) });
+  }
+  return out;
 }
 
 const cash = (amount: number): PassReward => ({ kind: "cash", amount });
@@ -63,12 +121,14 @@ export const SEASON: Season = {
   starts: "2026-11-07",
   ends: "2027-01-01",
   claimDays: 14,
-  xpPerTier: 160,
-  xp: { daily_task: 10, daily_bonus: 30, goal: 50 },
+  // Owner, Nov 16: challenges carry most of the XP now (migration 0167; it was 160 a level, 10 a task, 30 for all five).
+  xpPerTier: 200,
+  xp: { daily_task: 5, daily_bonus: 20, goal: 50 },
   badge: { id: "pass-s1", emoji: "💘", name: "Cuffing Season '26" },
+  title: { id: "cuffed-26", emoji: "💘", name: "Cuffed '26" },
   tiers: FREE.map((free, i) => ({
     tier: i + 1,
-    free,
+    free: i === FREE.length - 1 ? [...free, { kind: "title", id: "cuffed-26" } as PassReward] : free,
     paid: [item(PAID[i]), ...(i === FREE.length - 1 ? [{ kind: "badge", id: "pass-s1" } as PassReward] : [])],
   })),
 };
@@ -82,12 +142,19 @@ export const STARTER_PACK = {
   badge: { id: "day-one", emoji: "🗽", name: "Day One New Yorker" },
 } as const;
 
+/** The challenges, a week at a time, from the week migration 0167 went in (Monday Nov 16) to the season's end. */
+export const WEEKS = seasonWeeks("2026-11-16", SEASON.ends);
+
 /** The badges this file gives, for the profile. */
 export function passBadge(id: string): { emoji: string; name: string } | null {
   if (id === SEASON.badge.id) return SEASON.badge;
   if (id === STARTER_PACK.badge.id) return STARTER_PACK.badge;
+  if (id === `title-${SEASON.title.id}`) return { emoji: SEASON.title.emoji, name: `"${SEASON.title.name}" title` };
   return null;
 }
+
+/** The chip by a title holder's name. */
+export const titleChipText = () => `${SEASON.title.emoji} ${SEASON.title.name}`;
 
 /** The Clout Pass's own icon (owner, Nov 16: a ticket, not the season badge's heart). */
 export const PASS_EMOJI = "🎟️";
@@ -114,6 +181,24 @@ export interface PassState {
   today: number;
   /** Paid at Stripe, waiting for the webhook. */
   pending?: boolean;
+  /** This week's challenges and how far along each is (season_state, migration 0167); absent before it. */
+  week?: { from: string; challenges: { id: string; have: number; done: boolean }[] } | null;
+}
+
+/**
+ * Will you finish? Your average XP a day so far (from the season's start, or the first day you earned, at least 3 days in)
+ * carried to the season's end. On track at 18; otherwise the level you're heading for. `spare`: days left over at that rate.
+ */
+export function pace(s: Pick<PassState, "xp" | "season">, today: string): { onTrack: boolean; heading: number; spare: number } {
+  const total = s.season.tiers.length * s.season.xpPerTier;
+  if (s.xp >= total) return { onTrack: true, heading: s.season.tiers.length, spare: daysLeft(today, s.season) };
+  const elapsed = Math.max(3, Math.round((utc(today) - utc(s.season.starts)) / dayMs) + 1);
+  const rate = s.xp / elapsed;
+  const left = daysLeft(today, s.season);
+  const end = s.xp + rate * left;
+  const heading = Math.min(s.season.tiers.length, Math.floor(end / s.season.xpPerTier));
+  const need = rate > 0 ? Math.ceil((total - s.xp) / rate) : Infinity;
+  return { onTrack: heading >= s.season.tiers.length, heading, spare: Number.isFinite(need) ? Math.max(0, left - need) : 0 };
 }
 
 export interface StarterPackState {
@@ -139,6 +224,7 @@ export function rewardLabel(r: PassReward, name: (sku: string) => string | undef
   if (r.kind === "cash") return `C$${r.amount.toLocaleString("en-US")}`;
   if (r.kind === "clout") return `${r.amount} clout`;
   if (r.kind === "badge") return `${passBadge(r.id)?.name ?? "Badge"} badge`;
+  if (r.kind === "title") return `The "${SEASON.title.name}" title`;
   return name(r.sku) ?? r.sku;
 }
 
@@ -151,6 +237,14 @@ export function daysLeft(today: string, season: Pick<Season, "ends"> = SEASON): 
 /** What the settings row holds (the migration's JSON). */
 export function seasonSettings(s: Season = SEASON) {
   return { id: s.id, sku: s.sku, name: s.name, starts: s.starts, ends: s.ends, claimDays: s.claimDays, xpPerTier: s.xpPerTier, xp: s.xp, badge: s.badge.id, tiers: s.tiers };
+}
+/** Migration 0167's additions to the settings row: the title and the weekly challenges (definitions and the schedule). */
+export function seasonStakesSettings(s: Season = SEASON) {
+  return {
+    ...seasonSettings(s), title: s.title.id,
+    challenges: Object.fromEntries(ALL_CHALLENGES.map((c) => [c.id, { need: c.need, xp: c.xp, source: c.source }])),
+    weeks: WEEKS,
+  };
 }
 export function starterPackSettings() {
   return { sku: STARTER_PACK.sku, days: STARTER_PACK.days, items: STARTER_PACK.items, badge: STARTER_PACK.badge.id };

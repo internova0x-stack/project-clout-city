@@ -90,7 +90,7 @@ import {
 } from "@/app/preview/visitActions";
 import type { VisitApi } from "@/lib/visits";
 import {
-  previewChatBlock, previewChatList, previewCrowned, previewChatReact, previewSetMessagesFrom, previewPresence, previewPlaceCounts, previewChatPreset, previewCrowdPreset, previewChatReport, previewChatSend, previewChatStatus, previewChatThread, previewLeaderboard, previewPlayerCard, previewSkillsOf,
+  previewChatBlock, previewChatList, previewCrowned, previewTitled, previewChatReact, previewSetMessagesFrom, previewPresence, previewPlaceCounts, previewChatPreset, previewCrowdPreset, previewChatReport, previewChatSend, previewChatStatus, previewChatThread, previewLeaderboard, previewPlayerCard, previewSkillsOf,
 } from "@/app/preview/chatActions";
 import {
   previewPartyInbox, previewPartyInvite, previewPartyMentions, previewPartyReset, previewPartyRespond, previewSetNewsOptOut,
@@ -566,7 +566,7 @@ export function PreviewHome({
     void previewCrowdPreset(Number(q.get("crowd")) || 0);
   }, []);
   const chat = useMemo<ChatApi>(() => ({
-    list: previewChatList, thread: previewChatThread, crowned: previewCrowned, status: previewChatStatus,
+    list: previewChatList, thread: previewChatThread, crowned: previewCrowned, titled: previewTitled, status: previewChatStatus,
     block: previewChatBlock, report: previewChatReport, card: previewPlayerCard, skills: previewSkillsOf,
     react: previewChatReact, setMessagesFrom: previewSetMessagesFrom, presence: previewPresence, counts: previewPlaceCounts,
     async send(...a: Parameters<typeof previewChatSend>) { const r = await previewChatSend(...a); if (r.ok) mark("message"); return r; },

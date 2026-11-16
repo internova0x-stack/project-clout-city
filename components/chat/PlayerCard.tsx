@@ -1,5 +1,6 @@
 "use client";
 
+import { titleChipText } from "@/lib/seasonPass";
 import { useEffect, useRef, useState } from "react";
 import { DAILY_LIMIT, REPORT_REASONS, chatTime, type ChatApi, type ReportReason, type ChatMessage, type ChatStatus, type PlayerCard } from "@/lib/chat";
 import { REACTIONS, icebreakers } from "@/lib/meet";
@@ -31,6 +32,8 @@ export function PlayerCardSheet({ playerId, api, onClose, onMessage, dating, onT
   onOutOfMessages?: () => void;
 }) {
   const [card, setCard] = useState<PlayerCard | null | undefined>(undefined);
+  // The Clout Pass (migration 0167): the season title by their name.
+  const [titled, setTitled] = useState(false);
   const [status, setStatus] = useState<ChatStatus | null>(null);
   const [thread, setThread] = useState<ChatMessage[]>([]);
   const [draft, setDraft] = useState("");
@@ -76,6 +79,7 @@ export function PlayerCardSheet({ playerId, api, onClose, onMessage, dating, onT
     setThread([]);
     setDraft("");
     void api.card(playerId).then((r) => setCard(r.ok ? r.data : null));
+    void api.titled?.().then((r) => setTitled(r.ok && r.data.includes(playerId)));
     void api.status().then((r) => setStatus(r.ok ? r.data : null));
     void api.thread(playerId).then((r) => setThread(r.ok && !r.data.blocked ? r.data.messages.slice(-6) : []));
     setTopSkills([]);
@@ -124,6 +128,7 @@ export function PlayerCardSheet({ playerId, api, onClose, onMessage, dating, onT
               <span className="row" style={{ gap: 6, marginTop: 6, flexWrap: "wrap" }}>
                 <RankChip rank={rankFor(card.clout, card.netWorth ?? 0)} />
                 {card.vipSince && <span className="tag tag-gold">👑 VIP</span>}
+                {titled && <span className="title-chip" style={{ marginLeft: 0 }}>{titleChipText()}</span>}
               </span>
               {card.partner && <span className="partner-line" style={{ marginTop: 6 }}>💞 Dating {handle(card.partner.name)}</span>}
               {/* Living together (migration 0149), shown with the dating line (hiding one hides both). */}

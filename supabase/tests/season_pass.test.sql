@@ -1,4 +1,4 @@
--- Scenario test for migration 0156 (the Clout Pass and the starter pack): XP from tasks and goals while a season runs,
+-- Scenario test for migrations 0156 and 0167 (the Clout Pass and the starter pack; the challenges and the title): XP from tasks and goals while a season runs,
 -- claiming both rows once, the paid row opened by the pass or VIP, refunds, the pack's window and pieces.
 -- Runs in a transaction and rolls back. Run with scripts/test-db.sh.
 \set ON_ERROR_STOP on
@@ -50,16 +50,16 @@ reset role;
 -- ---- The season runs: goals and tasks earn XP, once per ref ----
 update public.game_settings set value = value || jsonb_build_object('starts', public.ny_today() - 1, 'ends', public.ny_today() + 30)
  where key = 'season_pass';
-select public.ledger_once(pg_temp.pid(1), 'clout', 5, 'goal', 'g' || n) from generate_series(1, 7) n;
+select public.ledger_once(pg_temp.pid(1), 'clout', 5, 'goal', 'g' || n) from generate_series(1, 8) n;
 select public.ledger_once(pg_temp.pid(1), 'cash', 30, 'daily_task', 't1');
 select public.ledger_once(pg_temp.pid(1), 'clout', 30, 'daily_task', 't1');
 select public.ledger_once(pg_temp.pid(1), 'cash', 30, 'gig', 'not-counted');
 set role authenticated;
 select pg_temp.as_player(1);
-select pg_temp.assert((public.season_state() ->> 'xp')::int = 360, 'seven goals and one task (cash and clout rows count once): 360 XP');
+select pg_temp.assert((public.season_state() ->> 'xp')::int = 405, 'eight goals and one task (cash and clout rows count once): 405 XP (migration 0167: a task is 5)');
 select pg_temp.assert(public.season_state() ->> 'phase' = 'on' and not (public.season_state() ->> 'paid')::boolean, 'on, paid row closed');
 
--- ---- Claiming the free row: tiers 1 and 2 (160 XP a tier) ----
+-- ---- Claiming the free row: tiers 1 and 2 (200 XP a tier since migration 0167) ----
 create temp table before1 as select bank_cash, clout from public.players where id = pg_temp.pid(1);
 select pg_temp.assert(jsonb_array_length(public.season_claim_all() -> 'got') = 2, 'two free rewards');
 select pg_temp.assert((select p.bank_cash - b.bank_cash = 100 and p.clout - b.clout = 10 from public.players p, before1 b where p.id = pg_temp.pid(1)),
@@ -131,6 +131,38 @@ set role authenticated;
 select pg_temp.as_player(1);
 select pg_temp.assert(not (public.starter_pack_state() ->> 'offer')::boolean, 'an older account is not offered the pack');
 select pg_temp.assert(pg_temp.refused('starter-pack', 'cs_pp_1', 'offer_over'), 'an older account cannot buy it');
+reset role;
+
+-- ---- Weekly challenges (migration 0167): counted from this New York week, paid once when reached ----
+update public.game_settings set value = jsonb_set(value, '{weeks}', jsonb_build_array(jsonb_build_object(
+  'from', (public.ny_today() - (extract(isodow from public.ny_today())::int - 1))::text, 'ids', jsonb_build_array('dates2', 'choices3', 'five4'))))
+ where key = 'season_pass';
+set role authenticated;
+select pg_temp.as_player(2);
+select pg_temp.assert((select bool_and(not (c ->> 'done')::boolean) from jsonb_array_elements(public.season_state() -> 'week' -> 'challenges') c), 'nothing done yet');
+create temp table xp2 as select (public.season_state() ->> 'xp')::int as xp;
+reset role;
+select public.ledger_once(pg_temp.pid(2), 'clout', 20, 'date_night', 'dn1');
+select public.ledger_once(pg_temp.pid(2), 'cash', 20, 'date_night', 'dn1');
+set role authenticated;
+select pg_temp.as_player(2);
+select pg_temp.assert((public.season_state() -> 'week' -> 'challenges' -> 0 ->> 'have')::int = 1, 'one date night (its cash and clout rows count once)');
+reset role;
+select public.ledger_once(pg_temp.pid(2), 'clout', 20, 'date_night', 'dn2');
+set role authenticated;
+select pg_temp.as_player(2);
+select pg_temp.assert((public.season_state() -> 'week' -> 'challenges' -> 0 ->> 'done')::boolean, 'two date nights: done');
+select pg_temp.assert((public.season_state() ->> 'xp')::int - (select xp from xp2) = 120, 'paid 120 XP');
+select pg_temp.assert((public.season_state() ->> 'xp')::int - (select xp from xp2) = 120, 'and only once');
+
+-- ---- Level 18's title (migration 0167): a badge row, and season_titled() lists who holds it ----
+reset role;
+insert into public.season_xp (player_id, season, kind, ref, xp, ny_date) values (pg_temp.pid(2), 's1', 'test', 'max', 3600, public.ny_today());
+set role authenticated;
+select pg_temp.as_player(2);
+select public.season_claim_all();
+select pg_temp.assert(exists (select 1 from public.player_badges where player_id = pg_temp.pid(2) and badge_id = 'title-cuffed-26'), 'the title is theirs');
+select pg_temp.assert(pg_temp.pid(2) = any (public.season_titled()) and not (pg_temp.pid(1) = any (public.season_titled())), 'season_titled lists only who holds it');
 reset role;
 
 -- ---- After the season: the grace days still claim, then nothing ----
