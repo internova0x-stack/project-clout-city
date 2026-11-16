@@ -471,6 +471,11 @@ components live in `app/globals.css`.
   (`view.money`). The inbox is a messaging app (sender avatar, time stamp from `inbox[].at`, unread dot kept on the device in
   `cc-camp-read:<campaign>`, the reply as a sent bubble) and the Allies tab lists every stakeholder by standing (`view.allies`).
   A trace is exposed at most once (`events` 'exposed:<id>').
+  Replies and the debate (owner, Nov 16): an answered inbox message shows a decision card (Your call, a DECIDED or BOOKED stamp,
+  the receipt, each effect on its own green/red line), not a sent bubble. The debate is five questions (three issues, the Mayor's
+  jab, money or the scandal) with Q1-Q5 tabs carrying each score, one question on screen, the answer's result in its place until
+  Next question, and the results card at the end (`celebrate` result: points moved, the poll before → after). A win moves every
+  place `CAMPAIGN.debateSwing` (2.5 to 5 points, full reach to the other boroughs), a loss 1 to 2 at the usual half, a tie nothing.
   The whole city votes (owner, Nov 4: "go with recommendation 1"; no migration): Queens is the swing borough (27%), the other
   four (`boroughs` in content/campaign/city.json) start mostly decided and move only with citywide campaigning at half strength
   (`CAMPAIGN.boroughs`, `reachBoroughs`); the poll is citywide (`cityTotal`) with Queens under it; election night counts the

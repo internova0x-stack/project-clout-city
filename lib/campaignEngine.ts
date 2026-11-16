@@ -156,9 +156,8 @@ function bumpAll(state: CampaignState, you: number, mayor: number) {
 }
 
 /** Citywide moves (ads, TV, the debate, scandals) reach the other boroughs at CAMPAIGN.boroughs.reach (owner, Nov 4). */
-function reachBoroughs(state: CampaignState, you: number, mayor: number) {
+function reachBoroughs(state: CampaignState, you: number, mayor: number, k: number = CAMPAIGN.boroughs.reach) {
   if (!state.boroughs) return;
-  const k = CAMPAIGN.boroughs.reach;
   for (const r of Object.values(state.boroughs)) {
     r.you = clamp(r.you + you * k);
     r.mayor = clamp(r.mayor + mayor * k);
@@ -455,13 +454,13 @@ export function dilemma(content: CampaignContent, state: CampaignState, id: "ski
 }
 
 // ---------------------------------------------------------------------------------------------------------------
-// The debate (week 3): four rounds, played live
+// The debate (week 3): five rounds, played live (owner, Nov 16: "5 questions instead of 4")
 // ---------------------------------------------------------------------------------------------------------------
 
-/** The debate's four questions: two of the city's issues, the Mayor on the candidate's weak spot, then money or the scandal. */
+/** The debate's five questions: three of the city's issues, the Mayor on the candidate's weak spot, then money or the scandal. */
 export function debateQuestions(content: CampaignContent, state: CampaignState): string[] {
   const qs = content.debate.questions;
-  const issue = qs.filter((q) => q.by === "moderator" && q.topic !== "scandal" && q.topic !== "money").slice(0, 2);
+  const issue = qs.filter((q) => q.by === "moderator" && q.topic !== "scandal" && q.topic !== "money").slice(0, 3);
   const weak = qs.find((q) => q.by === "mayor" && q.topic === state.candidate);
   const last = qs.find((q) => q.topic === (state.exposures > 0 ? "scandal" : "money"));
   return [...issue, weak, last].filter(Boolean).map((q) => q!.id);
@@ -493,8 +492,16 @@ export function debateRound(content: CampaignContent, state: CampaignState, styl
   if (d.round >= ids.length) {
     d.done = true;
     d.won = d.crowd > 0;
-    const swing = clamp(d.crowd * 0.4, -4, 4);
-    bumpAll(state, round1(swing), round1(-swing / 2));
+    const sw = CAMPAIGN.debateSwing;
+    const swing = round1(d.crowd > 0 ? Math.min(sw.winMax, Math.max(sw.winMin, sw.winBase + sw.winPer * d.crowd))
+      : d.crowd < 0 ? -Math.min(sw.loseMax, Math.max(sw.loseMin, sw.loseBase + sw.losePer * -d.crowd)) : 0);
+    const before = cityTotal(state, content).you;
+    for (const id of Object.keys(state.places)) bump(state, id, swing, round1(-swing / 2));
+    // A win carries everywhere; a loss reaches the other boroughs at the usual half (the owner asked for the win's swing).
+    reachBoroughs(state, swing, round1(-swing / 2), swing > 0 ? 1 : CAMPAIGN.boroughs.reach);
+    d.swing = swing;
+    d.before = before;
+    d.after = cityTotal(state, content).you;
     const text = d.won ? `Won the debate (crowd ${d.crowd > 0 ? "+" : ""}${d.crowd}). The snap poll likes ${c.short}.` : `Lost the debate (crowd ${d.crowd}). The clip everyone's sharing isn't a good one.`;
     state.receipts.push(text);
     state.log.push({ week: state.week, text });

@@ -38,7 +38,7 @@ export function createCampaignSim(preset: string | null, opts: { clout: number; 
     for (const a of plan) { while (i < CAMPAIGN.slots && s.slots[i]) i++; try { setSlot(content, s, i, a); } catch { /* taken */ } }
     const spend = Math.floor(s.cash * 0.6 / 3);
     setBudget(s, { digital: spend, street: spend, tv: spend });
-    if (s.week === CAMPAIGN.debateWeek) for (let r = 0; r < 4 && !s.debate?.done; r++) debateRound(content, s, r === 2 ? "deflect" : "charm", rng);
+    if (s.week === CAMPAIGN.debateWeek) for (let r = 0; r < 5 && !s.debate?.done; r++) debateRound(content, s, r === 3 ? "deflect" : "charm", rng);
     // A preset's earlier weeks happened on earlier days: its mail is stamped a day apart, the last one this morning.
     const at = Date.now() - Math.max(0, 2 - s.week) * 86_400_000 - 5 * 3_600_000;
     endWeek(content, s, day, rng, { now: at });
@@ -57,7 +57,7 @@ export function createCampaignSim(preset: string | null, opts: { clout: number; 
     if (preset === "situation" || preset === "bribe" || preset === "waiting") {
       const s = state!;
       s.week = Math.max(s.week, 2);
-      if (s.week === CAMPAIGN.debateWeek) for (let r = 0; r < 4 && !s.debate?.done; r++) debateRound(content, s, r === 2 ? "deflect" : "charm", rng);
+      if (s.week === CAMPAIGN.debateWeek) for (let r = 0; r < 5 && !s.debate?.done; r++) debateRound(content, s, r === 3 ? "deflect" : "charm", rng);
       endWeek(content, s, day, rng);
       // ?campaign=bribe: End Week opens on a bought endorsement and an offer of votes for cash.
       if (preset === "bribe") s.pending = [{ id: "buy_joy" }, { id: "votes_cash", place: s.pending[0]?.place ?? "astoria" }];

@@ -3500,3 +3500,46 @@ button.camp-task { background:none; border:0; border-top:1px solid var(--divider
 .member-pass { display:flex; align-items:center; gap:12px; width:100%; margin:0 0 14px; padding:12px 14px; border:0; border-radius:var(--r-md);
   background:linear-gradient(135deg, #FFE3EF, #F3E8FF); font:inherit; color:inherit; cursor:pointer; }
 .member-pass .tag { flex:none; }
+
+/* The inbox's decision card (owner, Nov 16: option A) */
+.camp-decision { position:relative; background:var(--surface-raised); border-radius:18px; box-shadow:var(--elev-2); overflow:hidden; }
+.camp-decision-top { display:flex; gap:10px; align-items:flex-start; padding:12px 96px 10px 14px; border-bottom:1px dashed #E6DFD3; }
+.camp-decision-icon { font-size:22px; line-height:26px; }
+.camp-decision-pick { font-size:15px; font-weight:700; line-height:20px; color:var(--text-1); }
+.camp-decision-stamp { position:absolute; right:12px; top:12px; font-family:var(--font-label); font-weight:800; font-size:15px; letter-spacing:1.5px;
+  color:#E2243B; border:2.5px solid #E2243B; border-radius:6px; padding:0 6px; transform:rotate(8deg); opacity:.85; }
+.camp-decision-stamp.good { color:var(--green-500); border-color:var(--green-500); }
+.camp-decision-body { display:flex; flex-direction:column; gap:10px; padding:10px 14px 14px; }
+.camp-decision-story { margin:0; font-size:14px; line-height:20px; color:var(--text-2); }
+.camp-decision-fx { display:flex; flex-direction:column; gap:6px; }
+.camp-fx { display:flex; align-items:center; gap:8px; padding:8px 10px; border-radius:12px; font-size:13px; font-weight:600; line-height:17px; }
+.camp-fx i { flex:none; width:20px; height:20px; border-radius:50%; display:grid; place-items:center; font-style:normal; font-size:12px; font-weight:800; color:#fff; }
+.camp-fx.good { background:#E3F4EA; color:#1C6B47; } .camp-fx.good i { background:var(--green-500); }
+.camp-fx.bad { background:#FDE8EA; color:#A3162A; } .camp-fx.bad i { background:#E2243B; }
+.camp-fx.neutral { background:#F2EEE8; color:var(--text-2); } .camp-fx.neutral i { background:#CFC8BD; }
+.camp-ticket { display:flex; gap:12px; align-items:center; padding:10px; border-radius:14px; background:#fff; box-shadow:var(--elev-1); font-size:14px; }
+.camp-ticket-day { flex:none; width:52px; border-radius:10px; overflow:hidden; text-align:center; border:1.5px solid #ECE6DC; }
+.camp-ticket-day span { display:block; background:#E2243B; color:#fff; font-size:10px; font-weight:800; letter-spacing:1px; padding:2px 0; }
+.camp-ticket-day b { display:block; font-size:22px; font-weight:800; padding:2px 0 4px; }
+/* The debate (owner, Nov 16) */
+.debate-steps { display:flex; gap:6px; }
+.debate-step { flex:1; height:30px; border-radius:10px; background:#EDE7DD; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; color:var(--text-3); white-space:nowrap; }
+.debate-step.now { background:var(--night-900); color:#fff; }
+.debate-step.up { background:#E3F4EA; color:#1C6B47; } .debate-step.down { background:#FDE8EA; color:#A3162A; } .debate-step.even { background:#F2EEE8; color:var(--text-2); }
+.debate-crowd { display:flex; flex-direction:column; gap:4px; }
+.debate-crowd-bar { position:relative; height:10px; border-radius:5px; background:linear-gradient(90deg,#E2243B,#F4D7DA 45%,#E7EEF0 50%,#CDEBDA 55%,#2E9E6A); }
+.debate-crowd-bar span { position:absolute; top:50%; width:22px; height:22px; border-radius:50%; background:#fff; border:3px solid var(--night-900); transform:translate(-50%,-50%); transition:left .6s ease; }
+.debate-crowd-lab { display:flex; justify-content:space-between; font-size:11px; font-weight:600; color:var(--text-3); }
+.debate-crowd-lab b { color:var(--text-1); }
+.debate-q { background:var(--night-900); color:#fff; border-radius:20px; padding:14px 16px 16px; display:flex; flex-direction:column; gap:8px; }
+.debate-q p { margin:0; font-size:17px; font-weight:700; line-height:23px; }
+.debate-q-who { display:flex; align-items:center; gap:8px; font-size:12px; color:#CFC8D9; }
+.debate-q-who span { width:26px; height:26px; border-radius:50%; background:rgba(255,255,255,.12); display:grid; place-items:center; font-size:14px; }
+.debate-plays { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.debate-play { display:flex; flex-direction:column; gap:3px; text-align:left; padding:10px; border-radius:14px; border:1.5px solid transparent; background:var(--surface-raised); box-shadow:var(--elev-1); color:var(--text-1); font:inherit; }
+.debate-play b { font-size:14px; } .debate-play small { font-size:11.5px; line-height:15px; color:var(--text-2); }
+.debate-play.wide { grid-column:span 2; }
+.debate-play[aria-checked="true"] { border-color:var(--night-900); }
+.debate-reveal { display:flex; flex-direction:column; align-items:center; gap:6px; padding:16px; text-align:center; border-radius:20px; background:var(--surface-raised); box-shadow:var(--elev-2); }
+.debate-reveal-big { font-family:var(--font-label); font-weight:800; font-size:54px; line-height:1; color:var(--text-2); }
+.debate-reveal.up .debate-reveal-big { color:var(--green-500); } .debate-reveal.down .debate-reveal-big { color:#E2243B; }
