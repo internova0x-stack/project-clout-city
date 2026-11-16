@@ -3839,6 +3839,7 @@ export function GameShell({
           api={membership}
           onGetVip={() => { setMemberOpen(false); setChatPass({ out: false }); }}
           onToast={setToast}
+          pass={passS ? { state: passS, price: priceOf(SEASON.sku), onOpen: () => { setMemberOpen(false); setTasksTab("pass"); setPanel("tasks"); } } : null}
         />
       )}
       {together && (

@@ -3439,3 +3439,8 @@ button.camp-task { background:none; border:0; border-top:1px solid var(--divider
 .pass-pill.ready { box-shadow:0 0 0 2px #FF4FA3, 0 6px 22px rgba(255,79,163,.45); animation:pass-glow 2.2s ease-in-out infinite; }
 @keyframes pass-glow { 0%, 100% { box-shadow:0 0 0 2px #FF4FA3, 0 6px 18px rgba(255,79,163,.35); } 50% { box-shadow:0 0 0 2px #FF4FA3, 0 6px 28px rgba(255,79,163,.7); } }
 @media (prefers-reduced-motion: reduce) { .pass-pill.ready { animation:none; } }
+
+/* The Clout Pass row on the membership card (owner, Nov 16). */
+.member-pass { display:flex; align-items:center; gap:12px; width:100%; margin:0 0 14px; padding:12px 14px; border:0; border-radius:var(--r-md);
+  background:linear-gradient(135deg, #FFE3EF, #F3E8FF); font:inherit; color:inherit; cursor:pointer; }
+.member-pass .tag { flex:none; }
