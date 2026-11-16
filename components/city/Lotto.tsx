@@ -2,9 +2,9 @@
 
 import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 import { CITY_ECONOMY } from "@/lib/city";
-import type { CityState } from "@/lib/cityState";
+import { dueBills, upcomingBills, type CityState } from "@/lib/cityState";
 import {
-  LOTTO_GAMES, bennyLine, buyCardAvailability, freeCardAvailability, lottoGame, lottoOdds, oneInLine, potOdds, potWinLine, prizeTable, topPrize,
+  LOTTO_GAMES, bennyLine, buyCardAvailability, rentShortAfter, freeCardAvailability, lottoGame, lottoOdds, oneInLine, potOdds, potWinLine, prizeTable,
   type LottoCard, type LottoGame, type LottoPot, type LottoState, type LottoWin,
 } from "@/lib/lotto";
 import { localDate, nextNyMonday, nyMidnight, nyMidnightLine } from "@/lib/localTime";
@@ -27,15 +27,30 @@ export function LottoSheet({ open, state, placeId, busy, onClose, onBuy, onScrat
   const lotto = state.lotto;
   const [card, setCard] = useState<LottoCard | null>(null);
   const [odds, setOdds] = useState<LottoGame | null>(null);
+  // The rent warning (owner, Nov 16): a card that would leave the bank short of the rent coming up asks first.
+  const [warn, setWarn] = useState<{ game: LottoGame; owed: number; due: string } | null>(null);
   const [wasOpen, setWasOpen] = useState(open);
   if (open !== wasOpen) {
     setWasOpen(open);
     setCard(null);
     setOdds(null);
+    setWarn(null);
   }
   if (!lotto) return <Sheet open={false} onClose={onClose} label="Lucky Star Lotto">{null}</Sheet>;
   const nowMs = Date.now() + state.clockOffsetSeconds * 1000;
-  const buy = async (game: LottoGame, free: boolean) => {
+  // What the player still owes soon: bills already due, plus the next rent within a week.
+  const rentOwed = (() => {
+    const due = dueBills(state);
+    const next = upcomingBills(state).find((b) => b.kind === "rent" && !due.some((d) => d.kind === "rent"));
+    const nextSoon = next && Date.parse(next.due_date) - Date.parse(state.today) <= 7 * 86_400_000 ? next : null;
+    return { owed: due.reduce((a, b) => a + b.amount, 0) + (nextSoon?.amount ?? 0), due: nextSoon?.due_date ?? due[0]?.due_date ?? state.today };
+  })();
+  const buy = async (game: LottoGame, free: boolean, sure = false) => {
+    if (!free && !sure && rentShortAfter(game.price, state.player.bank_cash, rentOwed.owed)) {
+      setWarn({ game, owed: rentOwed.owed, due: rentOwed.due });
+      return;
+    }
+    setWarn(null);
     const c = await onBuy(placeId, game.id, free);
     if (c) setCard(c);
   };
@@ -78,14 +93,38 @@ export function LottoSheet({ open, state, placeId, busy, onClose, onBuy, onScrat
           onBack={() => setCard(null)}
           onDone={onClose}
         />
+      ) : warn ? (
+        <div className="stack-16 lotto-warn">
+          <div className="lotto-warn-emoji" aria-hidden="true">🧾</div>
+          <h2 className="display-md" style={{ margin: 0 }}>That&apos;s your rent, babe.</h2>
+          <p className="body" style={{ margin: 0 }}>
+            A {warn.game.name} card is {formatCash(warn.game.price)}. After it you&apos;d have {formatCash(Math.max(0, state.player.bank_cash - warn.game.price))},
+            and you owe {formatCash(warn.owed)} in rent and bills by {localDate(warn.due + "T12:00:00")}.
+          </p>
+          <p className="meta" style={{ margin: 0 }}>Late rent drops your Mood every day, and after a week you&apos;re out. Benny will still be here on payday.</p>
+          <button className="btn btn-taxi" onClick={() => setWarn(null)}>Not today</button>
+          <button className="btn btn-secondary" disabled={busy} onClick={() => void buy(warn.game, false, true)}>Still scratching · {formatCash(warn.game.price)}</button>
+        </div>
       ) : odds ? (
         <OddsView game={odds} onBack={() => setOdds(null)} />
       ) : (
         <div className="stack-12 lotto">
           <div>
             <h2 className="display-md" style={{ margin: 0, paddingRight: 44 }}>🌟 Lucky Star Lotto</h2>
-            <p className="subtext" style={{ margin: "4px 0 0" }}>Match the lucky number, win on the spot.</p>
+            <p className="subtext" style={{ margin: "4px 0 0" }}>Find a ⭐ to win the pot. Every pot can be won again and again.</p>
           </div>
+          {/* The latest pot won (owner, Nov 16: "I want people to believe they can win"). */}
+          {lotto.wins?.[0] && (() => {
+            const w = lotto.wins[0];
+            const mins = Math.max(0, Math.round((nowMs - Date.parse(w.wonAt)) / 60_000));
+            return (
+              <div className="lotto-ticker" role="status">
+                <span className="lotto-live">Live</span>
+                <span style={{ flex: 1, minWidth: 0 }}>🎉 <b>{w.mine ? "You" : w.winner ? handle(w.winner) : "A lucky Astorian"}</b> won the {lottoGame(w.game)?.name ?? "Lucky Star"} pot · <b>{formatCash(w.amount)}</b></span>
+                <span className="lotto-ticker-time">{mins < 60 ? `${mins}m` : mins < 1440 ? `${Math.round(mins / 60)}h` : `${Math.round(mins / 1440)}d`}</span>
+              </div>
+            );
+          })()}
           {resume && (
             <div className="reason-banner info lotto-resume">
               <span style={{ flex: 1 }}>🎟️ {lotto.unscratched.length === 1 ? "A card you haven't scratched" : `${lotto.unscratched.length} cards you haven't scratched`}</span>
@@ -97,7 +136,7 @@ export function LottoSheet({ open, state, placeId, busy, onClose, onBuy, onScrat
           <div className="lotto-sec"><b>Weekly pots</b><span>New numbers {nyMidnightLine(nextNyMonday(nowMs)).replace(/^Monday at midnight$/, "Monday")}</span></div>
           {LOTTO_GAMES.filter((g) => g.period === "week").map(row)}
           <p className="meta" style={{ margin: 0, textAlign: "center" }}>
-            Bought today {lotto.bought} of {CITY_ECONOMY.lotto.buyPerDay} · resets at midnight · about {oneInLine(Math.round(lottoOdds().anyOneIn))} cards wins something
+            Cards today {lotto.bought} of {CITY_ECONOMY.lotto.buyPerDay} · this week {lotto.boughtWeek ?? 0} of {CITY_ECONOMY.lotto.buyPerWeek} (resets Monday) · about {oneInLine(Math.round(lottoOdds().anyOneIn))} cards wins something
           </p>
         </div>
       )}
@@ -129,7 +168,7 @@ function GameRow({ game, pot, lotto, cash, busy, onBuy, onOdds, free }: {
       <span className="lotto-ball" style={{ "--ball": game.color } as CSSProperties} aria-label={pot ? `Lucky number ${pot.lucky}` : undefined}>{pot?.lucky ?? "?"}</span>
       <button className="lotto-game-info" onClick={onOdds} aria-label={`${game.name}: the odds`}>
         <b>{game.name}</b>
-        <small>Pot <span className="lotto-pot">{formatCash(pot?.pool ?? game.pot.seed)}</span> · {weekly ? "grows all week" : `prizes to ${formatCash(topPrize(game))}`} ›</small>
+        <small>Pot <span className="lotto-pot">{formatCash(pot?.pool ?? game.pot.seed)}</span> <span className="lotto-odds-chip">⭐ {oneInLine(game.pot.oneIn)}</span> ›</small>
       </button>
       {isFree ? (
         <button className="btn btn-green btn-sm lotto-buy" disabled={busy} onClick={() => onBuy(true)}>Free</button>
@@ -156,8 +195,8 @@ function OddsView({ game, onBack }: { game: LottoGame; onBack: () => void }) {
       <OddsTable game={game} />
       <ul className="lotto-facts">
         <li>Any prize: {oneInLine(Number(odds.anyOneIn.toFixed(2)))}. Every game uses the same table: prizes are multiples of the card.</li>
-        <li>The pot (a ⭐ on your card): {oneInLine(pot.oneIn)}. It starts at {formatCash(pot.seed)}, and {Math.round(CITY_ECONOMY.lotto.potCut * 100)}% of every bought card goes into it. {game.period === "day" ? "It starts over every midnight with a new lucky number." : "It grows all week and starts over every Monday with a new lucky number."} After a win it starts again from {formatCash(pot.seed)}.</li>
-        <li>On average a card pays back {Math.round(odds.payback * 1000) / 10}% of its price in prizes. The shop always wins; that&apos;s the point of a shop.</li>
+        <li>The pot (a ⭐ on your card): {oneInLine(pot.oneIn)}, {formatCash(pot.seed)} every time. Win it and the next card can win it again. {game.period === "day" ? "A new lucky number every midnight." : "A new lucky number every Monday."}</li>
+        <li>Up to {CITY_ECONOMY.lotto.buyPerDay} cards a day and {CITY_ECONOMY.lotto.buyPerWeek} a week. Benny likes regulars, not lunatics.</li>
         <li>The server draws each card the moment you buy it. Scratching only uncovers it.</li>
         <li>No real money: cards cost C$, prizes are C$, and C$ can&apos;t be bought.</li>
       </ul>
@@ -171,7 +210,7 @@ function OddsTable({ game, highlight }: { game: LottoGame; highlight?: number })
     <table className="lotto-odds">
       <thead><tr><th scope="col">Prize</th><th scope="col">Odds</th></tr></thead>
       <tbody>
-        <tr className="top"><td>⭐ The pot<small> from {formatCash(game.pot.seed)}</small></td><td>{oneInLine(game.pot.oneIn)}</td></tr>
+        <tr className="top"><td>⭐ The pot<small> {formatCash(game.pot.seed)}, every time</small></td><td>{oneInLine(game.pot.oneIn)}</td></tr>
         {prizeTable(game).reverse().map((p) => (
           <tr key={p.amount} className={highlight === p.amount ? "hit" : ""}>
             <td>{formatCash(p.amount)}{p.amount === game.price ? <small> your card back</small> : p.big ? <small> big prize</small> : null}</td>

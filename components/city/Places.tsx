@@ -40,7 +40,7 @@ import { handle } from "@/lib/validation";
 import { BOROUGHS, type BoroughId } from "@/lib/map/boroughs";
 import { gateProgress, gateRule, ruleFor, type BoroughGate } from "@/lib/boroughGates";
 import { SHOP_CATEGORIES, type ShopCategory } from "@/lib/city";
-import { LOTTO_GAMES, isLottoPlace, topPrize } from "@/lib/lotto";
+import { LOTTO_GAMES, isLottoPlace } from "@/lib/lotto";
 import { perkOn } from "@/lib/skills";
 
 const CATEGORY_LABEL: Record<Place["category"], string> = {
@@ -256,7 +256,7 @@ export function ActionList({ place, state, handlers, compact = false, preview, f
           <div className="action-row">
             <div style={{ minWidth: 0, flex: 1 }}>
               <span className="title" style={{ display: "block" }}>🌟 Scratch cards</span>
-              {!compact && <span className="subtext" style={{ display: "block" }}>Five games, {formatCash(LOTTO_GAMES[0].price)} to {formatCash(LOTTO_GAMES[LOTTO_GAMES.length - 1].price)}. Top prize {formatCash(topPrize(LOTTO_GAMES[LOTTO_GAMES.length - 1]))}.</span>}
+              {!compact && <span className="subtext" style={{ display: "block" }}>Five games, {formatCash(LOTTO_GAMES[0].price)} to {formatCash(LOTTO_GAMES[LOTTO_GAMES.length - 1].price)}. Pots up to {formatCash(LOTTO_GAMES[LOTTO_GAMES.length - 1].pot.seed)}.</span>}
               <span className="fx-row">
                 {free > 0 && <span className="fx fx-pay">🎟️ {free} free today</span>}
                 <span className="fx">{l.bought} of {CITY_ECONOMY.lotto.buyPerDay} bought</span>
