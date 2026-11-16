@@ -17,7 +17,7 @@ import type { RepairMethod, RepairOffer } from "@/lib/streakRepair";
 import { StreakRepairCard } from "./game/StreakRepair";
 import type { TodayPick } from "@/lib/placeLife";
 import { SEASON, STARTER_PACK, claimable, passBadge, type PassApi, type PassState, type StarterPackState } from "@/lib/seasonPass";
-import { PassTab, StarterPackCard } from "./game/SeasonPass";
+import { PassPill, PassTab, StarterPackCard } from "./game/SeasonPass";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { PlayerUpdate } from "@/app/home/actions";
 import { ECONOMY, formatCash } from "@/lib/economy";
@@ -3469,7 +3469,13 @@ export function GameShell({
         headline={latestNews ? { text: latestNews.headline, onOpen: () => openCityNews(latestNews.id) } : null}
         onLocate={tab === "map" && !trip ? () => mapRef.current?.locatePlayer() : undefined}
         atPlace={atPlaceInfo && !trip && tab === "map" && !inside ? { name: atPlaceInfo.name, onOpen: () => setPlace(atPlaceInfo) } : null}
-        starter={starter && !inside && flow === "none" && !visitView ? <StarterPill done={starter.done} day={starterDay(starter)} onOpen={() => setPanel("starter")} /> : null}
+        starter={!inside && flow === "none" && !visitView && (starter || (passS && tab === "home")) ? (
+          <>
+            {starter && <StarterPill done={starter.done} day={starterDay(starter)} onOpen={() => setPanel("starter")} />}
+            {/* Owner, Nov 16: the Clout Pass gets its own way in, on the home screen. */}
+            {passS && tab === "home" && <PassPill state={passS} today={city?.today ?? new Date().toISOString().slice(0, 10)} onOpen={() => { setTasksTab("pass"); setPanel("tasks"); }} />}
+          </>
+        ) : null}
         homeScore={cityOn && homeScoreNow && tab === "home" && !inside && !viewing && !decor && !sharedHome && !visitView && flow === "none" ? { score: homeScoreNow.score, tier: homeScoreNow.tier, onOpen: () => setPanel("homescore") } : null}
         quests={trip ? [] : quests}
         time={clock.time}

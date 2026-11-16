@@ -20,6 +20,30 @@ function Reward({ r, locked }: { r: PassReward; locked?: boolean }) {
   );
 }
 
+/**
+ * The Clout Pass on the home screen (owner, Nov 16: "I cannot find the entry point to the pass feature"): a ring with the
+ * tier reached, the season and its days left; while rewards wait it glows and says how many. A tap opens Tasks → Pass.
+ */
+export function PassPill({ state, today, onOpen }: { state: PassState; today: string; onOpen: () => void }) {
+  if (state.phase !== "on" && state.phase !== "claim") return null;
+  const t = tierFor(state.xp, state.season);
+  const ready = claimable(state);
+  const n = ready.free.length + ready.paid.length;
+  const pct = t.max ? 100 : Math.round((100 * t.into) / t.need);
+  const left = daysLeft(today, state.season);
+  return (
+    <button className={`pill-glass glass-hud pass-pill${n ? " ready" : ""}`} onClick={onOpen}
+      aria-label={`Clout Pass, tier ${t.tier} of ${state.season.tiers.length}${n ? `, ${n} reward${n === 1 ? "" : "s"} to collect` : ""}`}>
+      <span className="pass-ring" style={{ ["--p" as string]: `${pct}%` }} aria-hidden="true"><b>{t.tier}</b></span>
+      <span className="pass-label" aria-hidden="true">
+        <small>{state.season.badge.emoji} {state.season.name}</small>
+        {n ? `🎁 ${n} reward${n === 1 ? "" : "s"} to collect` : state.phase === "claim" ? "Claim before it closes" : `Tier ${t.tier + (t.max ? 0 : 1)} next · ${left}d left`}
+      </span>
+      <span aria-hidden="true">›</span>
+    </button>
+  );
+}
+
 export function PassTab({ state, today, busy, price, onClaim, onBuy, starter }: {
   state: PassState;
   /** Today's New York date (for days left). */
