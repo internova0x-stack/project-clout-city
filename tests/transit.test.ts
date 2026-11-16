@@ -20,6 +20,7 @@ test("every Queens neighborhood with places or homes has a line; Astoria rides t
 
 test("the green cab and the rideshare: the rideshare is quicker and dearer at every distance", () => {
   assert.equal(TRAVEL_MODES.find((m) => m.id === "taxi")!.label, "Green cab");
+  assert.ok(!TRAVEL_MODES.some((m) => m.id === "rideshare"), "no rideshare on the list (owner, Nov 16)");
   for (const miles of [0.3, 1.5, 4, 8]) {
     const cab = travelQuote("taxi", miles, false);
     const ride = travelQuote("rideshare", miles, false);

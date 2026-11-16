@@ -21,6 +21,9 @@ interface Stored {
 
 const OFF = "Payments aren't switched on yet.";
 const NOTHING = "Nothing to manage yet: Stripe opens a billing page after your first purchase.";
+/** Owner, Nov 16: purchases on record but Stripe has no customer for them (a test-mode buy read with live keys, or one
+ *  Stripe has deleted). Say so, and how to get help, instead of "nothing to manage". */
+const MISSING = "Stripe can't find the billing record for these purchases, so there's nothing to change there. A charge looks wrong? Email hello@cloutcity.app with the date and we'll sort it out.";
 
 
 async function player() {
@@ -93,7 +96,8 @@ export async function membershipPortal(): Promise<MembershipResult<{ url: string
   if (!p) return { ok: false, error: "Sign in first." };
   if (!secret) return { ok: false, error: OFF };
   const b = await billing(secret, p.user.id);
-  if (!b?.customer) return { ok: false, error: NOTHING };
+  const bought = !!b && (!!b.subscription || b.sessions.length > 0);
+  if (!b?.customer) return { ok: false, error: bought ? MISSING : NOTHING };
   try {
     const h = await headers();
     const origin = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ?? `${h.get("x-forwarded-proto") ?? "https"}://${h.get("x-forwarded-host") ?? h.get("host")}`;
@@ -102,7 +106,7 @@ export async function membershipPortal(): Promise<MembershipResult<{ url: string
   } catch (e) {
     if (stripeUnknown(e, "customer")) {
       await forgetCustomer(p.user.id);
-      return { ok: false, error: NOTHING };
+      return { ok: false, error: bought ? MISSING : NOTHING };
     }
     console.error("billing portal failed", e);
     return { ok: false, error: "Stripe's billing page didn't open. Nothing changed; try again." };

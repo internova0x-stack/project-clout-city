@@ -6,12 +6,12 @@ import type { LatLng } from "./map/geo.ts";
  * Mirrors public.travel() (migration 0025), which charges the same numbers.
  */
 export type TravelMode = "walk" | "subway" | "taxi" | "rideshare" | "car";
-/** C4 (owner, Oct 20): the taxi is the outer boroughs' green cab now (its id stays "taxi"), plus a rideshare. */
+/** C4 (owner, Oct 20): the taxi is the outer boroughs' green cab now (its id stays "taxi"). Owner, Nov 16: the rideshare is
+ *  off the list (the server still prices one, so an old trip or a stray call keeps working). */
 export const TRAVEL_MODES: { id: TravelMode; label: string; emoji: string }[] = [
   { id: "walk", label: "Walk", emoji: "🚶" },
   { id: "subway", label: "Subway", emoji: "🚇" },
   { id: "taxi", label: "Green cab", emoji: "🚕" },
-  { id: "rideshare", label: "Rideshare", emoji: "📱" },
   { id: "car", label: "Your car", emoji: "🚗" },
 ];
 

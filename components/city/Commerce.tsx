@@ -256,11 +256,11 @@ export function ShopSheet({
             <div className="stack-16">
               <ShopArt image={confirm.item.image} emoji={confirm.item.emoji} item={confirm.item} size={confirm.item.image ? 96 : 52} />
               <h2 className="display-md" style={{ margin: 0, paddingRight: 44 }}>
-                {confirm.mode === "rent" ? `Rent the ${confirm.item.name.toLowerCase()}?` : `Buy the ${confirm.item.name.toLowerCase()}?`}
+                {confirm.mode === "rent" ? `Rent the ${confirm.item.name}?` : `Buy the ${confirm.item.name}?`}
               </h2>
               <div className="card stack-8">
                 <div className="ledger-row" style={{ padding: 0, border: 0 }}><span className="body">Price</span><span className="body-strong">{formatCash(price)}{confirm.mode === "rent" ? " this week" : ""}</span></div>
-                <div className="ledger-row" style={{ padding: 0, border: 0 }}><span className="body">Bank after</span><span className={`body-strong ${after < 0 ? "money-neg" : ""}`}>{formatCash(Math.max(0, after))}</span></div>
+                <div className="ledger-row" style={{ padding: 0, border: 0 }}><span className="body">Left in your bank</span><span className={`body-strong ${after < 0 ? "money-neg" : ""}`}>{formatCash(Math.max(0, after))}</span></div>
                 {confirm.mode === "buy" && <div className="ledger-row" style={{ padding: 0, border: 0 }}><span className="body">Clout</span><span className="body-strong" style={{ color: "var(--taxi-500)" }}>🔥 +{owned.has(confirm.item.sku) ? 0 : purchaseClout(confirm.item.clout, player.purchases_count)}</span></div>}
               </div>
               {after < 0 && <p className="error-text" style={{ margin: 0 }}>You&apos;re {formatCash(-after)} short. Work a shift or take a gig.</p>}

@@ -122,7 +122,7 @@ export interface Room3DProps {
    * without calling onUse again. `key` changes for each new one. `use` is a piece's use kind ("sit", "sleep", "cook")
    * or a place action's id.
    */
-  act?: { use: "sit" | "sleep" | "cook" | { action: string; index?: number }; key: number } | null;
+  act?: { use: "sit" | "sleep" | "cook" | { action: string; index?: number; kind?: string; seconds?: number }; key: number } | null;
 }
 
 export default function Room3D(props: Room3DProps) {
@@ -159,7 +159,10 @@ export default function Room3D(props: Room3DProps) {
   editRef.current = { editing, selected };
   const savedRef = useRef<RoomItem[]>(items);
   useEffect(() => { propsRef.current.onEditingChange?.(editing); }, [editing]);
-  const actionsRef = useRef<{ goUse: (it: RoomItem, silent?: boolean) => void; talk: (i: number) => void; floorStep: (screen: number) => [number, number] } | null>(null);
+  const actionsRef = useRef<{
+    goUse: (it: RoomItem, silent?: boolean) => void; talk: (i: number) => void; floorStep: (screen: number) => [number, number];
+    sitNear: (near: RoomItem | null) => boolean; stroll: (seconds: number, dog: boolean) => void;
+  } | null>(null);
 
   // Re-apply when the room or saved layout changes (not while arranging).
   const layoutKey = JSON.stringify(layout ?? null);
@@ -679,6 +682,17 @@ export default function Room3D(props: Room3DProps) {
       if (!wld) return;
       if (wld.dirty) syncFurniture();
       stepActor(me, dt, t, reduceMotion, (it) => arrive(it));
+      // The dog on a dog-walking stroll (owner, Nov 16: "No dog walking"): it trots a step behind, then goes home.
+      if (dog) {
+        const bx = me.x - Math.sin(me.heading) * 0.75 + Math.cos(me.heading) * 0.35, bz = me.z - Math.cos(me.heading) * 0.75 - Math.sin(me.heading) * 0.35;
+        const k = Math.min(1, dt * 5);
+        dog.position.x += (bx - dog.position.x) * k;
+        dog.position.z += (bz - dog.position.z) * k;
+        dog.rotation.y = me.heading;
+        const moving = me.mode === "walk";
+        dog.position.y = moving && !reduceMotion ? Math.abs(Math.sin(t * 14)) * 0.04 : 0;
+        if (!moving && now > dogUntil) { scene.remove(dog); dog = null; }
+      }
       for (const n of npcs) stepActor(n, dt, t, reduceMotion);
       let gone = false;
       for (const c of crowdRef.current) {
@@ -805,7 +819,50 @@ export default function Room3D(props: Room3DProps) {
       const order = [0, 1, 2, 3].sort((i, j) => fromUp(ang[i]) - fromUp(ang[j]));
       return FLOOR_DIRS[order[screen]];
     };
-    actionsRef.current = { goUse, talk, floorStep };
+    // Seats (owner, Nov 16: "I could not sit on the chair while eating"): a meal or a hangout sits you on the free seat
+    // nearest its table or counter. Any chair, stool, bench or sofa counts, used or not, unless a seated regular has it.
+    const SEATS = new Set(["chair", "stool", "barStool", "bench", "sofa", "armchair", "diningChair", "booth", "loveseat"]);
+    const sitNear = (near: RoomItem | null): boolean => {
+      const taken = (it: RoomItem) => npcs.some((n) => n.mode === "sit" && Math.hypot(n.x - it.x, n.z - it.z) < 0.6);
+      const seats = itemsRef.current.filter((i) => (SEATS.has(i.kind) || i.use?.kind === "sit") && !taken(i));
+      if (!seats.length) return false;
+      const ox = near?.x ?? me.x, oz = near?.z ?? me.z;
+      const seat = seats.sort((a, b) => Math.hypot(a.x - ox, a.z - oz) - Math.hypot(b.x - ox, b.z - oz))[0];
+      goUse({ ...seat, use: { kind: "sit" } }, true);
+      return true;
+    };
+    // A stroll (owner, Nov 16: the dog walk and the lap "did nothing"): laps of the room's open ground for the action's
+    // seconds, with a dog at your heels for a dog walk.
+    let dog: Group | null = null;
+    let dogUntil = 0;
+    const stroll = (seconds: number, withDog: boolean) => {
+      const grid = makeGrid(template, itemsRef.current);
+      const hw = template.w * 0.32, hd = template.d * 0.32;
+      const corners: [number, number][] = [[-hw, -hd], [hw, -hd], [hw, hd], [-hw, hd]];
+      let at: [number, number] = [me.x, me.z];
+      const start = corners.reduce((b, c, i) => (Math.hypot(c[0] - at[0], c[1] - at[1]) < Math.hypot(corners[b][0] - at[0], corners[b][1] - at[1]) ? i : b), 0);
+      const path: [number, number][] = [];
+      let length = 0;
+      const want = Math.max(4, seconds) * WALK_SPEED;
+      for (let i = 0; i < 16 && length < want; i++) {
+        const goal = corners[(start + i) % 4];
+        const leg = findPath(grid, at, goal).slice(1);
+        for (const p of leg) { length += Math.hypot(p[0] - at[0], p[1] - at[1]); path.push(p); at = p; }
+      }
+      if (!path.length) return;
+      if (me.mode === "sit" || me.mode === "sleep" || me.mode === "dance") standUp(me);
+      me.pending = null;
+      me.path = path;
+      me.run = false;
+      me.mode = "walk";
+      if (withDog && !dog) {
+        dog = buildDog();
+        dog.position.set(me.x - 0.6, 0, me.z - 0.6);
+        scene.add(dog);
+      }
+      dogUntil = performance.now() + seconds * 1000;
+    };
+    actionsRef.current = { goUse, talk, floorStep, sitNear, stroll };
 
     function walkTo(goal: [number, number], use: RoomItem | null) {
       const grid = makeGrid(template, itemsRef.current);
@@ -993,6 +1050,14 @@ export default function Room3D(props: Room3DProps) {
     const act = props.act;
     if (!act) return;
     const want = act.use;
+    if (typeof want !== "string") {
+      const strolls = /dog|lap|walk|run|jog/.test(want.action);
+      const matched = itemsRef.current.find((i) => i.use?.kind === "action" && (i.use.actionId === want.action || (want.index !== undefined && i.use.actionId === `*${want.index}`))) ?? null;
+      // A dog walk or a lap is a stroll; a meal or a hangout sits you near its table; else walk to its piece, or stroll.
+      if (strolls && (want.kind === "shift" || want.kind === "visit" || want.kind === "hangout")) { actionsRef.current?.stroll(want.seconds ?? 8, /dog/.test(want.action)); return; }
+      if ((want.kind === "eat" || want.kind === "hangout") && actionsRef.current?.sitNear(matched)) return;
+      if (!matched && (want.kind === "shift" || want.kind === "visit")) { actionsRef.current?.stroll(want.seconds ?? 8, false); return; }
+    }
     const fits = itemsRef.current.filter((i) => {
       const u = i.use;
       if (!u) return false;
@@ -1532,4 +1597,25 @@ export function derivedBackdrop(t: RoomTemplate, daytime: boolean): { css: strin
     css: `radial-gradient(85% 45% at 72% 16%, ${glow}, transparent 70%), linear-gradient(180deg, ${top} 0%, ${mid} 52%, ${bot} 100%)`,
     haze: mid,
   };
+}
+
+/** A small dog for the dog-walking stroll: boxes in a warm brown, a darker snout and a wagging-ready tail. */
+function buildDog(): Group {
+  const g = new Group();
+  const coat = new MeshStandardMaterial({ color: "#B07A4A", roughness: 0.8 });
+  const dark = new MeshStandardMaterial({ color: "#4A2E1E", roughness: 0.8 });
+  const box = (w: number, h: number, d: number, x: number, y: number, z: number, m = coat) => {
+    const b = new Mesh(new BoxGeometry(w, h, d), m);
+    b.position.set(x, y, z);
+    b.castShadow = true;
+    g.add(b);
+  };
+  box(0.2, 0.16, 0.42, 0, 0.2, 0);
+  box(0.17, 0.16, 0.17, 0, 0.32, 0.25);
+  box(0.09, 0.07, 0.1, 0, 0.29, 0.37, dark);
+  box(0.05, 0.08, 0.04, -0.06, 0.43, 0.23, dark);
+  box(0.05, 0.08, 0.04, 0.06, 0.43, 0.23, dark);
+  for (const [x, z] of [[-0.07, 0.15], [0.07, 0.15], [-0.07, -0.15], [0.07, -0.15]]) box(0.05, 0.13, 0.05, x, 0.065, z);
+  box(0.04, 0.04, 0.16, 0, 0.27, -0.26);
+  return g;
 }

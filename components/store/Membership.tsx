@@ -46,6 +46,8 @@ export function MembershipSheet({ open, onClose, api, onGetVip, onToast, pass }:
 }) {
   const [state, setState] = useState<MembershipState | null>(null);
   const [busy, setBusy] = useState(false);
+  // Owner, Nov 16: a billing page that can't open says why inside the card, not in a toast over the top of the screen.
+  const [portalErr, setPortalErr] = useState<string | null>(null);
   useEffect(() => {
     if (!open) return;
     let stop = false;
@@ -54,9 +56,10 @@ export function MembershipSheet({ open, onClose, api, onGetVip, onToast, pass }:
   }, [open, api, onToast]);
   const manage = async () => {
     setBusy(true);
+    setPortalErr(null);
     const r = await api.portal();
     if (r.ok) window.location.href = r.data.url;
-    else { setBusy(false); onToast?.(r.error); }
+    else { setBusy(false); setPortalErr(r.error); }
   };
   const vip = state?.vip;
   return (
@@ -89,7 +92,11 @@ export function MembershipSheet({ open, onClose, api, onGetVip, onToast, pass }:
               <button className="btn btn-secondary" style={{ width: "100%" }} disabled={busy} onClick={() => void manage()}>
                 {busy ? "Opening Stripe…" : vip.status === "cancelling" ? "Turn renewal back on" : vip.status === "past_due" ? "Update card" : "Manage billing"}
               </button>
-              <p className="meta" style={{ margin: "8px 0 0", textAlign: "center" }}>Switch plan, change card, cancel or get receipts, on Stripe.</p>
+              {portalErr ? (
+                <p className="member-err" role="alert">{portalErr}</p>
+              ) : (
+                <p className="meta" style={{ margin: "8px 0 0", textAlign: "center" }}>Switch plan, change card, cancel or get receipts, on Stripe.</p>
+              )}
             </div>
           ) : (
             <div className="member-card free">
@@ -135,6 +142,7 @@ export function MembershipSheet({ open, onClose, api, onGetVip, onToast, pass }:
             {state.canManage && !vip && (
               <button className="chip" style={{ alignSelf: "flex-start" }} disabled={busy} onClick={() => void manage()}>{busy ? "Opening Stripe…" : "Receipts and card on Stripe"}</button>
             )}
+            {portalErr && !vip && <p className="member-err" role="alert">{portalErr}</p>}
           </div>
           <div className="stack-4">
             <p className="overline" style={{ margin: 0 }}>Help</p>

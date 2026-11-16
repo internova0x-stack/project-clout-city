@@ -97,7 +97,7 @@ export function GiftSheet({ item, api, cash, onClose, onSent }: {
               <div className="card stack-8">
                 <div className="ledger-row" style={{ padding: 0, border: 0 }}><span className="body">For</span><span className="body-strong">{handle(pick?.name ?? "")}</span></div>
                 <div className="ledger-row" style={{ padding: 0, border: 0 }}><span className="body">You pay</span><span className="body-strong">{formatCash(item.price)}</span></div>
-                <div className="ledger-row" style={{ padding: 0, border: 0 }}><span className="body">Bank after</span><span className={`body-strong${cash < item.price ? " money-neg" : ""}`}>{formatCash(Math.max(0, cash - item.price))}</span></div>
+                <div className="ledger-row" style={{ padding: 0, border: 0 }}><span className="body">Left in your bank</span><span className={`body-strong${cash < item.price ? " money-neg" : ""}`}>{formatCash(Math.max(0, cash - item.price))}</span></div>
                 {state && <div className="ledger-row" style={{ padding: 0, border: 0 }}><span className="body">Gifts left this week</span><span className="body-strong">{state.week.giftsLeft}</span></div>}
               </div>
               {note.trim() && <p className="subtext ph-sensitive" style={{ margin: 0 }}>&ldquo;{note.trim()}&rdquo;</p>}
