@@ -9,8 +9,34 @@ import { Sheet } from "../Sheet";
 import { VIP_PERKS } from "@/lib/meet";
 import { formatPrice } from "@/lib/store";
 import { membershipDate, vipLine, type MembershipApi, type MembershipState } from "@/lib/membership";
+import { tierFor, type PassState } from "@/lib/seasonPass";
 
-export function MembershipSheet({ open, onClose, api, onGetVip, onToast }: {
+/**
+ * The Clout Pass on the membership card (owner, Nov 16): included for a VIP, owned, or on sale, and a way to it.
+ * Absent outside a season or before migration 0156.
+ */
+function PassRow({ pass, onOpen }: { pass: { state: PassState; price: string | null; onOpen: () => void }; onOpen?: () => void }) {
+  const s = pass.state;
+  if (s.phase !== "on" && s.phase !== "claim") return null;
+  const t = tierFor(s.xp, s.season);
+  const line = s.vip ? `${s.season.name} · included with your VIP`
+    : s.paid ? `${s.season.name} · yours for the season`
+    : `${s.season.name} · tier ${t.tier}, paid row${pass.price ? ` ${pass.price}` : " on sale"}`;
+  return (
+    <button className="member-pass" onClick={onOpen ?? pass.onOpen}>
+      <span aria-hidden="true" className="member-emoji">{s.season.badge.emoji}</span>
+      <span style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
+        <span className="title member-name">Clout Pass</span>
+        <span className="meta" style={{ display: "block" }}>{line}</span>
+      </span>
+      <span className={`tag ${s.vip || s.paid ? "tag-positive" : "tag-gold"}`}>{s.vip ? "Included" : s.paid ? "Owned" : "Get it"}</span>
+    </button>
+  );
+}
+
+export function MembershipSheet({ open, onClose, api, onGetVip, onToast, pass }: {
+  /** The Clout Pass row (migration 0156): this season's state, the pass's price and a way to Tasks → Pass. */
+  pass?: { state: PassState; price: string | null; onOpen: () => void } | null;
   open: boolean;
   onClose: () => void;
   api: MembershipApi;
@@ -59,6 +85,7 @@ export function MembershipSheet({ open, onClose, api, onGetVip, onToast }: {
               <ul className="member-perks">
                 {VIP_PERKS.map((p) => <li key={p.text}><span aria-hidden="true">{p.emoji}</span> {p.text}</li>)}
               </ul>
+              {pass && <PassRow pass={pass} />}
               <button className="btn btn-secondary" style={{ width: "100%" }} disabled={busy} onClick={() => void manage()}>
                 {busy ? "Opening Stripe…" : vip.status === "cancelling" ? "Turn renewal back on" : vip.status === "past_due" ? "Update card" : "Manage billing"}
               </button>
@@ -74,6 +101,7 @@ export function MembershipSheet({ open, onClose, api, onGetVip, onToast }: {
               <ul className="member-perks">
                 {VIP_PERKS.map((p) => <li key={p.text}><span aria-hidden="true">{p.emoji}</span> {p.text}</li>)}
               </ul>
+              {pass && <PassRow pass={pass} />}
               <button className="btn btn-taxi" style={{ width: "100%" }} onClick={onGetVip}>See VIP plans</button>
             </div>
           )}

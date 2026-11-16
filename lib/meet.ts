@@ -25,6 +25,8 @@ export const VIP_PERKS = [
   { emoji: "💬", text: "Unlimited chat with anyone you meet" },
   { emoji: "📖", text: "Every side story free while you're a member" },
   { emoji: "👑", text: "A VIP badge on your player card" },
+  // Migration 0156: VIP includes the Clout Pass's paid row, every season (owner, Nov 16: say so where VIP is sold).
+  { emoji: "🎟️", text: "The Clout Pass included, every season" },
 ];
 
 const PLACE_LINES = [
