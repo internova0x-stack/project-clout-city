@@ -89,6 +89,9 @@ export function passBadge(id: string): { emoji: string; name: string } | null {
   return null;
 }
 
+/** The Clout Pass's own icon (owner, Nov 16: a ticket, not the season badge's heart). */
+export const PASS_EMOJI = "🎟️";
+
 /** The tier an amount of XP has reached (0 before the first), and progress into the next. */
 export function tierFor(xp: number, season: Pick<Season, "xpPerTier" | "tiers"> = SEASON) {
   const tier = Math.min(season.tiers.length, Math.floor(Math.max(0, xp) / season.xpPerTier));

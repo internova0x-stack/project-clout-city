@@ -9,7 +9,7 @@ import { Sheet } from "../Sheet";
 import { VIP_PERKS } from "@/lib/meet";
 import { formatPrice } from "@/lib/store";
 import { membershipDate, vipLine, type MembershipApi, type MembershipState } from "@/lib/membership";
-import { tierFor, type PassState } from "@/lib/seasonPass";
+import { PASS_EMOJI, tierFor, type PassState } from "@/lib/seasonPass";
 
 /**
  * The Clout Pass on the membership card (owner, Nov 16): included for a VIP, owned, or on sale, and a way to it.
@@ -24,7 +24,7 @@ function PassRow({ pass, onOpen }: { pass: { state: PassState; price: string | n
     : `${s.season.name} · tier ${t.tier}, paid row${pass.price ? ` ${pass.price}` : " on sale"}`;
   return (
     <button className="member-pass" onClick={onOpen ?? pass.onOpen}>
-      <span aria-hidden="true" className="member-emoji">{s.season.badge.emoji}</span>
+      <span aria-hidden="true" className="member-emoji">{PASS_EMOJI}</span>
       <span style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
         <span className="title member-name">Clout Pass</span>
         <span className="meta" style={{ display: "block" }}>{line}</span>

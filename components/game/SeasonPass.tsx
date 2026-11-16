@@ -1,6 +1,6 @@
 "use client";
 
-import { claimable, daysLeft, rewardLabel, tierFor, type PassReward, type PassState, type StarterPackState, STARTER_PACK } from "@/lib/seasonPass";
+import { PASS_EMOJI, claimable, daysLeft, rewardLabel, tierFor, type PassReward, type PassState, type StarterPackState, STARTER_PACK } from "@/lib/seasonPass";
 import { itemBySku } from "@/lib/city";
 import { useEffect, useState } from "react";
 
@@ -36,7 +36,7 @@ export function PassPill({ state, today, onOpen }: { state: PassState; today: st
       aria-label={`Clout Pass, tier ${t.tier} of ${state.season.tiers.length}${n ? `, ${n} reward${n === 1 ? "" : "s"} to collect` : ""}`}>
       <span className="pass-ring" style={{ ["--p" as string]: `${pct}%` }} aria-hidden="true"><b>{t.tier}</b></span>
       <span className="pass-label" aria-hidden="true">
-        <small>{state.season.badge.emoji} {state.season.name}</small>
+        <small>{PASS_EMOJI} {state.season.name}</small>
         {n ? `🎁 ${n} reward${n === 1 ? "" : "s"} to collect` : state.phase === "claim" ? "Claim before it closes" : `Tier ${t.tier + (t.max ? 0 : 1)} next · ${left}d left`}
       </span>
       <span aria-hidden="true">›</span>
@@ -64,7 +64,7 @@ export function PassTab({ state, today, busy, price, onClaim, onBuy, starter }: 
     <div className="stack-16">
       <div className="pass-hero">
         <div className="pass-hero-kicker">Clout Pass · Season 1</div>
-        <div className="pass-hero-title">💘 {s.name}</div>
+        <div className="pass-hero-title">{PASS_EMOJI} {s.name}</div>
         <div className="row" style={{ justifyContent: "space-between", marginTop: 14 }}>
           <span className="title">Tier {tier} of {s.tiers.length}</span>
           <span className="pass-hero-meta">

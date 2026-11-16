@@ -5,7 +5,7 @@
 //                                 (once per season on this device: cc-pass-wrap:<season>)
 // GameShell hands every pass read to `passRead` and every claim to `passClaimBanner`; nothing here calls the server.
 
-import { claimable, rewardLabel, tierFor, type PassReward, type PassState } from "../../lib/seasonPass.ts";
+import { PASS_EMOJI, claimable, rewardLabel, tierFor, type PassReward, type PassState } from "../../lib/seasonPass.ts";
 import type { Celebration } from "../Celebrate";
 
 type Name = (sku: string) => string | undefined;
@@ -28,7 +28,7 @@ export function passMaxCelebration(s: PassState, onOpen?: () => void): Celebrati
   const ready = claimable(s);
   const waiting = ready.free.length + ready.paid.length;
   return {
-    rung: 4, emoji: s.season.badge.emoji, tag: "Clout Pass", num: String(n), unit: "tiers",
+    rung: 4, emoji: PASS_EMOJI, tag: "Clout Pass", num: String(n), unit: "tiers",
     title: `Every tier of ${s.season.name}`,
     line: "You did the daily tasks so many times the tasks started doing you.",
     rewards: s.paid ? [{ text: `${s.season.badge.emoji} ${s.season.badge.name} badge` }] : undefined,
@@ -76,7 +76,7 @@ export function passWrapResult(s: PassState, name: Name, onOpen?: () => void): C
     ...(badge ? [`${s.season.badge.emoji} ${s.season.badge.name}`] : []),
   ];
   return {
-    rung: 3, emoji: s.season.badge.emoji, tag: "Clout Pass · Season over",
+    rung: 3, emoji: PASS_EMOJI, tag: "Clout Pass · Season over",
     title: all ? `${s.season.name}, maxed` : `${s.season.name} is a wrap`,
     cta: waiting ? `Claim ${waiting} reward${waiting === 1 ? "" : "s"}` : "Bring on next season",
     onCta: waiting ? onOpen : undefined,
