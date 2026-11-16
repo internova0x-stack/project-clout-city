@@ -4,6 +4,7 @@
 // miniature. Drag to scroll, pinch or scroll to zoom; pins and the locked boroughs' cards are HTML on top. Game data
 // stays in lat/lng: a place's lat/lng lands on its own block, anything else between its nearest places.
 
+import { pointAlong, streetRoute } from "@/lib/compactRoute";
 import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
 import { Vector3 } from "three";
 import { BOROUGHS, type BoroughId } from "@/lib/map/boroughs";
@@ -23,7 +24,7 @@ const PITCH = 50;
 /** ...and turned a little, so the street grid runs on the diagonal like the mockups (degrees). */
 const YAW = -32;
 /** Camera distance from what it looks at, in meters: close in, the default, zoomed all the way out. */
-const DIST = { min: 240, start: 640, max: 1700 } as const;
+const DIST = { min: 240, start: 640, max: 1700, trip: 2400 } as const;
 /** Closer than this, pins show their names; farther, just their icon. */
 const NAMES_DIST = 520;
 /** Farther than this, the city is a picture: neighborhood names and the locked boroughs' cards, no pins. */
@@ -34,10 +35,10 @@ const project = makeProjector(PLACES.map((p) => ({ at: p.at, spot: SPOTS[p.id] ?
 const CELL = COMPACT_GRID.cell;
 
 interface View { x: number; z: number; dist: number }
-const clampView = (v: View): View => ({
+const clampView = (v: View, max: number = DIST.max): View => ({
   x: Math.min(WORLD_SIZE.w, Math.max(0, v.x)),
   z: Math.min(WORLD_SIZE.h, Math.max(0, v.z)),
-  dist: Math.min(DIST.max, Math.max(DIST.min, v.dist)),
+  dist: Math.min(max, Math.max(DIST.min, v.dist)),
 });
 
 export const CompactMap = forwardRef<MapApi, CityMapProps>(function CompactMap(
@@ -156,8 +157,8 @@ export const CompactMap = forwardRef<MapApi, CityMapProps>(function CompactMap(
     return () => { live = false; };
   }, [screenUrl, screenHandle, ready]);
 
-  const flyTo = (to: Partial<View>, ms = 600) => {
-    animRef.current = { from: viewRef.current, to: clampView({ ...viewRef.current, ...to }), start: performance.now(), ms };
+  const flyTo = (to: Partial<View>, ms = 600, max: number = DIST.max) => {
+    animRef.current = { from: viewRef.current, to: clampView({ ...viewRef.current, ...to }, max), start: performance.now(), ms };
   };
 
   // ---- Gestures: drag to scroll, pinch or wheel to zoom ----
@@ -269,10 +270,30 @@ export const CompactMap = forwardRef<MapApi, CityMapProps>(function CompactMap(
       flyTo({ x, z, dist: DIST.start }, 700);
     },
     frameTrip(from, to) {
-      const [ax, az] = project(from), [bx, bz] = project(to);
-      flyTo({ x: (ax + bx) / 2, z: (az + bz) / 2, dist: Math.min(DIST.max, Math.max(DIST.start * 0.8, Math.hypot(ax - bx, az - bz) * 2.4)) }, 700);
+      // Owner, Nov 16: the whole street route on screen, on a narrow phone too. Its extent along the screen's across
+      // (u) and up (w) axes sets how far out the camera goes: across by the horizontal field of view, up by the
+      // vertical one stretched by the tilt; 68% and 65% of the screen leave room for the trip bar and Skip.
+      const route = streetRoute(project(from), project(to));
+      const yaw = (YAW * Math.PI) / 180, tilt = (PITCH * Math.PI) / 180;
+      const us = route.map(([x, z]) => x * Math.cos(yaw) - z * Math.sin(yaw));
+      const ws = route.map(([x, z]) => -x * Math.sin(yaw) - z * Math.cos(yaw));
+      const u0 = Math.min(...us), u1 = Math.max(...us), w0 = Math.min(...ws), w1 = Math.max(...ws);
+      const um = (u0 + u1) / 2, wm = (w0 + w1) / 2;
+      // Back from (u, w) to the map's x and z.
+      const cx = um * Math.cos(yaw) - wm * Math.sin(yaw), cz = -um * Math.sin(yaw) - wm * Math.cos(yaw);
+      const host = hostRef.current, aspect = host && host.clientHeight ? host.clientWidth / host.clientHeight : 0.5;
+      const half = Math.tan((20 * Math.PI) / 180);
+      const need = Math.max(DIST.start * 0.8, (u1 - u0) / 2 / (0.68 * half * aspect), ((w1 - w0) / 2) * Math.cos(tilt) / (0.65 * half));
+      flyTo({ x: cx, z: cz, dist: need }, 700, DIST.trip);
     },
     project(at) { return toScreen(at); },
+    tripOnScreen(from, to, t) {
+      const route = streetRoute(project(from), project(to));
+      const points = route.map(([x, z]) => screenAt(x, 0.6, z)).filter((p): p is { x: number; y: number } => !!p);
+      if (points.length < 2) return null;
+      const [x, z] = pointAlong(route, t);
+      return { points, at: screenAt(x, 0.6, z) };
+    },
     setBoroughLock(id, isLocked) {
       setLocked((prev) => {
         if (prev.has(id) === isLocked) return prev;

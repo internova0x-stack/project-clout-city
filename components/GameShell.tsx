@@ -3436,7 +3436,8 @@ export function GameShell({
             rightInset={72}
             pins={cityOn ? starterPins : WAVE_1_PINS}
             vehicles={cityOn}
-            player={{ at: cityOn ? myPos : DEFAULT_PLAYER_LOCATION, emoji: style.emoji }}
+            // Owner, Nov 16: during a trip the ride is the player (the server already has them at the destination's door).
+            player={trip ? null : { at: cityOn ? myPos : DEFAULT_PLAYER_LOCATION, emoji: style.emoji }}
             initialCenter={cityOn ? ASTORIA_CENTER : DEFAULT_PLAYER_LOCATION}
             initialZoom={cityOn ? ASTORIA_ZOOM : undefined}
             daytime={daytime}

@@ -171,10 +171,10 @@ export function TripView({ trip, map, onDone, onSkip, onShowtime }: {
     return () => cancelAnimationFrame(raf);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const a = map?.project(trip.from);
-  const b = map?.project(trip.to);
-  const at: LatLng = [trip.from[0] + (trip.to[0] - trip.from[0]) * t, trip.from[1] + (trip.to[1] - trip.from[1]) * t];
-  const p = map?.project(at);
+  // One street path for the line and the ride (owner, Nov 16), recomputed each frame as the camera settles.
+  const route = map?.tripOnScreen(trip.from, trip.to, t) ?? null;
+  const p = route?.at ?? null;
+  const line = route?.points.map((q) => `${q.x.toFixed(1)},${q.y.toFixed(1)}`).join(" ");
   const left = Math.max(0, Math.ceil(trip.seconds * (1 - t)));
   const cost = skipCost(left);
   const skip = async () => {
@@ -187,11 +187,11 @@ export function TripView({ trip, map, onDone, onSkip, onShowtime }: {
   };
   return (
     <div className="trip" role="dialog" aria-label={`On the way to ${trip.toName}`}>
-      {a && b && (
+      {line && (
         <svg className="trip-route" aria-hidden="true">
           {/* Owner, Oct 15: dark dots vanished on the night map. Light dots with a dark ring read on both. */}
-          <line className="halo" x1={a.x} y1={a.y} x2={b.x} y2={b.y} />
-          <line x1={a.x} y1={a.y} x2={b.x} y2={b.y} />
+          <polyline className="halo" points={line} />
+          <polyline points={line} />
         </svg>
       )}
       {p && <span className={`trip-ride ${trip.mode}`} style={{ left: p.x, top: p.y }} aria-hidden="true">{ICON[trip.mode]}</span>}
