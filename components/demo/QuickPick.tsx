@@ -3,8 +3,9 @@
 import dynamic from "next/dynamic";
 import { useMemo, useState } from "react";
 import { ECONOMY } from "@/lib/economy";
-import { HAIR_COLORS, SKIN_TONES, SKIN_WEIGHTS, randomLook, weightedIndex, type BodyId, type BuildId, type GlassesId, type HairId, type Look } from "@/lib/look";
+import { BODIES, BUILDS, DEFAULT_BUILD, HAIR_COLORS, SKIN_TONES, SKIN_WEIGHTS, randomLook, weightedIndex, type BodyId, type BuildId, type GlassesId, type HairId, type Look } from "@/lib/look";
 import { STYLE_IDS, type StyleId } from "@/lib/styles";
+import { keepGuestLook } from "@/lib/guestLook";
 
 const Avatar3D = dynamic(() => import("@/components/avatar/Avatar3D"), { ssr: false });
 
@@ -87,6 +88,9 @@ export function keepCharacter(c: QuickCharacter) {
   try { sessionStorage.setItem(PICK_KEY, JSON.stringify(c)); } catch { /* private mode */ }
 }
 
+/** Keeps the look the guest picked for the creator (lib/guestLook.ts), when they tap Sign up. */
+export function carryLookToSignUp() { keepGuestLook(defaultCharacter().look); }
+
 /**
  * Owner, Nov 7: the demo starts as a ready-made New Yorker, chosen once per visit and kept in sessionStorage, so the guest
  * screen can download that avatar's files early. A guest who picked one in the Go sheet keeps their pick.
@@ -108,21 +112,27 @@ export function defaultCharacter(): QuickCharacter {
  * avatar. Starts on the character already chosen for this visit, so a guest who just taps on keeps it.
  */
 export function LookPicker({ onChange }: { onChange?: (c: QuickCharacter) => void }) {
+  // Owner, Nov 16: four named layers, each its own choice: Gender, Shape (the body type), Skin tone, Style. A style brings
+  // its hair and glasses; the shape stays what the guest picked.
   const start = useMemo(() => defaultCharacter(), []);
   const [face] = useState<Look>(start.look);
   const [body, setBody] = useState<BodyId>(start.look.body);
+  const [build, setBuild] = useState<BuildId>(start.look.build);
   const [skin, setSkin] = useState<string>(start.look.skin);
   const [lookId, setLookId] = useState<string>(() => LOOKS.find((l) => l.style === start.look.style)?.id ?? LOOKS[0].id);
   const l = LOOKS.find((x) => x.id === lookId) ?? LOOKS[0];
-  const look = lookOn(l, body, skin, face);
+  const look = { ...lookOn(l, body, skin, face), build };
 
-  const choose = (next: { body?: BodyId; skin?: string; lookId?: string }) => {
+  const choose = (next: { body?: BodyId; build?: BuildId; skin?: string; lookId?: string }) => {
     const nl = LOOKS.find((x) => x.id === (next.lookId ?? lookId)) ?? LOOKS[0];
     const nb = next.body ?? body;
+    // A shape the other gender doesn't have becomes that gender's default.
+    const nbuild = next.build ?? (BUILDS[nb].some((o) => o.id === build) ? build : DEFAULT_BUILD[nb]);
     if (next.body) setBody(next.body);
+    setBuild(nbuild);
     if (next.skin) setSkin(next.skin);
     if (next.lookId) setLookId(next.lookId);
-    const c = finish(nl, lookOn(nl, nb, next.skin ?? skin, face));
+    const c = finish(nl, { ...lookOn(nl, nb, next.skin ?? skin, face), build: nbuild });
     keepCharacter(c);
     onChange?.(c);
   };
@@ -132,24 +142,41 @@ export function LookPicker({ onChange }: { onChange?: (c: QuickCharacter) => voi
       <div className="look-pick-stage">
         <Avatar3D look={look} framing="full" />
         <span className="look-pick-tag">{l.emoji} {lookLabel(l, body)}</span>
-        <div className="look-pick-gender" role="group" aria-label="Him or her">
-          <button aria-pressed={body === "straight"} onClick={() => choose({ body: "straight" })}>Him</button>
-          <button aria-pressed={body === "curvy"} onClick={() => choose({ body: "curvy" })}>Her</button>
+      </div>
+      <section className="look-pick-layer" aria-label="Gender">
+        <p className="look-pick-title">Gender</p>
+        <div className="look-pick-row" role="radiogroup" aria-label="Gender">
+          {BODIES.map((o) => (
+            <button key={o.id} role="radio" aria-checked={body === o.id} className="look-pick-chip" onClick={() => choose({ body: o.id })}>{o.label}</button>
+          ))}
         </div>
-      </div>
-      <p className="meta look-pick-line">{sideOf(l, body).line}</p>
-      <div className="look-pick-skins" role="radiogroup" aria-label="Skin tone">
-        {SKIN_TONES.map((t) => (
-          <button key={t} role="radio" aria-checked={t === skin} aria-label="Skin tone" className="look-pick-skin" style={{ background: t }} onClick={() => choose({ skin: t })} />
-        ))}
-      </div>
-      <div className="look-pick-row" role="radiogroup" aria-label="Looks">
-        {LOOKS.map((x) => (
-          <button key={x.id} role="radio" aria-checked={x.id === lookId} className="look-pick-chip" onClick={() => choose({ lookId: x.id })}>
-            <span aria-hidden="true">{x.emoji}</span>{lookLabel(x, body)}
-          </button>
-        ))}
-      </div>
+      </section>
+      <section className="look-pick-layer" aria-label="Shape">
+        <p className="look-pick-title">Shape</p>
+        <div className="look-pick-row" role="radiogroup" aria-label="Shape">
+          {BUILDS[body].map((o) => (
+            <button key={o.id} role="radio" aria-checked={build === o.id} className="look-pick-chip" onClick={() => choose({ build: o.id })}>{o.label}</button>
+          ))}
+        </div>
+      </section>
+      <section className="look-pick-layer" aria-label="Skin tone">
+        <p className="look-pick-title">Skin tone</p>
+        <div className="look-pick-skins" role="radiogroup" aria-label="Skin tone">
+          {SKIN_TONES.map((t, i) => (
+            <button key={t} role="radio" aria-checked={t === skin} aria-label={`Skin tone ${i + 1}`} className="look-pick-skin" style={{ background: t }} onClick={() => choose({ skin: t })} />
+          ))}
+        </div>
+      </section>
+      <section className="look-pick-layer" aria-label="Style">
+        <p className="look-pick-title">Style <span className="look-pick-sub">{sideOf(l, body).line}</span></p>
+        <div className="look-pick-row" role="radiogroup" aria-label="Style">
+          {LOOKS.map((x) => (
+            <button key={x.id} role="radio" aria-checked={x.id === lookId} className="look-pick-chip" onClick={() => choose({ lookId: x.id })}>
+              <span aria-hidden="true">{x.emoji}</span>{lookLabel(x, body)}
+            </button>
+          ))}
+        </div>
+      </section>
     </div>
   );
 }

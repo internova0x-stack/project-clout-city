@@ -69,7 +69,7 @@ test("v0.7: body types per presentation; older rows keep their shape and Bodega 
 });
 
 test("v0.7: a starter fit must use its style's garments; its colors are the look's own (owner, Oct 22 and 30)", () => {
-  const fit = { top: "hoodie", topColor: "#1F4FB5", bottom: "shorts", bottomColor: "#5B5A4A", shoeColor: "#F4F1EA" };
+  const fit = { top: "hoodie", topColor: "#E0A030", bottom: "shorts", bottomColor: "#5B5A4A", shoeColor: "#F4F1EA" };
   assert.deepEqual(normalizeLook({ fit }, "bodega_drip").fit, fit);
   assert.equal(normalizeLook({ fit: { ...fit, top: "blazer" } }, "bodega_drip").fit, null, "not a Bodega Drip top");
   assert.deepEqual(normalizeLook({ fit: { ...fit, topColor: "#8E8C94" } }, "bodega_drip").fit, fit, "an old color reads as the look's own");

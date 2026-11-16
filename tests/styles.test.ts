@@ -18,6 +18,7 @@ test("the eight looks are for everyone and each is clearly different (owner, Oct
   const { STARTING_STYLES } = await import("../lib/styles.ts");
   assert.equal(STARTING_STYLES.length, 8);
   const seen = new Set<string>();
+  const tops = new Set<string>();
   for (const s of STARTING_STYLES) {
     // One outfit whatever the body: no per-presentation pieces or colors.
     assert.equal(s.male, undefined, s.id);
@@ -26,9 +27,9 @@ test("the eight looks are for everyone and each is clearly different (owner, Oct
     const key = `${o.top}/${o.bottom}/${o.shoes ?? "sneakers"}/${o.accessory}`;
     assert.ok(!seen.has(key), `${s.id}: same pieces as another look`);
     seen.add(key);
-    // Every look starts in a shade of blue (owner, Oct 30): the top's blue channel leads.
-    const [r, g, b] = [1, 3, 5].map((i) => parseInt(o.topColor.slice(i, i + 2), 16));
-    assert.ok(b > r && b >= g, `${s.id}: ${o.topColor} is blue`);
+    // Every look in its own color (owner, Nov 16: "give every outfit its own color"): no two tops alike.
+    assert.ok(!tops.has(o.topColor.toLowerCase()), `${s.id}: ${o.topColor} is another look's top`);
+    tops.add(o.topColor.toLowerCase());
   }
 });
 

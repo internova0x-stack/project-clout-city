@@ -409,6 +409,15 @@ components live in `app/globals.css`.
   never counted; over a limit is HTTP 429 'rate_limited'; a broken check lets requests through. game_settings 'rate_limits',
   mirrored by lib/rateLimits.ts (tests/rateLimits.test.ts). The browser client shows "slow down" (`SLOW_DOWN_EVENT`, GameShell).
   A new function players can spam: add it to a bucket.
+- The guest map (owner, Nov 16: "they should be allowed to explore. The sign-up/login should only pop up when they try to go to a
+  location"; option A, going anywhere needs an account): a plain visit gets a slim bar (Clout City · Tap any spot · Sign in), no
+  sign-up card; an invite, a creator's link or an expired link keep the full card. A tap on a place opens its card
+  (components/guest/GuestPlace.tsx `GuestPlaceCard`: art, Lola's lore, what people do there) and "Go to …" opens "Who's going?"
+  (`GuestGoSheet`): `LookPicker` (components/demo/QuickPick.tsx) in four named layers, Gender, Shape (body type), Skin tone (any of
+  the eight), Style (`LOOKS`: Casual, Sporty, Street, Nerdy, Gothic, Future mogul, Flashy/Glam, Artsy: one per starting outfit,
+  each with its own him and her hair, glasses and line), on a light stage; then Sign up or Sign in. The look waits on the device
+  (lib/guestLook.ts, `cc-guest-look`) and the creator's Look step opens wearing it (new accounts only). No "play without an account"
+  from the map; `/demo` stays for invites' "Not sure yet?" link.
 - Demo mode (owner, Oct 27): `/demo` (components/demo/DemoGame.tsx) starts as one of four ready-made New Yorkers (owner, Nov 7:
   no pick before sign-up: `defaultCharacter()` in QuickPick.tsx, chosen once per visit in sessionStorage 'cc-demo-character', a
   made-up name, a lottery roll, the room share) straight onto the map (GameShell `startTab="map"`); the guest screen downloads that
@@ -862,8 +871,9 @@ components live in `app/globals.css`.
   fashion; a dress (slot 'one-piece') is a top and a bottom (`wear_slots`, equip_item, save_look 'one_piece_conflict',
   style_counts); lib/wearing.ts mirrors it (wearSlot, slotsClash, outfitFromSkus); Your Look has Dresses and a tab per
   accessory slot once something's owned there. The home bubble's portrait aims at the head (AvatarHead). `/preview/moves?outfit=hoodie` shows all eight body types.
-  The eight starting looks (owner, Oct 30): one outfit for everyone whatever the body, each clearly different, every top
-  a shade of blue in the look's own fixed colors (`styleColors`; no color picker): Everyday Casual, Gym Regular, Bodega
+  The eight starting looks (owner, Oct 30): one outfit for everyone whatever the body, each clearly different, in the look's
+  own fixed colors (`styleColors`; no color picker; owner, Nov 16: "give every outfit its own color", no longer all-blue tops:
+  sage tee, red hoodie, mustard puffer, charcoal suit, hot-pink blazer, rust cardigan, forest-green vest, black hoodie): Everyday Casual, Gym Regular, Bodega
   Streetwear, Midtown Corporate, New Money, Thrift Store Regular, Arcade Prep, Night Owl Goth (ids kept: lib/styles.ts,
   docs/HUNTS.md maps them). Each look's signature piece shows on the new bodies (`starterAccessory`: gym bag, lanyard,
   phone, tote, choker; headphones and the cap are headwear) unless a Shop piece fills that slot.
