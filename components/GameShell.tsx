@@ -3570,6 +3570,7 @@ export function GameShell({
         onOpenPlayer={chat ? (id) => setCardId(id) : undefined}
         fetchRows={leaderboardRows}
         fetchCrowned={chat?.crowned ? () => chat.crowned!().then((r) => (r.ok ? r.data : [])) : undefined}
+        fetchTitled={chat?.titled ? () => chat.titled!().then((r) => (r.ok ? r.data : [])) : undefined}
       />
       {chat && (
         <PlayerCardSheet

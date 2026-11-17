@@ -117,6 +117,14 @@ components live in `app/globals.css`.
   reward pieces at 0): never sold, sold back, traded or gifted, nothing in Net Worth, no style line, the Crib Rating counts bought
   pieces only. UI: Tasks → Pass (components/game/SeasonPass.tsx `PassTab`), the Shop's top card (`StarterPackCard`, also under the
   pass). A new season = a new migration with new settings, sku and pieces. `?pass=soon|new|progress|paid|vip|done&pack=offer|owned|none`.
+  Stakes (migration 0167, owner Nov 16: "Clout pass seems to have no stakes"; after the preview, "go ahead"): a level costs 200 XP, a
+  daily task 5, all five 20, a goal 50 (levels reached before were kept by a one-off 'rebalance' season_xp row); three weekly
+  challenges (lib/seasonPass.ts `CHALLENGES` social/city/routine, scheduled in `WEEKS` from Monday Nov 16, copied to the settings row)
+  count that New York week's ledger rows (distinct kind+ref) or Moral Choices made and pay their XP once (`season_week`, called by
+  `season_state`, now volatile; season_xp kind 'challenge', ref '<monday>:<id>'); the Pass tab shows the pace line (`pace`: your
+  average XP a day carried to the end, on track or the level you're heading for) and the week's three; Level 18's free row adds the
+  "Cuffed '26" title (kind 'title', a player_badges row 'title-cuffed-26', never paid), shown by the name on the leaderboard, in chat
+  and on the player card (`season_titled()`, ChatApi.titled, `.title-chip`). `?pass=behind` in the preview.
 - Insights (migration 0053): `admin_insights()` is the Studio's numbers (admin only). Sessions come from
   `session_ping()` (GameShell, every `GAME_CONFIG.sessionPingMs`); VIP renewals from the webhook's `invoice.paid`
   (`payment_renewal`). Revenue counts paid, unrefunded purchases plus renewals.
@@ -490,7 +498,9 @@ components live in `app/globals.css`.
   the game's and the guest screen's map (props and `MapApi` in components/map/types.ts); components/map/compactScene.ts draws it with the landmark models,
   storefronts (`STOREFRONTS`), filler blocks and street life. Street life moves (owner, Oct 30): lib/streetTraffic.ts
   (pure, tests/streetTraffic.test.ts: right-hand lanes, curved corners, a light at every intersection, queues; people round
-  their block) drawn by components/map/streetLife.ts (instanced, open boroughs only); at night lamps at every corner and
+  their block) drawn by components/map/streetLife.ts (instanced, open boroughs only); buses (owner, Nov 16: `busRoutes` loops a block
+  in from each open borough's edge, two in Queens; `BUS` in lib/streetTraffic.ts) pull in at a shelter on every other block, wait for
+  the riders gathered there and carry on, obeying the lights, with cars queueing behind; at night lamps at every corner and
   mid-block pool light on the street, filler windows light up, cars show head- and taillights. Only the 3D view redraws
   for it (30 fps, 20 in low graphics); the shadow map redraws only when something static changes. Only the picture changes: travel, prices and lines keep
   real lat/lng (`makeProjector` places any lat/lng among its nearest places). Names only for the most relevant places

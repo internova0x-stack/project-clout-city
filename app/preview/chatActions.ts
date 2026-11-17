@@ -207,6 +207,12 @@ export async function previewCrowned(): Promise<ChatResult<string[]>> {
   return { ok: true, data: top ? [top[0]] : [] };
 }
 
+/** The Clout Pass: the two most famous sample players finished the season. */
+export async function previewTitled(): Promise<ChatResult<string[]>> {
+  previewOnly();
+  return { ok: true, data: Object.entries(PEOPLE).sort((a, b) => b[1].clout - a[1].clout).slice(0, 2).map(([id]) => id) };
+}
+
 export async function previewLeaderboard(myClout: number) {
   previewOnly();
   const rows = [...Object.entries(PEOPLE).map(([id, p]) => ({ id, display_name: p.name, starting_style: p.style, clout: p.clout, is_me: false })),

@@ -1,11 +1,22 @@
 // The Clout Pass and the starter pack in the preview (/preview/home?pass=...&pack=...): the same tiers as the server, in
-// memory. Presets: soon (before the season), new (day one, 0 XP), progress (tier 6, rewards waiting), paid (the pass
+// memory. Presets: soon (before the season), new (day one, 0 XP), progress (tier 6, rewards waiting), behind (tier 2: the amber pace line), paid (the pass
 // bought, tier 9), vip (VIP, tier 12), done (every tier), ended (the claim days after the season: tier 14, two tiers waiting). The paid row and the pack follow the preview store (buying them
 // there unlocks them after its 4-second wait). ?pack=offer|owned|none.
 
-import { SEASON, STARTER_PACK, claimable, type PassApi, type PassReward, type PassState, type StarterPackState } from "./seasonPass.ts";
+import { SEASON, STARTER_PACK, WEEKS, challengeById, claimable, weekOf, type PassApi, type PassReward, type PassState, type StarterPackState } from "./seasonPass.ts";
 
-export const PASS_PRESETS = ["soon", "new", "progress", "paid", "vip", "done", "ended"] as const;
+export const PASS_PRESETS = ["soon", "new", "progress", "behind", "paid", "vip", "done", "ended"] as const;
+
+/** This week's challenges in the preview: the schedule's week for today (or its first), part done. */
+function simWeek(preset: string | null): PassState["week"] {
+  const today = new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York" }).format(new Date());
+  const w = WEEKS.find((x) => x.from === weekOf(today)) ?? WEEKS[0];
+  const have = preset === "new" || preset === "behind" ? [0, 0, 1] : preset === "done" ? [9, 9, 9] : [1, 0, 9];
+  return { from: w.from, challenges: w.ids.map((id, i) => {
+    const need = challengeById(id)?.need ?? 1;
+    return { id, have: Math.min(need, have[i]), done: have[i] >= need };
+  }) };
+}
 
 export function createSeasonSim(preset: string | null, pack: string | null, opts: {
   owns: (sku: string) => boolean;
@@ -13,7 +24,7 @@ export function createSeasonSim(preset: string | null, pack: string | null, opts
   reward: (cash: number, clout: number) => void;
   item: (sku: string) => void;
 }): PassApi {
-  const xp = { soon: 0, new: 0, progress: 6 * SEASON.xpPerTier + 60, paid: 9 * SEASON.xpPerTier + 20, vip: 12 * SEASON.xpPerTier + 90, done: SEASON.tiers.length * SEASON.xpPerTier, ended: 14 * SEASON.xpPerTier + 40 }[preset ?? "progress"] ?? 6 * SEASON.xpPerTier + 60;
+  const xp = { soon: 0, new: 0, progress: 6 * SEASON.xpPerTier + 60, behind: 2 * SEASON.xpPerTier + 20, paid: 9 * SEASON.xpPerTier + 20, vip: 12 * SEASON.xpPerTier + 90, done: SEASON.tiers.length * SEASON.xpPerTier, ended: 14 * SEASON.xpPerTier + 40 }[preset ?? "progress"] ?? 6 * SEASON.xpPerTier + 60;
   const vip = preset === "vip";
   const claimed = { free: [] as number[], paid: [] as number[] };
   if (preset === "ended") for (let t = 1; t <= 12; t++) { claimed.free.push(t); claimed.paid.push(t); }
@@ -25,6 +36,7 @@ export function createSeasonSim(preset: string | null, pack: string | null, opts
     pending: opts.pending(SEASON.sku),
     phase: preset === "soon" ? "soon" : preset === "ended" ? "claim" : "on",
     claimed: { free: [...claimed.free], paid: [...claimed.paid] },
+    week: preset === "soon" || preset === "ended" ? null : simWeek(preset),
   });
   let packGranted = false;
   return {

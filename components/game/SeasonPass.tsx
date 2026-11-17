@@ -1,6 +1,6 @@
 "use client";
 
-import { PASS_EMOJI, claimable, daysLeft, rewardLabel, tierFor, type PassReward, type PassState, type StarterPackState, STARTER_PACK } from "@/lib/seasonPass";
+import { PASS_EMOJI, SEASON, challengeById, claimable, pace, daysLeft, rewardLabel, tierFor, type PassReward, type PassState, type StarterPackState, STARTER_PACK } from "@/lib/seasonPass";
 import { itemBySku } from "@/lib/city";
 import { useEffect, useState } from "react";
 
@@ -9,7 +9,7 @@ import { useEffect, useState } from "react";
 
 const itemName = (sku: string) => itemBySku(sku)?.name;
 const rewardEmoji = (r: PassReward) =>
-  r.kind === "cash" ? "💵" : r.kind === "clout" ? "🔥" : r.kind === "badge" ? "🏅" : itemBySku(r.sku)?.emoji ?? "🎁";
+  r.kind === "cash" ? "💵" : r.kind === "clout" ? "🔥" : r.kind === "badge" ? "🏅" : r.kind === "title" ? SEASON.title.emoji : itemBySku(r.sku)?.emoji ?? "🎁";
 
 function Reward({ r, locked }: { r: PassReward; locked?: boolean }) {
   return (
@@ -79,6 +79,9 @@ export function PassTab({ state, today, busy, price, onClaim, onBuy, starter }: 
         <div className="pass-hero-meta" style={{ marginTop: 6 }}>{max ? "Every tier reached" : `${into} / ${need} XP`}</div>
       </div>
 
+      {state.phase === "on" && <PaceLine state={state} today={today} />}
+      {state.phase === "on" && state.week && <WeekChallenges week={state.week} today={today} />}
+
       <HowItWorks season={s} price={price} />
 
       {readyCount > 0 && (
@@ -103,12 +106,12 @@ export function PassTab({ state, today, busy, price, onClaim, onBuy, starter }: 
 
       {/* Owner, Nov 16 ("I don't understand the tier, free, clout pass"): say how a row works before the rows. */}
       <p className="pass-legend">
-        Each level you reach unlocks <b>two rewards</b>: the <b>free</b> one is everyone&apos;s, the <b className="pass-legend-paid">Clout Pass</b> one
-        is {state.paid ? "yours too" : "for Clout Pass owners"}. Tap Claim to collect.
+        Each level you reach unlocks <b>two rewards</b>. The left one is <b>free for everyone</b>; the right one is
+        {state.paid ? " yours too, with your " : " only for people who buy the "}<b className="pass-legend-paid">Clout Pass</b>. Tap Claim to collect.
       </p>
       <div className="pass-grid" role="table" aria-label="Season rewards">
         <div className="pass-row pass-head" role="row">
-          <span role="columnheader">Level</span><span role="columnheader">Free for all</span><span role="columnheader">{PASS_EMOJI} Clout Pass</span>
+          <span role="columnheader">Level</span><span role="columnheader">Free reward</span><span role="columnheader">{PASS_EMOJI} Pass reward</span>
         </div>
         {s.tiers.map((t) => {
           const reached = t.tier <= tier;
@@ -138,6 +141,52 @@ export function PassTab({ state, today, busy, price, onClaim, onBuy, starter }: 
   );
 }
 
+/**
+ * Will you finish (owner, Nov 16: stakes)? Green when your pace reaches Level 18 by the end, amber with the level you're
+ * heading for when it doesn't, and what fixes it.
+ */
+function PaceLine({ state, today }: { state: PassState; today: string }) {
+  const p = pace(state, today);
+  const top = state.season.tiers.length;
+  if (tierFor(state.xp, state.season).max) return <div className="pass-pace ok"><span aria-hidden="true">🏆</span><span><b>Every level reached</b>Collect what&apos;s waiting below.</span></div>;
+  return p.onTrack ? (
+    <div className="pass-pace ok"><span aria-hidden="true">✅</span><span><b>On track for Level {top}</b>Keep doing the weekly challenges{p.spare > 0 ? ` and you'll finish with ${p.spare} day${p.spare === 1 ? "" : "s"} to spare` : ""}.</span></div>
+  ) : (
+    <div className="pass-pace behind"><span aria-hidden="true">⏳</span><span><b>Behind: you&apos;re heading for Level {Math.max(1, p.heading)}</b>Finish this week&apos;s challenges to catch up before the season ends.</span></div>
+  );
+}
+
+/** This week's three challenges (they expire Sunday night, New York time). */
+function WeekChallenges({ week, today }: { week: NonNullable<PassState["week"]>; today: string }) {
+  const end = Date.UTC(+week.from.slice(0, 4), +week.from.slice(5, 7) - 1, +week.from.slice(8, 10)) + 7 * 86_400_000;
+  const now = Date.UTC(+today.slice(0, 4), +today.slice(5, 7) - 1, +today.slice(8, 10));
+  const left = Math.max(1, Math.round((end - now) / 86_400_000));
+  return (
+    <div className="stack-8">
+      <div className="pass-week-head">
+        <span className="overline">This week&apos;s challenges</span>
+        <span className="pass-week-left">Ends Sunday · {left} day{left === 1 ? "" : "s"} left</span>
+      </div>
+      {week.challenges.map((c) => {
+        const def = challengeById(c.id);
+        if (!def) return null;
+        return (
+          <div key={c.id} className="pass-ch" data-done={c.done || undefined}>
+            <span className="pass-ch-emoji" aria-hidden="true">{def.emoji}</span>
+            <span className="pass-ch-main">
+              <b>{def.title}</b>
+              <small>{c.done ? "Done ✓" : `${c.have} of ${def.need}`}</small>
+              <span className="pass-ch-bar" aria-hidden="true"><span style={{ width: `${Math.round((c.have / def.need) * 100)}%` }} /></span>
+            </span>
+            <span className="pass-ch-xp">+{def.xp} XP</span>
+          </div>
+        );
+      })}
+      <p className="meta" style={{ margin: 0 }}>Miss them and they&apos;re gone on Sunday. Three new ones arrive Monday.</p>
+    </div>
+  );
+}
+
 /** What the Clout Pass is: open the first time, folded after (remembered on this device). */
 function HowItWorks({ season: s, price }: { season: PassState["season"]; price: string | null }) {
   const KEY = "cc-pass-how-seen";
@@ -146,8 +195,9 @@ function HowItWorks({ season: s, price }: { season: PassState["season"]; price: 
     try { if (!localStorage.getItem(KEY)) { setOpen(true); localStorage.setItem(KEY, "1"); } } catch { /* stays folded */ }
   }, []);
   const steps: [string, string, React.ReactNode][] = [
+    ["📅", "Do the weekly challenges", <>Three new ones every Monday, worth most of the XP. They&apos;re gone on Sunday night.</>],
     ["🎯", "Play like you already do", <>Daily tasks <b>+{s.xp.daily_task} XP</b>, all five in a day <b>+{s.xp.daily_bonus}</b>, each goal <b>+{s.xp.goal}</b>.</>],
-    ["🪜", "Climb the levels", <>Every {s.xpPerTier} XP is a new level. Each one has a free reward: C$, clout or a piece for your place.</>],
+    ["🪜", "Climb the levels", <>Every {s.xpPerTier} XP is a new level with a free reward. Level {s.tiers.length} gives the {s.title.emoji} &ldquo;{s.title.name}&rdquo; title by your name, never given again.</>],
     ["✨", "The Clout Pass adds the good stuff", <>One payment for the season{price ? ` (${price})` : ""}, or free with VIP: an exclusive outfit or furniture piece on every level. Looks only. XP you already have counts.</>],
     ["⏳", "It's a season", <>Ends {new Date(s.ends + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })}. You get {s.claimDays} more days to claim, then a new season starts.</>],
   ];

@@ -3543,3 +3543,24 @@ button.camp-task { background:none; border:0; border-top:1px solid var(--divider
 .debate-reveal { display:flex; flex-direction:column; align-items:center; gap:6px; padding:16px; text-align:center; border-radius:20px; background:var(--surface-raised); box-shadow:var(--elev-2); }
 .debate-reveal-big { font-family:var(--font-label); font-weight:800; font-size:54px; line-height:1; color:var(--text-2); }
 .debate-reveal.up .debate-reveal-big { color:var(--green-500); } .debate-reveal.down .debate-reveal-big { color:#E2243B; }
+
+/* The Clout Pass's stakes (owner, Nov 16): the pace line and the weekly challenges */
+.pass-pace { display:flex; gap:10px; align-items:center; padding:10px 12px; border-radius:14px; font-size:13px; line-height:18px; }
+.pass-pace > span:first-child { font-size:22px; flex:none; }
+.pass-pace b { display:block; font-size:14px; }
+.pass-pace.ok { background:#E3F4EA; color:#1C6B47; }
+.pass-pace.behind { background:#FFF1DC; color:#7A4A00; }
+.pass-week-head { display:flex; justify-content:space-between; align-items:baseline; gap:8px; }
+.pass-week-left { font-size:12px; font-weight:700; color:#D81B34; }
+.pass-ch { display:flex; gap:10px; align-items:center; padding:12px; border-radius:16px; background:var(--surface-raised); box-shadow:var(--elev-1); }
+.pass-ch[data-done] { opacity:.6; }
+.pass-ch-emoji { width:40px; height:40px; border-radius:12px; background:#F6EFE5; display:grid; place-items:center; font-size:20px; flex:none; }
+.pass-ch-main { flex:1; min-width:0; display:flex; flex-direction:column; }
+.pass-ch-main b { font-size:14px; line-height:18px; color:var(--night-900); }
+.pass-ch-main small { font-size:12px; color:var(--text-2); }
+.pass-ch-bar { height:6px; border-radius:3px; background:#EDE7DD; margin-top:6px; position:relative; overflow:hidden; }
+.pass-ch-bar span { position:absolute; left:0; top:0; bottom:0; background:var(--green-500); }
+.pass-ch-xp { flex:none; font-family:var(--font-label); font-weight:800; font-size:15px; color:#6C3FB0; background:#F1E8FD; border-radius:10px; padding:4px 8px; }
+.pass-ch[data-done] .pass-ch-xp { background:#E3F4EA; color:var(--green-500); }
+.title-chip { display:inline-block; vertical-align:middle; margin-left:6px; font-family:var(--font-label); font-weight:800; font-size:11px; letter-spacing:.3px;
+  padding:2px 7px; border-radius:99px; background:linear-gradient(90deg,#FF6FA3,#B98CFF); color:#fff; white-space:nowrap; }

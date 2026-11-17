@@ -95,6 +95,8 @@ export interface ChatApi {
   skills?(playerId: string): Promise<ChatResult<{ id: import("./skills.ts").SkillId; level: number }[]>>;
   /** Clout Couture (migration 0103): who owns the Clout Crown, for the crown by their name. */
   crowned?(): Promise<ChatResult<string[]>>;
+  /** The Clout Pass (migration 0167): who holds this season's title, for the chip by their name. */
+  titled?(): Promise<ChatResult<string[]>>;
 }
 
 /** The daily limit's message; the game opens the unlimited chat offer when it sees it. */
