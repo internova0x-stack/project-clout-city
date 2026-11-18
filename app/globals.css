@@ -40,7 +40,8 @@
   /* shape + type */
   --r-pill:999px; --r-xs:8px; --r-sm:12px; --r-md:16px; --r-lg:20px; --r-xl:28px;
   /* --ff-* are set by next/font in app/layout.tsx (fonts bundled with the app) */
-  --font-display:var(--ff-bungee),'Bungee',Impact,sans-serif;
+  /* Headings: SF Pro on Apple devices, Inter Bold elsewhere (owner, Oct 12; Bungee removed Nov 18). */
+  --font-display:-apple-system, BlinkMacSystemFont, "SF Pro Display", var(--ff-inter), "Inter", system-ui, sans-serif;
   --font-label:var(--ff-barlow),'Barlow Condensed','Arial Narrow',sans-serif;
   --font-ui:var(--ff-inter),'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
 
@@ -524,7 +525,6 @@ a { color:inherit; }
 /* ---------- Headings in SF Pro (Oct 12, 2026) ----------
    Titles use Apple's system font: SF Pro on iPhone, iPad and Mac. Apple's license
    doesn't allow shipping the font file, so other devices fall back to Inter Bold. */
-:root { --font-display:-apple-system, BlinkMacSystemFont, "SF Pro Display", var(--ff-inter), "Inter", system-ui, sans-serif; }
 .display-xl, .display-lg, .display-md, .display-sm, .legal h1 { font-weight:700; letter-spacing:-0.015em; }
 .display-xl { font-size:32px; line-height:36px; }
 .display-lg { font-size:26px; line-height:30px; }

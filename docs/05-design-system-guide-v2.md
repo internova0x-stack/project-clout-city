@@ -67,7 +67,7 @@ The key art ("Clout City NYC — Tap in. Blow up") sets a night-time, high-energ
 | Sheets | Light sheets for readability | Warm cream instead of cool grey |
 | In-world chrome | Translucent glass | Dark glass instead of light, to sit on the night city |
 | Primary action | One loud colored button | Taxi yellow with night text instead of red with white |
-| Headings | A characterful display face over a clean UI sans | Bungee (NYC signage) instead of a soft serif |
+| Headings | A clean, bold system face over a clean UI sans | SF Pro Bold (Bungee until Oct 12) instead of a soft serif |
 | Delight | Emoji, gradients, witty copy | Neon and taxi gradients; NYC-flavored copy and emoji (🚕 🗽 🍕 🌉) |
 
 ### Logo and tagline
@@ -164,7 +164,7 @@ Provide a no-blur fallback (solid fills at 92% opacity) for low-end Android.
 
 Three families: a chunky NYC-signage display face for names, titles and reveals; a condensed sans for loud labels and numbers; and a neutral UI sans for everything people read.
 
-- **Display: Bungee** (Google Fonts, single weight). Sentence case for names, uppercase only for short reveals.
+- **Display: SF Pro Bold** through the system font stack (Inter Bold off Apple devices; Bungee was dropped Oct 12 and removed from the app Nov 18). Sentence case for names, uppercase only for short reveals.
 - **Labels and numbers: Barlow Condensed 600/700.** Uppercase overlines, HUD numbers, tags, tagline bars. Tabular figures for money and clout.
 - **UI: Inter 400/500/600** (SF Pro on iOS is fine). Body, subtext, buttons and table text.
 
@@ -172,10 +172,10 @@ Three families: a chunky NYC-signage display face for names, titles and reveals;
 
 | Token | Family / weight | Size / line height | Color | Example |
 | --- | --- | --- | --- | --- |
-| display-xl | Bungee | 30 / 34 | text-on-dark | Birth lottery reveal, story reveal |
-| display-lg | Bungee | 24 / 28 | text-primary | Sheet titles: "Shop," "Net Worth," "Leaderboard" |
-| display-md | Bungee | 20 / 24 | text-primary | Player name in profile, beat headlines |
-| display-sm | Bungee | 16 / 20 | text-primary or text-on-dark | Creator step titles: "Look," "Traits," "Birth lottery," "Home" |
+| display-xl | SF Pro Bold | 30 / 34 | text-on-dark | Birth lottery reveal, story reveal |
+| display-lg | SF Pro Bold | 24 / 28 | text-primary | Sheet titles: "Shop," "Net Worth," "Leaderboard" |
+| display-md | SF Pro Bold | 20 / 24 | text-primary | Player name in profile, beat headlines |
+| display-sm | SF Pro Bold | 16 / 20 | text-primary or text-on-dark | Creator step titles: "Look," "Traits," "Birth lottery," "Home" |
 | title | Inter 600 | 16 / 22 | text-primary | Card titles |
 | body-strong | Inter 600 | 15 / 20 | text-primary | Button labels, table values |
 | body | Inter 400 | 15 / 21 | text-primary | Beat bodies, prompts, explanations |
@@ -685,7 +685,7 @@ Motion is quick and springy, and it respects the system's reduced-motion setting
 
 ## 14. Starter tokens (CSS)
 
-Ship this token file with all three fonts (Bungee, Barlow Condensed, Inter) and tabular figures enabled.
+Ship this token file with both bundled fonts (Barlow Condensed, Inter; headings use the system's SF Pro) and tabular figures enabled.
 
 ```css
 :root {
@@ -724,7 +724,7 @@ Ship this token file with all three fonts (Bungee, Barlow Condensed, Inter) and 
 
   /* shape + type */
   --r-pill:999px; --r-xs:8px; --r-sm:12px; --r-md:16px; --r-lg:20px; --r-xl:28px;
-  --font-display:'Bungee',Impact,sans-serif;
+  --font-display:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter",system-ui,sans-serif;
   --font-label:'Barlow Condensed','Arial Narrow',sans-serif;
   --font-ui:'Inter',system-ui,sans-serif;
 }

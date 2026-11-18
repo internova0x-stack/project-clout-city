@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Barlow_Condensed, Bungee, Inter, Permanent_Marker } from "next/font/google";
+import { Barlow_Condensed, Inter, Permanent_Marker } from "next/font/google";
 import Script from "next/script";
 import { Suspense } from "react";
 import { SteamBridge } from "@/components/SteamBridge";
@@ -9,7 +9,6 @@ import { ConsentBanner } from "@/components/ConsentBanner";
 
 // The three typefaces from the Design System Guide (section 4), downloaded at
 // build time and served with the app, so they never depend on Google at runtime.
-const bungee = Bungee({ weight: "400", subsets: ["latin"], variable: "--ff-bungee", display: "swap" });
 const barlow = Barlow_Condensed({ weight: ["600", "700", "800"], subsets: ["latin"], variable: "--ff-barlow", display: "swap" });
 const inter = Inter({ subsets: ["latin"], variable: "--ff-inter", display: "swap" });
 // Only the Clout TV card's spray-painted "TV" (owner, Oct 16), so it isn't preloaded.
@@ -44,7 +43,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${bungee.variable} ${barlow.variable} ${inter.variable} ${marker.variable}`} suppressHydrationWarning>
+    <html lang="en" className={`${barlow.variable} ${inter.variable} ${marker.variable}`} suppressHydrationWarning>
       <body>
         <Script id="cc-boot" strategy="beforeInteractive">{NO_BLUR_SCRIPT}</Script>
         {/* On wide screens the game sits in a phone-sized frame (see .device in globals.css). */}
