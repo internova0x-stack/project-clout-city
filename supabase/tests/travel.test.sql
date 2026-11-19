@@ -31,11 +31,11 @@ select pg_temp.assert((select bank_cash from public.players where id = auth.uid(
 select pg_temp.assert(exists (select 1 from public.ledger where player_id = auth.uid() and kind = 'travel' and amount = -18), 'fare in the ledger');
 -- On the way: nothing happens at the deli until the player gets there (#13).
 select pg_temp.assert(pg_temp.raises($$select public.do_action('ditmars-deli', 'eat')$$, 'still_travelling'), 'no acting mid-trip');
--- Skipping costs C$1 per 2 seconds left, at least C$5, and pays once.
+-- Skipping costs C$2 a second left, at least C$20 (migration 0168), and pays once.
 create temp table k as select public.skip_trip() as r;
-select pg_temp.assert((select (r ->> 'cash')::int = -5 from k), 'skip: C$5 minimum');
-select pg_temp.assert((select bank_cash from public.players where id = auth.uid()) = 977, 'skip charged');
-select pg_temp.assert(exists (select 1 from public.ledger where player_id = auth.uid() and kind = 'travel_skip' and amount = -5), 'skip in the ledger');
+select pg_temp.assert((select (r ->> 'cash')::int = -20 from k), 'skip: C$20 minimum');
+select pg_temp.assert((select bank_cash from public.players where id = auth.uid()) = 962, 'skip charged');
+select pg_temp.assert(exists (select 1 from public.ledger where player_id = auth.uid() and kind = 'travel_skip' and amount = -20), 'skip in the ledger');
 select pg_temp.assert((public.skip_trip() ->> 'cash')::int = 0, 'nothing left to skip: free');
 select 1 from public.do_action('ditmars-deli', 'eat');
 select pg_temp.assert(public.travel('ditmars-deli', 'taxi') ->> 'already' = 'true', 'already there costs nothing');
@@ -58,11 +58,11 @@ select pg_temp.assert(pg_temp.raises($$select public.travel('st-johnsons', 'car'
 create temp table far as select public.travel('st-johnsons', 'taxi') as r;
 select pg_temp.assert((select (r ->> 'cash')::int = -95 from far), 'long taxi: C$95');
 select pg_temp.assert((select (r ->> 'seconds')::int = 60 from far), 'a long ride: a minute');
--- A long skip costs more: C$1 for every 2 seconds left.
+-- A long skip costs more: C$2 for every second left.
 reset role;
 update public.players set arrives_at = clock_timestamp() + interval '40 seconds' where display_name = 'traveller';
 set role authenticated;
-select pg_temp.assert((public.skip_trip() ->> 'cash')::int = -20, '40 s left: C$20');
+select pg_temp.assert((public.skip_trip() ->> 'cash')::int = -80, '40 s left: C$80');
 select pg_temp.assert(pg_temp.raises($$select public.travel('skyline-pier', 'taxi')$$, 'unknown_place'), 'story places before their story');
 
 rollback;

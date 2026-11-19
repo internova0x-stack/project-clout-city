@@ -411,6 +411,13 @@ components live in `app/globals.css`.
   Consent (owner, Oct 27; GDPR/ePrivacy): PostHog starts opted out (`opt_out_capturing_by_default`, no cookies or storage) until
   the player taps Accept on `ConsentBanner` (app/layout.tsx); Reject keeps it off; Settings has the `ConsentSwitch`
   (`setConsent`, `consentStatus` in lib/analytics.ts). VIP plans state the renewal and how to cancel above the button (ChatPass).
+- Trip skip price (migration 0168, owner Nov 19: "too low"): C$2 a second left, at least C$20 (economy.travel.skip, `skipCost`).
+- Music by place and the player (owner, Nov 19; no migration): six styles composed in code (lib/musicStyles.ts: lofi, pop, techno,
+  afrobeats, romance, synth; patterns as data, played live by lib/music.ts, no files or licences), picked by where the player is
+  (lib/musicMap.ts `musicFor`: clubs techno, rooftops and parks the slow jam, offices electronica, Greek Row afrobeats, home lo-fi,
+  the map city pop; GameShell `setScene`), crossfading in 1.5 s. The Radio app opens with the player (components/city/MusicPlayer.tsx:
+  pause, previous/next style, volume; a skipped-to style plays everywhere until "Back to the music for where you are"; kept on the
+  device: cc_music_volume, cc_music_paused, cc_music_pick). Settings' Music switch still mutes it. tests/music.test.ts.
 - Rate limits (migration 0126, owner Oct 27): PostgREST's pre-request hook (`pgrst.db_pre_request` = `check_request()`) counts each
   signed-in player's writes per minute (`rate_counters`, `rate_hit`): 240 in all, plus buckets for guesses (hunt answers, exams,
   gossip, name checks: 20), reviewed posts (10), chat (30) and checkouts (10). Reads, signed-out requests and the service role are
@@ -479,6 +486,11 @@ components live in `app/globals.css`.
   (`view.money`). The inbox is a messaging app (sender avatar, time stamp from `inbox[].at`, unread dot kept on the device in
   `cc-camp-read:<campaign>`, the reply as a sent bubble) and the Allies tab lists every stakeholder by standing (`view.allies`).
   A trace is exposed at most once (`events` 'exposed:<id>').
+  Week as steps and Results (owner, Nov 19; no migration): the Week tab is a vertical step rail (`WeekSteps`: tasks with tick boxes,
+  inbox, debate, budget, calendar, decisions, End week; ticked when done, the first left to do open, the rest folded with a summary;
+  "The budget looks good" is kept on the device, `cc-camp-steps:<campaign>:<week>`). "Previous week's results ›" (a right-aligned blue pill
+  under the city poll, owner Nov 19: not a tab) opens every week's morning paper (`state.history`,
+  `view.history`, newest first; older campaigns show only the last).
   Replies and the debate (owner, Nov 16): an answered inbox message shows a decision card (Your call, a DECIDED or BOOKED stamp,
   the receipt, each effect on its own green/red line), not a sent bubble. The debate is five questions (three issues, the Mayor's
   jab, money or the scandal) with Q1-Q5 tabs carrying each score, one question on screen, the answer's result in its place until

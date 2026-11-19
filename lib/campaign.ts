@@ -353,6 +353,8 @@ export interface CampaignState {
   prepped: string[];
   debate: DebateState | null;
   recap: Recap | null;
+  /** Every week's morning paper, oldest first (owner, Nov 19: "I can't check last week's results"); older campaigns: none. */
+  history?: Recap[];
   receipts: string[];
   log: LogEntry[];
   election: ElectionResult[] | null;

@@ -24,11 +24,11 @@ test("trips take longer the farther they go, up to a minute (#13)", () => {
   assert.equal(travelQuote("taxi", 0.4, false).seconds, 9);
 });
 
-test("skipping costs C$1 per 2 seconds left, at least C$5 (#13, matches skip_trip)", () => {
+test("skipping costs C$2 a second left, at least C$20 (owner Nov 19, migration 0168; matches skip_trip)", () => {
   assert.equal(skipCost(0), 0);
-  assert.equal(skipCost(3), 5);
-  assert.equal(skipCost(40), 20);
-  assert.equal(skipCost(41), 21);
+  assert.equal(skipCost(3), 20);
+  assert.equal(skipCost(40), 80);
+  assert.equal(skipCost(41), 82);
 });
 
 test("miles are real distances", () => {

@@ -40,7 +40,8 @@
   /* shape + type */
   --r-pill:999px; --r-xs:8px; --r-sm:12px; --r-md:16px; --r-lg:20px; --r-xl:28px;
   /* --ff-* are set by next/font in app/layout.tsx (fonts bundled with the app) */
-  --font-display:var(--ff-bungee),'Bungee',Impact,sans-serif;
+  /* Headings: SF Pro on Apple devices, Inter Bold elsewhere (owner, Oct 12; Bungee removed Nov 18). */
+  --font-display:-apple-system, BlinkMacSystemFont, "SF Pro Display", var(--ff-inter), "Inter", system-ui, sans-serif;
   --font-label:var(--ff-barlow),'Barlow Condensed','Arial Narrow',sans-serif;
   --font-ui:var(--ff-inter),'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
 
@@ -524,7 +525,6 @@ a { color:inherit; }
 /* ---------- Headings in SF Pro (Oct 12, 2026) ----------
    Titles use Apple's system font: SF Pro on iPhone, iPad and Mac. Apple's license
    doesn't allow shipping the font file, so other devices fall back to Inter Bold. */
-:root { --font-display:-apple-system, BlinkMacSystemFont, "SF Pro Display", var(--ff-inter), "Inter", system-ui, sans-serif; }
 .display-xl, .display-lg, .display-md, .display-sm, .legal h1 { font-weight:700; letter-spacing:-0.015em; }
 .display-xl { font-size:32px; line-height:36px; }
 .display-lg { font-size:26px; line-height:30px; }
@@ -3564,3 +3564,96 @@ button.camp-task { background:none; border:0; border-top:1px solid var(--divider
 .pass-ch[data-done] .pass-ch-xp { background:#E3F4EA; color:var(--green-500); }
 .title-chip { display:inline-block; vertical-align:middle; margin-left:6px; font-family:var(--font-label); font-weight:800; font-size:11px; letter-spacing:.3px;
   padding:2px 7px; border-radius:99px; background:linear-gradient(90deg,#FF6FA3,#B98CFF); color:#fff; white-space:nowrap; }
+
+/* The cutscene prototype (/preview/cutscene, owner Nov 19) */
+.cutscene { position:fixed; inset:0; z-index:60; background:#0E1430; overflow:hidden; font-family:var(--font-ui); }
+.cutscene-canvas { position:absolute; inset:0; width:100%; height:100%; display:block; }
+.cutscene-bar { position:absolute; left:0; right:0; height:0; background:#000; transition:height .6s ease; z-index:2; }
+.cutscene-bar.top { top:0; } .cutscene-bar.bottom { bottom:0; }
+.cutscene-bar.on { height:11vh; }
+.cutscene-place { position:absolute; left:20px; top:calc(11vh + 14px); z-index:3; color:#fff; font-family:var(--font-label); font-weight:700; font-size:14px;
+  letter-spacing:.12em; text-transform:uppercase; text-shadow:0 1px 6px rgba(0,0,0,.6); transition:opacity .3s; }
+.cutscene-sub { position:absolute; left:16px; right:16px; bottom:calc(11vh + 18px); z-index:3; display:flex; flex-direction:column; align-items:center; gap:4px;
+  text-align:center; color:#fff; font-size:18px; font-weight:600; line-height:24px; text-shadow:0 2px 8px rgba(0,0,0,.75); }
+.cutscene-who { font-family:var(--font-label); font-weight:700; font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:#FFD58A; }
+.cutscene-skip { position:absolute; right:14px; top:calc(11vh + 10px); z-index:4; border:0; border-radius:99px; padding:6px 14px; font:600 13px var(--font-ui);
+  color:#fff; background:rgba(255,255,255,.18); backdrop-filter:blur(6px); }
+.cutscene-card { position:absolute; left:16px; right:16px; top:50%; transform:translateY(-50%); z-index:4; max-width:360px; margin:0 auto; display:flex; flex-direction:column;
+  align-items:center; gap:8px; padding:24px 20px 20px; border-radius:24px; text-align:center; background:rgba(250,246,240,.96); box-shadow:0 20px 60px rgba(0,0,0,.45); }
+.cutscene-card-tag { font-family:var(--font-label); font-weight:700; font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:var(--text-3); }
+.cutscene-card-title { font-family:var(--font-display); font-weight:700; font-size:30px; line-height:34px; color:var(--night-900); letter-spacing:-0.015em; }
+.cutscene-card-names { font-weight:600; font-size:15px; color:var(--text-2); }
+.cutscene-card-line { font-size:14px; line-height:20px; color:var(--text-2); margin-bottom:6px; }
+.cutscene-card .btn { width:100%; }
+
+/* Campaign HQ's week as steps and the Results tab (owner, Nov 19) */
+.camp-results-link { display:block; width:fit-content; align-self:flex-end; margin:-4px 0 0 auto; padding:8px 14px; border:0; border-radius:99px; background:#E6F0FF; color:#1F4FB8; font:inherit; font-size:14px; font-weight:700; cursor:pointer; }
+.camp-progress { display:flex; flex-direction:column; gap:6px; }
+.camp-progress-bar { height:6px; border-radius:3px; background:#EDE7DD; position:relative; overflow:hidden; }
+.camp-progress-bar span { position:absolute; inset:0 auto 0 0; background:var(--green-500); transition:width .4s ease-out; }
+.camp-steps { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; }
+.camp-step { position:relative; display:flex; gap:12px; padding-bottom:12px; }
+.camp-step::before { content:""; position:absolute; left:15px; top:34px; bottom:0; width:2px; background:#E4DCCF; }
+.camp-step:last-child::before { display:none; }
+.camp-step[data-state="done"]::before { background:var(--green-500); }
+.camp-step-dot { flex:none; width:32px; height:32px; border-radius:50%; display:grid; place-items:center; font-family:var(--font-label); font-weight:800; font-size:15px;
+  background:#fff; color:var(--text-2); box-shadow:inset 0 0 0 2px #E4DCCF; position:relative; z-index:1; }
+.camp-step[data-state="current"] .camp-step-dot { background:var(--night-900); color:#fff; box-shadow:0 0 0 4px rgba(20,20,40,.12); }
+.camp-step[data-state="done"] .camp-step-dot { background:var(--green-500); color:#fff; box-shadow:none; }
+.camp-step-main { flex:1; min-width:0; border-radius:16px; background:var(--surface-raised); box-shadow:var(--elev-1); padding:4px 12px; }
+.camp-step[data-state="done"] .camp-step-main { background:#F4F8F5; box-shadow:inset 0 0 0 1px #DCEDE2; }
+.camp-step-head { display:flex; align-items:center; gap:10px; width:100%; min-height:52px; padding:8px 0; background:none; border:0; color:inherit; font:inherit; cursor:pointer; }
+.camp-step[data-state="done"] .camp-step-head .title { color:var(--green-text); }
+.camp-step-chev { flex:none; color:var(--text-2); font-size:14px; }
+.camp-step-body { padding:4px 0 12px; }
+.camp-step-body > .stack-8 > .card { box-shadow:none; padding:0; background:none; }
+button.camp-task.ticked { flex-direction:row; align-items:flex-start; gap:10px; }
+.camp-tick { flex:none; width:22px; height:22px; margin-top:1px; border-radius:6px; box-shadow:inset 0 0 0 2px #CFC6B8; display:grid; place-items:center; font-size:14px; font-weight:800; color:#fff; }
+.camp-tick[data-on] { background:var(--green-500); box-shadow:none; }
+.camp-result { background:#fff; border-radius:20px; box-shadow:var(--elev-1); padding:16px; display:flex; flex-direction:column; gap:14px; border-left:4px solid #D8D2C8; }
+.camp-result[data-tone="up"] { border-left-color:#2E9E6A; }
+.camp-result[data-tone="down"] { border-left-color:#D6455B; }
+.camp-result-head { display:flex; align-items:flex-start; gap:12px; width:100%; background:none; border:0; padding:0; color:inherit; font:inherit; text-align:left; cursor:pointer; }
+.camp-result-week { flex:none; width:48px; height:48px; border-radius:14px; display:flex; flex-direction:column; align-items:center; justify-content:center; background:#EAF2FF; color:#1F4FB8;
+  font-family:var(--font-label); font-weight:800; font-size:20px; line-height:1; }
+.camp-result-week small { font-size:10px; letter-spacing:.6px; text-transform:uppercase; margin-bottom:2px; }
+.camp-result-headline { flex:1; min-width:0; font-size:16px; line-height:22px; font-weight:700; color:var(--night-900); }
+.camp-result-change { flex:none; font-family:var(--font-label); font-weight:800; font-size:14px; padding:5px 9px; border-radius:10px; background:#EFEAE2; color:var(--text-2); white-space:nowrap; }
+.camp-result-change.up { background:#E3F4EA; color:#1C7A4E; }
+.camp-result-change.down { background:#FDE7EA; color:#C8102E; }
+.camp-result-poll { display:flex; flex-direction:column; gap:8px; padding:12px; border-radius:14px; background:#F7F5F1; }
+.camp-result-names { display:flex; justify-content:space-between; font-size:14px; color:var(--text-2); }
+.camp-result-names b { color:var(--night-900); }
+.camp-result-bar { display:block; height:8px; border-radius:4px; background:#3056C8; position:relative; overflow:hidden; }
+.camp-result-bar span { position:absolute; inset:0 auto 0 0; background:linear-gradient(90deg,#FF6A3D,#FF2E7E); }
+.camp-result-lines { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px; }
+.camp-result-lines li { display:flex; gap:12px; align-items:flex-start; font-size:14px; line-height:21px; color:var(--night-900); padding:10px 12px; border-radius:14px; background:#F7F5F1; }
+.camp-result-lines li[data-tone="up"] { background:#EEF8F2; }
+.camp-result-lines li[data-tone="down"] { background:#FDF0F2; }
+.camp-result-icon { flex:none; width:30px; height:30px; border-radius:10px; background:#fff; display:grid; place-items:center; font-size:16px; box-shadow:0 1px 2px rgba(0,0,0,.06); }
+.camp-result-more { align-self:flex-start; background:none; border:0; padding:0; font:inherit; font-size:14px; font-weight:700; color:#1F4FB8; cursor:pointer; }
+.camp-move { font-weight:800; }
+.camp-move.up { color:#1C7A4E; }
+.camp-move.down { color:#C8102E; }
+.camp-move.cash { color:#1F4FB8; }
+
+/* The music player in the Radio app (owner, Nov 19) */
+.music-player { display:flex; flex-direction:column; gap:14px; padding:16px; border-radius:20px; background:linear-gradient(160deg,#1E1B3A,#3A2366); color:#fff; margin-bottom:12px; }
+.music-player .overline { color:rgba(255,255,255,.65); }
+.music-player .title { color:#fff; font-size:18px; }
+.music-player .meta { color:rgba(255,255,255,.7); }
+.music-now { display:flex; gap:14px; align-items:center; }
+.music-art { position:relative; flex:none; width:64px; height:64px; border-radius:16px; display:grid; place-items:center; font-size:32px; background:rgba(255,255,255,.12); }
+.music-eq { position:absolute; right:6px; bottom:6px; display:flex; gap:2px; align-items:flex-end; height:12px; }
+.music-eq i { width:3px; background:#7CF5C0; border-radius:1px; animation:music-eq .9s ease-in-out infinite; }
+.music-eq i:nth-child(2) { animation-delay:.2s; } .music-eq i:nth-child(3) { animation-delay:.45s; }
+@keyframes music-eq { 0%,100% { height:3px; } 50% { height:12px; } }
+@media (prefers-reduced-motion: reduce) { .music-eq i { animation:none; height:8px; } }
+.music-controls { display:flex; justify-content:center; align-items:center; gap:22px; }
+.music-btn { width:48px; height:48px; border-radius:50%; border:0; background:rgba(255,255,255,.14); color:#fff; font-size:18px; cursor:pointer; display:grid; place-items:center; }
+.music-btn.big { width:64px; height:64px; font-size:24px; background:#fff; color:#1E1B3A; }
+.music-volume { display:flex; align-items:center; gap:10px; font-size:16px; }
+.music-volume input { flex:1; accent-color:#7CF5C0; height:28px; }
+.music-auto { align-self:center; background:none; border:0; color:#B9A8FF; font:inherit; font-size:14px; font-weight:700; cursor:pointer; }
+.music-player[data-off] .music-art { opacity:.6; }
+.music-text { flex:1; min-width:0; display:flex; flex-direction:column; gap:2px; }

@@ -1,10 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { Sheet } from "@/components/Sheet";
 import {
   CAMPAIGN, cs, energyCost, meterLevel, slotCash,
-  type Budget, type CampaignApi, type CampaignScreen, type CandidateCard, type CandidateId, type DebateStyle, type InboxOption, type MeterLevel, type OpId, type Preview, type SlotAction,
+  type Budget, type CampaignApi, type CampaignScreen, type CandidateCard, type CandidateId, type DebateStyle, type InboxOption, type MeterLevel, type OpId, type Preview, type Recap, type SlotAction,
 } from "@/lib/campaign";
 import type { CampaignView } from "@/lib/campaignEngine";
 import { RANKS } from "@/lib/ranks";
@@ -269,6 +269,8 @@ function Hq({ data, v, busy, tab, setTab, api, run, focusTask, onFocused }: {
   const [mail, setMail] = useState<string | null>(null);
   // Owner, Nov 4: the candidate's face opens their profile.
   const [profile, setProfile] = useState(false);
+  // Owner, Nov 19: past weeks' results open from a link above the poll, not a tab.
+  const [results, setResults] = useState(false);
   const [editing, setEditing] = useState<{ index: number; hint?: Hint } | null>(null);
   // A task goes where it's done: its message in the Inbox, or the slot picker on a free slot, set to the right action.
   const openTask = useCallback((t: ViewTask) => {
@@ -286,6 +288,7 @@ function Hq({ data, v, busy, tab, setTab, api, run, focusTask, onFocused }: {
     onFocused?.();
   }, [focusTask, v.pending.length, v.tasks, openTask, onFocused]);
   if (profile) return <CandidateProfile card={card} v={v} onBack={() => setProfile(false)} />;
+  if (results) return <Results v={v} short={card.short} onBack={() => setResults(false)} />;
   return (
     <div className="stack-16">
       <button className="camp-head camp-head-btn" onClick={() => setProfile(true)} aria-label={`${card.name}'s profile`}>
@@ -298,6 +301,9 @@ function Hq({ data, v, busy, tab, setTab, api, run, focusTask, onFocused }: {
       </button>
       <Funds v={v} />
       <Polls you={v.you} mayor={v.mayor} short={card.short} queens={v.boroughs.length ? v.queens : undefined} />
+      {v.history.length > 0 && (
+        <button className="camp-results-link" onClick={() => setResults(true)}>📊 Previous week&apos;s results ›</button>
+      )}
       <Meters v={v} short={card.short} />
       {v.pending.length > 0 ? (
         <SituationCard v={v} busy={busy} onChoose={(s, c) => run(api.choose(s, c))} />
@@ -460,48 +466,226 @@ function Week({ data, v, busy, api, run, onInbox, editing, setEditing, onTask }:
           <p className="subtext" style={{ margin: 0 }}>The week is out of your hands. Lola is writing the headline. Come back tomorrow for the morning paper.</p>
         </div>
       )}
-      {!waiting && (
-        <>
-          {v.tasks.length > 0 && (
-            <div className="card stack-8">
-              <p className="overline" style={{ margin: 0 }}>🗳️ This week's tasks · +{CAMPAIGN.taskClout} 🔥 each</p>
-              {v.tasks.map((t) => (
-                <button key={t.id} className={`camp-task${t.isDone ? " done" : ""}`} disabled={busy} onClick={() => onTask(t)}>
-                  <span className="title">{t.isDone ? "✓ " : ""}{t.title}</span>
-                  <span className="meta">{t.isDone ? "On the calendar. Pays at End Week." : t.tag}</span>
-                  {!t.isDone && <span className="camp-task-how">👉 {t.how} ›</span>}
-                </button>
-              ))}
-            </div>
-          )}
-          {newMail > 0 && <button className="card camp-nudge" onClick={onInbox}>📬 {newMail} message{newMail === 1 ? "" : "s"} waiting. They expire when the week ends.</button>}
-          {v.debateWeek && (
-            <div className="card stack-8">
-              <p className="title" style={{ margin: 0 }}>🎤 Debate Thursday</p>
-              {v.debate?.done
-                ? <p className="subtext" style={{ margin: 0 }}>{v.debate.won ? "Won" : "Lost"} the debate (crowd {v.debate.crowd > 0 ? "+" : ""}{v.debate.crowd}).</p>
-                : <><p className="subtext" style={{ margin: 0 }}>Four questions, live. Prep slots this week help Facts. Intel helps Attack.</p>
-                    <button className="btn btn-secondary" onClick={() => setDebate(true)}>{v.debate?.round ? "Back on stage ›" : "Take the stage ›"}</button></>}
-            </div>
-          )}
-          <BudgetCard v={v} busy={busy} onSave={(b) => run(api.budget(b))} />
-          <div className="stack-8">
-            <p className="overline" style={{ margin: 0 }}>📅 The calendar</p>
-            {v.slots.map((s, i) => (
-              <button key={i} ref={just === i ? justRef : undefined} className={`camp-slot${just === i ? " just" : ""}`} disabled={busy || s?.kind === "meeting"} onClick={() => setEditing({ index: i })}>
-                <span className="meta">{slotName(i)}</span>
-                <span className="title">{just === i && <span className="camp-just" aria-label="Booked">✓ </span>}{s ? slotLabel(s, v) : <span className="meta">Free</span>}</span>
-                {s && slotCash(s) > 0 && <span className="camp-slot-cost">{cs(slotCash(s))}</span>}
-              </button>
-            ))}
-          </div>
-          <Dilemmas v={v} busy={busy} onPick={(id, c) => run(api.dilemma(id, c))} />
-          <button className="btn btn-taxi" disabled={busy || v.endedToday || (v.debateWeek && !v.debate?.done)} onClick={() => run(api.endWeek())}>
-            {v.endedToday ? "One week a day. See you tomorrow." : v.debateWeek && !v.debate?.done ? "Debate first" : v.week === v.weeks ? "End the campaign: Election Day ›" : `End week ${v.week} ›`}
+      {!waiting && <WeekSteps data={data} v={v} busy={busy} api={api} run={run} onInbox={onInbox} setEditing={setEditing} onTask={onTask}
+        onDebate={() => setDebate(true)} just={just} justRef={justRef} />}
+    </div>
+  );
+}
+
+type StepId = "tasks" | "inbox" | "debate" | "budget" | "calendar" | "decide" | "end";
+interface Step { id: StepId; emoji: string; title: string; summary: string; done: boolean; body: ReactNode }
+
+/** The budget and the steps opened by hand this week, kept on this device (`cc-camp-steps:<campaign>:<week>`). */
+function useStepMarks(campaign: string, week: number) {
+  const key = `cc-camp-steps:${campaign}:${week}`;
+  const [marks, setMarks] = useState<{ budget?: boolean }>({});
+  useEffect(() => { try { setMarks(JSON.parse(localStorage.getItem(key) ?? "{}")); } catch { setMarks({}); } }, [key]);
+  const mark = useCallback((m: { budget?: boolean }) => setMarks((cur) => {
+    const next = { ...cur, ...m };
+    try { localStorage.setItem(key, JSON.stringify(next)); } catch { /* private mode */ }
+    return next;
+  }), [key]);
+  return [marks, mark] as const;
+}
+
+/**
+ * The week as steps (owner, Nov 19: "the Week tab needs sections, a vertical step/progress bar, collapsible actions, tick
+ * boxes"): a rail down the left, each step ticked when it's done, the first one left to do open, the rest folded with a
+ * one-line summary; End week is always last.
+ */
+function WeekSteps({ data, v, busy, api, run, onInbox, setEditing, onTask, onDebate, just, justRef }: {
+  data: CampaignScreen; v: CampaignView; busy: boolean; api: CampaignApi; run: Run; onInbox: () => void;
+  setEditing: (e: { index: number; hint?: Hint } | null) => void; onTask: (t: ViewTask) => void; onDebate: () => void;
+  just: number | null; justRef: React.MutableRefObject<HTMLButtonElement | null>;
+}) {
+  void data;
+  const [marks, mark] = useStepMarks(v.id, v.week);
+  const [open, setOpen] = useState<Partial<Record<StepId, boolean>>>({});
+  const newMail = v.inbox.filter((m) => m.status === "new").length;
+  const booked = v.slots.filter(Boolean).length;
+  const tasksDone = v.tasks.filter((t) => t.isDone).length;
+  const decisions = (v.dilemmas.skim !== null ? 1 : 0) + (v.dilemmas.charity ? 1 : 0);
+  const steps: Step[] = [];
+  if (v.tasks.length) steps.push({
+    id: "tasks", emoji: "🗳️", title: "This week's tasks", done: tasksDone === v.tasks.length,
+    summary: tasksDone === v.tasks.length ? `All ${v.tasks.length} on the calendar · +${CAMPAIGN.taskClout} 🔥 each at End Week` : `${tasksDone} of ${v.tasks.length} done · +${CAMPAIGN.taskClout} 🔥 each`,
+    body: (
+      <div className="stack-8">
+        {v.tasks.map((t) => (
+          <button key={t.id} className={`camp-task ticked${t.isDone ? " done" : ""}`} disabled={busy} onClick={() => onTask(t)}>
+            <span className="camp-tick" data-on={t.isDone || undefined} aria-hidden="true">{t.isDone ? "✓" : ""}</span>
+            <span className="stack-2" style={{ flex: 1, minWidth: 0 }}>
+              <span className="title">{t.title}</span>
+              <span className="meta">{t.isDone ? "On the calendar. Pays at End Week." : t.tag}</span>
+              {!t.isDone && <span className="camp-task-how">👉 {t.how} ›</span>}
+            </span>
           </button>
-          <p className="meta" style={{ margin: 0 }}>Results arrive the next morning. Nothing moves while you're away.</p>
-        </>
-      )}
+        ))}
+      </div>
+    ),
+  });
+  if (v.inbox.length) steps.push({
+    id: "inbox", emoji: "📬", title: "Answer the inbox", done: newMail === 0,
+    summary: newMail ? `${newMail} message${newMail === 1 ? "" : "s"} waiting · they expire when the week ends` : "Everything answered",
+    body: <button className="btn btn-secondary" onClick={onInbox}>{newMail ? `Open the inbox (${newMail} new) ›` : "Open the inbox ›"}</button>,
+  });
+  if (v.debateWeek) steps.push({
+    id: "debate", emoji: "🎤", title: "Debate Thursday", done: !!v.debate?.done,
+    summary: v.debate?.done ? `${v.debate.won ? "Won" : "Lost"} the debate (crowd ${v.debate.crowd > 0 ? "+" : ""}${v.debate.crowd})` : "Five questions, live. Needed before End Week",
+    body: v.debate?.done ? <p className="subtext" style={{ margin: 0 }}>{v.debate.won ? "You won the debate." : "You lost the debate."} The polls move at End Week.</p>
+      : <div className="stack-8"><p className="subtext" style={{ margin: 0 }}>Five questions, live. Prep slots this week help Facts. Intel helps Attack.</p>
+          <button className="btn btn-secondary" onClick={onDebate}>{v.debate?.round ? "Back on stage ›" : "Take the stage ›"}</button></div>,
+  });
+  steps.push({
+    id: "budget", emoji: "💰", title: "Set the budget", done: !!marks.budget,
+    summary: marks.budget ? `Set · ${cs(v.free)} left unplanned` : `${cs(v.free)} left to plan`,
+    body: (
+      <div className="stack-8">
+        <BudgetCard v={v} busy={busy} onSave={async (b) => { const r = await run(api.budget(b)); if (r) mark({ budget: true }); }} />
+        {!marks.budget && <button className="btn btn-ghost" onClick={() => { mark({ budget: true }); setOpen((o) => ({ ...o, budget: false })); }}>✓ The budget looks good</button>}
+      </div>
+    ),
+  });
+  steps.push({
+    id: "calendar", emoji: "📅", title: "Fill the calendar", done: booked === v.slots.length,
+    summary: `${booked} of ${v.slots.length} slots booked`,
+    body: (
+      <div className="stack-8">
+        {v.slots.map((s, i) => (
+          <button key={i} ref={just === i ? justRef : undefined} className={`camp-slot${just === i ? " just" : ""}`} disabled={busy || s?.kind === "meeting"} onClick={() => setEditing({ index: i })}>
+            <span className="meta">{slotName(i)}</span>
+            <span className="title">{just === i && <span className="camp-just" aria-label="Booked">✓ </span>}{s ? slotLabel(s, v) : <span className="meta">Free</span>}</span>
+            {s && slotCash(s) > 0 && <span className="camp-slot-cost">{cs(slotCash(s))}</span>}
+          </button>
+        ))}
+      </div>
+    ),
+  });
+  if (decisions) steps.push({
+    id: "decide", emoji: "🧾", title: "Make the call", done: false,
+    summary: `${decisions} decision${decisions === 1 ? "" : "s"} on the desk`,
+    body: <Dilemmas v={v} busy={busy} onPick={(id, c) => run(api.dilemma(id, c))} />,
+  });
+  const blocked = v.debateWeek && !v.debate?.done;
+  steps.push({
+    id: "end", emoji: "🏁", title: v.week === v.weeks ? "Election Day" : `End week ${v.week}`, done: false,
+    summary: v.endedToday ? "One week a day. See you tomorrow." : "Results arrive the next morning",
+    body: (
+      <div className="stack-8">
+        <button className="btn btn-taxi" disabled={busy || v.endedToday || blocked} onClick={() => run(api.endWeek())}>
+          {v.endedToday ? "One week a day. See you tomorrow." : blocked ? "Debate first" : v.week === v.weeks ? "End the campaign: Election Day ›" : `End week ${v.week} ›`}
+        </button>
+        <p className="meta" style={{ margin: 0 }}>Results arrive the next morning. Nothing moves while you&apos;re away. You can end the week before every step is ticked.</p>
+      </div>
+    ),
+  });
+  const todo = steps.filter((s) => s.id !== "end");
+  const doneCount = todo.filter((s) => s.done).length;
+  const current = steps.find((s) => !s.done)?.id ?? "end";
+  // A just-booked slot keeps the calendar open so the light-up shows.
+  const isOpen = (s: Step) => open[s.id] ?? (s.id === current || (s.id === "calendar" && just !== null) || s.id === "end");
+  return (
+    <div className="stack-12">
+      <div className="camp-progress" aria-label={`${doneCount} of ${todo.length} steps done`}>
+        <span className="overline">Your week · {doneCount} of {todo.length} done</span>
+        <span className="camp-progress-bar" aria-hidden="true"><span style={{ width: `${Math.round((doneCount / Math.max(1, todo.length)) * 100)}%` }} /></span>
+      </div>
+      <ol className="camp-steps">
+        {steps.map((s, i) => {
+          const state = s.done ? "done" : s.id === current ? "current" : "todo";
+          const shown = isOpen(s);
+          return (
+            <li key={s.id} className="camp-step" data-state={state}>
+              <span className="camp-step-dot" aria-hidden="true">{s.done ? "✓" : s.id === "end" ? "🏁" : i + 1}</span>
+              <div className="camp-step-main">
+                <button className="camp-step-head" aria-expanded={shown} onClick={() => setOpen((o) => ({ ...o, [s.id]: !shown }))}>
+                  <span className="stack-2" style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
+                    <span className="title">{s.emoji} {s.title}{s.done ? <span className="sr-only"> (done)</span> : null}</span>
+                    <span className="meta">{s.summary}</span>
+                  </span>
+                  <span className="camp-step-chev" aria-hidden="true">{shown ? "▴" : "▾"}</span>
+                </button>
+                {shown && <div className="camp-step-body">{s.body}</div>}
+              </div>
+            </li>
+          );
+        })}
+      </ol>
+    </div>
+  );
+}
+
+/**
+ * Every week's morning paper (owner, Nov 19: "I can't check the previous week's results"), newest first: the headline,
+ * the city poll and its move, and the stories on tap.
+ */
+/** An icon and a tone for a line of the morning paper, from what it says (the lines are written by the engine). */
+function lineLook(l: string, short: string): { icon: string; tone: "up" | "down" | "flat"; text: string } {
+  const lead = l.match(/^(\p{Extended_Pictographic}\uFE0F?)\s*/u);
+  const text = lead ? l.slice(lead[0].length) : l;
+  const num = text.match(/([+\-−]\d+(?:\.\d+)?)\.?\s*(?:in [^.]+)?\.?$/);
+  const n = num ? parseFloat(num[1].replace("−", "-")) : 0;
+  const tone = n > 0 ? "up" : n < 0 ? "down" : /raised|richer/i.test(text) ? "up" : /cost/i.test(text) ? "down" : "flat";
+  if (lead) return { icon: lead[1], tone: lead[1] === "😇" ? "up" : lead[1] === "💸" ? "down" : tone, text };
+  const icon = /^Papa-Dani:/.test(text) ? "🎙️" : /raised|donor/i.test(text) ? "💵" : /cost|C\$/i.test(text) ? "🧾"
+    : /Papa-Dani|Mayor/.test(text) ? "🏛️" : /endorse/i.test(text) ? "🤝" : /rally|doors|tour|vote/i.test(text) ? "📣"
+    : new RegExp(short, "i").test(text) ? "📸" : n > 0 ? "📈" : n < 0 ? "📉" : "📰";
+  return { icon, tone, text };
+}
+
+/** The numbers that moved (owner, Nov 19): poll points in green or red, money in bold, the rest plain. */
+function Moves({ text }: { text: string }) {
+  const parts = text.split(/((?:^|(?<=\s))[+\-−]\d+(?:\.\d+)?|C\$[\d,]+)/g);
+  return <>{parts.map((p, i) => {
+    if (/^[+\-−]\d/.test(p)) return <b key={i} className={`camp-move ${p.startsWith("+") ? "up" : "down"}`}>{p}</b>;
+    if (/^C\$/.test(p)) return <b key={i} className="camp-move cash">{p}</b>;
+    return p;
+  })}</>;
+}
+
+/**
+ * Previous weeks' results (owner, Nov 19: opened from the pill under the city poll; roomy, minimal, with icons and colour),
+ * newest first: the headline, the poll that week, and each story with an icon, tinted by whether it helped.
+ */
+function Results({ v, short, onBack }: { v: CampaignView; short: string; onBack: () => void }) {
+  const [open, setOpen] = useState<number | null>(v.history[0]?.week ?? null);
+  const top = useRef<HTMLDivElement | null>(null);
+  useEffect(() => { top.current?.scrollIntoView({ block: "start" }); }, []);
+  return (
+    <div className="stack-16" ref={top}>
+      <button className="link-row" onClick={onBack}><span className="meta">‹ Back to Campaign HQ</span></button>
+      <div className="stack-4">
+        <p className="overline" style={{ margin: 0 }}>📊 Previous weeks&apos; results</p>
+        <p className="subtext" style={{ margin: 0 }}>Every week&apos;s morning paper, newest first.</p>
+      </div>
+      {v.history.map((r) => {
+        const shown = open === r.week;
+        const tone = r.change > 0.5 ? "up" : r.change < -0.5 ? "down" : "flat";
+        const total = Math.max(1, r.you + r.mayor);
+        return (
+          <div key={r.week} className="camp-result" data-tone={tone}>
+            <button className="camp-result-head" aria-expanded={shown} onClick={() => setOpen(shown ? null : r.week)}>
+              <span className="camp-result-week"><small>Week</small>{r.week}</span>
+              <span className="camp-result-headline">{r.headline}</span>
+              <span className={`camp-result-change ${tone}`}>{tone === "up" ? "▲" : tone === "down" ? "▼" : "●"} {r.change >= 0 ? "+" : ""}{r.change}</span>
+            </button>
+            <div className="camp-result-poll">
+              <div className="camp-result-names"><span>{short} <b>{r.you.toFixed(1)}%</b></span><span>Papa-Dani <b>{r.mayor.toFixed(1)}%</b></span></div>
+              <span className="camp-result-bar" aria-hidden="true"><span style={{ width: `${(r.you / total) * 100}%` }} /></span>
+              {r.queens && <span className="meta">Queens {r.queens.you.toFixed(1)} vs {r.queens.mayor.toFixed(1)} · {r.queens.change >= 0 ? "+" : ""}{r.queens.change} this week</span>}
+            </div>
+            {shown ? (
+              <ul className="camp-result-lines">
+                {r.lines.map((l, i) => { const k = lineLook(l, short); return (
+                  <li key={i} data-tone={k.tone}><span className="camp-result-icon" aria-hidden="true">{k.icon}</span><span><Moves text={k.text} /></span></li>
+                ); })}
+              </ul>
+            ) : (
+              <button className="camp-result-more" onClick={() => setOpen(r.week)}>{r.lines.length} stories ›</button>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }
