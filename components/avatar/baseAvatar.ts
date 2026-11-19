@@ -27,7 +27,8 @@ import { GLTFLoader, type GLTF } from "three/examples/jsm/loaders/GLTFLoader.js"
 import { clone as cloneSkinned } from "three/examples/jsm/utils/SkeletonUtils.js";
 import type { Look } from "@/lib/look";
 import { getStyle, starterOutfit, type Outfit } from "@/lib/styles";
-import { garmentsFor, KEEPS_COVERING, modelSex, SET_LOOKS } from "@/lib/avatarCatalog";
+import { GARMENT_TEMPLATES, garmentsFor, KEEPS_COVERING, modelSex, SET_LOOKS } from "@/lib/avatarCatalog";
+import { attachShoes, shoeStyle } from "./shoes";
 import { lowGraphics } from "@/lib/graphics";
 import { widenOffsets, type V3 } from "@/lib/bodyTypes";
 import { buildAvatar, type AvatarParts } from "./buildAvatar";
@@ -578,10 +579,24 @@ void main() {`)
     // The outfit's garments, on the body's own bones; the skin they hide isn't drawn.
     const low = lowGraphics() ? "-low" : "";
     const worn = opts.bare ? [] : garmentsFor(outfit, sex);
-    const files = await Promise.all(worn.map((g) => load(`/avatars/garments/${g.file}-${sex}${low}.glb`).catch(() => null)));
+    // Shoes are solid models now (owner, Nov 19: components/avatar/shoes.ts), not cut from the foot's skin.
+    const isShoe = (g: (typeof worn)[number]) => g.slot === "shoes";
+    const files = await Promise.all(worn.map((g) => (isShoe(g) ? null : load(`/avatars/garments/${g.file}-${sex}${low}.glb`).catch(() => null))));
     if (disposed) return;
     let cover = 0;
+    const shoe = worn.find(isShoe);
+    if (shoe) {
+      const style = shoeStyle(shoe.file, shoe.kind, shoe.pattern ?? 0, shoe.cover);
+      rig.updateMatrixWorld(true);
+      // The skin under them isn't drawn, and a boot's shaft or a low shoe's sock reaches just past where it ends, so no
+      // cut shows; a sandal or heel shows the foot.
+      const bit = style === "sandal" || style === "heel" ? 0 : GARMENT_TEMPLATES[shoe.file]?.cover ?? 0;
+      const made = attachShoes(mesh, bones, { style, color: shoe.color, accent: shoe.accent, finish: shoe.finish, glowSole: !!((shoe.pattern ?? 0) & 32768), low: !!low, coverBit: bit });
+      materials.push(...made.materials);
+      cover |= bit;
+    }
     worn.forEach((g, k) => {
+      if (isShoe(g)) return;
       let src: SkinnedMesh | null = null;
       files[k]?.scene.traverse((o) => { if ((o as SkinnedMesh).isSkinnedMesh) src = o as SkinnedMesh; });
       if (!src) return;
