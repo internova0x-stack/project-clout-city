@@ -123,8 +123,11 @@ export const CITY_ECONOMY = {
       rideshare: { base: 4, perMile: 7, max: 50 },
       car: { base: 5, perMile: 8, max: 55 },
     },
-    /** Skipping the rest of a trip costs C$1 per `secondsPerCash` seconds left, at least `min`. */
-    skip: { secondsPerCash: 2, min: 5 },
+    /**
+     * Skipping the rest of a trip costs C$1 per `secondsPerCash` seconds left, at least `min`. Owner, Nov 19 ("too low";
+     * migration 0168): C$2 a second, at least C$20, so skipping a long subway ride costs about a shift's pay, more than a taxi.
+     */
+    skip: { secondsPerCash: 0.5, min: 20 },
   },
   /**
    * Treasure hunts (v0.6): cash about a pro gig (8 to 10 shifts), clout about 15 to 20% of an

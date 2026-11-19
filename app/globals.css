@@ -3585,3 +3585,36 @@ button.camp-task { background:none; border:0; border-top:1px solid var(--divider
 .cutscene-card-names { font-weight:600; font-size:15px; color:var(--text-2); }
 .cutscene-card-line { font-size:14px; line-height:20px; color:var(--text-2); margin-bottom:6px; }
 .cutscene-card .btn { width:100%; }
+
+/* Campaign HQ's week as steps and the Results tab (owner, Nov 19) */
+.camp-tabs button { font-size:13px; }
+.camp-progress { display:flex; flex-direction:column; gap:6px; }
+.camp-progress-bar { height:6px; border-radius:3px; background:#EDE7DD; position:relative; overflow:hidden; }
+.camp-progress-bar span { position:absolute; inset:0 auto 0 0; background:var(--green-500); transition:width .4s ease-out; }
+.camp-steps { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; }
+.camp-step { position:relative; display:flex; gap:12px; padding-bottom:12px; }
+.camp-step::before { content:""; position:absolute; left:15px; top:34px; bottom:0; width:2px; background:#E4DCCF; }
+.camp-step:last-child::before { display:none; }
+.camp-step[data-state="done"]::before { background:var(--green-500); }
+.camp-step-dot { flex:none; width:32px; height:32px; border-radius:50%; display:grid; place-items:center; font-family:var(--font-label); font-weight:800; font-size:15px;
+  background:#fff; color:var(--text-2); box-shadow:inset 0 0 0 2px #E4DCCF; position:relative; z-index:1; }
+.camp-step[data-state="current"] .camp-step-dot { background:var(--night-900); color:#fff; box-shadow:0 0 0 4px rgba(20,20,40,.12); }
+.camp-step[data-state="done"] .camp-step-dot { background:var(--green-500); color:#fff; box-shadow:none; }
+.camp-step-main { flex:1; min-width:0; border-radius:16px; background:var(--surface-raised); box-shadow:var(--elev-1); padding:4px 12px; }
+.camp-step[data-state="done"] .camp-step-main { background:#F4F8F5; box-shadow:inset 0 0 0 1px #DCEDE2; }
+.camp-step-head { display:flex; align-items:center; gap:10px; width:100%; min-height:52px; padding:8px 0; background:none; border:0; color:inherit; font:inherit; cursor:pointer; }
+.camp-step[data-state="done"] .camp-step-head .title { color:var(--green-text); }
+.camp-step-chev { flex:none; color:var(--text-2); font-size:14px; }
+.camp-step-body { padding:4px 0 12px; }
+.camp-step-body > .stack-8 > .card { box-shadow:none; padding:0; background:none; }
+button.camp-task.ticked { flex-direction:row; align-items:flex-start; gap:10px; }
+.camp-tick { flex:none; width:22px; height:22px; margin-top:1px; border-radius:6px; box-shadow:inset 0 0 0 2px #CFC6B8; display:grid; place-items:center; font-size:14px; font-weight:800; color:#fff; }
+.camp-tick[data-on] { background:var(--green-500); box-shadow:none; }
+.camp-result { padding:4px 14px 10px; }
+.camp-result .camp-step-head { padding:8px 0 0; }
+.camp-result-week { flex:none; width:40px; height:40px; border-radius:12px; display:grid; place-items:center; background:#F6EFE5; font-family:var(--font-label); font-weight:800; font-size:15px; color:var(--night-900); }
+.camp-result-change { flex:none; font-family:var(--font-label); font-weight:800; font-size:15px; padding:4px 8px; border-radius:10px; background:#EFEAE2; color:var(--text-2); }
+.camp-result-change.up { background:#E3F4EA; color:var(--green-500); }
+.camp-result-change.down { background:#FDE7EA; color:#C8102E; }
+.camp-result-bar { display:block; height:8px; border-radius:4px; background:#F3C9CF; position:relative; overflow:hidden; }
+.camp-result-bar span { position:absolute; inset:0 auto 0 0; background:var(--green-500); }

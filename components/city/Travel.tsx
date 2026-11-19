@@ -117,7 +117,7 @@ export function TravelSheet({ plan, state, busy, onClose, onGo, ride, transit }:
               : `${pick === "walk" ? "Walk there" : pick === "car" ? "Drive there" : `Go by ${chosen.label.toLowerCase()}`}${chosen.q.fare ? ` · ${formatCash(chosen.q.fare)}` : ""}`}
           </button>
           <p className="meta" style={{ margin: 0, textAlign: "center" }}>
-            {shared ? "They get a ride request and pay their half when they accept." : "Trips take about a minute on your own timer, never the city clock (a delay on the line adds a little). In a rush? Skip the rest for C$1 per 2 seconds."}
+            {shared ? "They get a ride request and pay their half when they accept." : "Trips take about a minute on your own timer, never the city clock (a delay on the line adds a little). In a rush? Skip the rest for C$2 a second (at least C$20)."}
           </p>
         </div>
       )}

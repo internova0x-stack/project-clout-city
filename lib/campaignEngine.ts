@@ -7,7 +7,7 @@ import { UNDERWORLD, campaignOpBonus } from "./underworld.ts";
 import {
   CAMPAIGN, boroughsOf, cityTotal, citywide, cs, endReward, energyCost, meterLevel, skimRoom, slotCash, startBoroughs,
   type Budget, type CampaignContent, type CampaignState, type CampaignTask, type Candidate, type CandidateId, type TaskDef, type Choice, type DebateStyle, type Effects,
-  type InboxMessage, type InboxOption, type OpId, type Payout, type Place, type Situation, type SlotAction,
+  type InboxMessage, type InboxOption, type OpId, type Payout, type Place, type Recap, type Situation, type SlotAction,
 } from "./campaign.ts";
 
 export type Rng = () => number;
@@ -818,6 +818,7 @@ function resolveWeek(content: CampaignContent, state: CampaignState, today: stri
   const headline = fill(pick(rng, change > 0.5 ? h.up : change < -0.5 ? h.down : h.flat), { candidate: c.short, points: String(Math.abs(change)) });
   const mayorLine = pick(rng, change > 0.5 ? content.lines.mayor.up : content.lines.mayor.down);
   state.recap = { week: state.week, headline, lines: [...lines.slice(0, repLine ? 6 : 7), ...(repLine ? [repLine] : []), `Papa-Dani: "${fill(mayorLine, { candidate: c.short })}"`], you: now.you, mayor: now.mayor, change: cityChange, queens: { you: queensNow.you, mayor: queensNow.mayor, change }, revealOn: nextDay(today) };
+  (state.history ??= []).push(state.recap);
   state.log.push({ week: state.week, text: `Week ${state.week}: city ${cityChange >= 0 ? "+" : ""}${cityChange} (${now.you} vs ${now.mayor}), Queens ${change >= 0 ? "+" : ""}${change}.` });
 
   // 12. This week's campaign tasks pay (15 clout each, once).
@@ -977,6 +978,8 @@ export interface CampaignView {
   debateWeek: boolean;
   prepped: string[];
   recap: CampaignState["recap"];
+  /** Every week's results that have arrived, newest first (the Results tab). */
+  history: Recap[];
   /** The overnight results are in but not yet read (the morning paper). */
   recapReady: boolean;
   receipts: string[];
@@ -1053,6 +1056,7 @@ export function campaignView(content: CampaignContent, state: CampaignState, tod
     debateWeek: state.week === CAMPAIGN.debateWeek,
     prepped: state.prepped,
     recap: recapReady ? state.recap : null,
+    history: (state.history ?? (state.recap ? [state.recap] : [])).filter((r) => today >= r.revealOn).slice().reverse(),
     recapReady,
     receipts: state.receipts,
     log: state.log,
