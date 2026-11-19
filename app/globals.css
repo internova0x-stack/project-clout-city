@@ -3564,3 +3564,24 @@ button.camp-task { background:none; border:0; border-top:1px solid var(--divider
 .pass-ch[data-done] .pass-ch-xp { background:#E3F4EA; color:var(--green-500); }
 .title-chip { display:inline-block; vertical-align:middle; margin-left:6px; font-family:var(--font-label); font-weight:800; font-size:11px; letter-spacing:.3px;
   padding:2px 7px; border-radius:99px; background:linear-gradient(90deg,#FF6FA3,#B98CFF); color:#fff; white-space:nowrap; }
+
+/* The cutscene prototype (/preview/cutscene, owner Nov 19) */
+.cutscene { position:fixed; inset:0; z-index:60; background:#0E1430; overflow:hidden; font-family:var(--font-ui); }
+.cutscene-canvas { position:absolute; inset:0; width:100%; height:100%; display:block; }
+.cutscene-bar { position:absolute; left:0; right:0; height:0; background:#000; transition:height .6s ease; z-index:2; }
+.cutscene-bar.top { top:0; } .cutscene-bar.bottom { bottom:0; }
+.cutscene-bar.on { height:11vh; }
+.cutscene-place { position:absolute; left:20px; top:calc(11vh + 14px); z-index:3; color:#fff; font-family:var(--font-label); font-weight:700; font-size:14px;
+  letter-spacing:.12em; text-transform:uppercase; text-shadow:0 1px 6px rgba(0,0,0,.6); transition:opacity .3s; }
+.cutscene-sub { position:absolute; left:16px; right:16px; bottom:calc(11vh + 18px); z-index:3; display:flex; flex-direction:column; align-items:center; gap:4px;
+  text-align:center; color:#fff; font-size:18px; font-weight:600; line-height:24px; text-shadow:0 2px 8px rgba(0,0,0,.75); }
+.cutscene-who { font-family:var(--font-label); font-weight:700; font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:#FFD58A; }
+.cutscene-skip { position:absolute; right:14px; top:calc(11vh + 10px); z-index:4; border:0; border-radius:99px; padding:6px 14px; font:600 13px var(--font-ui);
+  color:#fff; background:rgba(255,255,255,.18); backdrop-filter:blur(6px); }
+.cutscene-card { position:absolute; left:16px; right:16px; top:50%; transform:translateY(-50%); z-index:4; max-width:360px; margin:0 auto; display:flex; flex-direction:column;
+  align-items:center; gap:8px; padding:24px 20px 20px; border-radius:24px; text-align:center; background:rgba(250,246,240,.96); box-shadow:0 20px 60px rgba(0,0,0,.45); }
+.cutscene-card-tag { font-family:var(--font-label); font-weight:700; font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:var(--text-3); }
+.cutscene-card-title { font-family:var(--font-display); font-weight:700; font-size:30px; line-height:34px; color:var(--night-900); letter-spacing:-0.015em; }
+.cutscene-card-names { font-weight:600; font-size:15px; color:var(--text-2); }
+.cutscene-card-line { font-size:14px; line-height:20px; color:var(--text-2); margin-bottom:6px; }
+.cutscene-card .btn { width:100%; }
