@@ -3566,7 +3566,7 @@ button.camp-task { background:none; border:0; border-top:1px solid var(--divider
   padding:2px 7px; border-radius:99px; background:linear-gradient(90deg,#FF6FA3,#B98CFF); color:#fff; white-space:nowrap; }
 
 /* The cutscene prototype (/preview/cutscene, owner Nov 19) */
-.cutscene { position:fixed; inset:0; z-index:60; background:#0E1430; overflow:hidden; font-family:var(--font-ui); }
+.cutscene { position:fixed; inset:0; z-index:400; background:#0E1430; overflow:hidden; font-family:var(--font-ui); }
 .cutscene-canvas { position:absolute; inset:0; width:100%; height:100%; display:block; }
 .cutscene-bar { position:absolute; left:0; right:0; height:0; background:#000; transition:height .6s ease; z-index:2; }
 .cutscene-bar.top { top:0; } .cutscene-bar.bottom { bottom:0; }
@@ -3657,3 +3657,5 @@ button.camp-task.ticked { flex-direction:row; align-items:flex-start; gap:10px; 
 .music-auto { align-self:center; background:none; border:0; color:#B9A8FF; font:inherit; font-size:14px; font-weight:700; cursor:pointer; }
 .music-player[data-off] .music-art { opacity:.6; }
 .music-text { flex:1; min-width:0; display:flex; flex-direction:column; gap:2px; }
+.cutscene-flash { position:absolute; inset:0; z-index:5; background:#fff; pointer-events:none; }
+.cutscene-loading { position:absolute; inset:0; display:grid; place-items:center; z-index:3; color:rgba(255,255,255,.7); font-size:28px; letter-spacing:.2em; }

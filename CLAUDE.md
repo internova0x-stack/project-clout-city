@@ -418,6 +418,17 @@ components live in `app/globals.css`.
   the map city pop; GameShell `setScene`), crossfading in 1.5 s. The Radio app opens with the player (components/city/MusicPlayer.tsx:
   pause, previous/next style, volume; a skipped-to style plays everywhere until "Back to the music for where you are"; kept on the
   device: cc_music_volume, cc_music_paused, cc_music_pick). Settings' Music switch still mutes it. tests/music.test.ts.
+- Cutscenes (owner, Nov 19: "add cutscenes early in first play"; no migration): components/cutscene (scripts.ts: arrival, party,
+  official; sets.ts: box-built sets, skyline, fireworks; CutscenePlayer.tsx: letterbox, typed subtitles, Skip, the closing card;
+  CutsceneHost.tsx, lazy-loaded by GameShell). Arriving in New York plays before Lola's tour, Peyton Pastel's party before "You got in",
+  and going official before the It's official celebration; each once per device (`firstTime('cutscene', …)`), with the player's
+  own look and outfit. Don't call resetLimbs every frame on the base bodies (it sinks them into the floor; `stand()` after a dance).
+  `/preview/cutscene?scene=arrival|party|official&shot=N`.
+- Solid shoes (owner, Nov 19: "clothes and shoes… look chopped or distorted"; components/avatar/shoes.ts): shoes are no longer cut from
+  the foot's skin. Each is built from this body's foot (`attachShoes`: sneaker, dress, heel, sandal, boot, kneeboot by `shoeStyle`),
+  the heel half on the foot bone and the toe half on the toe bone, soles from the floor up; the foot skin under them is hidden (the
+  template's cover bit) and a sock (or a boot's shaft on the shin bone) reaches just past where the hidden skin ends (`coverTop`).
+  `/preview/moves?outfit=diagnose` (`&pick=feet|hem`) is the close-up check of shoes and hems on both bodies.
 - Rate limits (migration 0126, owner Oct 27): PostgREST's pre-request hook (`pgrst.db_pre_request` = `check_request()`) counts each
   signed-in player's writes per minute (`rate_counters`, `rate_hit`): 240 in all, plus buckets for guesses (hunt answers, exams,
   gossip, name checks: 20), reviewed posts (10), chat (30) and checkouts (10). Reads, signed-out requests and the service role are

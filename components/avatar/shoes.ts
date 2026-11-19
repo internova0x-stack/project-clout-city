@@ -2,7 +2,7 @@
 // shoes were cut from the bare foot's own skin, so they showed the toes, bent with them and tore at the ankle. These are
 // real 3D shoes: measured from this body's foot at build time, then fixed to the foot bone (and a boot's shaft to the
 // shin bone), so they keep their shape in every pose. The skin under them isn't drawn (the garment's cover bits).
-import { BufferGeometry, Color, DoubleSide, Float32BufferAttribute, Matrix4, Mesh, MeshStandardMaterial, Skeleton, SkinnedMesh, Uint16BufferAttribute, Vector3, type Bone } from "three";
+import { BufferGeometry, Color, DoubleSide, Float32BufferAttribute, Matrix4, Mesh, MeshStandardMaterial, Vector3, type Bone, type SkinnedMesh } from "three";
 import type { Finish } from "@/lib/avatarCatalog";
 
 /** What kind of shoe a worn shoe piece is. */
@@ -55,7 +55,7 @@ function measureShin(mesh: SkinnedMesh, side: "Left" | "Right") {
 }
 
 /** A closed loft: rings of points (each the same count) joined into a tube, with caps at both ends. */
-function loft(rings: Pt[][], colors: Color[]): BufferGeometry {
+function loft(rings: Pt[][], colors: Color[], caps: [boolean, boolean] = [true, true]): BufferGeometry {
   const n = rings[0].length;
   const P: number[] = [], C: number[] = [], I: number[] = [];
   rings.forEach((r, k) => r.forEach((p) => { P.push(p.x, p.y, p.z); C.push(colors[k].r, colors[k].g, colors[k].b); }));
@@ -65,6 +65,7 @@ function loft(rings: Pt[][], colors: Color[]): BufferGeometry {
   }
   // Caps: a fan from each end ring's middle.
   for (const [k, flip] of [[0, true], [rings.length - 1, false]] as const) {
+    if (!caps[k === 0 ? 0 : 1]) continue;
     const r = rings[k];
     const m = r.reduce((s, p) => ({ x: s.x + p.x / n, y: s.y + p.y / n, z: s.z + p.z / n }), { x: 0, y: 0, z: 0 });
     const ci = P.length / 3;
@@ -145,21 +146,38 @@ export function attachShoes(mesh: SkinnedMesh, bones: Map<string, Bone>, o: Shoe
     if (fwd.lengthSq() < 1e-8) fwd.set(0, 0, 1);
     fwd.normalize();
     const up = new Vector3(0, 1, 0), across = new Vector3().crossVectors(up, fwd).normalize();
-    const minY = Math.min(...pts.map((p) => p.y));
+    // The sole sits on the floor (the body's own origin, at build time the rig stands at 0): in the idle pose the toes dip
+    // a few centimetres below it, and a sole cut from the lowest toe sank out of sight on a solid floor.
+    const lowest = Math.min(...pts.map((p) => p.y));
+    const minY = Math.max(lowest, Math.min(0, fw.y - 0.02));
     const local = pts.map((p) => { const d = p.clone().sub(fw); return { x: d.dot(across), y: p.y - minY, z: d.dot(fwd) }; });
     const z0 = Math.min(...local.map((p) => p.z)), z1 = Math.max(...local.map((p) => p.z));
     const L = z1 - z0;
     const cx = local.reduce((s, p) => s + p.x, 0) / local.length;
-    const ankleY = Math.max(...local.filter((p) => p.z < z0 + L * 0.35).map((p) => p.y));
+    // The ankle's height: the highest heel-end point, and never lower than the ankle bone itself (low-detail bodies have
+    // few points there).
+    const ankleY = Math.max(fw.y - minY + 0.015, ...local.filter((p) => p.z < z0 + L * 0.35).map((p) => p.y));
     // How tall the upper rises at each point along the foot, and how wide the foot is there (with room for the shoe).
     const pad = o.style === "boot" || o.style === "kneeboot" ? 0.009 : o.style === "sneaker" ? 0.011 : 0.008;
     const sole = o.style === "sneaker" ? 0.022 : o.style === "boot" || o.style === "kneeboot" ? 0.026 : o.style === "heel" ? 0.006 : 0.01;
     const band = L / steps;
+    // The foot's width and height along its length, from the points near each slice. Low-detail bodies have few points on
+    // the foot, so the window widens until it finds some, and the profile never dips below a smooth foot shape.
+    const slice = (z: number) => {
+      for (const k of [0.9, 1.6, 2.6, 4]) {
+        const near = local.filter((p) => Math.abs(p.z - z) < band * k);
+        if (near.length >= 3) return { w: Math.max(...near.map((p) => Math.abs(p.x - cx))), h: Math.max(...near.map((p) => p.y)) };
+      }
+      return { w: 0, h: 0 };
+    };
+    const maxW = Math.max(0.042, ...local.map((p) => Math.abs(p.x - cx)));
     const at = (z: number) => {
-      const near = local.filter((p) => Math.abs(p.z - z) < band * 0.9);
-      const w = near.length ? Math.max(...near.map((p) => Math.abs(p.x - cx))) : 0.02;
-      const h = near.length ? Math.max(...near.map((p) => p.y)) : 0.02;
-      return { w: Math.max(0.012, w), h: Math.max(0.015, h) };
+      const m = slice(z);
+      const t = (z - z0) / L;
+      // A plain foot: tallest at the instep, lowest at the toes; widest at the ball.
+      const shapeH = ankleY * (t < 0.35 ? 0.85 : 0.85 - (t - 0.35) * 1.0);
+      const shapeW = maxW * (t < 0.2 ? 0.7 + t : t < 0.75 ? 0.9 + (t - 0.2) * 0.18 : 1 - (t - 0.75) * 0.9);
+      return { w: Math.max(0.012, m.w, shapeW * 0.9), h: Math.max(0.015, m.h, shapeH * 0.9) };
     };
     const rings: Pt[][] = [], cols: Color[] = [];
     const solePts: Pt[][] = [], soleCols: Color[] = [];
@@ -196,35 +214,26 @@ export function attachShoes(mesh: SkinnedMesh, bones: Map<string, Bone>, o: Shoe
     const toLocal = new Matrix4().copy(foot.matrixWorld).invert();
     const frame = new Matrix4().makeBasis(across, up, fwd).setPosition(fw.x, minY, fw.z);
     const place = (g: BufferGeometry) => { g.applyMatrix4(frame); g.applyMatrix4(toLocal); g.computeVertexNormals(); return g; };
-    // The shoe bends at the ball of the foot like a real one: skinned to the foot and toe bones, blended across the ball.
+    // The shoe bends at the ball of the foot like a real one: the back half rides the foot bone, the toe the toe bone
+    // (rigid parts on their bones; a SkinnedMesh drifted when the avatar turned far round).
     const ballT = toe ? Math.min(0.85, Math.max(0.5, (tw.clone().sub(fw).dot(fwd) - z0) / L)) : 2;
-    const skeleton = new Skeleton(toe ? [foot, toe] : [foot]);
-    const holder = mesh.parent!;
-    const skinnedOf = (g: BufferGeometry, mat: MeshStandardMaterial) => {
-      const p = g.getAttribute("position");
-      const idx = new Uint16Array(p.count * 4), w = new Float32Array(p.count * 4);
-      for (let i = 0; i < p.count; i++) {
-        const t = (p.getZ(i) - z0) / L;
-        const k = Math.min(1, Math.max(0, (t - (ballT - 0.06)) / 0.12));
-        idx[i * 4] = 0; idx[i * 4 + 1] = toe ? 1 : 0; w[i * 4] = 1 - k; w[i * 4 + 1] = toe ? k : 0;
-      }
-      g.setAttribute("skinIndex", new Uint16BufferAttribute(idx, 4));
-      g.setAttribute("skinWeight", new Float32BufferAttribute(w, 4));
-      g.applyMatrix4(frame);
-      const sm = new SkinnedMesh(g, mat);
-      sm.position.copy(mesh.position); sm.quaternion.copy(mesh.quaternion); sm.scale.copy(mesh.scale);
-      holder.add(sm);
-      sm.updateMatrixWorld(true);
-      g.applyMatrix4(new Matrix4().copy(sm.matrixWorld).invert());
-      g.computeVertexNormals();
-      sm.bind(skeleton, sm.matrixWorld.clone());
-      sm.castShadow = true; sm.frustumCulled = false;
-      meshes.push(sm);
-      return sm;
-    };
+    const split = Math.min(steps, Math.max(1, Math.round(ballT * steps)));
     const soleMat = new MeshStandardMaterial({ vertexColors: true, roughness: 0.85, side: DoubleSide, emissive: o.glowSole ? accentC : new Color(0), emissiveIntensity: o.glowSole ? 1.2 : 0 });
-    skinnedOf(loft(rings, cols), upper);
-    skinnedOf(loft(solePts, soleCols), soleMat);
+    const halves = (rs: Pt[][], cs: Color[], mat: MeshStandardMaterial) => {
+      const parts: [Pt[][], Color[], Bone, [boolean, boolean]][] = toe && split < steps
+        ? [[rs.slice(0, split + 1), cs.slice(0, split + 1), foot, [true, false]], [rs.slice(split), cs.slice(split), toe, [false, true]]]
+        : [[rs, cs, foot, [true, true]]];
+      for (const [r2, c2, bone, caps] of parts) {
+        const g = loft(r2, c2, caps);
+        g.applyMatrix4(frame);
+        g.applyMatrix4(new Matrix4().copy(bone.matrixWorld).invert());
+        g.computeVertexNormals();
+        const m = new Mesh(g, mat);
+        m.castShadow = true; bone.add(m); meshes.push(m);
+      }
+    };
+    halves(rings, cols, upper);
+    halves(solePts, soleCols, soleMat);
     // A heel's stiletto block under the heel.
     if (o.style === "heel") {
       const hz = z0 + L * 0.06, hw = 0.011;
@@ -260,7 +269,7 @@ export function attachShoes(mesh: SkinnedMesh, bones: Map<string, Bone>, o: Shoe
       const ax2 = new Vector3().crossVectors(axis, fwd).normalize(), ax3 = new Vector3().crossVectors(ax2, axis).normalize();
       const ringN = o.low ? 6 : 9;
       for (let k = 0; k <= ringN; k++) {
-        const s = -0.04 + (k / ringN) * (reach + 0.04); // 0 the ankle, 1 the knee
+        const s = -0.1 + (k / ringN) * (reach + 0.1); // 0 the ankle, 1 the knee (it starts inside the shoe)
         const c = new Vector3().copy(fw).addScaledVector(axis, -s * legLen);
         const near = shinPts.filter((p) => Math.abs(new Vector3().subVectors(p, c).dot(axis)) < legLen / ringN * 0.8);
         let rx = 0.035, rz = 0.035, ox = 0, oz = 0;
