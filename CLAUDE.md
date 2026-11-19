@@ -412,6 +412,12 @@ components live in `app/globals.css`.
   the player taps Accept on `ConsentBanner` (app/layout.tsx); Reject keeps it off; Settings has the `ConsentSwitch`
   (`setConsent`, `consentStatus` in lib/analytics.ts). VIP plans state the renewal and how to cancel above the button (ChatPass).
 - Trip skip price (migration 0168, owner Nov 19: "too low"): C$2 a second left, at least C$20 (economy.travel.skip, `skipCost`).
+- Music by place and the player (owner, Nov 19; no migration): six styles composed in code (lib/musicStyles.ts: lofi, pop, techno,
+  afrobeats, romance, synth; patterns as data, played live by lib/music.ts, no files or licences), picked by where the player is
+  (lib/musicMap.ts `musicFor`: clubs techno, rooftops and parks the slow jam, offices electronica, Greek Row afrobeats, home lo-fi,
+  the map city pop; GameShell `setScene`), crossfading in 1.5 s. The Radio app opens with the player (components/city/MusicPlayer.tsx:
+  pause, previous/next style, volume; a skipped-to style plays everywhere until "Back to the music for where you are"; kept on the
+  device: cc_music_volume, cc_music_paused, cc_music_pick). Settings' Music switch still mutes it. tests/music.test.ts.
 - Rate limits (migration 0126, owner Oct 27): PostgREST's pre-request hook (`pgrst.db_pre_request` = `check_request()`) counts each
   signed-in player's writes per minute (`rate_counters`, `rate_hit`): 240 in all, plus buckets for guesses (hunt answers, exams,
   gossip, name checks: 20), reviewed posts (10), chat (30) and checkouts (10). Reads, signed-out requests and the service role are

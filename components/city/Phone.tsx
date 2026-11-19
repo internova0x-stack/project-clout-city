@@ -21,6 +21,7 @@ import { MayorApp } from "./Mayor";
 import type { MayorApi } from "@/lib/mayor";
 import type { ElectionTeaser } from "@/components/story/News";
 import { RadioApp } from "./Radio";
+import { MusicPlayer } from "./MusicPlayer";
 import { TvApp } from "./CloutTv";
 import type { Station, StationThread, TvApi, TvState } from "@/lib/cloutTv";
 import type { RadioApi } from "@/lib/radio";
@@ -239,7 +240,7 @@ export function PhoneModal({
                 </button>
               )}
               <div className="phone-grid">
-                {APPS.filter((a) => (a.id !== "collection" || onOpenCollection) && (a.id !== "tea" || tea) && (a.id !== "apartments" || (apartments && state)) && (a.id !== "businesses" || businesses) && (a.id !== "jobs" || jobs) && (a.id !== "radio" || radio) && (a.id !== "tv" || tv) && (a.id !== "mayor" || mayor) && (a.id !== "campaign" || onOpenCampaign) && (a.id !== "careers" || onOpenCareers) && (a.id !== "university" || onOpenUniversity) && (a.id !== "market" || market)).map((a) => (
+                {APPS.filter((a) => (a.id !== "collection" || onOpenCollection) && (a.id !== "tea" || tea) && (a.id !== "apartments" || (apartments && state)) && (a.id !== "businesses" || businesses) && (a.id !== "jobs" || jobs) && (a.id !== "tv" || tv) && (a.id !== "mayor" || mayor) && (a.id !== "campaign" || onOpenCampaign) && (a.id !== "careers" || onOpenCareers) && (a.id !== "university" || onOpenUniversity) && (a.id !== "market" || market)).map((a) => (
                   <button key={a.id} className={`phone-app${locked?.[a.id] ? " locked" : ""}`} aria-label={locked?.[a.id] ? `${a.label}, opens at ${locked[a.id]}` : undefined}
                     onClick={() => (a.id === "campaign" ? onOpenCampaign!() : a.id === "university" ? onOpenUniversity!() : a.id === "careers" ? onOpenCareers!() : locked?.[a.id] ? onToast?.(`🔒 ${a.label} opens at ${locked[a.id]}. Keep earning clout.`) : a.id === "collection" ? onOpenCollection!() : setApp(a.id))}>
                     <span style={{ position: "relative" }}>
@@ -275,6 +276,7 @@ export function PhoneModal({
               {app === "businesses" && businesses && assets && <AssetSalesPanel api={assets.api} scope="business" onChanged={assets.onChanged} onToast={onToast} />}
               {app === "jobs" && jobs && <JobsApp {...jobs} onHome={() => setApp(null)} />}
               {app === "market" && market && <MarketApp api={market.api} cash={market.cash} onChanged={market.onChanged} onToast={market.onToast} />}
+              {app === "radio" && <MusicPlayer />}
               {app === "radio" && radio && <RadioApp api={radio} startForm={openForm && app === initialApp} onToast={(t) => onToast?.(t)} />}
               {app === "mayor" && mayor && <MayorApp api={mayor.api} onSeen={mayor.onSeen} onToast={(t) => onToast?.(t)} />}
               {app === "tv" && tv && <TvApp api={tv.api} startForm={openForm && app === initialApp} onChange={tv.onChange} onToast={(t) => onToast?.(t)} />}
@@ -289,7 +291,7 @@ export function PhoneModal({
                 <div className="stack-12">
                   {membership && <MembershipRow vip={membership.vip} onOpen={membership.onOpen} />}
                   <div className="list-row static">
-                    <span style={{ flex: 1 }}><span className="title" style={{ display: "block" }}>Music</span><span className="meta">Lo-fi city loop</span></span>
+                    <span style={{ flex: 1 }}><span className="title" style={{ display: "block" }}>Music</span><span className="meta">Changes with where you are · skip and volume in Radio</span></span>
                     <Toggle on={!muted} label="Music" onChange={onToggleSound} />
                   </div>
                   <SoundSwitch />

@@ -24,6 +24,7 @@ import { ECONOMY, formatCash } from "@/lib/economy";
 import { inviteUrl } from "@/lib/invite";
 import { normalizeLook } from "@/lib/look";
 import { music, readLocalMuted, writeLocalMuted } from "@/lib/music";
+import { musicFor } from "@/lib/musicMap";
 import { checkBuild, isStaleBuild, reloadForNewBuild } from "@/lib/freshBuild";
 import { LEVEL_AT, MAX_LEVEL, SKILLS, SKILL_PERKS, levelFor, levelProgress, perkStatus, skillBadge } from "@/lib/skills";
 import { SkillsSheet } from "./game/Skills";
@@ -2767,6 +2768,10 @@ export function GameShell({
     return music().unlockOnTap();
   }, [player.music_muted]);
   useEffect(() => unlockSfx(), []);
+  // Music by place (owner, Nov 19; lib/musicMap.ts): clubs play techno, rooftops a slow jam, offices electronica…
+  const musicPlace = inside ? { id: inside.id, tags: inside.tags ?? [] } : null;
+  const musicStyle = musicFor({ tab, place: musicPlace, floor: insideFloor });
+  useEffect(() => { music().setScene(musicStyle); }, [musicStyle]);
   const toggleSound = () => {
     const next = !muted;
     setMuted(next);
