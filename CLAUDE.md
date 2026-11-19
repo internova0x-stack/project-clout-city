@@ -482,8 +482,9 @@ components live in `app/globals.css`.
   A trace is exposed at most once (`events` 'exposed:<id>').
   Week as steps and Results (owner, Nov 19; no migration): the Week tab is a vertical step rail (`WeekSteps`: tasks with tick boxes,
   inbox, debate, budget, calendar, decisions, End week; ticked when done, the first left to do open, the rest folded with a summary;
-  "The budget looks good" is kept on the device, `cc-camp-steps:<campaign>:<week>`). The Results tab lists every week's morning
-  paper (`state.history`, `view.history`, newest first; older campaigns show only the last).
+  "The budget looks good" is kept on the device, `cc-camp-steps:<campaign>:<week>`). "Previous week's results ›" (a right-aligned blue pill
+  under the city poll, owner Nov 19: not a tab) opens every week's morning paper (`state.history`,
+  `view.history`, newest first; older campaigns show only the last).
   Replies and the debate (owner, Nov 16): an answered inbox message shows a decision card (Your call, a DECIDED or BOOKED stamp,
   the receipt, each effect on its own green/red line), not a sent bubble. The debate is five questions (three issues, the Mayor's
   jab, money or the scandal) with Q1-Q5 tabs carrying each score, one question on screen, the answer's result in its place until
