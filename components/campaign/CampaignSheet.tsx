@@ -633,6 +633,16 @@ function lineLook(l: string, short: string): { icon: string; tone: "up" | "down"
   return { icon, tone, text };
 }
 
+/** The numbers that moved (owner, Nov 19): poll points in green or red, money in bold, the rest plain. */
+function Moves({ text }: { text: string }) {
+  const parts = text.split(/((?:^|(?<=\s))[+\-−]\d+(?:\.\d+)?|C\$[\d,]+)/g);
+  return <>{parts.map((p, i) => {
+    if (/^[+\-−]\d/.test(p)) return <b key={i} className={`camp-move ${p.startsWith("+") ? "up" : "down"}`}>{p}</b>;
+    if (/^C\$/.test(p)) return <b key={i} className="camp-move cash">{p}</b>;
+    return p;
+  })}</>;
+}
+
 /**
  * Previous weeks' results (owner, Nov 19: opened from the pill under the city poll; roomy, minimal, with icons and colour),
  * newest first: the headline, the poll that week, and each story with an icon, tinted by whether it helped.
@@ -667,7 +677,7 @@ function Results({ v, short, onBack }: { v: CampaignView; short: string; onBack:
             {shown ? (
               <ul className="camp-result-lines">
                 {r.lines.map((l, i) => { const k = lineLook(l, short); return (
-                  <li key={i} data-tone={k.tone}><span className="camp-result-icon" aria-hidden="true">{k.icon}</span><span>{k.text}</span></li>
+                  <li key={i} data-tone={k.tone}><span className="camp-result-icon" aria-hidden="true">{k.icon}</span><span><Moves text={k.text} /></span></li>
                 ); })}
               </ul>
             ) : (
