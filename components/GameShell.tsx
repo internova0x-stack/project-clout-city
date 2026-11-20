@@ -114,7 +114,7 @@ import { GameChrome, type ChromeAction, type QuestButton, type Tab } from "./hud
 import { handle } from "@/lib/validation";
 import { rankCelebration } from "./game/Ranks";
 import { CelebrationHost, celebrate } from "./Celebrate";
-import { GuideFlow, GuidePill, GuideTab, type GuidePhase } from "./game/Guide";
+import { GuideFlow, GuidePill, type GuidePhase } from "./game/Guide";
 import { CHAPTERS, nextStep, stepById, type GuideApi, type GuideState } from "@/lib/guide";
 import { crewNightsRead, dateNightsRead, nightsCouple, type NightCtx } from "./nightResults";
 import { coupleRead, evictionRead, streakRead, subletRead, type BadNewsCtx } from "./game/badNewsReads";
@@ -3633,7 +3633,7 @@ export function GameShell({
         starter={!inside && flow === "none" && !visitView && (starter || guideNext || (passS && tab === "home")) ? (
           <>
             {guideNext && <GuidePill step={guideNext} onOpen={() => setGuidePlay({ id: guideNext.id, phase: "tip" })} />}
-            {starter && !guideNext && <StarterPill done={starter.done} day={starterDay(starter)} onOpen={() => setPanel("starter")} />}
+            {starter && <StarterPill done={starter.done} day={starterDay(starter)} onOpen={() => setPanel("starter")} />}
             {/* Owner, Nov 16: the Clout Pass gets its own way in, on the home screen. */}
             {passS && tab === "home" && <PassPill state={passS} today={city?.today ?? new Date().toISOString().slice(0, 10)} onOpen={() => { setTasksTab("pass"); setPanel("tasks"); }} />}
           </>
@@ -3794,11 +3794,6 @@ export function GameShell({
         cliqueCount={clique.length}
         city={cityOn ? city : null}
         goals={goalsNow}
-        guide={guideS ? {
-          node: <GuideTab state={guideS} current={guideNext} onPlay={(st) => { setPanel(null); setTasksTab(undefined); setGuidePlay({ id: st.id, phase: "tip" }); }}
-            extra={starter ? <button className="guide-step" onClick={() => setPanel("starter")}><span className="guide-step-n">🗓️</span><span style={{ flex: 1 }}>Starter Week missions<span className="meta" style={{ display: "block" }}>{starter.done.length} done · today&apos;s and what&apos;s next</span></span></button> : undefined} />,
-          next: !!guideNext,
-        } : null}
         repair={repairOffer ? <StreakRepairCard offer={repairOffer} busy={busy === "repair"} onRepair={(m) => void repairStreak(m)} /> : null}
         onOpenPlace={openPlace}
         skills={skills}
