@@ -1592,14 +1592,16 @@ function floorTexture(t: RoomTemplate, night: boolean, dream = false): CanvasTex
       g.lineWidth = tiled ? 2 : 1;
       g.strokeRect(x, y, s, s);
     }
+  } else if (t.outdoor) {
+    // Outdoor ground (the parks' and the Quad's grass): one solid color, no speckle (owner, Nov 20: "make sure it isn't a gradient").
   } else {
     for (let i = 0; i < 900; i++) {
       g.fillStyle = `rgba(255,255,255,${Math.random() * 0.04})`;
       g.fillRect(Math.random() * c.width, Math.random() * c.height, 3, 3);
     }
   }
-  if (dream) {
-    // A soft light pool toward the front-right corner, fading to a cooler back corner.
+  if (dream && !t.outdoor) {
+    // A soft light pool toward the front-right corner, fading to a cooler back corner (indoors only: outdoor ground stays solid).
     const gl = g.createLinearGradient(0, 0, c.width, c.height);
     gl.addColorStop(0, night ? "rgba(90,74,154,0.28)" : "rgba(156,140,217,0.22)");
     gl.addColorStop(0.55, "rgba(255,255,255,0)");

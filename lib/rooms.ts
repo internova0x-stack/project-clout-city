@@ -244,7 +244,7 @@ export const FURNITURE: Record<FurnitureKind, { w: number; d: number; walkable?:
   gearLocker: { w: 0.9, d: 0.5, label: "Gear" },
   firePole: { w: 0.4, d: 0.4, label: "The pole" },
   curtain: { w: 2.2, d: 0.1, label: "Curtain" },
-  runTrack: { w: 10.0, d: 6.0, walkable: true, label: "Running track" },
+  runTrack: { w: 9.0, d: 5.4, walkable: true, label: "Running track" },
   fountain: { w: 3.2, d: 3.2, label: "Fountain" },
   cubicle: { w: 1.6, d: 1.5, label: "Cubicle" },
   glassWall: { w: 3.0, d: 0.12, label: "Glass wall" },
@@ -661,8 +661,8 @@ export const PLACE_TEMPLATES: Record<PlaceTemplateId, RoomTemplate> = {
   // Astoria Park by the river: riverside benches (the bench by the river), the running track (a lap), the picnic lawn, the dog
   // run (walking dogs), the iron fountain (the signature piece), trees and lamps.
   parkRiver: {
-    id: "parkRiver", w: 26, d: 20, wall: "#BFD3E0", wallAccent: "#7FA36A", floor: "#9CCB82", floorKind: "concrete",
-    outdoor: { height: 4.5, edge: "#7FA36A", water: true, view: [13, 11] },
+    id: "parkRiver", w: 26, d: 20, wall: "#BFD3E0", wallAccent: "#7FA36A", floor: "#4C9A3F", floorKind: "concrete",
+    outdoor: { height: 4.5, edge: "#3E7F33", water: true, view: [13, 11] },
     // Grass, with paving where people walk: the riverside promenade, the path in from the gate and the fountain's square.
     rooms: [
       { name: "Promenade", x0: -13, z0: -10, x1: 13, z1: -7.4, floor: "#E2DACB", floorKind: "tile" },
@@ -674,15 +674,13 @@ export const PLACE_TEMPLATES: Record<PlaceTemplateId, RoomTemplate> = {
       { id: "river-bench-1", kind: "bench", x: -5.0, z: -8.6, rot: 2, use: MAIN(0), label: "*", model: "stationBench" },
       { id: "river-bench-2", kind: "bench", x: 1.4, z: -8.6, rot: 2, use: { kind: "sit" }, label: "Sit", model: "stationBench" },
       { id: "river-bench-3", kind: "bench", x: 7.6, z: -8.6, rot: 2, model: "stationBench" },
-      { id: "track", kind: "runTrack", x: -6.0, z: 1.0, rot: 0, use: MAIN(1), label: "*" },
-      { id: "lawn-1", kind: "rug", x: 6.0, z: 2.0, rot: 0, color: "#7CC86B" },
-      { id: "lawn-2", kind: "rug", x: 8.4, z: 2.0, rot: 0, color: "#7CC86B" },
+      { id: "track", kind: "runTrack", x: -7.1, z: 1.2, rot: 0, use: MAIN(1), label: "*" },
       { id: "picnic", kind: "rug", x: 7.2, z: 3.8, rot: 0, color: "#D93A2F", use: MAIN(2), label: "*" },
       { id: "fountain", kind: "fountain", x: 4.6, z: -4.4, rot: 0 },
       ...[6.2, 10.2].map((x, i) => ({ id: `dogrun-${i}`, kind: "bench" as const, x, z: 8.2, rot: 2 })),
       { id: "dog", kind: "dog", x: 8.2, z: 6.8, rot: 1, use: MAIN(3), label: "*" },
       { id: "dog-2", kind: "dog", x: 10.6, z: 6.2, rot: 2 },
-      ...[[-12, -6.4], [-12, 7.8], [12, -6.4], [12, 0.4], [-0.8, 8.6], [-12, 1.2], [2.6, -6.8], [12, 8.6]].map(([x, z], i) => ({ id: `tree-${i}`, kind: "tree" as const, x, z, rot: 0 })),
+      ...[[-12, -6.4], [-12, 7.8], [12, -6.4], [12, 0.4], [-3.2, 8.6], [-12.2, -2.8], [2.6, -6.8], [12, 8.6]].map(([x, z], i) => ({ id: `tree-${i}`, kind: "tree" as const, x, z, rot: 0 })),
       ...[[-1.6, -6.4], [9.6, -6.4], [0.2, 4.2], [-9.4, 7.6]].map(([x, z], i) => ({ id: `lamp-${i}`, kind: "lamppost" as const, x, z, rot: 0 })),
       { id: "cart", kind: "foodCart", x: 2.6, z: 7.6, rot: 2, color: "#F2A900" },
     ],
@@ -696,8 +694,8 @@ export const PLACE_TEMPLATES: Record<PlaceTemplateId, RoomTemplate> = {
   // Flushing Meadows: the big fountain plaza in the middle (hanging out by the fountains), lawns either side, benches round it,
   // paths, trees and the ice-cream cart (the signature piece).
   parkMeadow: {
-    id: "parkMeadow", w: 26, d: 20, wall: "#BFD3E0", wallAccent: "#7FA36A", floor: "#9CCB82", floorKind: "concrete",
-    outdoor: { height: 4.5, edge: "#7FA36A", view: [13, 11] },
+    id: "parkMeadow", w: 26, d: 20, wall: "#BFD3E0", wallAccent: "#7FA36A", floor: "#4C9A3F", floorKind: "concrete",
+    outdoor: { height: 4.5, edge: "#3E7F33", view: [13, 11] },
     // Grass, with the fountain plaza paved in the middle and paths out to the edges.
     rooms: [
       { name: "Plaza", x0: -5.4, z0: -6.2, x1: 5.4, z1: 4.0, floor: "#E2DACB", floorKind: "tile" },
@@ -706,7 +704,6 @@ export const PLACE_TEMPLATES: Record<PlaceTemplateId, RoomTemplate> = {
     ],
     items: [
       { id: "fountain", kind: "fountain", x: 0, z: -1.0, rot: 0, use: MAIN(0), label: "*" },
-      ...[[-8, -5], [-8, -2], [-8, 3], [-8, 6], [8, -5], [8, -2], [8, 3], [8, 6]].map(([x, z], i) => ({ id: `lawn-${i}`, kind: "rug" as const, x, z, rot: 0, color: "#7CC86B" })),
       ...[[-3.4, -1.0, 1], [3.4, -1.0, 3], [0, -4.4, 0], [0, 2.4, 2]].map(([x, z, r], i) => ({ id: `bench-${i}`, kind: "bench" as const, x, z, rot: r, model: "stationBench", ...(i === 0 ? { use: { kind: "sit" as const }, label: "Sit" } : {}) })),
       ...[[-12, -8.4], [-12, -3.6], [-12, 1.2], [-12, 6.0], [12, -8.4], [12, -3.6], [12, 1.2], [12, 6.0], [-4, -8.6], [4, -8.6]].map(([x, z], i) => ({ id: `tree-${i}`, kind: "tree" as const, x, z, rot: 0 })),
       ...[[-4.6, 5.4], [4.6, 5.4], [-4.6, -6.4], [4.6, -6.4]].map(([x, z], i) => ({ id: `lamp-${i}`, kind: "lamppost" as const, x, z, rot: 0 })),
@@ -775,8 +772,8 @@ export const PLACE_TEMPLATES: Record<PlaceTemplateId, RoomTemplate> = {
   // ---- The campuses (owner, Nov 20: "next"): every school's five areas as big floors (CAMPUS_AREAS) ----
   // The Quad: lawns crossed by paths, benches, trees and lamps, the events board, a coffee cart; St. Johnsons' founder stands here.
   quadBig: {
-    id: "quadBig", w: 24, d: 18, wall: "#BFD3E0", wallAccent: "#7FA36A", floor: "#9CCB82", floorKind: "concrete",
-    outdoor: { height: 4.5, edge: "#7FA36A", view: [12, 10] },
+    id: "quadBig", w: 24, d: 18, wall: "#BFD3E0", wallAccent: "#7FA36A", floor: "#4C9A3F", floorKind: "concrete",
+    outdoor: { height: 4.5, edge: "#3E7F33", view: [12, 10] },
     // Grass, crossed by paved paths and a paved strip by the events board.
     rooms: [
       { name: "Walk", x0: -1.4, z0: -9, x1: 1.4, z1: 9, floor: "#E2DACB", floorKind: "tile" },
@@ -784,9 +781,8 @@ export const PLACE_TEMPLATES: Record<PlaceTemplateId, RoomTemplate> = {
       { name: "Board", x0: -6, z0: -9, x1: 6, z1: -7.6, floor: "#E2DACB", floorKind: "tile" },
     ],
     items: [
-      ...[[-7.5, -4.5], [-3.0, -4.5], [3.0, -4.5], [7.5, -4.5], [-7.5, -1.5], [-3.0, -1.5], [3.0, -1.5], [7.5, -1.5], [-7.5, 3.5], [-3.0, 3.5], [3.0, 3.5], [7.5, 3.5]].map(([x, z], i) => ({
-        id: `lawn-${i}`, kind: "rug" as const, x, z, rot: 0, color: "#7CC86B", ...(i === 5 ? { use: { kind: "action" as const, actionId: "quad" }, label: "Hang out on the lawn" } : {}),
-      })),
+      // A picnic blanket on the lawn (hanging out on the lawn).
+      { id: "blanket", kind: "rug", x: -6.0, z: -3.6, rot: 0, color: "#F4E3C8", use: { kind: "action", actionId: "quad" }, label: "Hang out on the lawn" },
       { id: "board", kind: "chalkboard", x: 0.0, z: -8.7, rot: 0, use: { kind: "events" }, label: "Campus events" },
       { id: "bench-1", kind: "bench", x: -3.0, z: 1.0, rot: 2, use: { kind: "sit" }, label: "Sit", model: "stationBench" },
       { id: "bench-2", kind: "bench", x: 3.0, z: 1.0, rot: 2, use: { kind: "action", actionId: "quad" }, label: "People-watch", model: "stationBench" },

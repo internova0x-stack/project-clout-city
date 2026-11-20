@@ -1459,7 +1459,7 @@ function buildBoxFurniture(item: RoomItem, k: Kit, opts: { night: boolean }): Bu
     }
     case "runTrack": {
       // A running track: a terracotta loop with white lane lines around an inner lawn, flat on the ground.
-      const clay = k.mat("#C9653F"), line = k.mat("#F4F1EA"), grass = k.mat("#8FCB7A");
+      const clay = k.mat("#C9653F"), line = k.mat("#F4F1EA"), grass = k.mat("#4C9A3F");
       box(w - 2.4, 0.015, d - 2.4, grass, 0, 0, 0);
       const lane = 1.0;
       for (const sz of [-1, 1]) {

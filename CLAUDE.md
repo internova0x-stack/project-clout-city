@@ -883,7 +883,8 @@ components live in `app/globals.css`.
   Tiled floors are plain white (owner, Nov 20: "I don't like the tiled floors", then after a side-by-side of off-white tiles, white
   tiles and plain white, "go with white"): Room3D `floorTexture` draws every `tile` and `checker` floor (and room zone) as one smooth
   white surface, no lines or checker squares, whatever the template's floor color; dark rooms and outdoor places (`outdoor`:
-  parks, the Quad, plazas) keep their ground. The parks and the Quad are grass (#9CCB82) with paved paths as room zones.
+  parks, the Quad, plazas) keep their ground. The parks and the Quad are lush grass (#4C9A3F, one solid color: outdoor ground gets no speckle
+  or light wash) with paved paths as room zones; no lawn patches (owner, Nov 20); the track sits inside its grass with room around it.
 - Players see "Crew" for their invited friends; code, types and database tables still say `clique`
   (renaming stored data isn't worth the risk). Keep player-facing copy on "crew".
 - Culture packs (docs/culture/, one at a time, only when the owner says "Build C<number>"): slang, invented stand-ins
