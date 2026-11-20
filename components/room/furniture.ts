@@ -1227,6 +1227,38 @@ function buildBoxFurniture(item: RoomItem, k: Kit, opts: { night: boolean }): Bu
       }
       return { group: g };
     }
+    case "heatLamp": {
+      // A patio heater: a tall steel pole, a reflector hat and a glowing element under it.
+      cyl(0.22, 0.25, 0.08, METAL, 0, 0, 0, 12);
+      cyl(0.035, 0.035, 2.1, METAL, 0, 0.08, 0, 8);
+      const el = cyl(0.12, 0.12, 0.3, glow("#FF7A2E", 1.8), 0, 1.75, 0, 10);
+      const hat = new Mesh(k.geo(new ConeGeometry(0.42, 0.22, 14, 1, true)), k.mat("#B8B2A8", { metalness: 0.6, roughness: 0.3 }));
+      hat.position.y = 2.25; g.add(hat);
+      return { group: g, tick: (t) => { (el.material as MeshStandardMaterial).emissiveIntensity = (opts.night ? 1.8 : 1.0) + Math.sin(t * 2.3 + item.x) * 0.2; } };
+    }
+    case "roundDining": {
+      // A round marble table and four chairs (the box-built stand-in for the modeled dining set).
+      cyl(0.5, 0.5, 0.04, "#EDEAE4", 0, 0.72, 0, 18);
+      cyl(0.06, 0.18, 0.72, BLACK, 0, 0, 0, 10);
+      for (let i = 0; i < 4; i++) {
+        const a = (i / 4) * Math.PI * 2 + Math.PI / 4, cx = Math.cos(a) * 0.75, cz = Math.sin(a) * 0.75;
+        box(0.42, 0.06, 0.42, "#CBBFA9", cx, 0.45, cz);
+        for (const sx of [-1, 1]) for (const sz of [-1, 1]) cyl(0.015, 0.015, 0.45, METAL, cx + sx * 0.17, 0, cz + sz * 0.17, 6);
+        box(0.42, 0.42, 0.05, "#CBBFA9", cx - Math.cos(a) * 0.19, 0.5, cz - Math.sin(a) * 0.19).lookAt(0, 0.7, 0);
+      }
+      return { group: g };
+    }
+    case "planter": {
+      // A long timber planter with clipped shrubs.
+      box(w, 0.55, d, "#6B4A2B");
+      box(w - 0.06, 0.04, d - 0.06, "#3A2A1E", 0, 0.55, 0);
+      const n = Math.max(2, Math.round(w / 0.45));
+      for (let i = 0; i < n; i++) {
+        const b = new Mesh(k.geo(new DodecahedronGeometry(0.24)), k.mat(i % 2 ? "#4E7A3A" : "#5E8C45"));
+        b.position.set(-w / 2 + (w * (i + 0.5)) / n, 0.78, 0); b.scale.y = 0.85; g.add(b);
+      }
+      return { group: g };
+    }
     case "chandelier": {
       // A brass ring of candle lights on a chain (the box-built stand-in).
       const brass = k.mat("#C9A227", { metalness: 0.5, roughness: 0.35 });

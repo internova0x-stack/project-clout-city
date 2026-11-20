@@ -197,3 +197,17 @@ test("the big clubs (Nov 20): every club's floors fit, with its signature piece 
     }
   }
 });
+
+test("the rooftops (Nov 20): an open roof with the skyline, its signature piece, dining that works", () => {
+  for (const id of ["altitude-718", "ditmars-heights-rooftop", "up-on-thirty"]) {
+    const p = PLACES.find((x) => x.id === id)!;
+    const t = placeRoom(p)!;
+    assert.match(t.id, /^rooftop:/, id);
+    assert.ok(t.open && t.skyline, `${id} is open to the sky`);
+    assert.ok(t.items.some((i) => i.id.startsWith("sig-")), `${id} has its signature piece`);
+    assert.ok(t.items.some((i) => i.use?.kind === "action" && (i.use as { actionId: string }).actionId === "eat"), `${id}: dining is in the room`);
+    for (const i of t.items) assert.ok(placementOk(t, t.items, i), `${t.id}/${i.id}`);
+    const grid = makeGrid(t, t.items);
+    for (const i of t.items.filter((x) => x.use)) assert.ok(findPath(grid, t.spawn, useSpot(i)).length > 0, `${t.id}/${i.id} can be reached`);
+  }
+});

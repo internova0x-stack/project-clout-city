@@ -451,6 +451,11 @@ components live in `app/globals.css`.
   262144/524288, never sold); npcs with `costume: "gogo"` wear `gogoPieces(i)` (lib/avatarCatalog.ts) with knee boots on the female
   body (`?outfit=gogo` in /preview/moves). The dance clip dances on the spot (baseAvatar `danceInPlace`: the female clip's hips
   wandered a meter).
+  The rooftops (owner, Nov 20: "next the rooftops"): Altitude 718, Ditmars Heights and Up on Wythe are `rooftop` (24 × 16 m, open,
+  `PLACE_GROUND`): the bar along the back, six round marble dining sets (`roundDining`, the dining action) under string lights and
+  heat lamps (`heatLamp`), planters (`planter`), a front lounge and sun loungers; `skyline` draws the roof's own building under the
+  deck and the city around it (lower roofs close by, taller towers farther off; windows lit at night). Signature pieces: the fire
+  pit, the cabana and the water tower.
 - Rate limits (migration 0126, owner Oct 27): PostgREST's pre-request hook (`pgrst.db_pre_request` = `check_request()`) counts each
   signed-in player's writes per minute (`rate_counters`, `rate_hit`): 240 in all, plus buckets for guesses (hunt answers, exams,
   gossip, name checks: 20), reviewed posts (10), chat (30) and checkouts (10). Reads, signed-out requests and the service role are

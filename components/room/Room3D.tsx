@@ -293,6 +293,46 @@ export default function Room3D(props: Room3DProps) {
       }
     }
 
+    // A rooftop (owner, Nov 20): the city all around beyond the parapet. Towers rise from far below the roof to well above
+    // it, in rows behind the back and left walls; their windows light up at night. Seeded, so the view never changes.
+    if (template.skyline) {
+      const c = document.createElement("canvas");
+      c.width = c.height = 64;
+      const g2 = c.getContext("2d")!;
+      g2.fillStyle = night ? "#2A2F3D" : "#E4E0D8"; g2.fillRect(0, 0, 64, 64);
+      let seed = 7;
+      const rnd = () => ((seed = (seed * 48271) % 2147483647) / 2147483647);
+      for (let y = 3; y < 64; y += 8) for (let x = 3; x < 64; x += 8) {
+        g2.fillStyle = night ? (rnd() < 0.55 ? (rnd() < 0.7 ? "#FFD58A" : "#9FD4FF") : "#3B4256") : rnd() < 0.15 ? "#B9CFE3" : "#7E97B0";
+        g2.fillRect(x, y, 4, 5);
+      }
+      const win = new CanvasTexture(c);
+      win.colorSpace = SRGBColorSpace; win.wrapS = win.wrapT = RepeatWrapping;
+      const n = lowGraphics() ? 26 : 52;
+      const tones = ["#8C95A6", "#A7A29A", "#6F7787", "#B9B3A8", "#7D8698"];
+      const tower = (bw: number, bd: number, top: number, x: number, z: number, color: string) => {
+        const h = top + 60;
+        const t2 = win.clone(); t2.needsUpdate = true; t2.repeat.set(Math.max(1, Math.round(bw / 1.2)), Math.max(1, Math.round(h / 1.6)));
+        const side = new MeshStandardMaterial({ color, map: t2, emissive: "#ffffff", emissiveMap: t2, emissiveIntensity: night ? 0.9 : 0.05, roughness: 0.9 });
+        const roof = new MeshStandardMaterial({ color: night ? "#3A3D45" : "#9C9A94", roughness: 1 });
+        const m = new Mesh(new BoxGeometry(bw, h, bd), [side, side, roof, side, side, side]);
+        m.position.set(x, top - h / 2, z);
+        scene.add(m);
+      };
+      // The roof's own building, under the deck.
+      tower(template.w + 0.3, template.d + 0.3, -0.06, 0, 0, "#9A9488");
+      // Neighbors: mostly lower than this roof close by (we're high up), a few taller towers farther off.
+      for (let i = 0; i < n; i++) {
+        const back = i % 3 !== 0;
+        const away = 5 + rnd() * 30;
+        const tall = away > 16 && rnd() < 0.45;
+        const top = tall ? 2 + rnd() * 18 : -16 + rnd() * 13;
+        const bw = 3 + rnd() * 5, bd = 3 + rnd() * 5;
+        if (back) tower(bw, bd, top, -template.w / 2 - 16 + rnd() * (template.w + 26), -template.d / 2 - away, tones[i % tones.length]);
+        else tower(bw, bd, top, -template.w / 2 - away, -template.d / 2 - 12 + rnd() * (template.d + 8), tones[i % tones.length]);
+      }
+    }
+
     // Room shell: floor, two cutaway walls, trim and a window or sign.
     const room = new Group();
     const floorTex = floorTexture(template, night, dream);
@@ -460,7 +500,7 @@ export default function Room3D(props: Room3DProps) {
     // Dream mood: haze toward the sky color, and a few slow motes of light.
     const motes: Mesh[] = [];
     if (dream) {
-      scene.fog = new Fog(derivedBackdrop(template, daytime).haze, 32, 60);
+      scene.fog = new Fog(derivedBackdrop(template, daytime).haze, template.skyline ? 70 : 32, template.skyline ? 130 : 60);
       const moteMat = new MeshStandardMaterial({ color: "#ffffff", emissive: night ? "#FFE6B0" : "#ffffff", emissiveIntensity: 0.9, transparent: true, opacity: 0.85 });
       for (let i = 0; i < 9; i++) {
         const m = new Mesh(kit.geo(new BoxGeometry(0.07, 0.07, 0.07)), moteMat);

@@ -46,7 +46,9 @@ export type FurnitureKind =
   | "phoneBank" | "warTable" | "pressBackdrop" | "campaignBanner" | "flagStand" | "pendantLamp" | "waterCooler" | "pollBoard"
   | "rallyStage" | "stringLights" | "patioUmbrella" | "sectional" | "chandelier"
   // The big clubs (owner, Nov 20: "a bar, a stage with go-go dancers, a vip, lighting"): the DJ stage, podiums, video walls
-  | "djStage" | "gogoPodium" | "ledWall" | "clubPillar" | "velvetRope";
+  | "djStage" | "gogoPodium" | "ledWall" | "clubPillar" | "velvetRope"
+  // The rooftops (owner, Nov 20): heat lamps, round dining sets and long planters
+  | "heatLamp" | "roundDining" | "planter";
 
 export type ItemUse =
   | { kind: "action"; actionId: string }
@@ -125,6 +127,8 @@ export interface RoomTemplate {
   open?: boolean;
   /** The big clubs: moving light beams from a rig over the floor and colored pools of light sweeping the floor. */
   clubLights?: boolean;
+  /** A rooftop: the city's towers all around beyond the parapet, their windows lit at night. */
+  skyline?: boolean;
   items: RoomItem[];
   /** Where the avatar enters. */
   spawn: [number, number];
@@ -214,6 +218,9 @@ export const FURNITURE: Record<FurnitureKind, { w: number; d: number; walkable?:
   ledWall: { w: 8.0, d: 0.15, walkable: true, label: "Video wall" },
   clubPillar: { w: 0.6, d: 0.6, label: "Pillar" },
   velvetRope: { w: 2.0, d: 0.25, label: "Velvet rope" },
+  heatLamp: { w: 0.5, d: 0.5, label: "Heat lamp" },
+  roundDining: { w: 2.0, d: 2.0, label: "Table" },
+  planter: { w: 1.8, d: 0.5, label: "Planter" },
   cubicle: { w: 1.6, d: 1.5, label: "Cubicle" },
   glassWall: { w: 3.0, d: 0.12, label: "Glass wall" },
   displayCase: { w: 0.9, d: 0.9, label: "Display case" },
@@ -520,7 +527,7 @@ export function homeTemplate(homeId: string | null | undefined, houseSku?: strin
   return (houseSku && HOME_TEMPLATES[houseSku]) || HOME_TEMPLATES[homeId ?? ""] || HOME_TEMPLATES.astoria_studio;
 }
 
-export type PlaceTemplateId = "campaignGround" | "campaignWar" | "campaignRoof" | "clubBig" | "vipBig" | "restroom" | "vip" | "club" | "cafe" | "counter" | "lounge" | "store" | "showroom" | "campus" | "unisphere" | "gantries" | "lotto" | "office" | "officeSmall" | "officeBig" | "towerLobby" | "techFloor" | "execFloor" | "newsroom" | "streamHouse" | "streamFloor" | "atelier" | "tradingFloor" | "lawOffice" | "backRoom" | "civic" | "gym" | "plaza" | "penthouse" | "radio" | "broadcast" | "hub" | "hubGames" | "hubLounge" | "campusQuad" | "campusLibrary" | "campusDining" | "campusGreek";
+export type PlaceTemplateId = "campaignGround" | "campaignWar" | "campaignRoof" | "clubBig" | "vipBig" | "rooftop" | "restroom" | "vip" | "club" | "cafe" | "counter" | "lounge" | "store" | "showroom" | "campus" | "unisphere" | "gantries" | "lotto" | "office" | "officeSmall" | "officeBig" | "towerLobby" | "techFloor" | "execFloor" | "newsroom" | "streamHouse" | "streamFloor" | "atelier" | "tradingFloor" | "lawOffice" | "backRoom" | "civic" | "gym" | "plaza" | "penthouse" | "radio" | "broadcast" | "hub" | "hubGames" | "hubLounge" | "campusQuad" | "campusLibrary" | "campusDining" | "campusGreek";
 
 // v0.11 (spec section 11): every place can be entered. The shared templates take a place's own
 // actions: "*0" and "*1" are its first and second action (see placeRoom), so one office serves the
@@ -547,6 +554,56 @@ export const PLACE_TEMPLATES: Record<PlaceTemplateId, RoomTemplate> = {
     npcs: [
       { x: -1.4, z: -1.75, facing: 3.14 }, { x: 0.8, z: -1.75, facing: 3.14 }, { x: 0.3, z: -1.0, facing: -2.2 },
       { x: -0.6, z: 2.3, facing: 3.14, seated: true },
+    ],
+  },
+  // ---- The rooftops (owner, Nov 20: "next the rooftops") ----
+  // Altitude 718, Ditmars Heights and Up on Wythe: a 24 × 16 m roof terrace behind a parapet with the skyline all around. The
+  // bar along the back, round marble tables under string lights and heat lamps (dining is the place's action), a lounge in the
+  // front corner, planters along the edges; each roof's signature piece (PLACE_SIGNATURE) stands in the middle of the deck.
+  rooftop: {
+    id: "rooftop", w: 24, d: 16, wall: "#CFC6B8", wallAccent: "#B8743A", floor: "#8A6A4E", floorKind: "wood", open: true, skyline: true,
+    rooms: [
+      { name: "Bar", x0: -12, z0: -8, x1: -1, z1: -3, floor: "#4A4038", floorKind: "tile" },
+      { name: "Dining", x0: -1, z0: -8, x1: 12, z1: 1.5, floor: "#D9D2C5", floorKind: "tile" },
+    ],
+    items: [
+      // The bar along the back parapet.
+      { id: "bar", kind: "bar", x: -8.2, z: -7.4, rot: 0, color: "#6B4A2B" },
+      { id: "bar-2", kind: "bar", x: -4.9, z: -7.4, rot: 0, color: "#6B4A2B" },
+      ...[-9.4, -8.3, -7.2, -6.1, -5.0, -3.9].map((x, i) => ({ id: `stool-${i + 1}`, kind: "barStool" as const, x, z: -6.5, rot: 0, model: "barStool" })),
+      { id: "bar-plant", kind: "plant", x: -11.5, z: -7.5, rot: 0, model: "figTree" },
+      // Dining: six round marble tables under string lights, heat lamps between them.
+      { id: "table-1", kind: "roundDining", x: 2.5, z: -1.6, rot: 0, use: MAIN(0), label: "*", model: "diningSet" },
+      ...[[6.0, -1.6], [9.5, -1.6], [2.5, -5.2], [6.0, -5.2], [9.5, -5.2]].map(([x, z], i) => ({ id: `table-${i + 2}`, kind: "roundDining" as const, x, z, rot: 0, model: "diningSet" })),
+      { id: "lights-1", kind: "stringLights", x: 1.5, z: -3.4, rot: 0 },
+      { id: "lights-2", kind: "stringLights", x: 1.5, z: 2.6, rot: 0 },
+      { id: "heat-1", kind: "heatLamp", x: 4.25, z: -3.4, rot: 0 },
+      { id: "heat-2", kind: "heatLamp", x: 7.75, z: -3.4, rot: 0 },
+      { id: "heat-3", kind: "heatLamp", x: -1.5, z: 4.6, rot: 0 },
+      { id: "heat-4", kind: "heatLamp", x: 6.8, z: 4.4, rot: 0 },
+      ...[2.5, 6.0, 9.5].map((x, i) => ({ id: `planter-back-${i}`, kind: "planter" as const, x, z: -7.6, rot: 0 })),
+      { id: "planter-left-1", kind: "planter", x: -11.6, z: -0.6, rot: 1 },
+      { id: "planter-left-2", kind: "planter", x: -11.6, z: 2.6, rot: 1 },
+      { id: "dining-plant", kind: "plant", x: 11.5, z: -7.5, rot: 0, model: "figTree" },
+      // The lounge in the front corner.
+      { id: "lounge-sofa-1", kind: "sofa", x: -8.6, z: 7.3, rot: 2, color: "#EDE6D6", model: "sofa" },
+      { id: "lounge-table-1", kind: "coffeeTable", x: -8.6, z: 6.1, rot: 0, model: "marbleTable" },
+      { id: "lounge-sofa-2", kind: "sofa", x: -4.4, z: 7.3, rot: 2, color: "#EDE6D6", model: "sofa", use: sit, label: "Sit" },
+      { id: "lounge-table-2", kind: "coffeeTable", x: -4.4, z: 6.1, rot: 0, model: "marbleTable" },
+      { id: "lounge-chair-1", kind: "armchair", x: -10.5, z: 5.7, rot: 1, model: "k:loungeDesignChair" },
+      { id: "lounge-chair-2", kind: "armchair", x: -2.5, z: 5.7, rot: 3, model: "k:loungeDesignChair" },
+      { id: "lounge-plant", kind: "plant", x: -11.5, z: 7.5, rot: 0, model: "monstera" },
+      // Sun loungers in the far corner, with a planter between them and the dining.
+      { id: "sunbed-1", kind: "armchair", x: 9.2, z: 6.8, rot: 2, model: "k:loungeChair" },
+      { id: "sunbed-2", kind: "armchair", x: 11.0, z: 6.8, rot: 2, model: "k:loungeChair" },
+      { id: "planter-front", kind: "planter", x: 10.0, z: 3.4, rot: 0 },
+    ],
+    spawn: [1.0, 6.6],
+    npcs: [
+      { x: -7.0, z: -7.85, facing: 0 }, { x: -8.3, z: -6.5, facing: 3.14, seated: true }, { x: -5.0, z: -6.5, facing: 3.14, seated: true },
+      { x: 1.6, z: -0.8, facing: 2.4 }, { x: 6.9, z: -4.4, facing: -2.4 }, { x: 9.5, z: -2.7, facing: 0 }, { x: 3.4, z: -6.0, facing: 0.8 },
+      { x: -8.6, z: 7.2, facing: 3.14, seated: true }, { x: -4.4, z: 7.2, facing: 3.14, seated: true },
+      { x: -1.2, z: 3.8, facing: 2.2 }, { x: 6.2, z: 3.6, facing: -0.8 }, { x: 0.4, z: 2.0, facing: 1.4 },
     ],
   },
   // ---- The big clubs (owner, Nov 20: "Start with the clubs"; then the references: "a bar, a stage with go-go dancers, a vip,
@@ -1725,6 +1782,8 @@ export const PLACE_GROUND: Record<string, PlaceTemplateId> = {
   "campaign-hq": "campaignGround",
   // The big clubs (owner, Nov 20); their VIP floor is vipBig (placeFloor).
   "velvet-static": "clubBig", "hellgate-hall": "clubBig", "the-sticky-floor": "clubBig", "discount-disco": "clubBig", "ultraviolet-society": "clubBig",
+  // The rooftops (owner, Nov 20).
+  "altitude-718": "rooftop", "ditmars-heights-rooftop": "rooftop", "up-on-thirty": "rooftop",
 };
 
 /**
@@ -1737,6 +1796,10 @@ export const PLACE_SIGNATURE: Record<string, { add?: RoomItem[]; models?: Record
   "hellgate-hall": { add: [{ id: "sig-kiln", kind: "booth", x: -10.2, z: 8.3, rot: 2, color: "#FF5A36", model: "kilnBar", name: "The kiln" }] },
   "the-sticky-floor": { add: [{ id: "sig-jukebox", kind: "arcade", x: -10.2, z: 8.4, rot: 2, color: "#3DDC97", model: "jukebox", name: "The jukebox" }] },
   "discount-disco": { models: Object.fromEntries(["floor", "floor-2", "floor-3", "floor-4", "floor-5", "floor-6"].map((id) => [id, "discoFloor"])) },
+  // The rooftops' signature pieces stand in the middle of the deck (rooftop: around x -5.5, z 1.2), the water tower at the back.
+  "altitude-718": { add: [{ id: "sig-firepit", kind: "sectional", x: -5.5, z: 1.0, rot: 0, model: "firePit", name: "The fire pit" }] },
+  "ditmars-heights-rooftop": { add: [{ id: "sig-cabana", kind: "sectional", x: -5.5, z: 1.0, rot: 0, color: "#F4F1EA", model: "cabana", name: "The cabana" }] },
+  "up-on-thirty": { add: [{ id: "sig-tower", kind: "tree", x: -10.6, z: -4.4, rot: 0, model: "waterTower", name: "The water tower" }] },
   "ultraviolet-society": {
     add: [
       { id: "sig-pod-1", kind: "armchair", x: -10.8, z: 8.2, rot: 2, color: "#9B5CFF", model: "uvPod", name: "UV pod" },
@@ -2222,7 +2285,7 @@ export const PLAYER_SLOTS: Record<PlaceTemplateId, number> = {
   restroom: 3, vip: 4, club: 6, cafe: 5, counter: 4, lounge: 5, store: 5, showroom: 7, campus: 6, lotto: 4,
   unisphere: 7, gantries: 7, office: 5, officeSmall: 3, officeBig: 7, towerLobby: 6, techFloor: 7, execFloor: 6, newsroom: 7, streamHouse: 6, streamFloor: 7, atelier: 6, tradingFloor: 7, lawOffice: 6, backRoom: 3, civic: 5, gym: 5, plaza: 7, penthouse: 10, radio: 4, broadcast: 5,
   hub: 7, hubGames: 7, hubLounge: 7, campusQuad: 7, campusLibrary: 5, campusDining: 6, campusGreek: 7,
-  campaignGround: 12, campaignWar: 10, campaignRoof: 14, clubBig: 14, vipBig: 7,
+  campaignGround: 12, campaignWar: 10, campaignRoof: 14, clubBig: 14, vipBig: 7, rooftop: 14,
 };
 /** The player figures a room holds (its party spots, or PLAYER_SLOTS by template; floors are "vip:place"). */
 export function playerSlots(t: RoomTemplate): number {
