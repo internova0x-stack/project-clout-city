@@ -29,7 +29,9 @@ export type GuideCheck =
    *  business, a job on the players' Jobs board (posted or taken). */
   | { has: "aspiration" | "job" | "workday" | "office_move" | "business" | "board_job" | "hunt_step" | "shoutout"
       | "layout" | "placed_piece" | "home_plan" | "garden" | "moved_up" | "hosted"
-      | "skill_task" | "skill2" | "skill3" | "look_saved" | "fashion" | "dressed_out" };
+      | "skill_task" | "skill2" | "skill3" | "look_saved" | "fashion" | "dressed_out"
+      | "message" | "crush" | "couple" | "moved_in" | "gift" | "choice" | "favor" | "held" | "underworld"
+      | "enrolled" | "exam_pass" | "crown_race" | "campaign" | "campaign_week" | "biz_upgrade" | "tv" | "mayor_letter" };
 
 export interface GuideCard { art: string; t: string; b: string }
 export interface GuideStep {
@@ -50,6 +52,9 @@ export interface GuideStep {
   check: GuideCheck;
   /** A step that opens later than its chapter (Rank 2 for businesses and the Jobs board): until then the Guide skips it. */
   opens?: { rank?: number; day?: number };
+  /** Not every player can or wants to (dating, Pablo, holding): it pays, but the chapter doesn't wait for it, and its tip
+   *  card offers "Skip this one" (kept on the device). */
+  optional?: boolean;
   reward: { cash?: number; clout?: number };
   /** The banner when it's done. */
   done: string;
@@ -65,6 +70,8 @@ export interface GuideChapter {
   reward: { cash?: number; clout?: number };
   /** False until its steps are written: shown as "Coming soon". */
   live: boolean;
+  /** Finished after any this many of its steps (Big plays: three); otherwise every step that isn't optional. */
+  need?: number;
 }
 
 export const CHAPTERS: GuideChapter[] = [
@@ -75,10 +82,10 @@ export const CHAPTERS: GuideChapter[] = [
   { n: 5, title: "Home", day: 3, badge: "Landlord's Nightmare", badgeId: "guide-5", reward: { cash: 400 }, live: true },
   { n: 6, title: "Skills", day: 3, badge: "Multi-Hyphenate", badgeId: "guide-6", reward: { clout: 100 }, live: true },
   { n: 7, title: "Style", day: 2, badge: "Main Character Fit", badgeId: "guide-7", reward: { clout: 100 }, live: true },
-  { n: 8, title: "People", day: 2, badge: "Plus One", badgeId: "guide-8", reward: { clout: 150 }, live: false },
-  { n: 9, title: "Choices", day: 1, badge: "It's Complicated", badgeId: "guide-9", reward: { clout: 100 }, live: false },
-  { n: 10, title: "Big plays", rank: 2, badge: "Big Plans", badgeId: "guide-10", reward: { clout: 200 }, live: false },
-  { n: 11, title: "The city", day: 4, badge: "Well Informed", badgeId: "guide-11", reward: { clout: 100 }, live: false },
+  { n: 8, title: "People", day: 2, badge: "Plus One", badgeId: "guide-8", reward: { clout: 150 }, live: true },
+  { n: 9, title: "Choices", day: 1, badge: "It's Complicated", badgeId: "guide-9", reward: { clout: 100 }, live: true },
+  { n: 10, title: "Big plays", rank: 2, badge: "Big Plans", badgeId: "guide-10", reward: { clout: 200 }, live: true, need: 3 },
+  { n: 11, title: "The city", day: 4, badge: "Well Informed", badgeId: "guide-11", reward: { clout: 100 }, live: true },
 ];
 
 // "text:Map" is a visible button whose words are exactly "Map" (the tab bar's buttons have no label of their own).
@@ -620,6 +627,239 @@ STEPS.push(
   },
 );
 
+// ---- Chapter 8: People. Only the first three are needed for the chapter: dating, together plans and gifts need other people.
+STEPS.push(
+  {
+    id: "8.1", chapter: 8, tag: "Crew", tip: "Invite your crew.",
+    cards: [
+      { art: "📨", t: "Bring your friends.", b: "Share your invite link. Each friend who joins pays you, and a full crew pays a bonus." },
+      { art: "🧑‍🤝‍🧑", t: "Crews do things together.", b: "Crew outings, together bonuses, decorating each other's homes. It's more fun with people." },
+    ],
+    hint: "Tap Invite your Crew", targets: ["text:Invite your Crew"],
+    check: { seen: true }, reward: { clout: 30 }, done: "Invites out. Popularity pending.",
+  },
+  {
+    id: "8.2", chapter: 8, tag: "People", tip: "Meet people where they are.",
+    cards: [
+      { art: "👋", t: "Real players are out there.", b: "People with a blue name tag are other players. Tap one to see their card." },
+      { art: "🛡️", t: "You're in charge.", b: "Block or report anyone from their card. Blocked players can't see or reach you." },
+    ],
+    hint: "Tap another player to open their card", targets: [".map-pin", ".compact-dot", MAP],
+    check: { seen: true }, reward: { clout: 15 }, done: "Card opened. Very forward of you.",
+  },
+  {
+    id: "8.3", chapter: 8, tag: "Messages", tip: "Slide into the DMs. Respectfully.",
+    cards: [
+      { art: "💬", t: "Message anyone you've met.", b: "From their card. Everyone gets 20 messages a day; VIP is unlimited." },
+      { art: "🤝", t: "Chats open doors.", b: "People you talk to can be invited over, gifted things and hired on the Jobs board." },
+    ],
+    hint: "Send a player a message", targets: [PHONE],
+    check: { has: "message" }, reward: { clout: 15 }, done: "Message sent. Now wait. Don't double text.",
+  },
+  {
+    id: "8.4", chapter: 8, tag: "Together", tip: "Better together.", optional: true,
+    cards: [
+      { art: "🚕", t: "Plans with your crew pay more.", b: "Go somewhere together, share a ride, decorate someone's home. Together bonuses pay both of you." },
+      { art: "📅", t: "Plan it in Messages.", b: "Pick a crewmate, pick a plan, meet there." },
+    ],
+    hint: "Make a together plan with a crewmate", targets: [PHONE],
+    check: { ledger: ["together"] }, reward: { clout: 30 }, done: "Together bonus. Friendship, monetized.",
+  },
+  {
+    id: "8.5", chapter: 8, tag: "Dating", tip: "A crush.", optional: true, opens: { day: 7 },
+    cards: [
+      { art: "💘", t: "Crushes are private until they match.", b: "Crush on someone from their card. If they crush back, it's a match." },
+      { art: "🗓️", t: "Then plan a date night.", b: "A match can invite you to one of Lola's date spots, or you invite them." },
+    ],
+    hint: "Crush on a player from their card", targets: [PHONE],
+    check: { has: "crush" }, reward: { clout: 15 }, done: "Crush logged. Your secret's safe.",
+  },
+  {
+    id: "8.6", chapter: 8, tag: "Dating", tip: "Date night.", optional: true, opens: { day: 7 },
+    cards: [
+      { art: "🕯️", t: "Both of you show up.", b: "Be at the spot at the time. A date night that happens pays you both Mood and clout." },
+      { art: "🌧️", t: "Rain checks happen.", b: "If one of you doesn't come, it's a rain check, or a stood up. Try again." },
+    ],
+    hint: "Go on a date night with a match", targets: [PHONE],
+    check: { ledger: ["date_night"] }, reward: { clout: 40 }, done: "Date night done. Cute.",
+  },
+  {
+    id: "8.7", chapter: 8, tag: "Couples", tip: "Make it official.", optional: true, opens: { day: 7 },
+    cards: [
+      { art: "💞", t: "Three dates, then ask.", b: "After three date nights you can make it official. Couples get a streak, anniversaries and gifts." },
+      { art: "🧾", t: "Us keeps score.", b: "Your couple screen is in Messages: the streak, the next anniversary, the gift box." },
+    ],
+    hint: "Ask your match to make it official in Us", targets: [PHONE],
+    check: { has: "couple" }, reward: { cash: 200 }, done: "It's official. Change your bio.",
+  },
+  {
+    id: "8.8", chapter: 8, tag: "Couples", tip: "Move in together.", optional: true, opens: { day: 14 },
+    cards: [
+      { art: "🏠", t: "A week official, then move in.", b: "One of you hosts. The rent splits, and \"Home together\" pays you both once a day." },
+      { art: "📦", t: "Either of you can move out.", b: "The host keeps the home; the other moves to the cheapest place, furniture and all." },
+    ],
+    hint: "Ask your partner to move in from Us", targets: [PHONE],
+    check: { has: "moved_in" }, reward: { clout: 40 }, done: "Moved in. Toothbrushes merged.",
+  },
+  {
+    id: "8.9", chapter: 8, tag: "Gifts", tip: "Gifts.", optional: true, opens: { rank: 2 },
+    cards: [
+      { art: "🎁", t: "Send a friend a Shop piece.", b: "Up to five a week. They can accept or decline; declined gifts come back." },
+      { art: "🔒", t: "Gifts can't be flipped.", b: "An accepted gift can't be sold back to the game for 14 days." },
+    ],
+    hint: "Send a gift from a friend's card", targets: [PHONE],
+    check: { has: "gift" }, reward: { clout: 20 }, done: "Gift sent. Generous. Suspicious.",
+  },
+  // ---- Chapter 9: Choices. Holding, Pablo and the Gala only happen to some players, so they're optional.
+  {
+    id: "9.1", chapter: 9, tag: "Choices", tip: "New York will test you.",
+    cards: [
+      { art: "🃏", t: "Situations come up.", b: "After a trip, a shift, a meal or a hangout, the city sometimes hands you a choice. Each option says what you get and what it costs." },
+      { art: "⏳", t: "Some choices come back.", b: "A day or a week later, what you did can pay off, or catch up with you." },
+      { art: "😇", t: "Halo or Hustler.", b: "Your choices slowly move a private meter. Both ends pay, in different ways. Only you see it." },
+    ],
+    hint: "Make a choice when one comes up", targets: [MAP],
+    check: { has: "choice" }, reward: { clout: 20 }, done: "Decided. No take-backs.",
+  },
+  {
+    id: "9.2", chapter: 9, tag: "Regulars", tip: "Do someone a favor.",
+    cards: [
+      { art: "🤝", t: "Regulars ask favors.", b: "Talk to the regular at a place and they may need a hand. Helping moves your friendship along." },
+      { art: "❤️", t: "Friendly, Friend, Family.", b: "Friends treat you once a week. Family will do you a big favor once a month." },
+    ],
+    hint: "Talk to a regular and help with a favor", targets: [MAP],
+    check: { has: "favor" }, reward: { cash: 50 }, done: "Favor done. They'll remember.",
+  },
+  {
+    id: "9.3", chapter: 9, tag: "Holding", tip: "If you end up on the bench.", optional: true,
+    cards: [
+      { art: "🚔", t: "Some choices end at the precinct.", b: "Up to three hours in holding. You can pay bail, or call in a favor from Sgt. Bev." },
+      { art: "📱", t: "Your phone still works.", b: "Holding stops tasks and trips, not your Phone. Time served counts down on its own." },
+    ],
+    hint: "Only if it happens: get out of holding", targets: [MAP],
+    check: { has: "held" }, reward: { clout: 15 }, done: "Out. Sgt. Bev says don't come back.",
+  },
+  {
+    id: "9.4", chapter: 9, tag: "Pablo", tip: "Pablo would like a word.", optional: true, opens: { rank: 2 },
+    cards: [
+      { art: "🧳", t: "There's a back room behind the luggage shop.", b: "Pablo invites a certain kind of player. His jobs pay well and come with Heat." },
+      { art: "🌡️", t: "Heat cools down.", b: "Lie low and it drops. Get caught and it's a fine and the bench, never your home or job." },
+    ],
+    hint: "Only if Pablo invites you: open his back room", targets: [MAP],
+    check: { has: "underworld" }, reward: { clout: 20 }, done: "You met Pablo. Don't tell anyone.",
+  },
+  {
+    id: "9.5", chapter: 9, tag: "The Gala", tip: "The Gala.", optional: true,
+    cards: [
+      { art: "🥂", t: "Halo players get invited.", b: "The Charity Gala is on the rooftop once a week. Donate and be seen doing it." },
+      { art: "📸", t: "Generosity pays clout.", b: "The bigger the gift, the bigger the thank-you." },
+    ],
+    hint: "Only with an invite: donate at the Gala", targets: [MAP],
+    check: { ledger: ["gala_donation"] }, reward: { clout: 20 }, done: "Donated. Very philanthropic.",
+  },
+  // ---- Chapter 10: Big plays. Every step is a path; any three finish the chapter.
+  {
+    id: "10.1", chapter: 10, tag: "Campus", tip: "Go back to school.", optional: true,
+    cards: [
+      { art: "🎓", t: "Two campuses in Queens.", b: "Enrol at one. Students get a dorm option, classes, Friday exams and the campus leaderboard." },
+      { art: "📜", t: "A degree helps your career.", b: "Pass three exams and your career starts a level higher." },
+    ],
+    hint: "Enrol at a campus from its card", targets: [".map-pin", ".compact-dot", MAP],
+    check: { has: "enrolled" }, reward: { clout: 30 }, done: "Enrolled. Student loans: pending.",
+  },
+  {
+    id: "10.2", chapter: 10, tag: "Campus", tip: "Go to class.", optional: true,
+    cards: [
+      { art: "📚", t: "Class is a daily task.", b: "When your campus is open, one of your five tasks is going to class." },
+      { art: "🍽️", t: "Campus has more.", b: "The library, the dining hall and Greek Row's party nights." },
+    ],
+    hint: "Attend a class at your campus", targets: [".map-pin", ".compact-dot", MAP],
+    check: { ledger: ["campus_class"] }, reward: { cash: 50 }, done: "Attended. Front row, even.",
+  },
+  {
+    id: "10.3", chapter: 10, tag: "Campus", tip: "Pass an exam.", optional: true,
+    cards: [
+      { art: "📝", t: "Exams are on Fridays.", b: "Answer the questions; 70% passes. Three passes is a degree." },
+      { art: "🙈", t: "Don't get caught.", b: "Cheating can pass an exam. It can also cost you the degree." },
+    ],
+    hint: "Sit an exam at your campus on a Friday", targets: [".map-pin", ".compact-dot", MAP],
+    check: { has: "exam_pass" }, reward: { clout: 40 }, done: "Passed. Mom's framing it.",
+  },
+  {
+    id: "10.4", chapter: 10, tag: "Homecoming", tip: "Run for Homecoming.", optional: true,
+    cards: [
+      { art: "👑", t: "Four weeks to the crown.", b: "Plan your days, keep your grades up, win over the cliques and beat the reigning royal." },
+      { art: "🧑‍🏫", t: "The Dean is watching.", b: "Push too hard and you're off the ballot." },
+    ],
+    hint: "Declare for the crown in Crown HQ", targets: [".map-pin", ".compact-dot", MAP],
+    check: { has: "crown_race" }, reward: { clout: 30 }, done: "Declared. Campaign posters printing.",
+  },
+  {
+    id: "10.5", chapter: 10, tag: "Campaign", tip: "Run a campaign.", optional: true,
+    cards: [
+      { art: "🗳️", t: "Four challengers, one Mayor.", b: "Manage a challenger's campaign against Mayor Papa-Dani, one campaign week a day." },
+      { art: "💼", t: "It's a full-time job.", b: "Your career goes on leave while it runs. The campaign pays you a fee." },
+    ],
+    hint: "Open Campaign in your Phone and pick a candidate", targets: [PHONE],
+    check: { has: "campaign" }, reward: { clout: 40 }, done: "Campaign launched. Vote early.",
+  },
+  {
+    id: "10.6", chapter: 10, tag: "Campaign", tip: "End your first campaign week.", optional: true,
+    cards: [
+      { art: "📊", t: "A week has steps.", b: "Tasks, the inbox, the budget, the calendar and decisions, then End week." },
+      { art: "🗞️", t: "Results come the next day.", b: "The morning paper says how the polls moved." },
+    ],
+    hint: "Finish a campaign week in Campaign HQ", targets: [PHONE],
+    check: { has: "campaign_week" }, reward: { cash: 150 }, done: "Week one done. The polls noticed.",
+  },
+  {
+    id: "10.7", chapter: 10, tag: "Careers", tip: "Get promoted.", optional: true,
+    cards: [
+      { art: "📈", t: "Good weeks lead up.", b: "Strong reviews move you up the ladder: more pay, a new title, more clout." },
+      { art: "🤝", t: "People help.", b: "Your work friend, the boss's trust and the big boss all count." },
+    ],
+    hint: "Keep working good weeks at your job", targets: [PHONE],
+    check: { ledger: ["career_promo"] }, reward: { clout: 40 }, done: "Promoted. New title, same desk.",
+  },
+  {
+    id: "10.8", chapter: 10, tag: "Businesses", tip: "Grow the business.", optional: true,
+    cards: [
+      { art: "🏗️", t: "Upgrades earn more.", b: "Each level of a business earns more while you're away." },
+      { art: "📣", t: "The top of the ladder.", b: "Take a business all the way up and you can take it public." },
+    ],
+    hint: "Upgrade a business in the Businesses app", targets: [PHONE],
+    check: { has: "biz_upgrade" }, reward: { clout: 30 }, done: "Upgraded. Investors are circling.",
+  },
+  // ---- Chapter 11: The city. Only the News is needed; the Big Screen and the Mayor are for those who want them.
+  {
+    id: "11.1", chapter: 11, tag: "News", tip: "Read the news. Or at least the headlines.",
+    cards: [
+      { art: "🗞️", t: "News is the city's front page.", b: "City items, Lola's Blotter, transit delays and the weekly column." },
+      { art: "🌡️", t: "The city has moods too.", b: "Heatwaves, brownouts and festivals change prices and close places. \"Around the city\" lists what's on." },
+    ],
+    hint: "Open News in your Phone", targets: [PHONE],
+    check: { seen: true }, reward: { clout: 15 }, done: "Informed. Dangerous, even.",
+  },
+  {
+    id: "11.2", chapter: 11, tag: "Clout TV", tip: "Get on the Big Screen.", optional: true,
+    cards: [
+      { art: "📺", t: "Send Clout TV a photo.", b: "A photo of you, with your handle. Picks rotate every three hours." },
+      { art: "🔥", t: "Being on screen pays.", b: "If yours is picked, the whole city sees it, and you get clout." },
+    ],
+    hint: "Open Clout TV in your Phone and send a photo", targets: [PHONE],
+    check: { has: "tv" }, reward: { clout: 30 }, done: "Submitted. Practice your surprised face.",
+  },
+  {
+    id: "11.3", chapter: 11, tag: "The Mayor", tip: "Write to the Mayor.", optional: true,
+    cards: [
+      { art: "✉️", t: "The Mayor app goes to the team.", b: "Bugs, ideas, complaints, praise. The team reads every letter and sometimes writes back." },
+      { art: "🏛️", t: "Mayor Papa-Dani says hi.", b: "He'll take credit for anything good that comes of it." },
+    ],
+    hint: "Open the Mayor app in your Phone and send a letter", targets: [PHONE],
+    check: { has: "mayor_letter" }, reward: { clout: 30 }, done: "Letter sent. The Mayor is \"looking into it\".",
+  },
+);
+
 export const stepById = (id: string) => STEPS.find((s) => s.id === id);
 export const chapterSteps = (n: number) => STEPS.filter((s) => s.chapter === n);
 
@@ -627,12 +867,15 @@ export const chapterSteps = (n: number) => STEPS.filter((s) => s.chapter === n);
 export function guideSettings() {
   return {
     steps: Object.fromEntries(STEPS.map((s) => [s.id, { chapter: s.chapter, check: s.check, cash: s.reward.cash ?? 0, clout: s.reward.clout ?? 0 }])),
-    chapters: Object.fromEntries(CHAPTERS.filter((c) => c.live).map((c) => [String(c.n), { badge: c.badgeId, cash: c.reward.cash ?? 0, clout: c.reward.clout ?? 0, steps: chapterSteps(c.n).map((s) => s.id) }])),
+    chapters: Object.fromEntries(CHAPTERS.filter((c) => c.live).map((c) => [String(c.n), {
+      badge: c.badgeId, cash: c.reward.cash ?? 0, clout: c.reward.clout ?? 0,
+      ...(c.need ? { need: c.need, all: chapterSteps(c.n).map((s) => s.id) } : { steps: chapterSteps(c.n).filter((s) => !s.optional).map((s) => s.id) }),
+    }])),
   };
 }
 
 /** The player's Guide: steps paid, steps the game has seen done, chapters paid (guide_state). */
-export interface GuideState { paid: string[]; ready: string[]; chapters: number[]; day: number; rank: number }
+export interface GuideState { paid: string[]; ready: string[]; chapters: number[]; day: number; rank: number; skipped?: string[] }
 
 /** Opens? A chapter is open from its day or rank (and only when its steps are written). */
 export const chapterOpen = (c: GuideChapter, s: Pick<GuideState, "day" | "rank">) => c.live && (c.day === undefined || s.day >= c.day) && (c.rank === undefined || s.rank >= c.rank);
@@ -645,14 +888,17 @@ export const stepOpen = (st: GuideStep, s: Pick<GuideState, "day" | "rank">) =>
 export function nextStep(s: GuideState): GuideStep | null {
   for (const c of CHAPTERS) {
     if (!chapterOpen(c, s)) continue;
-    const step = chapterSteps(c.n).find((x) => !s.paid.includes(x.id) && stepOpen(x, s));
+    const step = chapterSteps(c.n).find((x) => !s.paid.includes(x.id) && stepOpen(x, s) && !(x.optional && s.skipped?.includes(x.id)));
     if (step) return step;
   }
   return null;
 }
 
 /** A finished chapter waiting to pay its badge and reward. */
-export const chapterDue = (s: GuideState) => CHAPTERS.find((c) => c.live && !s.chapters.includes(c.n) && chapterSteps(c.n).every((x) => s.paid.includes(x.id))) ?? null;
+export const chapterDone = (c: GuideChapter, paid: string[]) => (c.need
+  ? chapterSteps(c.n).filter((x) => paid.includes(x.id)).length >= c.need
+  : chapterSteps(c.n).filter((x) => !x.optional).every((x) => paid.includes(x.id)));
+export const chapterDue = (s: GuideState) => CHAPTERS.find((c) => c.live && !s.chapters.includes(c.n) && chapterDone(c, s.paid)) ?? null;
 
 export const rewardText = (r: { cash?: number; clout?: number }) => [r.cash ? `+C$${r.cash.toLocaleString("en-US")}` : "", r.clout ? `+${r.clout} clout` : ""].filter(Boolean).join(" · ");
 

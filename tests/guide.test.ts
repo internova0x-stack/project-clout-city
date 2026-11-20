@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { CHAPTERS, STEPS, chapterDue, chapterSteps, guideSettings, nextStep } from "../lib/guide.ts";
+import { CHAPTERS, STEPS, chapterDone, chapterDue, chapterSteps, guideSettings, nextStep } from "../lib/guide.ts";
 
 const sql = readFileSync(new URL("../supabase/migrations/0170_guide.sql", import.meta.url), "utf8");
 
@@ -33,7 +33,7 @@ test("the next step is the first unpaid one in an open chapter", () => {
   const all = chapterSteps(1).map((s) => s.id);
   assert.equal(nextStep({ ...base, paid: all })?.id, "2.1", "Chapter 2 follows");
   const both = [...all, ...chapterSteps(2).map((s) => s.id)];
-  assert.equal(nextStep({ ...base, paid: both }), null, "Chapter 3 opens on day 2");
+  assert.equal(nextStep({ ...base, paid: both })?.id, "9.1", "on day 1, Choices (which opens on day 1) comes before Money");
   assert.equal(nextStep({ ...base, paid: both, day: 2 })?.id, "3.1");
   const ch3 = chapterSteps(3).map((s) => s.id);
   const early = [...both, ...ch3.filter((id) => id !== "3.10" && id !== "3.11")];
@@ -41,4 +41,17 @@ test("the next step is the first unpaid one in an open chapter", () => {
   assert.equal(nextStep({ ...base, paid: early, day: 2, rank: 2 })?.id, "3.10");
   assert.equal(chapterDue({ ...base, paid: all })?.n, 1);
   assert.equal(chapterDue({ ...base, paid: all, chapters: [1] }), null);
+});
+
+test("optional steps can be skipped and don't hold a chapter back; Big plays needs any three", () => {
+  const base = { paid: [] as string[], ready: [] as string[], chapters: [] as number[], day: 30, rank: 3 };
+  const ch8 = CHAPTERS.find((c) => c.n === 8)!;
+  assert.ok(chapterDone(ch8, ["8.1", "8.2", "8.3"]), "the dating steps are optional");
+  const before8 = STEPS.filter((s) => s.chapter < 8).map((s) => s.id);
+  assert.equal(nextStep({ ...base, paid: [...before8, "8.1", "8.2", "8.3"] })?.id, "8.4", "optional steps are still suggested");
+  assert.equal(nextStep({ ...base, paid: [...before8, "8.1", "8.2", "8.3"], skipped: ["8.4", "8.5", "8.6", "8.7", "8.8", "8.9"] })?.id, "9.1", "until skipped");
+  const ch10 = CHAPTERS.find((c) => c.n === 10)!;
+  assert.ok(!chapterDone(ch10, ["10.1", "10.2"]));
+  assert.ok(chapterDone(ch10, ["10.1", "10.5", "10.7"]), "any three");
+  for (const c of CHAPTERS) assert.ok(c.live, `chapter ${c.n} is written`);
 });

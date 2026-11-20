@@ -20,6 +20,11 @@ game_settings 'guide' to `guideSettings()` (tests/guide.test.ts compares it with
 step's `check` is one of: `seen` (GameShell calls `guideSeenMark` when the screen opens), `ledger` kinds, `gossip`,
 `events`, `streak`. `targets` are CSS selectors (or `text:<button words>`) for the glow, tried in order.
 
+## Optional steps
+Steps some players can't or won't do (dating, gifts, together plans, holding, Pablo, the Gala, Clout TV, the Mayor, every
+Big play) are `optional: true`: they pay when done, the chapter doesn't wait for them, and their tip card has "Not for me:
+skip this one". Big plays finishes after any three of its steps (`need: 3`).
+
 ## Not doing it
 Nothing is locked behind the Guide. "Later" closes the card and the pill stays; steps the player does on their own are
 still noticed and paid; the tip for a step pops up once per device.

@@ -145,4 +145,42 @@ select pg_temp.as_(pg_temp.u(11)::text);
 select pg_temp.assert(public.guide_state() -> 'ready' @> '["6.1", "6.2", "6.3", "6.4", "6.5", "7.1", "7.2", "7.3", "7.4"]', 'every Chapter 6 and 7 step ready');
 select public.guide_claim(s) from unnest(array['6.1', '6.2', '6.3', '6.4', '6.5', '7.1', '7.2', '7.3', '7.4']) s;
 select pg_temp.assert(public.guide_state() -> 'chapters' @> '[6, 7]', 'chapters 6 and 7 paid');
+
+-- ---- Chapter 8: only the three required steps finish it; the optional ones pay on their own ----
+select public.guide_seen(s) from unnest(array['8.1', '8.2']) s;
+reset role;
+insert into public.conversations (a, b) values (least(pg_temp.u(11), pg_temp.u(12)), greatest(pg_temp.u(11), pg_temp.u(12)));
+insert into public.messages (conversation_id, sender, body, ny_date)
+  select id, pg_temp.u(11), 'hi', public.ny_today() from public.conversations where a = least(pg_temp.u(11), pg_temp.u(12));
+set role authenticated;
+select pg_temp.as_(pg_temp.u(11)::text);
+select public.guide_claim(s) from unnest(array['8.1', '8.2']) s;
+select pg_temp.assert(not (public.guide_state() -> 'chapters' @> '[8]'), 'not before the third');
+select pg_temp.assert((public.guide_claim('8.3') ->> 'chapter')::int = 8, 'the required three finish chapter 8');
+reset role;
+insert into public.crushes (player_id, target_id) values (pg_temp.u(11), pg_temp.u(12));
+set role authenticated;
+select pg_temp.as_(pg_temp.u(11)::text);
+select pg_temp.assert((public.guide_claim('8.5') ->> 'clout')::int = 15, 'an optional step still pays');
+
+-- ---- Chapter 10: any three ----
+reset role;
+insert into public.campus_enrolments (player_id, campus, enrolled_on) values (pg_temp.u(11), 'st-johnsons', public.ny_today());
+select public.ledger_once(pg_temp.u(11), 'clout', 5, k, 'x') from unnest(array['campus_class', 'career_promo']) k;
+set role authenticated;
+select pg_temp.as_(pg_temp.u(11)::text);
+select public.guide_claim(s) from unnest(array['10.1', '10.2']) s;
+select pg_temp.assert(not (public.guide_state() -> 'chapters' @> '[10]'), 'two isn''t enough');
+select pg_temp.assert((public.guide_claim('10.7') ->> 'chapter')::int = 10, 'any three finish Big plays');
+
+-- ---- Chapters 9 and 11 ----
+select public.guide_seen('11.1');
+reset role;
+insert into public.choice_log (player_id, card, base, area, day, status) values (pg_temp.u(11), 'c', 'c', 'favor', public.ny_today(), 'chosen');
+insert into public.mayor_letters (player_id, kind, message, ny_date) values (pg_temp.u(11), 'idea', 'More pizza rats please', public.ny_today());
+set role authenticated;
+select pg_temp.as_(pg_temp.u(11)::text);
+select pg_temp.assert(public.guide_state() -> 'ready' @> '["9.1", "9.2", "11.1", "11.3"]', 'a choice, a favor, the News, a letter');
+select public.guide_claim(s) from unnest(array['9.1', '9.2', '11.1']) s;
+select pg_temp.assert(public.guide_state() -> 'chapters' @> '[9, 11]', 'their required steps finish chapters 9 and 11');
 rollback;

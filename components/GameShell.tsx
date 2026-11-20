@@ -2639,7 +2639,18 @@ export function GameShell({
   const myWorth = Math.max(0, otherWorth + (biz ? businessesValue(biz.owned, me.clout) : 0) - (econ?.uncounted ?? 0));
   const myRank = rankFor(me.clout, myWorth);
   // ---- The Guide (migration 0170) ----
-  const guideS: GuideState | null = guide && guideRaw && cityOn ? { ...guideRaw, rank: myRank.level } : null;
+  // Optional steps the player skipped ("Not for me"), kept on this device.
+  const [guideSkipped, setGuideSkipped] = useState<string[]>([]);
+  useEffect(() => {
+    try { setGuideSkipped(JSON.parse(localStorage.getItem("cc-guide-skip") ?? "[]") as string[]); } catch { /* private mode */ }
+  }, []);
+  const skipGuideStep = (id: string) => {
+    const next = [...new Set([...guideSkipped, id])];
+    setGuideSkipped(next);
+    try { localStorage.setItem("cc-guide-skip", JSON.stringify(next)); } catch { /* private mode */ }
+    setGuidePlay(null);
+  };
+  const guideS: GuideState | null = guide && guideRaw && cityOn ? { ...guideRaw, rank: myRank.level, skipped: guideSkipped } : null;
   const guideNext = guideS ? nextStep(guideS) : null;
   const loadGuide = async () => {
     if (!guide || guideBusy.current) return;
@@ -2699,14 +2710,17 @@ export function GameShell({
     if (panel === "homescore") guideSeenMark("5.3");
     if (panel === "shop") { guideSeenMark("5.8"); guideSeenMark("7.4"); }
     if (panel === "skills") guideSeenMark("6.1");
+    if (panel === "invite") guideSeenMark("8.1");
   }, [panel]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (phone.open && phone.app === "messages") guideSeenMark("1.10");
     if (phone.open && phone.app === "gigs") guideSeenMark("3.1");
+    if (phone.open && phone.app === "news") guideSeenMark("11.1");
   }, [phone.open, phone.app]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { if (barksley) guideSeenMark("1.13"); }, [barksley]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { if (inside?.club) guideSeenMark("4.1"); }, [inside?.id]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { if (viewHome) guideSeenMark("5.6"); }, [viewHome]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (cardId && cardId !== player.id) guideSeenMark("8.2"); }, [cardId]); // eslint-disable-line react-hooks/exhaustive-deps
   // Lola's tip for the next step pops up once per step on this device, when nothing else is open.
   guideClear.current = !panel && !place && flow === "none" && !phone.open && !choiceCard && !barksley;
   const guideQuiet = guideClear.current && !welcomeOpen && !trip && !guidePlay;
@@ -4398,9 +4412,12 @@ export function GameShell({
       {unlockReveal && !rankUp && flow === "none" && (
         <UnlockReveal onClose={() => setUnlockReveal(false)} onOpen={() => { setUnlockReveal(false); setPanel(null); setPhone({ open: true, app: null }); }} />
       )}
-      {guidePlay && stepById(guidePlay.id) && !guideS?.paid.includes(guidePlay.id) && (
+      {/* Lola's tip steps aside while a sheet, a place card or the Phone is open (it comes back when they close); the cards and
+          "Show me" stay, since Show me often points inside those. */}
+      {guidePlay && stepById(guidePlay.id) && !guideS?.paid.includes(guidePlay.id) && (guidePlay.phase !== "tip" || (!panel && !place && !phone.open)) && (
         <GuideFlow step={stepById(guidePlay.id)!} phase={guidePlay.phase}
-          onPhase={(ph) => setGuidePlay({ id: guidePlay.id, phase: ph })} onClose={() => setGuidePlay(null)} />
+          onPhase={(ph) => setGuidePlay({ id: guidePlay.id, phase: ph })} onClose={() => setGuidePlay(null)}
+          onSkip={() => skipGuideStep(guidePlay.id)} />
       )}
       <CelebrationHost hold={!!choiceCard || !!trip || flow !== "none" || welcomeOpen || !!cutscene} />
       <ProfileSheet

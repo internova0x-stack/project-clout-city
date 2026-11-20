@@ -36,8 +36,10 @@ export function findTarget(targets: string[]): HTMLElement | null {
 
 export type GuidePhase = "tip" | "cards" | "show";
 
-export function GuideFlow({ step, phase, onPhase, onClose }: {
+export function GuideFlow({ step, phase, onPhase, onClose, onSkip }: {
   step: GuideStep; phase: GuidePhase; onPhase: (p: GuidePhase) => void; onClose: () => void;
+  /** Optional steps: "Skip this one" takes it off the pill for good (on this device). */
+  onSkip?: () => void;
 }) {
   const [card, setCard] = useState(0);
   const [rect, setRect] = useState<DOMRect | null>(null);
@@ -64,6 +66,7 @@ export function GuideFlow({ step, phase, onPhase, onClose }: {
             <button className="btn btn-taxi guide-btn" onClick={() => onPhase("cards")}>Show me how</button>
             <button className="btn btn-secondary guide-btn" onClick={onClose}>Later</button>
           </div>
+          {step.optional && onSkip && <button className="guide-skip" onClick={onSkip}>Not for me: skip this one</button>}
         </div>
       </div>
     );
@@ -127,14 +130,14 @@ export function GuideTab({ state, current, onPlay, extra }: { state: GuideState;
                     <li key={s.id}>
                       <button className={`guide-step${s.id === current?.id ? " is-next" : ""}`} onClick={() => onPlay(s)} disabled={paid || later}>
                         <span className="guide-step-n">{paid ? "✓" : later ? "🔒" : s.id}</span>
-                        <span style={{ flex: 1, minWidth: 0 }}>{s.tip}<span className="meta" style={{ display: "block" }}>{later ? `Opens at Rank ${s.opens?.rank}` : rewardText(s.reward)}</span></span>
+                        <span style={{ flex: 1, minWidth: 0 }}>{s.tip}<span className="meta" style={{ display: "block" }}>{later ? (s.opens?.rank ? `Opens at Rank ${s.opens.rank}` : `Opens on day ${s.opens?.day}`) : rewardText(s.reward)}{s.optional && !later ? " · optional" : ""}</span></span>
                       </button>
                     </li>
                   );
                 })}
               </ul>
             )}
-            {c.live && <span className="meta">Finish it: the &quot;{c.badge}&quot; badge and {rewardText(c.reward)}.{state.chapters.includes(c.n) ? " ✓ Collected." : ""}</span>}
+            {c.live && <span className="meta">{c.need ? `Any ${c.need} of these finish it` : "Finish it"}: the &quot;{c.badge}&quot; badge and {rewardText(c.reward)}.{state.chapters.includes(c.n) ? " ✓ Collected." : ""}</span>}
           </section>
         );
       })}
