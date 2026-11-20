@@ -1259,6 +1259,106 @@ function buildBoxFurniture(item: RoomItem, k: Kit, opts: { night: boolean }): Bu
       }
       return { group: g };
     }
+    case "subwayTrack": {
+      // The elevated tracks behind the platform edge: the track bed and rails run on past the room in both directions, and a
+      // three-car train pulls in, opens its doors, waits and leaves, on a loop (36 s). The platform's yellow edge strip is here too.
+      const RUN = 90;
+      box(RUN, 0.25, d, "#3A3632", 0, -0.2, 0);
+      for (let x = -RUN / 2; x < RUN / 2; x += 0.7) box(0.18, 0.06, d - 0.4, "#5A4A3A", x, 0.05, 0);
+      for (const z of [-0.72, 0.72]) box(RUN, 0.09, 0.07, METAL, 0, 0.11, z);
+      box(RUN, 0.06, 0.1, "#8A8478", 0, 0.08, 1.25);
+      box(w, 0.03, 0.4, "#FFC21A", 0, 0.0, d / 2 + 0.2);
+      const train = new Group();
+      const CAR = 7.6, GAP = 0.25, steel = k.mat("#C9CED6", { metalness: 0.55, roughness: 0.35 });
+      const doors: Mesh[] = [];
+      const lit = glow("#FFF2C8", 0.9);
+      for (let c = 0; c < 3; c++) {
+        const cx = (c - 1) * (CAR + GAP);
+        const body = new Mesh(k.geo(new BoxGeometry(CAR, 2.5, 2.6)), steel); body.position.set(cx, 1.55, 0); train.add(body);
+        const roof = new Mesh(k.geo(new BoxGeometry(CAR - 0.1, 0.18, 2.4)), k.mat("#8A8F98")); roof.position.set(cx, 2.88, 0); train.add(roof);
+        const stripe = new Mesh(k.geo(new BoxGeometry(CAR + 0.01, 0.12, 2.62)), k.mat("#FFC21A")); stripe.position.set(cx, 1.05, 0); train.add(stripe);
+        for (const wx of [-2.9, -0.95, 0.95, 2.9]) {
+          const win2 = new Mesh(k.geo(new BoxGeometry(1.2, 0.7, 0.02)), lit); win2.position.set(cx + wx, 2.05, 1.31); train.add(win2);
+        }
+        for (const dx of [-1.95, 1.95]) for (const half of [-1, 1]) {
+          const door = new Mesh(k.geo(new BoxGeometry(0.62, 2.0, 0.04)), k.mat("#AEB4BD", { metalness: 0.5, roughness: 0.35 }));
+          door.position.set(cx + dx + half * 0.31, 1.3, 1.32); door.userData.home = door.position.x; door.userData.half = half; train.add(door); doors.push(door);
+        }
+        for (const wx of [-2.6, 2.6]) for (const wz of [-0.72, 0.72]) {
+          const wheel = new Mesh(k.geo(new CylinderGeometry(0.32, 0.32, 0.12, 12)), k.mat("#2B2B2B"));
+          wheel.rotation.x = Math.PI / 2; wheel.position.set(cx + wx, 0.42, wz); train.add(wheel);
+        }
+      }
+      const bullet = new Mesh(k.geo(new CylinderGeometry(0.28, 0.28, 0.03, 20)), glow("#FFC21A", 1.2));
+      bullet.rotation.x = Math.PI / 2; bullet.position.set(-(CAR + GAP) - CAR / 2 + 0.6, 2.35, 1.32); train.add(bullet);
+      g.add(train);
+      const ease = (x: number) => (x <= 0 ? 0 : x >= 1 ? 1 : x * x * (3 - 2 * x));
+      return {
+        group: g,
+        tick: (t) => {
+          const c = (t + item.x) % 36;
+          // In from the left over 8 s, doors open 9-17 s, out to the right over 8 s, then an empty track.
+          const x = c < 8 ? -55 * (1 - ease(c / 8)) : c < 18 ? 0 : c < 26 ? 55 * ease((c - 18) / 8) : 999;
+          train.visible = x !== 999;
+          train.position.x = x;
+          const open = c > 9 && c < 17 ? Math.min(1, (c - 9) / 0.8, (17 - c) / 0.8) : 0;
+          for (const dm of doors) dm.position.x = dm.userData.home + dm.userData.half * open * 0.55;
+        },
+      };
+    }
+    case "turnstile": {
+      // A steel turnstile: the cabinet with its card reader glowing green, and three arms.
+      box(0.32, 1.0, d, "#9AA0A8", -0.24, 0, 0);
+      box(0.2, 0.06, 0.16, glow("#3DDC97", 1.2), -0.24, 1.0, 0.1);
+      for (let i = 0; i < 3; i++) {
+        const arm = new Mesh(k.geo(new CylinderGeometry(0.025, 0.025, 0.5, 6)), k.mat(METAL));
+        arm.rotation.z = Math.PI / 2; arm.rotation.x = (i * Math.PI * 2) / 3;
+        arm.position.set(0.12, 0.85, 0); g.add(arm);
+      }
+      return { group: g };
+    }
+    case "fareMachine": {
+      // A fare card machine: a steel cabinet, a glowing touch screen and a card slot.
+      box(w, 1.6, d, "#2B2D33");
+      const scr = box(w - 0.24, 0.5, 0.02, glow("#6CC4FF", 1.0), 0, 0.95, d / 2);
+      box(w - 0.3, 0.08, 0.04, "#FFC21A", 0, 0.62, d / 2);
+      box(w, 0.12, d, "#FFC21A", 0, 1.6);
+      return { group: g, tick: (t) => { (scr.material as MeshStandardMaterial).emissiveIntensity = 0.8 + Math.sin(t * 1.7 + item.z) * 0.15; } };
+    }
+    case "ticketBooth": {
+      // The station agent's booth: a steel base, glass on every side, a light inside, a little window counter.
+      box(w, 1.0, d, "#5A6068");
+      const glass = new MeshStandardMaterial({ color: "#BFE3F2", transparent: true, opacity: 0.35, roughness: 0.1, metalness: 0.1 });
+      for (const sx of [-1, 1]) box(0.04, 1.3, d, glass, sx * (w / 2 - 0.02), 1.0, 0);
+      for (const sz of [-1, 1]) box(w, 1.3, 0.04, glass, 0, 1.0, sz * (d / 2 - 0.02));
+      box(w + 0.1, 0.12, d + 0.1, "#3F6B4A", 0, 2.3);
+      box(0.9, 0.05, 0.3, "#C9CED6", 0, 1.0, d / 2 + 0.12);
+      box(0.6, 0.06, 0.4, glow("#FFF2C8", 0.8), 0, 2.24);
+      return { group: g };
+    }
+    case "stationColumn": {
+      // A green-painted steel column of the elevated structure, with a lamp near the top.
+      const green = k.mat("#3F6B4A", { metalness: 0.3, roughness: 0.6 });
+      box(0.3, 3.2, 0.3, green);
+      box(0.42, 0.08, 0.42, green, 0, 0, 0);
+      box(0.42, 0.1, 0.42, green, 0, 3.1, 0);
+      const lamp = new Mesh(k.geo(new SphereGeometry(0.14, 10, 8)), glow("#FFE6B0", 1.3));
+      lamp.position.set(0, 2.7, 0.24); g.add(lamp);
+      return { group: g };
+    }
+    case "stationEntrance": {
+      // The street entrance (the box-built stand-in for the modeled one): green railings round a stairwell going down, two lamps.
+      box(w - 0.6, 0.02, d - 0.4, "#2B2B2B", 0, 0.0, 0);
+      const rail = k.mat("#2F5A3A");
+      for (const sx of [-1, 1]) box(0.05, 1.0, d, rail, sx * (w / 2 - 0.2), 0, 0);
+      box(w - 0.4, 1.0, 0.05, rail, 0, 0, -d / 2);
+      for (const sx of [-1, 1]) {
+        cyl(0.04, 0.04, 2.2, rail, sx * (w / 2 - 0.2), 0, d / 2 - 0.1, 8);
+        const globe = new Mesh(k.geo(new SphereGeometry(0.16, 10, 8)), glow("#7FE0A0", 1.2));
+        globe.position.set(sx * (w / 2 - 0.2), 2.3, d / 2 - 0.1); g.add(globe);
+      }
+      return { group: g };
+    }
     case "chandelier": {
       // A brass ring of candle lights on a chain (the box-built stand-in).
       const brass = k.mat("#C9A227", { metalness: 0.5, roughness: 0.35 });

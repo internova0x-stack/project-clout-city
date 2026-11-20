@@ -46,10 +46,9 @@ test("room hotspots point at real place actions", () => {
   }
 });
 
-test("v0.11: every place but subway stations can be entered, and its room uses its own actions", () => {
+test("v0.11: every place can be entered (the station too, since Nov 20), and its room uses its own actions", () => {
   for (const p of PLACES) {
     const room = placeRoom(p);
-    if (p.tags.includes("subway")) { assert.equal(room, null, `${p.id}: subway stations stay a map label`); continue; }
     assert.ok(room, `${p.id} has a room`);
     const uses = room!.items.filter((i) => i.use?.kind === "action" || i.use?.kind === "gigs");
     for (const i of uses) {
@@ -210,4 +209,18 @@ test("the rooftops (Nov 20): an open roof with the skyline, its signature piece,
     const grid = makeGrid(t, t.items);
     for (const i of t.items.filter((x) => x.use)) assert.ok(findPath(grid, t.spawn, useSpot(i)).length > 0, `${t.id}/${i.id} can be reached`);
   }
+});
+
+test("the station (Nov 20): the platform, the train, the fare line, people-watching on a bench", () => {
+  const p = PLACES.find((x) => x.id === "astoria-blvd-station")!;
+  const t = placeRoom(p)!;
+  assert.match(t.id, /^station:/);
+  assert.ok(t.items.some((i) => i.kind === "subwayTrack"), "the tracks and the train");
+  assert.ok(t.items.filter((i) => i.kind === "turnstile").length >= 4, "the turnstiles");
+  assert.ok(t.items.some((i) => i.id === "sig-entrance"), "the street entrance");
+  const watch = t.items.find((i) => i.use?.kind === "action")!;
+  assert.equal((watch.use as { actionId: string }).actionId, "platform");
+  for (const i of t.items) assert.ok(placementOk(t, t.items, i), `${t.id}/${i.id}`);
+  const grid = makeGrid(t, t.items);
+  assert.ok(findPath(grid, t.spawn, useSpot(watch)).length > 0, "through the open gate to the platform");
 });

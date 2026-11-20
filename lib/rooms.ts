@@ -48,7 +48,9 @@ export type FurnitureKind =
   // The big clubs (owner, Nov 20: "a bar, a stage with go-go dancers, a vip, lighting"): the DJ stage, podiums, video walls
   | "djStage" | "gogoPodium" | "ledWall" | "clubPillar" | "velvetRope"
   // The rooftops (owner, Nov 20): heat lamps, round dining sets and long planters
-  | "heatLamp" | "roundDining" | "planter";
+  | "heatLamp" | "roundDining" | "planter"
+  // The subway station (owner, Nov 20): the track and its train, turnstiles, fare machines, the agent's booth, columns, the entrance
+  | "subwayTrack" | "turnstile" | "fareMachine" | "ticketBooth" | "stationColumn" | "stationEntrance";
 
 export type ItemUse =
   | { kind: "action"; actionId: string }
@@ -221,6 +223,12 @@ export const FURNITURE: Record<FurnitureKind, { w: number; d: number; walkable?:
   heatLamp: { w: 0.5, d: 0.5, label: "Heat lamp" },
   roundDining: { w: 2.0, d: 2.0, label: "Table" },
   planter: { w: 1.8, d: 0.5, label: "Planter" },
+  subwayTrack: { w: 23.8, d: 3.2, label: "Tracks" },
+  turnstile: { w: 0.8, d: 0.6, label: "Turnstile" },
+  fareMachine: { w: 0.8, d: 0.5, label: "Fare machine" },
+  ticketBooth: { w: 2.2, d: 1.6, label: "Station booth" },
+  stationColumn: { w: 0.4, d: 0.4, label: "Column" },
+  stationEntrance: { w: 3.0, d: 2.0, label: "Subway entrance" },
   cubicle: { w: 1.6, d: 1.5, label: "Cubicle" },
   glassWall: { w: 3.0, d: 0.12, label: "Glass wall" },
   displayCase: { w: 0.9, d: 0.9, label: "Display case" },
@@ -527,7 +535,7 @@ export function homeTemplate(homeId: string | null | undefined, houseSku?: strin
   return (houseSku && HOME_TEMPLATES[houseSku]) || HOME_TEMPLATES[homeId ?? ""] || HOME_TEMPLATES.astoria_studio;
 }
 
-export type PlaceTemplateId = "campaignGround" | "campaignWar" | "campaignRoof" | "clubBig" | "vipBig" | "rooftop" | "restroom" | "vip" | "club" | "cafe" | "counter" | "lounge" | "store" | "showroom" | "campus" | "unisphere" | "gantries" | "lotto" | "office" | "officeSmall" | "officeBig" | "towerLobby" | "techFloor" | "execFloor" | "newsroom" | "streamHouse" | "streamFloor" | "atelier" | "tradingFloor" | "lawOffice" | "backRoom" | "civic" | "gym" | "plaza" | "penthouse" | "radio" | "broadcast" | "hub" | "hubGames" | "hubLounge" | "campusQuad" | "campusLibrary" | "campusDining" | "campusGreek";
+export type PlaceTemplateId = "campaignGround" | "campaignWar" | "campaignRoof" | "clubBig" | "vipBig" | "rooftop" | "station" | "restroom" | "vip" | "club" | "cafe" | "counter" | "lounge" | "store" | "showroom" | "campus" | "unisphere" | "gantries" | "lotto" | "office" | "officeSmall" | "officeBig" | "towerLobby" | "techFloor" | "execFloor" | "newsroom" | "streamHouse" | "streamFloor" | "atelier" | "tradingFloor" | "lawOffice" | "backRoom" | "civic" | "gym" | "plaza" | "penthouse" | "radio" | "broadcast" | "hub" | "hubGames" | "hubLounge" | "campusQuad" | "campusLibrary" | "campusDining" | "campusGreek";
 
 // v0.11 (spec section 11): every place can be entered. The shared templates take a place's own
 // actions: "*0" and "*1" are its first and second action (see placeRoom), so one office serves the
@@ -554,6 +562,46 @@ export const PLACE_TEMPLATES: Record<PlaceTemplateId, RoomTemplate> = {
     npcs: [
       { x: -1.4, z: -1.75, facing: 3.14 }, { x: 0.8, z: -1.75, facing: 3.14 }, { x: 0.3, z: -1.0, facing: -2.2 },
       { x: -0.6, z: 2.3, facing: 3.14, seated: true },
+    ],
+  },
+  // ---- The subway station (owner, Nov 20: "next the station") ----
+  // Astoria Blvd, an elevated station with the city around it (open, skyline): the platform at the back along the tracks, where a
+  // train pulls in, opens its doors and leaves (subwayTrack); benches facing the tracks (people-watching, the station's action),
+  // green columns with lamps and a coffee cart; the fare line of turnstiles and railings with the gate open in the middle; the
+  // fare machines and the agent's booth; the street entrance (the signature piece) where you come up.
+  station: {
+    id: "station", w: 24, d: 14, wall: "#3F6B4A", wallAccent: "#FFC21A", floor: "#B8B4AC", floorKind: "concrete", open: true, skyline: true,
+    rooms: [
+      { name: "Platform", x0: -12, z0: -3.8, x1: 12, z1: 1.6, floor: "#C9C5BC", floorKind: "concrete" },
+      { name: "Mezzanine", x0: -12, z0: 1.6, x1: 12, z1: 7, floor: "#D9D2C5", floorKind: "tile" },
+    ],
+    items: [
+      { id: "track", kind: "subwayTrack", x: 0, z: -5.4, rot: 0 },
+      ...[-9.5, -4.75, 0, 4.75, 9.5].map((x, i) => ({ id: `column-${i}`, kind: "stationColumn" as const, x, z: -0.6, rot: 0 })),
+      { id: "bench-1", kind: "bench", x: -7.1, z: -2.4, rot: 2, model: "stationBench" },
+      { id: "bench-2", kind: "bench", x: -2.4, z: -2.4, rot: 2, model: "stationBench", use: MAIN(0), label: "*" },
+      { id: "bench-3", kind: "bench", x: 2.4, z: -2.4, rot: 2, model: "stationBench" },
+      { id: "bench-4", kind: "bench", x: 7.1, z: -2.4, rot: 2, model: "stationBench" },
+      { id: "coffee", kind: "foodCart", x: 10.4, z: 0.6, rot: 3, color: "#3F6B4A" },
+      // The fare line: railings either side, three turnstiles each side of the open gate.
+      { id: "rail-left", kind: "railing", x: -7.9, z: 1.6, rot: 0 },
+      { id: "rail-right", kind: "railing", x: 7.9, z: 1.6, rot: 0 },
+      ...[-3.4, -2.5, -1.6, 1.6, 2.5, 3.4].map((x, i) => ({ id: `turnstile-${i}`, kind: "turnstile" as const, x, z: 1.6, rot: 0 })),
+      // The mezzanine: fare machines, the booth, the entrance.
+      { id: "fare-1", kind: "fareMachine", x: -11.5, z: 3.2, rot: 1 },
+      { id: "fare-2", kind: "fareMachine", x: -11.5, z: 4.2, rot: 1 },
+      { id: "booth", kind: "ticketBooth", x: 9.6, z: 4.6, rot: 3 },
+      { id: "mezz-bench", kind: "bench", x: 3.4, z: 6.6, rot: 2, model: "stationBench" },
+      { id: "lamp-1", kind: "lamppost", x: -2.4, z: 4.8, rot: 0 },
+      { id: "lamp-2", kind: "lamppost", x: 6.4, z: 3.0, rot: 0 },
+    ],
+    spawn: [-4.4, 5.8],
+    npcs: [
+      { x: -7.1, z: -2.4, facing: 3.14, seated: true }, { x: 2.4, z: -2.4, facing: 3.14, seated: true }, { x: 7.4, z: -2.4, facing: 3.14, seated: true },
+      { x: -10.6, z: -1.8, facing: 3.4 }, { x: -5.6, z: -0.8, facing: 2.6 }, { x: 0.8, z: -1.2, facing: 3.0 }, { x: 4.6, z: -2.0, facing: 2.8 },
+      { x: 9.4, z: -1.4, facing: 2.2 }, { x: 9.4, z: 0.6, facing: 1.57 },
+      { x: 0.0, z: 0.6, facing: 0.4, dance: true },
+      { x: 10.1, z: 4.6, facing: -1.57 }, { x: -10.6, z: 3.7, facing: -1.57 }, { x: 1.2, z: 4.4, facing: 2.0 },
     ],
   },
   // ---- The rooftops (owner, Nov 20: "next the rooftops") ----
@@ -1768,7 +1816,7 @@ export interface RoomPlace {
 }
 
 /**
- * v0.11: the room for a place, or null (a subway station: map label and lore). Shared templates take
+ * v0.11: the room for a place, or null (a place with no room). Shared templates take
  * the place's own actions: placeholders ("*0", "*1") and any action id the place doesn't have are
  * given its actions in order, labelled with their names; items left over just sit there. Events,
  * the gigs board and Shop racks follow the place. Places that used to be scene cards are recolored
@@ -1784,6 +1832,8 @@ export const PLACE_GROUND: Record<string, PlaceTemplateId> = {
   "velvet-static": "clubBig", "hellgate-hall": "clubBig", "the-sticky-floor": "clubBig", "discount-disco": "clubBig", "ultraviolet-society": "clubBig",
   // The rooftops (owner, Nov 20).
   "altitude-718": "rooftop", "ditmars-heights-rooftop": "rooftop", "up-on-thirty": "rooftop",
+  // The subway station (owner, Nov 20): it used to be a map label only.
+  "astoria-blvd-station": "station",
 };
 
 /**
@@ -1799,6 +1849,7 @@ export const PLACE_SIGNATURE: Record<string, { add?: RoomItem[]; models?: Record
   // The rooftops' signature pieces stand in the middle of the deck (rooftop: around x -5.5, z 1.2), the water tower at the back.
   "altitude-718": { add: [{ id: "sig-firepit", kind: "sectional", x: -5.5, z: 1.0, rot: 0, model: "firePit", name: "The fire pit" }] },
   "ditmars-heights-rooftop": { add: [{ id: "sig-cabana", kind: "sectional", x: -5.5, z: 1.0, rot: 0, color: "#F4F1EA", model: "cabana", name: "The cabana" }] },
+  "astoria-blvd-station": { add: [{ id: "sig-entrance", kind: "stationEntrance", x: -8.6, z: 5.6, rot: 0, model: "subwayEntrance", name: "The way down to the street" }] },
   "up-on-thirty": { add: [{ id: "sig-tower", kind: "tree", x: -10.6, z: -4.4, rot: 0, model: "waterTower", name: "The water tower" }] },
   "ultraviolet-society": {
     add: [
@@ -2285,7 +2336,7 @@ export const PLAYER_SLOTS: Record<PlaceTemplateId, number> = {
   restroom: 3, vip: 4, club: 6, cafe: 5, counter: 4, lounge: 5, store: 5, showroom: 7, campus: 6, lotto: 4,
   unisphere: 7, gantries: 7, office: 5, officeSmall: 3, officeBig: 7, towerLobby: 6, techFloor: 7, execFloor: 6, newsroom: 7, streamHouse: 6, streamFloor: 7, atelier: 6, tradingFloor: 7, lawOffice: 6, backRoom: 3, civic: 5, gym: 5, plaza: 7, penthouse: 10, radio: 4, broadcast: 5,
   hub: 7, hubGames: 7, hubLounge: 7, campusQuad: 7, campusLibrary: 5, campusDining: 6, campusGreek: 7,
-  campaignGround: 12, campaignWar: 10, campaignRoof: 14, clubBig: 14, vipBig: 7, rooftop: 14,
+  campaignGround: 12, campaignWar: 10, campaignRoof: 14, clubBig: 14, vipBig: 7, rooftop: 14, station: 12,
 };
 /** The player figures a room holds (its party spots, or PLAYER_SLOTS by template; floors are "vip:place"). */
 export function playerSlots(t: RoomTemplate): number {

@@ -456,6 +456,11 @@ components live in `app/globals.css`.
   heat lamps (`heatLamp`), planters (`planter`), a front lounge and sun loungers; `skyline` draws the roof's own building under the
   deck and the city around it (lower roofs close by, taller towers farther off; windows lit at night). Signature pieces: the fire
   pit, the cabana and the water tower.
+  The station (owner, Nov 20: "next the station"): Astoria Blvd station, a map label until then, can be entered: `station` (24 × 14 m,
+  open, skyline, `PLACE_GROUND`): the platform along `subwayTrack` (the track runs on past the room; a three-car train pulls in, opens
+  its doors and leaves every 36 s), benches facing the tracks (the platform action), green `stationColumn`s, a coffee cart, the fare
+  line (`turnstile`s and railings, the gate open in the middle), `fareMachine`s, the agent's `ticketBooth` and the street entrance
+  (`stationEntrance`, the signature subwayEntrance model).
 - Rate limits (migration 0126, owner Oct 27): PostgREST's pre-request hook (`pgrst.db_pre_request` = `check_request()`) counts each
   signed-in player's writes per minute (`rate_counters`, `rate_hit`): 240 in all, plus buckets for guesses (hunt answers, exams,
   gossip, name checks: 20), reviewed posts (10), chat (30) and checkouts (10). Reads, signed-out requests and the service role are
