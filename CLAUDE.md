@@ -882,7 +882,8 @@ components live in `app/globals.css`.
   dusty violet → rose at night, never dark) with only a fifth of the room's own wall/accent tint; `skyline` rooms get it untinted.
   Tiled floors are plain white (owner, Nov 20: "I don't like the tiled floors", then after a side-by-side of off-white tiles, white
   tiles and plain white, "go with white"): Room3D `floorTexture` draws every `tile` and `checker` floor (and room zone) as one smooth
-  white surface, no lines or checker squares, whatever the template's floor color; dark rooms keep theirs.
+  white surface, no lines or checker squares, whatever the template's floor color; dark rooms and outdoor places (`outdoor`:
+  parks, the Quad, plazas) keep their ground. The parks and the Quad are grass (#9CCB82) with paved paths as room zones.
 - Players see "Crew" for their invited friends; code, types and database tables still say `clique`
   (renaming stored data isn't worth the risk). Keep player-facing copy on "crew".
 - Culture packs (docs/culture/, one at a time, only when the owner says "Build C<number>"): slang, invented stand-ins

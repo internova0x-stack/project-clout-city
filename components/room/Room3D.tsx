@@ -1562,8 +1562,8 @@ function floorTexture(t: RoomTemplate, night: boolean, dream = false): CanvasTex
   const px = 128;
   const [c, g] = canvas(px * t.w, px * t.d);
   // Tiled floors are plain white (owner, Nov 20: "Make the floor off-white tiles", then, after a side-by-side, "go with white"):
-  // one smooth white surface, no tile lines, except in dark rooms; a checker is the same.
-  const tiled = (t.floorKind === "tile" || t.floorKind === "checker") && !t.dark;
+  // one smooth white surface, no tile lines, except in dark rooms and outdoors (parks and plazas keep their ground).
+  const tiled = (t.floorKind === "tile" || t.floorKind === "checker") && !t.dark && !t.outdoor;
   const base = new Color(tiled ? "#FFFFFF" : t.floor);
   if (night && !t.dark) base.multiplyScalar(0.8);
   g.fillStyle = base.getStyle();

@@ -661,8 +661,14 @@ export const PLACE_TEMPLATES: Record<PlaceTemplateId, RoomTemplate> = {
   // Astoria Park by the river: riverside benches (the bench by the river), the running track (a lap), the picnic lawn, the dog
   // run (walking dogs), the iron fountain (the signature piece), trees and lamps.
   parkRiver: {
-    id: "parkRiver", w: 26, d: 20, wall: "#BFD3E0", wallAccent: "#7FA36A", floor: "#E8E2D6", floorKind: "tile",
+    id: "parkRiver", w: 26, d: 20, wall: "#BFD3E0", wallAccent: "#7FA36A", floor: "#9CCB82", floorKind: "concrete",
     outdoor: { height: 4.5, edge: "#7FA36A", water: true, view: [13, 11] },
+    // Grass, with paving where people walk: the riverside promenade, the path in from the gate and the fountain's square.
+    rooms: [
+      { name: "Promenade", x0: -13, z0: -10, x1: 13, z1: -7.4, floor: "#E2DACB", floorKind: "tile" },
+      { name: "Path", x0: -1.2, z0: -7.4, x1: 1.2, z1: 10, floor: "#E2DACB", floorKind: "tile" },
+      { name: "Fountain square", x0: 1.2, z0: -7.4, x1: 8.0, z1: -1.6, floor: "#E2DACB", floorKind: "tile" },
+    ],
     items: [
       ...[-8.6, 0, 8.6].map((x, i) => ({ id: `rail-${i}`, kind: "railing" as const, x, z: -9.6, rot: 0 })),
       { id: "river-bench-1", kind: "bench", x: -5.0, z: -8.6, rot: 2, use: MAIN(0), label: "*", model: "stationBench" },
@@ -690,8 +696,14 @@ export const PLACE_TEMPLATES: Record<PlaceTemplateId, RoomTemplate> = {
   // Flushing Meadows: the big fountain plaza in the middle (hanging out by the fountains), lawns either side, benches round it,
   // paths, trees and the ice-cream cart (the signature piece).
   parkMeadow: {
-    id: "parkMeadow", w: 26, d: 20, wall: "#BFD3E0", wallAccent: "#7FA36A", floor: "#E8E2D6", floorKind: "tile",
+    id: "parkMeadow", w: 26, d: 20, wall: "#BFD3E0", wallAccent: "#7FA36A", floor: "#9CCB82", floorKind: "concrete",
     outdoor: { height: 4.5, edge: "#7FA36A", view: [13, 11] },
+    // Grass, with the fountain plaza paved in the middle and paths out to the edges.
+    rooms: [
+      { name: "Plaza", x0: -5.4, z0: -6.2, x1: 5.4, z1: 4.0, floor: "#E2DACB", floorKind: "tile" },
+      { name: "Path north", x0: -1.2, z0: -10, x1: 1.2, z1: -6.2, floor: "#E2DACB", floorKind: "tile" },
+      { name: "Path south", x0: -1.2, z0: 4.0, x1: 1.2, z1: 10, floor: "#E2DACB", floorKind: "tile" },
+    ],
     items: [
       { id: "fountain", kind: "fountain", x: 0, z: -1.0, rot: 0, use: MAIN(0), label: "*" },
       ...[[-8, -5], [-8, -2], [-8, 3], [-8, 6], [8, -5], [8, -2], [8, 3], [8, 6]].map(([x, z], i) => ({ id: `lawn-${i}`, kind: "rug" as const, x, z, rot: 0, color: "#7CC86B" })),
@@ -763,8 +775,14 @@ export const PLACE_TEMPLATES: Record<PlaceTemplateId, RoomTemplate> = {
   // ---- The campuses (owner, Nov 20: "next"): every school's five areas as big floors (CAMPUS_AREAS) ----
   // The Quad: lawns crossed by paths, benches, trees and lamps, the events board, a coffee cart; St. Johnsons' founder stands here.
   quadBig: {
-    id: "quadBig", w: 24, d: 18, wall: "#BFD3E0", wallAccent: "#7FA36A", floor: "#D9CFC0", floorKind: "tile",
+    id: "quadBig", w: 24, d: 18, wall: "#BFD3E0", wallAccent: "#7FA36A", floor: "#9CCB82", floorKind: "concrete",
     outdoor: { height: 4.5, edge: "#7FA36A", view: [12, 10] },
+    // Grass, crossed by paved paths and a paved strip by the events board.
+    rooms: [
+      { name: "Walk", x0: -1.4, z0: -9, x1: 1.4, z1: 9, floor: "#E2DACB", floorKind: "tile" },
+      { name: "Cross walk", x0: -12, z0: 0.2, x1: 12, z1: 2.0, floor: "#E2DACB", floorKind: "tile" },
+      { name: "Board", x0: -6, z0: -9, x1: 6, z1: -7.6, floor: "#E2DACB", floorKind: "tile" },
+    ],
     items: [
       ...[[-7.5, -4.5], [-3.0, -4.5], [3.0, -4.5], [7.5, -4.5], [-7.5, -1.5], [-3.0, -1.5], [3.0, -1.5], [7.5, -1.5], [-7.5, 3.5], [-3.0, 3.5], [3.0, 3.5], [7.5, 3.5]].map(([x, z], i) => ({
         id: `lawn-${i}`, kind: "rug" as const, x, z, rot: 0, color: "#7CC86B", ...(i === 5 ? { use: { kind: "action" as const, actionId: "quad" }, label: "Hang out on the lawn" } : {}),
