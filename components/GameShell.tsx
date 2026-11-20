@@ -115,7 +115,7 @@ import { handle } from "@/lib/validation";
 import { rankCelebration } from "./game/Ranks";
 import { CelebrationHost, celebrate } from "./Celebrate";
 import { GuideFlow, GuidePill, GuideTab, type GuidePhase } from "./game/Guide";
-import { nextStep, stepById, type GuideApi, type GuideState } from "@/lib/guide";
+import { CHAPTERS, nextStep, stepById, type GuideApi, type GuideState } from "@/lib/guide";
 import { crewNightsRead, dateNightsRead, nightsCouple, type NightCtx } from "./nightResults";
 import { coupleRead, evictionRead, streakRead, subletRead, type BadNewsCtx } from "./game/badNewsReads";
 import { passClaimBanner, passRead } from "./game/passResults";
@@ -2661,12 +2661,18 @@ export function GameShell({
             ...(step.reward.clout ? [{ tone: "clout" as const, text: `+${step.reward.clout} 🔥` }] : []),
           ],
         });
-        if (r.chapter) {
+        const ch = r.chapter ? CHAPTERS.find((c) => c.n === r.chapter) : undefined;
+        if (ch) {
+          const after = CHAPTERS.find((c) => c.n === ch.n + 1);
           celebrate({
-            rung: 3, emoji: "🏅", tag: `Chapter ${r.chapter} complete`, title: "Off the Bus",
-            line: "You know your way around now. New York is not impressed yet, but it's paying attention.",
-            rewards: [{ tone: "cash", text: "+C$500" }, { text: "🏅 Off the Bus" }],
-            lola: "Chapter 2 is on its way. Keep the streak going in the meantime.",
+            rung: 3, emoji: "🏅", tag: `Chapter ${ch.n} complete`, title: ch.badge,
+            line: ch.n === 1 ? "You know your way around now. New York is not impressed yet, but it's paying attention." : `${ch.title}: done. Look at you.`,
+            rewards: [
+              ...(ch.reward.cash ? [{ tone: "cash" as const, text: `+C$${ch.reward.cash.toLocaleString("en-US")}` }] : []),
+              ...(ch.reward.clout ? [{ tone: "clout" as const, text: `+${ch.reward.clout} 🔥` }] : []),
+              { text: `🏅 ${ch.badge}` },
+            ],
+            lola: after?.live ? `Next up: ${after.title}.` : "More of the Guide is on its way. Keep the streak going in the meantime.",
           });
         }
         setGuidePlay((cur) => (cur?.id === id ? null : cur));

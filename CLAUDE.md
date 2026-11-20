@@ -887,7 +887,8 @@ components live in `app/globals.css`.
   or light wash) with paved paths as room zones; no lawn patches (owner, Nov 20); the track sits inside its grass with room around it.
 - The Guide (migration 0170, owner Nov 20: "the 'what do I do next?' problem"; "go with your recommendations"; docs/GUIDE.md):
   steps in chapters (lib/guide.ts `STEPS`, `CHAPTERS`; Chapter 1 Arrival is live, its 13 steps include the clout basics, owner:
-  "Merge into Chapter 1"; the rest show "Coming soon"). Each step: Lola's tip, 2-3 explainer cards, "Show me" (a ring on the real
+  "Merge into Chapter 1"; Chapter 2 Looking after yourself is live with 6 steps (the roommate folded into 2.6's cards: a step some
+  players can't do would hold their chapter back); the rest show "Coming soon"). Checks also take `rest`, `skill` and `bill`. Each step: Lola's tip, 2-3 explainer cards, "Show me" (a ring on the real
   button found by `targets`, taps go through) and a reward once done (components/game/Guide.tsx `GuideFlow`). game_settings 'guide'
   (`guideSettings()`, tests/guide.test.ts) holds each step's `check` (seen | ledger kinds | gossip | events | streak) and reward;
   `guide_state()`, `guide_seen(step)` (seen steps, marked by GameShell `guideSeenMark` when the screen opens), `guide_claim(step)`

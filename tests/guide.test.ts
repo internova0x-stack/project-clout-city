@@ -31,7 +31,9 @@ test("the next step is the first unpaid one in an open chapter", () => {
   assert.equal(nextStep(base)?.id, "1.1");
   assert.equal(nextStep({ ...base, paid: ["1.1", "1.2"] })?.id, "1.3");
   const all = chapterSteps(1).map((s) => s.id);
-  assert.equal(nextStep({ ...base, paid: all }), null, "chapters still being written stay shut");
+  assert.equal(nextStep({ ...base, paid: all })?.id, "2.1", "Chapter 2 follows");
+  const both = [...all, ...chapterSteps(2).map((s) => s.id)];
+  assert.equal(nextStep({ ...base, paid: both }), null, "chapters still being written stay shut");
   assert.equal(chapterDue({ ...base, paid: all })?.n, 1);
   assert.equal(chapterDue({ ...base, paid: all, chapters: [1] }), null);
 });

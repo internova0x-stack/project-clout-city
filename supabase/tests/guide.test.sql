@@ -59,4 +59,22 @@ reset role;
 select pg_temp.assert(exists (select 1 from public.player_badges where player_id = pg_temp.u(11) and badge_id = 'guide-1'), 'the Off the Bus badge');
 select pg_temp.assert(pg_temp.paid('guide', pg_temp.u(11), 'cash') = 50 + 150 + 50 + 150, 'step cash: 1.2, 1.6, 1.9, 1.13');
 select pg_temp.assert(pg_temp.paid('guide', pg_temp.u(11), 'clout') = 15 + 15 + 15 + 20 + 20 + 30 + 15 + 30 + 30, 'step clout');
+
+-- ---- Chapter 2: sleep, a meal, groceries, cooking practice, sitting, a paid bill ----
+set role authenticated;
+select pg_temp.as_(pg_temp.u(11)::text);
+select pg_temp.assert(not (public.guide_state() -> 'ready' ? '2.1'), 'no sleep yet');
+reset role;
+insert into public.player_rest (player_id, ny_date, kind, uses) values (pg_temp.u(11), public.ny_today(), 'sleep', 1), (pg_temp.u(11), public.ny_today(), 'sit', 1);
+select public.ledger_once(pg_temp.u(11), 'cash', -8, 'eat', 'x'), public.ledger_once(pg_temp.u(11), 'cash', -40, 'groceries', 'x');
+insert into public.skill_log (player_id, skill, key) values (pg_temp.u(11), 'cooking', 'test');
+insert into public.bills (player_id, kind, amount, due_date, status, paid_at) values (pg_temp.u(11), 'phone', 10, public.ny_today(), 'paid', now());
+set role authenticated;
+select pg_temp.as_(pg_temp.u(11)::text);
+select pg_temp.assert(public.guide_state() -> 'ready' @> '["2.1", "2.2", "2.3", "2.4", "2.5", "2.6"]', 'every Chapter 2 step ready');
+select public.guide_claim(s) from unnest(array['2.1', '2.2', '2.3', '2.4', '2.5', '2.6']) s;
+select pg_temp.assert(public.guide_state() -> 'chapters' @> '[1, 2]', 'chapter 2 paid');
+reset role;
+select pg_temp.assert(pg_temp.paid('guide_chapter', pg_temp.u(11), 'cash') = 500 + 300, 'chapter 2 pays C$300');
+select pg_temp.assert(exists (select 1 from public.player_badges where player_id = pg_temp.u(11) and badge_id = 'guide-2'), 'Adulting (Allegedly)');
 rollback;

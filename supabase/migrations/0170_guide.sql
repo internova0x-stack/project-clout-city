@@ -5,7 +5,7 @@
 -- last step also pays the chapter (ledger 'guide_chapter', ref its number) and its badge. "Seen" steps are marked by the game
 -- when the player opens that screen (guide_seen). Start over moves the ledger to the archive, so the Guide pays again.
 
-insert into public.game_settings (key, value) values ('guide', '{"steps":{"1.1":{"chapter":1,"check":{"seen":true},"cash":0,"clout":15},"1.2":{"chapter":1,"check":{"seen":true},"cash":50,"clout":0},"1.3":{"chapter":1,"check":{"seen":true},"cash":0,"clout":15},"1.4":{"chapter":1,"check":{"seen":true},"cash":0,"clout":15},"1.5":{"chapter":1,"check":{"ledger":["visit","shift"]},"cash":0,"clout":20},"1.6":{"chapter":1,"check":{"ledger":["daily_bonus"]},"cash":150,"clout":0},"1.7":{"chapter":1,"check":{"gossip":true},"cash":0,"clout":20},"1.8":{"chapter":1,"check":{"events":true},"cash":0,"clout":30},"1.9":{"chapter":1,"check":{"seen":true},"cash":50,"clout":0},"1.10":{"chapter":1,"check":{"seen":true},"cash":0,"clout":15},"1.11":{"chapter":1,"check":{"streak":3},"cash":0,"clout":30},"1.12":{"chapter":1,"check":{"ledger":["goal"]},"cash":0,"clout":30},"1.13":{"chapter":1,"check":{"seen":true},"cash":150,"clout":0}},"chapters":{"1":{"badge":"guide-1","cash":500,"clout":0,"steps":["1.1","1.2","1.3","1.4","1.5","1.6","1.7","1.8","1.9","1.10","1.11","1.12","1.13"]}}}'::jsonb)
+insert into public.game_settings (key, value) values ('guide', '{"steps":{"1.1":{"chapter":1,"check":{"seen":true},"cash":0,"clout":15},"1.2":{"chapter":1,"check":{"seen":true},"cash":50,"clout":0},"1.3":{"chapter":1,"check":{"seen":true},"cash":0,"clout":15},"1.4":{"chapter":1,"check":{"seen":true},"cash":0,"clout":15},"1.5":{"chapter":1,"check":{"ledger":["visit","shift"]},"cash":0,"clout":20},"1.6":{"chapter":1,"check":{"ledger":["daily_bonus"]},"cash":150,"clout":0},"1.7":{"chapter":1,"check":{"gossip":true},"cash":0,"clout":20},"1.8":{"chapter":1,"check":{"events":true},"cash":0,"clout":30},"1.9":{"chapter":1,"check":{"seen":true},"cash":50,"clout":0},"1.10":{"chapter":1,"check":{"seen":true},"cash":0,"clout":15},"1.11":{"chapter":1,"check":{"streak":3},"cash":0,"clout":30},"1.12":{"chapter":1,"check":{"ledger":["goal"]},"cash":0,"clout":30},"1.13":{"chapter":1,"check":{"seen":true},"cash":150,"clout":0},"2.1":{"chapter":2,"check":{"rest":"sleep"},"cash":0,"clout":15},"2.2":{"chapter":2,"check":{"ledger":["eat"]},"cash":50,"clout":0},"2.3":{"chapter":2,"check":{"ledger":["groceries"]},"cash":50,"clout":0},"2.4":{"chapter":2,"check":{"skill":"cooking"},"cash":0,"clout":20},"2.5":{"chapter":2,"check":{"rest":"sit"},"cash":0,"clout":15},"2.6":{"chapter":2,"check":{"bill":true},"cash":100,"clout":0}},"chapters":{"1":{"badge":"guide-1","cash":500,"clout":0,"steps":["1.1","1.2","1.3","1.4","1.5","1.6","1.7","1.8","1.9","1.10","1.11","1.12","1.13"]},"2":{"badge":"guide-2","cash":300,"clout":0,"steps":["2.1","2.2","2.3","2.4","2.5","2.6"]}}}'::jsonb)
 on conflict (key) do update set value = excluded.value;
 
 create table if not exists public.guide_seen (
@@ -33,6 +33,12 @@ begin
         or exists (select 1 from public.event_attendance where player_id = p_player);
   elsif p_check ? 'streak' then
     return exists (select 1 from public.player_streaks where player_id = p_player and greatest(current, best) >= (p_check ->> 'streak')::int);
+  elsif p_check ? 'rest' then
+    return exists (select 1 from public.player_rest where player_id = p_player and kind = p_check ->> 'rest' and uses > 0);
+  elsif p_check ? 'skill' then
+    return exists (select 1 from public.skill_log where player_id = p_player and skill = p_check ->> 'skill');
+  elsif p_check ? 'bill' then
+    return exists (select 1 from public.bills where player_id = p_player and status = 'paid');
   end if;
   return false;
 end;

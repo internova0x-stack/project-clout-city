@@ -18,7 +18,13 @@ export type GuideCheck =
   /** Went out: a club event, VIP floor or calendar event (ledger), or an exclusive party (event_attendance). */
   | { events: true }
   /** The daily streak (player_streaks, current or best) at least this long. */
-  | { streak: number };
+  | { streak: number }
+  /** Rested this way on any day (player_rest: sleep, nap, sit). */
+  | { rest: "sleep" | "nap" | "sit" }
+  /** Practised this skill (skill_log). */
+  | { skill: string }
+  /** Paid a bill (bills). */
+  | { bill: true };
 
 export interface GuideCard { art: string; t: string; b: string }
 export interface GuideStep {
@@ -56,7 +62,7 @@ export interface GuideChapter {
 
 export const CHAPTERS: GuideChapter[] = [
   { n: 1, title: "Arrival", day: 1, badge: "Off the Bus", badgeId: "guide-1", reward: { cash: 500 }, live: true },
-  { n: 2, title: "Looking after yourself", day: 1, badge: "Adulting (Allegedly)", badgeId: "guide-2", reward: { cash: 300 }, live: false },
+  { n: 2, title: "Looking after yourself", day: 1, badge: "Adulting (Allegedly)", badgeId: "guide-2", reward: { cash: 300 }, live: true },
   { n: 3, title: "Money", day: 2, badge: "Bag Secured", badgeId: "guide-3", reward: { cash: 500 }, live: false },
   { n: 4, title: "More clout", day: 2, badge: "Locally Relevant", badgeId: "guide-4", reward: { clout: 150 }, live: false },
   { n: 5, title: "Home", day: 3, badge: "Landlord's Nightmare", badgeId: "guide-5", reward: { cash: 400 }, live: false },
@@ -191,6 +197,67 @@ export const STEPS: GuideStep[] = [
     check: { seen: true }, reward: { cash: 150 }, done: "Sir Barksley tipped you. He seems slightly less sad.",
   },
 ];
+
+// ---- Chapter 2: Looking after yourself (owner, Nov 20: "write chapter 2"). The roommate step (2.7 in the doc) is folded into
+// 2.6's cards: only room-share players could do it, and a step some players can't do would hold their chapter back.
+const HOME = "text:Home";
+STEPS.push(
+  {
+    id: "2.1", chapter: 2, tag: "Energy", tip: "Energy is a currency. You're broke in it.",
+    cards: [
+      { art: "🔋", t: "Everything costs Energy.", b: "Trips, actions, shifts and work all spend it. At zero you can still scroll, but that's about it." },
+      { art: "🛏️", t: "Sleep is the big refill.", b: "Sleep in your own bed once a day for +80 Energy. Naps and sitting down top you up in between." },
+    ],
+    hint: "Go home and tap your bed", targets: [HOME],
+    check: { rest: "sleep" }, reward: { clout: 15 }, done: "Eight hours. Or the game version of it.",
+  },
+  {
+    id: "2.2", chapter: 2, tag: "Food", tip: "Sal says you look hungry.",
+    cards: [
+      { art: "🥯", t: "Eating out is the easy way.", b: "Delis, cafés and diners sell meals. A meal brings back Energy and usually a little Mood." },
+      { art: "🧾", t: "Regulars get remembered.", b: "Go back to the same spot on three different days and they start remembering your order. Sal does, anyway." },
+    ],
+    hint: "Eat a meal at a deli, café or diner", targets: [".map-pin", ".compact-dot", MAP],
+    check: { ledger: ["eat"] }, reward: { cash: 50 }, done: "Fed. Sal approves.",
+  },
+  {
+    id: "2.3", chapter: 2, tag: "Food", tip: "Groceries: cheaper than takeout, harder than takeout.",
+    cards: [
+      { art: "🛒", t: "Supermarkets sell bundles.", b: "A bundle fills your fridge with meals for home. Cheaper per meal than eating out, if you actually cook them." },
+      { art: "🧊", t: "Your fridge keeps count.", b: "The kitchen at home shows how many meals are left. When it's empty, it's back to the store." },
+    ],
+    hint: "Buy groceries at a supermarket", targets: [".map-pin", ".compact-dot", MAP],
+    check: { ledger: ["groceries"] }, reward: { cash: 50 }, done: "Fridge stocked. Very adult of you.",
+  },
+  {
+    id: "2.4", chapter: 2, tag: "Cooking", tip: "Let's get your cooking up.",
+    cards: [
+      { art: "🍳", t: "Cook at home.", b: "Tap the kitchen at home to cook a meal from your fridge. It brings back Energy for the price of the groceries." },
+      { art: "📈", t: "Cooking is a skill.", b: "Every meal you cook practises it. At levels 3, 6 and 9 it opens cooking gigs, invites and perks." },
+    ],
+    hint: "Tap the kitchen at home to cook", targets: [HOME],
+    check: { skill: "cooking" }, reward: { clout: 20 }, done: "You cooked. Nobody got hurt.",
+  },
+  {
+    id: "2.5", chapter: 2, tag: "Mood", tip: "Mood is the vibe tax.",
+    cards: [
+      { art: "🙂", t: "Mood turns up your clout.", b: "Clout from going places is bigger in a good mood and smaller in a bad one." },
+      { art: "🛋️", t: "Easy ways up.", b: "Sit down at home, eat, hang out at a park, have people over. Each stat panel row lists a few more." },
+    ],
+    hint: "Sit on your sofa at home for a while", targets: [HOME],
+    check: { rest: "sit" }, reward: { clout: 15 }, done: "Vibes restored. Mostly.",
+  },
+  {
+    id: "2.6", chapter: 2, tag: "Bills", tip: "Rent is due. Rent is always due.",
+    cards: [
+      { art: "🧾", t: "Rent comes every week.", b: "So do the phone bill and, if you have one, the car. Bills shows what's due and when." },
+      { art: "🚨", t: "Late is bad. Eviction is worse.", b: "A red card on the home screen warns you when the bank is short. Miss rent long enough and you're back in the room share." },
+      { art: "🧑‍🤝‍🧑", t: "Roommates split it.", b: "In the room share your roommate pays half. Living with a partner splits it too. Everyone else pays the whole thing." },
+    ],
+    hint: "Open Bills and pay one", targets: ['button[aria-label="Bills"]'],
+    check: { bill: true }, reward: { cash: 100 }, done: "Bill paid. Your landlord felt nothing.",
+  },
+);
 
 export const stepById = (id: string) => STEPS.find((s) => s.id === id);
 export const chapterSteps = (n: number) => STEPS.filter((s) => s.chapter === n);

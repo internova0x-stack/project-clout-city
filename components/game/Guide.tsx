@@ -27,7 +27,8 @@ export function findTarget(targets: string[]): HTMLElement | null {
       ? [...document.querySelectorAll<HTMLElement>("button")].filter((b) => b.innerText.trim() === t.slice(5))
       : [...document.querySelectorAll<HTMLElement>(t)];
     // Wholly on screen, so the ring never points off the edge (a map pin half past it).
-    const el = list.find((e) => { const r = e.getBoundingClientRect(); return r.width > 4 && r.height > 4 && r.left >= 4 && r.right <= innerWidth - 4 && r.top >= 4 && r.bottom <= innerHeight - 4 && getComputedStyle(e).visibility !== "hidden"; });
+    // A tab you're already on isn't the way there ("tap your bed" at home just shows the hint).
+    const el = list.find((e) => { const r = e.getBoundingClientRect(); return e.getAttribute("aria-current") !== "page" && r.width > 4 && r.height > 4 && r.left >= 4 && r.right <= innerWidth - 4 && r.top >= 4 && r.bottom <= innerHeight - 4 && getComputedStyle(e).visibility !== "hidden"; });
     if (el) return el;
   }
   return null;
