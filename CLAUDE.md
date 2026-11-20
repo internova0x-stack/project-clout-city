@@ -437,6 +437,11 @@ components live in `app/globals.css`.
   height), `spotlights` (recessed lights with a warm wall wash, sprites not lights) and `open`; floors of 200 m² or more open zoomed in
   on the player (pinch out for the whole floor) and hold up to 14 players. New pieces: phoneBank, warTable, pressBackdrop,
   campaignBanner, flagStand, pendantLamp, waterCooler, pollBoard, rallyStage, stringLights, patioUmbrella; item use `campaign`.
+  Modeled furniture (owner, Nov 20): a room item's `model` names a GLB in components/room/models.ts `MODELS` (Higgsfield pieces and
+  Kenney's CC0 kit in public/models/kenney/), swapped in over the box-built piece once loaded (low graphics keeps the boxes); fit by
+  `width`, `height` or the footprint, `turn` quarter turns, `layFlat`, `hangTop`. Add one with `node scripts/models.mjs <in.glb> <name>.glb`
+  (simplified, meshopt-compressed, WebP textures stepped down until under 80 KB; the loader has the meshopt decoder). Every place's
+  signature piece is listed there by place (fire engine, water tower, talk-show set…); `/preview/models?pick=a,b` checks them.
 - Rate limits (migration 0126, owner Oct 27): PostgREST's pre-request hook (`pgrst.db_pre_request` = `check_request()`) counts each
   signed-in player's writes per minute (`rate_counters`, `rate_hit`): 240 in all, plus buckets for guesses (hunt answers, exams,
   gossip, name checks: 20), reviewed posts (10), chat (30) and checkouts (10). Reads, signed-out requests and the service role are

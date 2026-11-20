@@ -2,7 +2,7 @@
 // /preview/models (development only): every modeled piece (components/room/models.ts) on a turntable-free grid, each
 // fitted to a 1.6 m footprint and facing the camera as the rooms place it (+z), labelled, for checking turns and looks.
 import { useEffect, useRef, useState } from "react";
-import { AmbientLight, Color, DirectionalLight, HemisphereLight, PerspectiveCamera, Scene, WebGLRenderer } from "three";
+import { AmbientLight, Box3, Color, DirectionalLight, HemisphereLight, PerspectiveCamera, Scene, Vector3, WebGLRenderer } from "three";
 import { MODELS, placedModel } from "../room/models";
 
 export function ModelsPreview({ pick }: { pick?: string }) {
@@ -19,7 +19,14 @@ export function ModelsPreview({ pick }: { pick?: string }) {
       scene.add(new HemisphereLight(0xffffff, 0x8a7f70, 1.5), new AmbientLight(0xffffff, 0.5));
       const sun = new DirectionalLight(0xffffff, 1.8); sun.position.set(2, 4, 3); scene.add(sun);
       const cam = new PerspectiveCamera(32, 1, 0.1, 50); cam.position.set(2.2, 2.6, 4.6); cam.lookAt(0, 0.55, 0);
-      const p = placedModel(id, 1.6, 1.6).then((m) => { if (m) scene.add(m); });
+      // Pulled back to fit the piece, so a 7 m fire engine shows whole like a 1 m chair (the label keeps its real size).
+      const p = placedModel(id, 1.6, 1.6).then((m) => {
+        if (!m) return;
+        scene.add(m);
+        const box = new Box3().setFromObject(m), s = box.getSize(new Vector3()), c = box.getCenter(new Vector3());
+        const k = Math.max(1, Math.max(s.x, s.y, s.z) / 1.7);
+        cam.position.set(c.x + 2.2 * k, c.y + 2.05 * k, c.z + 4.6 * k); cam.far = 50 * k; cam.updateProjectionMatrix(); cam.lookAt(c);
+      });
       return { scene, cam, p };
     });
     Promise.all(tiles.map((t) => t.p)).then(() => {

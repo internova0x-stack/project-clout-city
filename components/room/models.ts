@@ -4,6 +4,7 @@
 // piece's footprint and standing on the floor. Low graphics keeps the box-built pieces.
 import { Box3, Group, Mesh, Vector3, type Material, type Object3D } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+import { MeshoptDecoder } from "three/examples/jsm/libs/meshopt_decoder.module.js";
 
 export interface ModelInfo {
   /** The file in public/models/. */
@@ -55,6 +56,25 @@ export const MODELS: Record<string, ModelInfo> = {
   bed: { file: "bed.glb", width: 1.7, source: "Higgsfield (Tripo), generated Nov 20" },
   sofa: { file: "sofa.glb", width: 2.2, source: "Higgsfield (Tripo), generated Nov 20" },
   monstera: { file: "monstera.glb", height: 1.4, source: "Higgsfield (Tripo), generated Nov 20" },
+  // Signature pieces, one per special place (owner, Nov 20: "a special furniture piece for each of the 18 locations").
+  velvetBanquette: { file: "velvet-banquette.glb", width: 2.6, source: "Higgsfield (Tripo), generated Nov 20" }, // Velvet Static
+  kilnBar: { file: "kiln-bar.glb", width: 3.0, source: "Higgsfield (Tripo), generated Nov 20" }, // The Kiln
+  jukebox: { file: "jukebox.glb", height: 1.6, source: "Higgsfield (Tripo), generated Nov 20" }, // The Sticky Floor
+  discoFloor: { file: "disco-floor.glb", width: 4.0, source: "Higgsfield (Tripo), generated Nov 20" }, // Discount Disco
+  uvPod: { file: "uv-pod.glb", height: 1.6, source: "Higgsfield (Tripo), generated Nov 20" }, // Ultraviolet Society
+  firePit: { file: "fire-pit.glb", width: 3.0, source: "Higgsfield (Tripo), generated Nov 20" }, // Altitude 718 Rooftop
+  cabana: { file: "cabana.glb", width: 2.4, source: "Higgsfield (Tripo), generated Nov 20" }, // Ditmars Heights Rooftop
+  waterTower: { file: "water-tower.glb", height: 4.2, source: "Higgsfield (Tripo), generated Nov 20" }, // Up on Wythe
+  subwayEntrance: { file: "subway-entrance.glb", width: 3.0, source: "Higgsfield (Tripo), generated Nov 20" }, // Astoria Blvd station
+  talkShow: { file: "talk-show.glb", width: 4.0, turn: 2, source: "Higgsfield (Tripo), generated Nov 20" }, // Clout TV Tower
+  founderStatue: { file: "founder-statue.glb", height: 2.8, source: "Higgsfield (Tripo), generated Nov 20" }, // St. Johnsons University
+  oakLectern: { file: "oak-lectern.glb", height: 1.3, source: "Higgsfield (Tripo), generated Nov 20" }, // Queensborough University
+  trophyCase: { file: "trophy-case.glb", width: 1.8, turn: 2, source: "Higgsfield (Tripo), generated Nov 20" }, // Grand Street Community College
+  precinctDesk: { file: "precinct-desk.glb", width: 3.4, source: "Higgsfield (Tripo), generated Nov 20" }, // The 114½ Precinct
+  fireEngine: { file: "fire-engine.glb", width: 7.0, source: "Higgsfield (Tripo), generated Nov 20" }, // Engine 7 Firehouse
+  hospitalBed: { file: "hospital-bed.glb", width: 2.4, source: "Higgsfield (Tripo), generated Nov 20" }, // St. Copay's General Hospital
+  parkFountain: { file: "park-fountain.glb", width: 3.2, source: "Higgsfield (Tripo), generated Nov 20" }, // Astoria Park
+  parkCart: { file: "park-cart.glb", height: 2.4, source: "Higgsfield (Tripo), generated Nov 20" }, // Flushing Meadows Corona Park
   // Kenney's Furniture Kit (CC0, kenney.nl; public/models/kenney/LICENSE.txt): everyday pieces.
   "k:chairDesk": { file: "kenney/chairDesk.glb", source: "Kenney Furniture Kit 2.0 (CC0)" },
   "k:chairModernCushion": { file: "kenney/chairModernCushion.glb", source: "Kenney Furniture Kit 2.0 (CC0)" },
@@ -99,7 +119,7 @@ let loader: GLTFLoader | null = null;
 function loadModel(file: string): Promise<Object3D | null> {
   let p = cache.get(file);
   if (!p) {
-    loader ??= new GLTFLoader();
+    loader ??= new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
     p = loader.loadAsync(`/models/${file}`).then((g) => g.scene as Object3D).catch(() => null);
     cache.set(file, p);
   }
