@@ -1561,7 +1561,10 @@ function canvas(w: number, h: number) {
 function floorTexture(t: RoomTemplate, night: boolean, dream = false): CanvasTexture {
   const px = 128;
   const [c, g] = canvas(px * t.w, px * t.d);
-  const base = new Color(t.floor);
+  // Tiled floors are off-white tiles (owner, Nov 20: "I don't like the tiled floors. Make the floor off-white tiles"), except in
+  // dark rooms; a checker is plain tiles too.
+  const tiled = (t.floorKind === "tile" || t.floorKind === "checker") && !t.dark;
+  const base = new Color(tiled ? "#F3EFE7" : t.floor);
   if (night && !t.dark) base.multiplyScalar(0.8);
   g.fillStyle = base.getStyle();
   g.fillRect(0, 0, c.width, c.height);
@@ -1576,10 +1579,15 @@ function floorTexture(t: RoomTemplate, night: boolean, dream = false): CanvasTex
       g.fillRect(0, y + 2, c.width, plank - 2);
     }
   } else if (t.floorKind === "tile" || t.floorKind === "checker") {
-    const s = px * 0.5;
+    const s = px * 0.6;
+    let seed = 17;
+    const rnd = () => ((seed = (seed * 48271) % 2147483647) / 2147483647);
     for (let y = 0; y < c.height; y += s) for (let x = 0; x < c.width; x += s) {
-      if (t.floorKind === "checker" && ((x + y) / s) % 2 === 0) { g.fillStyle = "rgba(20,17,26,0.55)"; g.fillRect(x, y, s, s); }
-      g.strokeStyle = "rgba(0,0,0,0.15)";
+      if (!tiled && t.floorKind === "checker" && Math.round((x + y) / s) % 2 === 0) { g.fillStyle = "rgba(20,17,26,0.55)"; g.fillRect(x, y, s, s); }
+      // A barely-there variation from tile to tile, and soft warm-grey grout.
+      if (tiled) { g.fillStyle = `rgba(${rnd() < 0.5 ? "255,255,255" : "120,110,100"},${0.025 + rnd() * 0.03})`; g.fillRect(x, y, s, s); }
+      g.strokeStyle = tiled ? "rgba(150,138,124,0.28)" : "rgba(0,0,0,0.15)";
+      g.lineWidth = tiled ? 2 : 1;
       g.strokeRect(x, y, s, s);
     }
   } else {

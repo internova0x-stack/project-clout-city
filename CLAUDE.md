@@ -871,6 +871,9 @@ components live in `app/globals.css`.
   Backgrounds behind every room are the Monument Valley dusk (owner, Nov 20: "All these colors are harsh… and deviate from the
   delightful monument valley gradient we've used"): Room3D `derivedBackdrop` = `MV_SKY` (peach → rose → lavender by day, lavender →
   dusty violet → rose at night, never dark) with only a fifth of the room's own wall/accent tint; `skyline` rooms get it untinted.
+  Tiled floors are off-white tiles (owner, Nov 20: "I don't like the tiled floors. Make the floor off-white tiles"): Room3D
+  `floorTexture` draws every `tile` and `checker` floor (and room zone) as off-white 0.6 m tiles with soft warm-grey grout, no dark
+  checker squares, whatever the template's floor color; dark rooms keep theirs.
 - Players see "Crew" for their invited friends; code, types and database tables still say `clique`
   (renaming stored data isn't worth the risk). Keep player-facing copy on "crew".
 - Culture packs (docs/culture/, one at a time, only when the owner says "Build C<number>"): slang, invented stand-ins
