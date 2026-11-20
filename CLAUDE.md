@@ -465,6 +465,13 @@ components live in `app/globals.css`.
   the control room, the studio with the talk-show set (signature) under a video wall, cameras, `studioLight`s and audience seats, a
   green room, the "Get on Billboard" set) and `tvNewsroom` (the news desk set on a `tvSet` riser, writers' desks, edit bays, a break
   corner), 20 × 14 m each; the Executive floor stays `execFloor`. Its "modern" interior style is gone (the floors carry their own).
+  The schools (owner, Nov 20): CAMPUS_AREAS now point at big floors for all three schools: `quadBig` (24 × 18 outdoor: lawns, benches,
+  trees, lamps, the events board, a coffee cart), `lectureHall` (30 desk rows either side of the aisle, the lectern, chalkboard and
+  projector), `libraryBig` (rows of stacks, reading tables, the librarian's desk, the exam table, a reading nook), `diningBig` (the tray
+  line and menu, round marble and long tables) and `greekBig` (dark on purpose: a party house with the dance floor, DJ, `clubLights`,
+  pool table, beer pong, sofas, piano). The small campus* templates stay for nothing else. PLACE_SIGNATURE takes `area` (a campus
+  area's template): St. Johnsons' founder statue on the Quad, Queensborough's oak lectern and Grand Street's trophy case in the
+  Lecture Hall.
 - Rate limits (migration 0126, owner Oct 27): PostgREST's pre-request hook (`pgrst.db_pre_request` = `check_request()`) counts each
   signed-in player's writes per minute (`rate_counters`, `rate_hit`): 240 in all, plus buckets for guesses (hunt answers, exams,
   gossip, name checks: 20), reviewed posts (10), chat (30) and checkouts (10). Reads, signed-out requests and the service role are

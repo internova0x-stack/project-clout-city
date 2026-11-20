@@ -540,7 +540,7 @@ export function homeTemplate(homeId: string | null | undefined, houseSku?: strin
   return (houseSku && HOME_TEMPLATES[houseSku]) || HOME_TEMPLATES[homeId ?? ""] || HOME_TEMPLATES.astoria_studio;
 }
 
-export type PlaceTemplateId = "campaignGround" | "campaignWar" | "campaignRoof" | "clubBig" | "vipBig" | "rooftop" | "station" | "tvStudio" | "tvNewsroom" | "restroom" | "vip" | "club" | "cafe" | "counter" | "lounge" | "store" | "showroom" | "campus" | "unisphere" | "gantries" | "lotto" | "office" | "officeSmall" | "officeBig" | "towerLobby" | "techFloor" | "execFloor" | "newsroom" | "streamHouse" | "streamFloor" | "atelier" | "tradingFloor" | "lawOffice" | "backRoom" | "civic" | "gym" | "plaza" | "penthouse" | "radio" | "broadcast" | "hub" | "hubGames" | "hubLounge" | "campusQuad" | "campusLibrary" | "campusDining" | "campusGreek";
+export type PlaceTemplateId = "campaignGround" | "campaignWar" | "campaignRoof" | "clubBig" | "vipBig" | "rooftop" | "station" | "tvStudio" | "tvNewsroom" | "quadBig" | "lectureHall" | "libraryBig" | "diningBig" | "greekBig" | "restroom" | "vip" | "club" | "cafe" | "counter" | "lounge" | "store" | "showroom" | "campus" | "unisphere" | "gantries" | "lotto" | "office" | "officeSmall" | "officeBig" | "towerLobby" | "techFloor" | "execFloor" | "newsroom" | "streamHouse" | "streamFloor" | "atelier" | "tradingFloor" | "lawOffice" | "backRoom" | "civic" | "gym" | "plaza" | "penthouse" | "radio" | "broadcast" | "hub" | "hubGames" | "hubLounge" | "campusQuad" | "campusLibrary" | "campusDining" | "campusGreek";
 
 // v0.11 (spec section 11): every place can be entered. The shared templates take a place's own
 // actions: "*0" and "*1" are its first and second action (see placeRoom), so one office serves the
@@ -567,6 +567,137 @@ export const PLACE_TEMPLATES: Record<PlaceTemplateId, RoomTemplate> = {
     npcs: [
       { x: -1.4, z: -1.75, facing: 3.14 }, { x: 0.8, z: -1.75, facing: 3.14 }, { x: 0.3, z: -1.0, facing: -2.2 },
       { x: -0.6, z: 2.3, facing: 3.14, seated: true },
+    ],
+  },
+  // ---- The campuses (owner, Nov 20: "next"): every school's five areas as big floors (CAMPUS_AREAS) ----
+  // The Quad: lawns crossed by paths, benches, trees and lamps, the events board, a coffee cart; St. Johnsons' founder stands here.
+  quadBig: {
+    id: "quadBig", w: 24, d: 18, wall: "#BFD3E0", wallAccent: "#7FA36A", floor: "#D9CFC0", floorKind: "tile",
+    outdoor: { height: 4.5, edge: "#7FA36A", view: [12, 10] },
+    items: [
+      ...[[-7.5, -4.5], [-3.0, -4.5], [3.0, -4.5], [7.5, -4.5], [-7.5, -1.5], [-3.0, -1.5], [3.0, -1.5], [7.5, -1.5], [-7.5, 3.5], [-3.0, 3.5], [3.0, 3.5], [7.5, 3.5]].map(([x, z], i) => ({
+        id: `lawn-${i}`, kind: "rug" as const, x, z, rot: 0, color: "#7CC86B", ...(i === 5 ? { use: { kind: "action" as const, actionId: "quad" }, label: "Hang out on the lawn" } : {}),
+      })),
+      { id: "board", kind: "chalkboard", x: 0.0, z: -8.7, rot: 0, use: { kind: "events" }, label: "Campus events" },
+      { id: "bench-1", kind: "bench", x: -3.0, z: 1.0, rot: 2, use: { kind: "sit" }, label: "Sit", model: "stationBench" },
+      { id: "bench-2", kind: "bench", x: 3.0, z: 1.0, rot: 2, use: { kind: "action", actionId: "quad" }, label: "People-watch", model: "stationBench" },
+      { id: "bench-3", kind: "bench", x: -10.8, z: 1.0, rot: 1, model: "stationBench" },
+      { id: "bench-4", kind: "bench", x: 10.8, z: 1.0, rot: 3, model: "stationBench" },
+      { id: "cart", kind: "foodCart", x: 9.6, z: 6.6, rot: 3, color: "#F2A900" },
+      ...[[-5.2, 6.4], [0, 6.4], [5.2, 6.4], [-5.2, -7.2], [5.2, -7.2]].map(([x, z], i) => ({ id: `lamp-${i}`, kind: "lamppost" as const, x, z, rot: 0 })),
+      ...[[-10.8, -7.6], [-10.8, -4.2], [10.8, -7.6], [10.8, -4.2], [-10.8, 5.0], [-10.8, 7.8], [10.8, 4.0], [-1.4, -7.6], [1.4, -7.6]].map(([x, z], i) => ({ id: `tree-${i}`, kind: "tree" as const, x, z, rot: 0 })),
+    ],
+    spawn: [0.0, 7.6],
+    npcs: [
+      { x: -3.0, z: -1.2, facing: 0.6, seated: true }, { x: 3.2, z: -1.4, facing: 2.6, seated: true }, { x: -7.4, z: 3.6, facing: 1.0, seated: true },
+      { x: 3.0, z: 1.0, facing: 3.14, seated: true }, { x: 9.0, z: 6.2, facing: 2.2 }, { x: -1.4, z: 2.4, facing: 1.0 }, { x: 0.6, z: 2.6, facing: -2.0 },
+      { x: 7.6, z: -4.4, facing: 0.4, seated: true }, { x: -0.4, z: -8.0, facing: 0 },
+    ],
+  },
+  // The Lecture Hall: rows of desks either side of the aisle, facing the lectern, the chalkboard and the projector screen.
+  lectureHall: {
+    id: "lectureHall", w: 20, d: 14, wall: "#F2EBDD", wallAccent: "#7A5A3A", floor: "#C9A57A", floorKind: "wood", window: true, spotlights: true,
+    rooms: [{ name: "Front", x0: -10, z0: -7, x1: 10, z1: -3.6, floor: "#E2D6C2", floorKind: "tile" }],
+    items: [
+      { id: "board", kind: "chalkboard", x: -4.0, z: -6.85, rot: 0, use: { kind: "events" }, label: "Campus events" },
+      { id: "projector", kind: "bigScreen", x: 3.6, z: -6.9, rot: 0 },
+      { id: "lectern", kind: "lectern", x: 0.0, z: -5.0, rot: 0 },
+      { id: "front-desk", kind: "desk", x: -1.8, z: -5.0, rot: 0 },
+      ...[-2.2, -0.4, 1.4, 3.2, 5.0].flatMap((z, r) => [-7.4, -5.2, -3.0, 3.0, 5.2, 7.4].map((x, c) => {
+        const use = r === 0 && c === 2 ? { use: { kind: "action" as const, actionId: "lecture" }, label: "Take notes" } : r === 0 && c === 3 ? { use: { kind: "campus" as const, tab: "classes" as const }, label: "Go to class" } : r === 2 && c === 3 ? { use: { kind: "action" as const, actionId: "lecture" }, label: "Take notes" } : {};
+        return { id: `desk-${r}-${c}`, kind: "lectureDesk" as const, x, z, rot: 2, model: "lectureDesks", ...use };
+      })),
+      { id: "shelf-1", kind: "bookshelf", x: -9.7, z: 0.6, rot: 1, model: "bookshelf" },
+      { id: "shelf-2", kind: "bookshelf", x: -9.7, z: 2.0, rot: 1, model: "bookshelf" },
+      { id: "plant-1", kind: "plant", x: 9.5, z: -6.5, rot: 0, model: "figTree" },
+      { id: "plant-2", kind: "plant", x: -9.5, z: -6.5, rot: 0, model: "monstera" },
+      { id: "plant-3", kind: "plant", x: 9.5, z: 6.5, rot: 0, model: "monstera" },
+    ],
+    spawn: [0.0, 6.2],
+    npcs: [
+      { x: 0.0, z: -5.6, facing: 0 },
+      ...[[-7.4, -2.2], [-3.0, -0.4], [5.2, -2.2], [7.4, 1.4], [-5.2, 1.4], [3.0, 3.2], [-7.4, 5.0], [5.2, 5.0]].map(([x, z]) => ({ x, z: z + 0.35, facing: 3.14, seated: true })),
+    ],
+  },
+  // The Library: tall stacks in rows on the left, reading tables with green lamps on the right, the librarian's desk, the exam
+  // table and a reading nook.
+  libraryBig: {
+    id: "libraryBig", w: 20, d: 14, wall: "#EFE6D6", wallAccent: "#6B4A2E", floor: "#B48A5E", floorKind: "wood", window: true, spotlights: true,
+    rooms: [{ name: "Reading room", x0: 0, z0: -7, x1: 10, z1: 7, floor: "#C9A57A", floorKind: "wood" }],
+    items: [
+      ...[-6.6, -3.8, -1.0].flatMap((z) => [-8.6, -7.6, -6.6, -4.4, -3.4, -2.4].map((x, i) => ({ id: `stack-${z}-${i}`, kind: "bookshelf" as const, x, z, rot: 0, model: "bookshelf" }))),
+      ...[-6.0, -3.0].flatMap((z) => [-8.6, -7.6, -6.6, -4.4, -3.4, -2.4].map((x, i) => ({ id: `stack-back-${z}-${i}`, kind: "bookshelf" as const, x, z: z + 0.42, rot: 2, model: "bookshelf" }))),
+      ...[[2.6, -4.4], [6.8, -4.4], [2.6, -1.2], [6.8, -1.2], [2.6, 2.0], [6.8, 2.0]].flatMap(([x, z], i) => [
+        { id: `table-${i}`, kind: "diningTable" as const, x, z, rot: 0, model: "readingTable", ...(i === 0 ? { use: { kind: "action" as const, actionId: "study" }, label: "Study" } : i === 1 ? { use: { kind: "campus" as const, tab: "exams" as const }, label: "Exams" } : {}) },
+        { id: `table-chair-a-${i}`, kind: "chair" as const, x: x - 0.35, z: z + 0.75, rot: 2, model: "k:chairModernCushion" },
+        { id: `table-chair-b-${i}`, kind: "chair" as const, x: x + 0.35, z: z + 0.75, rot: 2, model: "k:chairModernCushion" },
+      ]),
+      { id: "librarian", kind: "storeCounter", x: -5.0, z: 3.6, rot: 0, color: "#7A5A3A" },
+      { id: "nook-chair-1", kind: "armchair", x: 3.2, z: 5.6, rot: 1, color: "#1F6B4A", model: "velvetChair" },
+      { id: "nook-chair-2", kind: "armchair", x: 6.0, z: 5.6, rot: 3, color: "#1F6B4A", model: "velvetChair" },
+      { id: "nook-table", kind: "coffeeTable", x: 4.6, z: 5.6, rot: 1, model: "marbleTable" },
+      { id: "nook-lamp", kind: "floorLamp", x: 4.6, z: 6.6, rot: 0, model: "arcLamp" },
+      { id: "nook-rug", kind: "rug", x: 4.6, z: 5.6, rot: 0, color: "#8E1F2F" },
+      { id: "plant-1", kind: "plant", x: 9.5, z: -6.5, rot: 0, model: "figTree" },
+      { id: "plant-2", kind: "plant", x: -9.5, z: 6.5, rot: 0, model: "monstera" },
+    ],
+    spawn: [-1.0, 6.2],
+    npcs: [
+      { x: -5.0, z: 2.9, facing: 0 }, { x: 2.25, z: -3.65, facing: 3.14, seated: true }, { x: 7.15, z: -0.45, facing: 3.14, seated: true },
+      { x: 2.95, z: 2.75, facing: 3.14, seated: true }, { x: 6.45, z: 2.75, facing: 3.14, seated: true }, { x: -5.4, z: -2.4, facing: 0.4 },
+      { x: 3.2, z: 5.6, facing: 1.57, seated: true },
+    ],
+  },
+  // The Dining Hall: the tray line and the menu along the back, round marble tables and long tables, a drinks corner.
+  diningBig: {
+    id: "diningBig", w: 20, d: 14, wall: "#F3EBDD", wallAccent: "#C8102E", floor: "#E2DACB", floorKind: "checker", window: true, alwaysLit: true, spotlights: true,
+    items: [
+      { id: "line", kind: "cafeCounter", x: -5.6, z: -6.4, rot: 0, use: { kind: "campus", tab: "dining" }, label: "Grab a tray" },
+      { id: "line-2", kind: "cafeCounter", x: -2.6, z: -6.4, rot: 0 },
+      { id: "case", kind: "pastryCase", x: 0.0, z: -6.5, rot: 0 },
+      { id: "menu", kind: "chalkboard", x: 4.0, z: -6.85, rot: 0, use: { kind: "campus", tab: "dining" }, label: "Today's menu" },
+      { id: "fridge", kind: "drinksFridge", x: 8.6, z: -6.45, rot: 0 },
+      ...[[-6.4, -2.4], [-2.2, -2.4], [2.0, -2.4], [6.2, -2.4], [-6.4, 1.4], [-2.2, 1.4]].map(([x, z], i) => ({ id: `round-${i}`, kind: "roundDining" as const, x, z, rot: 0, model: "diningSet" })),
+      ...[[2.6, 1.4], [6.4, 1.4], [2.6, 4.6], [6.4, 4.6]].flatMap(([x, z], i) => [
+        { id: `long-${i}`, kind: "diningTable" as const, x, z, rot: 0 },
+        { id: `long-chair-a-${i}`, kind: "chair" as const, x: x - 0.3, z: z - 0.7, rot: 0 },
+        { id: `long-chair-b-${i}`, kind: "chair" as const, x: x + 0.3, z: z + 0.7, rot: 2 },
+      ]),
+      { id: "plant-1", kind: "plant", x: 9.5, z: 6.5, rot: 0, model: "monstera" },
+      { id: "plant-2", kind: "plant", x: -9.5, z: 6.5, rot: 0, model: "figTree" },
+    ],
+    spawn: [-5.0, 5.6],
+    npcs: [
+      { x: -5.6, z: -6.85, facing: 0 }, { x: -2.6, z: -6.85, facing: 0 }, { x: -4.4, z: -5.4, facing: 3.14 },
+      { x: -6.4, z: -1.6, facing: 3.14 }, { x: 2.0, z: -3.2, facing: 0.2 }, { x: 2.3, z: 0.7, facing: 0, seated: true },
+      { x: 6.7, z: 5.3, facing: 3.14, seated: true }, { x: -2.2, z: 2.2, facing: 2.6 },
+    ],
+  },
+  // Greek Row: a frat house's living room on party night (dark: it's a party). The dance floor and the DJ, the punch bar, a pool
+  // table and a beer-pong table, sofas and the piano nobody can play.
+  greekBig: {
+    id: "greekBig", w: 20, d: 14, wall: "#3A2E44", wallAccent: "#FF6A3D", floor: "#6E4C35", floorKind: "wood", dark: true, clubLights: true,
+    items: [
+      { id: "floor", kind: "danceFloor", x: -1.5, z: -1.6, rot: 0, use: { kind: "events" }, label: "Party night" },
+      { id: "floor-2", kind: "danceFloor", x: 1.5, z: -1.6, rot: 0 },
+      { id: "dj", kind: "djBooth", x: 0.0, z: -6.3, rot: 0, model: "djBooth" },
+      { id: "speaker-1", kind: "speaker", x: -2.2, z: -6.4, rot: 0, model: "k:speaker" },
+      { id: "speaker-2", kind: "speaker", x: 2.2, z: -6.4, rot: 0, model: "k:speaker" },
+      { id: "punch", kind: "bar", x: 8.6, z: -2.4, rot: 3, model: "bar" },
+      { id: "pool", kind: "poolTable", x: -6.6, z: -4.4, rot: 0, model: "poolTable" },
+      { id: "pong", kind: "diningTable", x: -6.6, z: 0.2, rot: 0 },
+      { id: "sofa-1", kind: "sofa", x: -4.0, z: 6.2, rot: 2, color: "#7A5A3A", use: { kind: "sit" }, label: "Sit", model: "chesterfield" },
+      { id: "sofa-2", kind: "sofa", x: 2.0, z: 6.2, rot: 2, color: "#3B2A55", model: "sofa" },
+      { id: "table", kind: "coffeeTable", x: -1.0, z: 5.0, rot: 0, model: "marbleTable" },
+      { id: "chair", kind: "armchair", x: 5.0, z: 4.6, rot: 3, color: "#8E1F2F", model: "velvetChair" },
+      { id: "piano", kind: "piano", x: 7.8, z: 5.6, rot: 3, model: "grandPiano" },
+      { id: "lamp", kind: "floorLamp", x: -9.4, z: 6.4, rot: 0, model: "arcLamp" },
+    ],
+    spawn: [0.0, 3.6],
+    npcs: [
+      { x: 0.0, z: -5.6, facing: 0 }, { x: -1.8, z: -1.2, facing: 0.6 }, { x: 0.6, z: -2.4, facing: 2.6 }, { x: 2.2, z: -0.8, facing: -2.0 },
+      { x: -0.8, z: -2.8, facing: 0.2 }, { x: 7.8, z: -2.4, facing: 1.57 }, { x: -6.6, z: -3.4, facing: 3.14 }, { x: -7.6, z: 0.8, facing: 2.2 },
+      { x: -4.0, z: 6.1, facing: 3.14, seated: true }, { x: 2.0, z: 6.1, facing: 3.14, seated: true },
     ],
   },
   // ---- Clout TV Tower (owner, Nov 20: "next") ----
@@ -1955,7 +2086,11 @@ export const PLACE_GROUND: Record<string, PlaceTemplateId> = {
  * Each special place's signature piece (owner, Nov 20: "a special furniture piece for each of the 18 locations"): pieces added
  * to its ground floor, and models swapped onto the shared template's own pieces (by item id).
  */
-export const PLACE_SIGNATURE: Record<string, { add?: RoomItem[]; models?: Record<string, string> }> = {
+export const PLACE_SIGNATURE: Record<string, { add?: RoomItem[]; models?: Record<string, string>; area?: PlaceTemplateId }> = {
+  // The schools (owner, Nov 20): each on the area that suits it (`area`: a campus area's template; none = the ground floor).
+  "st-johnsons": { add: [{ id: "sig-founder", kind: "tree", x: 0, z: -3.0, rot: 0, model: "founderStatue", name: "The founder" }] },
+  "queensborough-u": { area: "lectureHall", models: { lectern: "oakLectern" } },
+  "astoria-cc": { area: "lectureHall", add: [{ id: "sig-trophies", kind: "displayCase", x: 9.4, z: -2.6, rot: 3, model: "trophyCase", name: "The trophy case" }] },
   // The clubs' feature corner is the lounge's left end (clubBig: x -11.5 to -9, z 4.5 to 9).
   "velvet-static": { add: [{ id: "sig-banquette", kind: "booth", x: -10.2, z: 8.3, rot: 2, color: "#8B1A2B", model: "velvetBanquette", name: "The velvet booth" }] },
   "hellgate-hall": { add: [{ id: "sig-kiln", kind: "booth", x: -10.2, z: 8.3, rot: 2, color: "#FF5A36", model: "kilnBar", name: "The kiln" }] },
@@ -1979,7 +2114,7 @@ export function placeRoom(place: RoomPlace & { tags?: string[] }, area?: PlaceTe
   // Club nights, campus events and exclusive parties are held here; elsewhere the dance floor is just a floor.
   const hasEvents = CLUB_EVENTS.some((e) => e.placeId === place.id) || !!place.tags?.includes("exclusive_venue");
   // v0.15: a campus opens on the Quad; its other areas come through placeFloor (CAMPUS_AREAS).
-  const campusArea = area ?? (place.tags?.includes("campus") && place.template === "campus" ? "campusQuad" : undefined);
+  const campusArea = area ?? (place.tags?.includes("campus") && place.template === "campus" ? CAMPUS_AREAS[1].template : undefined);
   const ground = PLACE_GROUND[place.id];
   const base = campusArea ? PLACE_TEMPLATES[campusArea] : ground ? PLACE_TEMPLATES[ground] : place.template && place.template !== "apartment" ? PLACE_TEMPLATES[place.template as PlaceTemplateId] : undefined;
   if (!base) return null;
@@ -2011,7 +2146,8 @@ export function placeRoom(place: RoomPlace & { tags?: string[] }, area?: PlaceTe
   // Tower offices: the ground floor's elevator doors.
   if (TOWERS[place.id] && !area) items.push(...towerElevators(base, place.id, 1));
   // The place's signature piece (on its ground floor, not a campus area).
-  const sig = !area ? PLACE_SIGNATURE[place.id] : undefined;
+  const sigAll = PLACE_SIGNATURE[place.id];
+  const sig = sigAll && (sigAll.area ? !!area && campusArea === sigAll.area : !area) ? sigAll : undefined;
   if (sig?.models) items.forEach((it, i) => { if (sig.models![it.id]) items[i] = { ...it, model: sig.models![it.id] }; });
   if (sig?.add) items.push(...sig.add);
   // #19 clubs: stairs down to the restroom, and up to VIP where there is one.
@@ -2193,11 +2329,12 @@ export const HUB_FLOORS: Record<number, { name: string; emoji: string; template:
 
 /** v0.15 campus areas (owner, Oct 18): you walk in on the Quad (1); the buildings are "floors" 2 to 5. */
 export const CAMPUS_AREAS: Record<number, { name: string; emoji: string; template: PlaceTemplateId }> = {
-  1: { name: "The Quad", emoji: "🌳", template: "campusQuad" },
-  2: { name: "Lecture Hall", emoji: "🎓", template: "campus" },
-  3: { name: "Library", emoji: "📖", template: "campusLibrary" },
-  4: { name: "Dining Hall", emoji: "🍽️", template: "campusDining" },
-  5: { name: "Greek Row", emoji: "🎉", template: "campusGreek" },
+  // The big floors (owner, Nov 20); campusQuad, campusLibrary, campusDining and campusGreek were the small rooms before them.
+  1: { name: "The Quad", emoji: "🌳", template: "quadBig" },
+  2: { name: "Lecture Hall", emoji: "🎓", template: "lectureHall" },
+  3: { name: "Library", emoji: "📖", template: "libraryBig" },
+  4: { name: "Dining Hall", emoji: "🍽️", template: "diningBig" },
+  5: { name: "Greek Row", emoji: "🎉", template: "greekBig" },
 };
 
 // ---------------------------------------------------------------------------
@@ -2452,7 +2589,7 @@ export const PLAYER_SLOTS: Record<PlaceTemplateId, number> = {
   restroom: 3, vip: 4, club: 6, cafe: 5, counter: 4, lounge: 5, store: 5, showroom: 7, campus: 6, lotto: 4,
   unisphere: 7, gantries: 7, office: 5, officeSmall: 3, officeBig: 7, towerLobby: 6, techFloor: 7, execFloor: 6, newsroom: 7, streamHouse: 6, streamFloor: 7, atelier: 6, tradingFloor: 7, lawOffice: 6, backRoom: 3, civic: 5, gym: 5, plaza: 7, penthouse: 10, radio: 4, broadcast: 5,
   hub: 7, hubGames: 7, hubLounge: 7, campusQuad: 7, campusLibrary: 5, campusDining: 6, campusGreek: 7,
-  campaignGround: 12, campaignWar: 10, campaignRoof: 14, clubBig: 14, vipBig: 7, rooftop: 14, station: 12, tvStudio: 12, tvNewsroom: 12,
+  campaignGround: 12, campaignWar: 10, campaignRoof: 14, clubBig: 14, vipBig: 7, rooftop: 14, station: 12, tvStudio: 12, tvNewsroom: 12, quadBig: 14, lectureHall: 14, libraryBig: 12, diningBig: 14, greekBig: 14,
 };
 /** The player figures a room holds (its party spots, or PLAYER_SLOTS by template; floors are "vip:place"). */
 export function playerSlots(t: RoomTemplate): number {
