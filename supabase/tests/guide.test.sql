@@ -77,4 +77,28 @@ select pg_temp.assert(public.guide_state() -> 'chapters' @> '[1, 2]', 'chapter 2
 reset role;
 select pg_temp.assert(pg_temp.paid('guide_chapter', pg_temp.u(11), 'cash') = 500 + 300, 'chapter 2 pays C$300');
 select pg_temp.assert(exists (select 1 from public.player_badges where player_id = pg_temp.u(11) and badge_id = 'guide-2'), 'Adulting (Allegedly)');
+
+-- ---- Chapter 3: gigs, shifts, a career, a business and the Jobs board ----
+insert into auth.users (id) select pg_temp.u(12);
+set role authenticated;
+select pg_temp.as_(pg_temp.u(12)::text);
+select public.create_player('Client', 'bodega_drip', '{}', null, true);
+select public.set_traits(array['loud', 'hustler']); select public.roll_birth_lottery(); select public.move_in('astoria_studio');
+select pg_temp.as_(pg_temp.u(11)::text);
+select public.guide_seen(s) from unnest(array['3.1', '3.4']) s;
+reset role;
+select public.ledger_once(pg_temp.u(11), 'cash', 50, 'gig', 'x'), public.ledger_once(pg_temp.u(11), 'cash', 50, 'shift', 'x'),
+       public.ledger_once(pg_temp.u(11), 'cash', 500, 'career_pay', 'x');
+insert into public.aspirations (player_id, aspiration) values (pg_temp.u(11), 'hustler');
+insert into public.careers (id, player_id, track, last_work_day, state) values (gen_random_uuid(), pg_temp.u(11), 'hospitality', public.ny_today(), '{}');
+insert into public.player_facts (player_id, key, subject) values (pg_temp.u(11), 'career.helped', 'hospitality:friend');
+insert into public.player_businesses (player_id, business_id, bought_at, collected_at) values (pg_temp.u(11), 'test', now(), now());
+insert into public.jobs (poster, kind, worker, status) values (pg_temp.u(12), 'decorator', pg_temp.u(11), 'active');
+set role authenticated;
+select pg_temp.as_(pg_temp.u(11)::text);
+select pg_temp.assert(public.guide_state() -> 'ready' @> '["3.1", "3.2", "3.3", "3.4", "3.5", "3.6", "3.7", "3.8", "3.9", "3.10", "3.11"]', 'every Chapter 3 step ready');
+select public.guide_claim(s) from unnest(array['3.1', '3.2', '3.3', '3.4', '3.5', '3.6', '3.7', '3.8', '3.9', '3.10', '3.11']) s;
+select pg_temp.assert(public.guide_state() -> 'chapters' @> '[1, 2, 3]', 'chapter 3 paid');
+select pg_temp.as_(pg_temp.u(12)::text);
+select pg_temp.assert(public.guide_state() -> 'ready' ? '3.11', 'posting a job counts too');
 rollback;

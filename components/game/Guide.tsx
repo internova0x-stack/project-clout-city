@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
-import { CHAPTERS, chapterOpen, chapterSteps, rewardText, type GuideState, type GuideStep } from "@/lib/guide";
+import { CHAPTERS, chapterOpen, chapterSteps, rewardText, stepOpen, type GuideState, type GuideStep } from "@/lib/guide";
 
 // The Guide (migration 0170, lib/guide.ts; owner Nov 20). The pill under "Invite your Crew" names the one recommended step;
 // GuideFlow plays it: Lola's tip, the explainer cards, then "Show me": a glow on the real button while the player does it.
@@ -122,11 +122,12 @@ export function GuideTab({ state, current, onPlay, extra }: { state: GuideState;
               <ul className="guide-steps">
                 {steps.map((s) => {
                   const paid = state.paid.includes(s.id);
+                  const later = !paid && !stepOpen(s, state);
                   return (
                     <li key={s.id}>
-                      <button className={`guide-step${s.id === current?.id ? " is-next" : ""}`} onClick={() => onPlay(s)} disabled={paid}>
-                        <span className="guide-step-n">{paid ? "✓" : s.id}</span>
-                        <span style={{ flex: 1, minWidth: 0 }}>{s.tip}<span className="meta" style={{ display: "block" }}>{rewardText(s.reward)}</span></span>
+                      <button className={`guide-step${s.id === current?.id ? " is-next" : ""}`} onClick={() => onPlay(s)} disabled={paid || later}>
+                        <span className="guide-step-n">{paid ? "✓" : later ? "🔒" : s.id}</span>
+                        <span style={{ flex: 1, minWidth: 0 }}>{s.tip}<span className="meta" style={{ display: "block" }}>{later ? `Opens at Rank ${s.opens?.rank}` : rewardText(s.reward)}</span></span>
                       </button>
                     </li>
                   );

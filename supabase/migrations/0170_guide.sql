@@ -5,7 +5,7 @@
 -- last step also pays the chapter (ledger 'guide_chapter', ref its number) and its badge. "Seen" steps are marked by the game
 -- when the player opens that screen (guide_seen). Start over moves the ledger to the archive, so the Guide pays again.
 
-insert into public.game_settings (key, value) values ('guide', '{"steps":{"1.1":{"chapter":1,"check":{"seen":true},"cash":0,"clout":15},"1.2":{"chapter":1,"check":{"seen":true},"cash":50,"clout":0},"1.3":{"chapter":1,"check":{"seen":true},"cash":0,"clout":15},"1.4":{"chapter":1,"check":{"seen":true},"cash":0,"clout":15},"1.5":{"chapter":1,"check":{"ledger":["visit","shift"]},"cash":0,"clout":20},"1.6":{"chapter":1,"check":{"ledger":["daily_bonus"]},"cash":150,"clout":0},"1.7":{"chapter":1,"check":{"gossip":true},"cash":0,"clout":20},"1.8":{"chapter":1,"check":{"events":true},"cash":0,"clout":30},"1.9":{"chapter":1,"check":{"seen":true},"cash":50,"clout":0},"1.10":{"chapter":1,"check":{"seen":true},"cash":0,"clout":15},"1.11":{"chapter":1,"check":{"streak":3},"cash":0,"clout":30},"1.12":{"chapter":1,"check":{"ledger":["goal"]},"cash":0,"clout":30},"1.13":{"chapter":1,"check":{"seen":true},"cash":150,"clout":0},"2.1":{"chapter":2,"check":{"rest":"sleep"},"cash":0,"clout":15},"2.2":{"chapter":2,"check":{"ledger":["eat"]},"cash":50,"clout":0},"2.3":{"chapter":2,"check":{"ledger":["groceries"]},"cash":50,"clout":0},"2.4":{"chapter":2,"check":{"skill":"cooking"},"cash":0,"clout":20},"2.5":{"chapter":2,"check":{"rest":"sit"},"cash":0,"clout":15},"2.6":{"chapter":2,"check":{"bill":true},"cash":100,"clout":0}},"chapters":{"1":{"badge":"guide-1","cash":500,"clout":0,"steps":["1.1","1.2","1.3","1.4","1.5","1.6","1.7","1.8","1.9","1.10","1.11","1.12","1.13"]},"2":{"badge":"guide-2","cash":300,"clout":0,"steps":["2.1","2.2","2.3","2.4","2.5","2.6"]}}}'::jsonb)
+insert into public.game_settings (key, value) values ('guide', '{"steps":{"1.1":{"chapter":1,"check":{"seen":true},"cash":0,"clout":15},"1.2":{"chapter":1,"check":{"seen":true},"cash":50,"clout":0},"1.3":{"chapter":1,"check":{"seen":true},"cash":0,"clout":15},"1.4":{"chapter":1,"check":{"seen":true},"cash":0,"clout":15},"1.5":{"chapter":1,"check":{"ledger":["visit","shift"]},"cash":0,"clout":20},"1.6":{"chapter":1,"check":{"ledger":["daily_bonus"]},"cash":150,"clout":0},"1.7":{"chapter":1,"check":{"gossip":true},"cash":0,"clout":20},"1.8":{"chapter":1,"check":{"events":true},"cash":0,"clout":30},"1.9":{"chapter":1,"check":{"seen":true},"cash":50,"clout":0},"1.10":{"chapter":1,"check":{"seen":true},"cash":0,"clout":15},"1.11":{"chapter":1,"check":{"streak":3},"cash":0,"clout":30},"1.12":{"chapter":1,"check":{"ledger":["goal"]},"cash":0,"clout":30},"1.13":{"chapter":1,"check":{"seen":true},"cash":150,"clout":0},"2.1":{"chapter":2,"check":{"rest":"sleep"},"cash":0,"clout":15},"2.2":{"chapter":2,"check":{"ledger":["eat"]},"cash":50,"clout":0},"2.3":{"chapter":2,"check":{"ledger":["groceries"]},"cash":50,"clout":0},"2.4":{"chapter":2,"check":{"skill":"cooking"},"cash":0,"clout":20},"2.5":{"chapter":2,"check":{"rest":"sit"},"cash":0,"clout":15},"2.6":{"chapter":2,"check":{"bill":true},"cash":100,"clout":0},"3.1":{"chapter":3,"check":{"seen":true},"cash":0,"clout":15},"3.2":{"chapter":3,"check":{"ledger":["gig"]},"cash":100,"clout":0},"3.3":{"chapter":3,"check":{"ledger":["shift"]},"cash":50,"clout":0},"3.4":{"chapter":3,"check":{"seen":true},"cash":0,"clout":15},"3.5":{"chapter":3,"check":{"has":"aspiration"},"cash":0,"clout":30},"3.6":{"chapter":3,"check":{"has":"job"},"cash":150,"clout":0},"3.7":{"chapter":3,"check":{"has":"workday"},"cash":100,"clout":0},"3.8":{"chapter":3,"check":{"has":"office_move"},"cash":0,"clout":20},"3.9":{"chapter":3,"check":{"ledger":["career_pay"]},"cash":0,"clout":30},"3.10":{"chapter":3,"check":{"has":"business"},"cash":200,"clout":0},"3.11":{"chapter":3,"check":{"has":"board_job"},"cash":0,"clout":20}},"chapters":{"1":{"badge":"guide-1","cash":500,"clout":0,"steps":["1.1","1.2","1.3","1.4","1.5","1.6","1.7","1.8","1.9","1.10","1.11","1.12","1.13"]},"2":{"badge":"guide-2","cash":300,"clout":0,"steps":["2.1","2.2","2.3","2.4","2.5","2.6"]},"3":{"badge":"guide-3","cash":500,"clout":0,"steps":["3.1","3.2","3.3","3.4","3.5","3.6","3.7","3.8","3.9","3.10","3.11"]}}}'::jsonb)
 on conflict (key) do update set value = excluded.value;
 
 create table if not exists public.guide_seen (
@@ -39,6 +39,19 @@ begin
     return exists (select 1 from public.skill_log where player_id = p_player and skill = p_check ->> 'skill');
   elsif p_check ? 'bill' then
     return exists (select 1 from public.bills where player_id = p_player and status = 'paid');
+  elsif p_check ->> 'has' = 'aspiration' then
+    return exists (select 1 from public.aspirations where player_id = p_player);
+  elsif p_check ->> 'has' = 'job' then
+    return exists (select 1 from public.careers where player_id = p_player);
+  elsif p_check ->> 'has' = 'workday' then
+    return exists (select 1 from public.careers where player_id = p_player and last_work_day is not null);
+  elsif p_check ->> 'has' = 'office_move' then
+    return exists (select 1 from public.player_facts where player_id = p_player and key in ('career.helped', 'career.shared_credit',
+      'career.teamed_up', 'career.took_credit', 'career.reported', 'career.started_rumor', 'career.covered', 'career.backed_boss', 'career.mentored'));
+  elsif p_check ->> 'has' = 'business' then
+    return exists (select 1 from public.player_businesses where player_id = p_player);
+  elsif p_check ->> 'has' = 'board_job' then
+    return exists (select 1 from public.jobs where poster = p_player or worker = p_player);
   end if;
   return false;
 end;

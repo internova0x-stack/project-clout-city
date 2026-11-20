@@ -2693,8 +2693,14 @@ export function GameShell({
     if (guideAt.current !== undefined && at && at !== guideAt.current) guideSeenMark("1.2");
     if (city) guideAt.current = at;
   }, [city?.player.at_place]); // eslint-disable-line react-hooks/exhaustive-deps
-  useEffect(() => { if (panel === "leaderboard") guideSeenMark("1.4"); }, [panel]); // eslint-disable-line react-hooks/exhaustive-deps
-  useEffect(() => { if (phone.open && phone.app === "messages") guideSeenMark("1.10"); }, [phone.open, phone.app]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (panel === "leaderboard") guideSeenMark("1.4");
+    if (panel === "networth") guideSeenMark("3.4");
+  }, [panel]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (phone.open && phone.app === "messages") guideSeenMark("1.10");
+    if (phone.open && phone.app === "gigs") guideSeenMark("3.1");
+  }, [phone.open, phone.app]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { if (barksley) guideSeenMark("1.13"); }, [barksley]); // eslint-disable-line react-hooks/exhaustive-deps
   // Lola's tip for the next step pops up once per step on this device, when nothing else is open.
   guideClear.current = !panel && !place && flow === "none" && !phone.open && !choiceCard && !barksley;

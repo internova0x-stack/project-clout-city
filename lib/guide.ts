@@ -24,7 +24,10 @@ export type GuideCheck =
   /** Practised this skill (skill_log). */
   | { skill: string }
   /** Paid a bill (bills). */
-  | { bill: true };
+  | { bill: true }
+  /** Has one of these (each a table the server reads): an aspiration, a career job, a workday done, an office move, a
+   *  business, a job on the players' Jobs board (posted or taken). */
+  | { has: "aspiration" | "job" | "workday" | "office_move" | "business" | "board_job" };
 
 export interface GuideCard { art: string; t: string; b: string }
 export interface GuideStep {
@@ -43,6 +46,8 @@ export interface GuideStep {
    */
   targets: string[];
   check: GuideCheck;
+  /** A step that opens later than its chapter (Rank 2 for businesses and the Jobs board): until then the Guide skips it. */
+  opens?: { rank?: number; day?: number };
   reward: { cash?: number; clout?: number };
   /** The banner when it's done. */
   done: string;
@@ -63,7 +68,7 @@ export interface GuideChapter {
 export const CHAPTERS: GuideChapter[] = [
   { n: 1, title: "Arrival", day: 1, badge: "Off the Bus", badgeId: "guide-1", reward: { cash: 500 }, live: true },
   { n: 2, title: "Looking after yourself", day: 1, badge: "Adulting (Allegedly)", badgeId: "guide-2", reward: { cash: 300 }, live: true },
-  { n: 3, title: "Money", day: 2, badge: "Bag Secured", badgeId: "guide-3", reward: { cash: 500 }, live: false },
+  { n: 3, title: "Money", day: 2, badge: "Bag Secured", badgeId: "guide-3", reward: { cash: 500 }, live: true },
   { n: 4, title: "More clout", day: 2, badge: "Locally Relevant", badgeId: "guide-4", reward: { clout: 150 }, live: false },
   { n: 5, title: "Home", day: 3, badge: "Landlord's Nightmare", badgeId: "guide-5", reward: { cash: 400 }, live: false },
   { n: 6, title: "Skills", day: 3, badge: "Multi-Hyphenate", badgeId: "guide-6", reward: { clout: 100 }, live: false },
@@ -259,6 +264,111 @@ STEPS.push(
   },
 );
 
+// ---- Chapter 3: Money (owner, Nov 20: "keep going"). The doc's skill-gig step waits for Chapter 6 (it needs a skill at level 3,
+// weeks away) and the Market step is left out (it opens only when the owner switches the Market on).
+const PHONE = "text:Phone";
+STEPS.push(
+  {
+    id: "3.1", chapter: 3, tag: "Money", tip: "Rent won't pay itself. Neither will you, yet.",
+    cards: [
+      { art: "💸", t: "Money comes from a few places.", b: "Gigs and shifts now, a career job and businesses later, and selling things you don't need." },
+      { art: "🧮", t: "Work backwards from rent.", b: "Your rent is due every week. Bills shows how much and when; everything else is for fun." },
+    ],
+    hint: "Open your Phone, then Gigs", targets: [PHONE],
+    check: { seen: true }, reward: { clout: 15 }, done: "Gigs found. Hustle unlocked.",
+  },
+  {
+    id: "3.2", chapter: 3, tag: "Gigs", tip: "Gigs: honest work, dishonest hours.",
+    cards: [
+      { art: "📋", t: "Take one, wait, collect.", b: "Accept a gig on the board, wait while it runs, then collect the pay. It costs a little Energy." },
+      { art: "⬆️", t: "Bigger gigs open with rank.", b: "Pro gigs open at Rank 3 and the big ones at Rank 5. Confidence matters for the best ones." },
+    ],
+    hint: "Accept a gig, then collect it", targets: [PHONE],
+    check: { ledger: ["gig"] }, reward: { cash: 100 }, done: "Paid. Don't spend it all on oat milk.",
+  },
+  {
+    id: "3.3", chapter: 3, tag: "Shifts", tip: "Pick up a shift.",
+    cards: [
+      { art: "🧑‍🍳", t: "Places pay for shifts.", b: "Cafés, delis and shops have a shift in their list. Go there, work it, get paid on the spot." },
+      { art: "🔋", t: "Shifts cost Energy.", b: "A couple a day at most. Sleep and food bring the Energy back." },
+    ],
+    hint: "Work a shift at a café, deli or shop", targets: [".map-pin", ".compact-dot", MAP],
+    check: { ledger: ["shift"] }, reward: { cash: 50 }, done: "Shift done. Your feet hurt. Worth it.",
+  },
+  {
+    id: "3.4", chapter: 3, tag: "Net worth", tip: "Your stuff is worth money. Some of it.",
+    cards: [
+      { art: "💎", t: "Net worth is everything you own.", b: "Cash, clothes, furniture, cars, businesses. Your rank counts it too, not just clout." },
+      { art: "🏷️", t: "You can sell things back.", b: "Each piece shows what the game pays for it. Clothes lose value once worn. Some things are worth keeping." },
+    ],
+    hint: "Tap the diamond to see your net worth", targets: ['button[aria-label="Net worth"]'],
+    check: { seen: true }, reward: { clout: 15 }, done: "You're worth something. Officially.",
+  },
+  {
+    id: "3.5", chapter: 3, tag: "Careers", tip: "Time for a real job.",
+    cards: [
+      { art: "🎯", t: "Start with an aspiration.", b: "Corporate, influencer, streamer, celebrity, hustler, public servant or stay-at-home. It decides where you start." },
+      { art: "🪜", t: "Every career is a ladder.", b: "Five levels, a boss, coworkers and a weekly review. Your aspiration's careers start you a level up." },
+    ],
+    hint: "Open Careers in your Phone and pick an aspiration", targets: [PHONE],
+    check: { has: "aspiration" }, reward: { clout: 30 }, done: "Aspiration chosen. Manifesting.",
+  },
+  {
+    id: "3.6", chapter: 3, tag: "Careers", tip: "Apply. Pretend you read the job description.",
+    cards: [
+      { art: "📝", t: "Apply for a job.", b: "Pick a career, answer the interview and you're in. Your skills decide where you start." },
+      { art: "🏢", t: "One job at a time.", b: "Quit and you wait 2 days for that track; get fired and it's 7. Choose wisely, or at least quickly." },
+    ],
+    hint: "Apply for a job in Careers", targets: [PHONE],
+    check: { has: "job" }, reward: { cash: 150 }, done: "Hired. Your mother is thrilled.",
+  },
+  {
+    id: "3.7", chapter: 3, tag: "Careers", tip: "Clock in.",
+    cards: [
+      { art: "⏰", t: "A workday is the day's work.", b: "Go to your employer and tap Go to work. Pick hustle, steady or coast, then handle the day's tasks." },
+      { art: "🔋", t: "It costs Energy and Mood.", b: "Work also practises the job's key skills. One workday a day, and no shifts after it." },
+    ],
+    hint: "Go to work at your employer", targets: [".map-pin", ".compact-dot", MAP],
+    check: { has: "workday" }, reward: { cash: 100 }, done: "Clocked in, clocked out. Capitalism.",
+  },
+  {
+    id: "3.8", chapter: 3, tag: "Careers", tip: "Office politics: optional, inevitable.",
+    cards: [
+      { art: "🤝", t: "Help someone, or don't.", b: "On a workday you get one move to help a coworker and one to get ahead of them." },
+      { art: "🗂️", t: "People remember.", b: "Your work friend, your rival and your boss all keep score. Sabotage leaves grudges." },
+    ],
+    hint: "Make an office move on a workday", targets: [PHONE],
+    check: { has: "office_move" }, reward: { clout: 20 }, done: "Politics played. Somebody noticed.",
+  },
+  {
+    id: "3.9", chapter: 3, tag: "Careers", tip: "Friday is review day.",
+    cards: [
+      { art: "📈", t: "The weekly review pays you.", b: "Your wage, any tips, and a verdict on the week. Good weeks lead to promotions." },
+      { art: "⚠️", t: "Bad weeks add strikes.", b: "A warning, then probation, then a demotion. Two good weeks in a row clear them." },
+    ],
+    hint: "Work this week, then open Careers for your review", targets: [PHONE],
+    check: { ledger: ["career_pay"] }, reward: { clout: 30 }, done: "Payday. The best day.",
+  },
+  {
+    id: "3.10", chapter: 3, tag: "Businesses", tip: "Be your own boss. Regret it later.", opens: { rank: 2 },
+    cards: [
+      { art: "🏪", t: "Buy a business.", b: "Businesses earn while you're away. Collect the takings in the Businesses app." },
+      { art: "🪜", t: "Upgrade it.", b: "Each upgrade earns more. Climb the whole ladder and you can take it public." },
+    ],
+    hint: "Open Businesses in your Phone and buy one", targets: [PHONE],
+    check: { has: "business" }, reward: { cash: 200 }, done: "Business owner. Put it in your bio.",
+  },
+  {
+    id: "3.11", chapter: 3, tag: "Jobs board", tip: "Other people pay for errands.", opens: { rank: 2 },
+    cards: [
+      { art: "📌", t: "The Jobs board is players hiring players.", b: "Post a job, like decorating your home or running a business, or take one someone else posted." },
+      { art: "⭐", t: "Ratings follow you.", b: "Clients rate the work. The game takes 5% of the pay." },
+    ],
+    hint: "Open Jobs in your Phone and take or post one", targets: [PHONE],
+    check: { has: "board_job" }, reward: { clout: 20 }, done: "Networking, but make it paid.",
+  },
+);
+
 export const stepById = (id: string) => STEPS.find((s) => s.id === id);
 export const chapterSteps = (n: number) => STEPS.filter((s) => s.chapter === n);
 
@@ -276,11 +386,15 @@ export interface GuideState { paid: string[]; ready: string[]; chapters: number[
 /** Opens? A chapter is open from its day or rank (and only when its steps are written). */
 export const chapterOpen = (c: GuideChapter, s: Pick<GuideState, "day" | "rank">) => c.live && (c.day === undefined || s.day >= c.day) && (c.rank === undefined || s.rank >= c.rank);
 
-/** The one recommended step: the first unpaid step of the first open chapter, in order. Null when everything open is done. */
+/** A step that opens later than its chapter is open yet? */
+export const stepOpen = (st: GuideStep, s: Pick<GuideState, "day" | "rank">) =>
+  (st.opens?.rank === undefined || s.rank >= st.opens.rank) && (st.opens?.day === undefined || s.day >= st.opens.day);
+
+/** The one recommended step: the first unpaid, open step of the first open chapter, in order. Null when everything open is done. */
 export function nextStep(s: GuideState): GuideStep | null {
   for (const c of CHAPTERS) {
     if (!chapterOpen(c, s)) continue;
-    const step = chapterSteps(c.n).find((x) => !s.paid.includes(x.id));
+    const step = chapterSteps(c.n).find((x) => !s.paid.includes(x.id) && stepOpen(x, s));
     if (step) return step;
   }
   return null;
