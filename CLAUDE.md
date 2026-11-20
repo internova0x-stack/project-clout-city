@@ -885,6 +885,22 @@ components live in `app/globals.css`.
   white surface, no lines or checker squares, whatever the template's floor color; dark rooms and outdoor places (`outdoor`:
   parks, the Quad, plazas) keep their ground. The parks and the Quad are lush grass (#4C9A3F, one solid color: outdoor ground gets no speckle
   or light wash) with paved paths as room zones; no lawn patches (owner, Nov 20); the track sits inside its grass with room around it.
+- The Guide (migration 0170, owner Nov 20: "the 'what do I do next?' problem"; "go with your recommendations"; docs/GUIDE.md):
+  steps in chapters (lib/guide.ts `STEPS`, `CHAPTERS`; Chapter 1 Arrival is live, its 13 steps include the clout basics, owner:
+  "Merge into Chapter 1"; the rest show "Coming soon"). Each step: Lola's tip, 2-3 explainer cards, "Show me" (a ring on the real
+  button found by `targets`, taps go through) and a reward once done (components/game/Guide.tsx `GuideFlow`). game_settings 'guide'
+  (`guideSettings()`, tests/guide.test.ts) holds each step's `check` (seen | ledger kinds | gossip | events | streak) and reward;
+  `guide_state()`, `guide_seen(step)` (seen steps, marked by GameShell `guideSeenMark` when the screen opens), `guide_claim(step)`
+  (once, ledger 'guide'; the chapter's last step pays ledger 'guide_chapter' and badge 'guide-<n>'). GameShell checks every 20 s and
+  after city changes, pays only when nothing covers the screen (`guideClear`), and pops the next tip once per step per device
+  (`firstTime('guide-tip')`). The pill (`GuidePill`) takes Starter Week's slot; Starter Week is a row in Tasks → Guide (`GuideTab`).
+  `?guide=new|mid|done` in the preview (lib/guideSim.ts: a checked step counts done 6 s after its "Show me").
+- Build mode (migration 0169, owner Nov 20: "Move walls, add rooms, landscapes"; "Renters can move walls"; contractor "Instant"):
+  players.home_plan (lib/homeBuild.ts `HomePlan`, keyed to the home it was built in; moving clears it) holds each floor's rooms
+  (walls and doorways follow the rooms: `wallsOf`), the paint and the Outside floor (floor 0, `yardTemplate`: garden zones and
+  pieces). app/home/buildActions.ts checks a plan (`planProblems`) and prices it against the last (`planCost`: walls by the metre,
+  floors by the m², paint, garden pieces; game_settings 'home_build'), then `home_build_save` (service role) charges and stores it.
+  components/home/BuildMode.tsx is the plan editor (the 🔨 under 🛋️); GameShell draws the home through `builtTemplate`.
 - Players see "Crew" for their invited friends; code, types and database tables still say `clique`
   (renaming stored data isn't worth the risk). Keep player-facing copy on "crew".
 - Culture packs (docs/culture/, one at a time, only when the owner says "Build C<number>"): slang, invented stand-ins

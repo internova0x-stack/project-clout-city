@@ -114,6 +114,8 @@ import { GameChrome, type ChromeAction, type QuestButton, type Tab } from "./hud
 import { handle } from "@/lib/validation";
 import { rankCelebration } from "./game/Ranks";
 import { CelebrationHost, celebrate } from "./Celebrate";
+import { GuideFlow, GuidePill, GuideTab, type GuidePhase } from "./game/Guide";
+import { nextStep, stepById, type GuideApi, type GuideState } from "@/lib/guide";
 import { crewNightsRead, dateNightsRead, nightsCouple, type NightCtx } from "./nightResults";
 import { coupleRead, evictionRead, streakRead, subletRead, type BadNewsCtx } from "./game/badNewsReads";
 import { passClaimBanner, passRead } from "./game/passResults";
@@ -302,6 +304,7 @@ export function GameShell({
   homeScoreApi,
   visits,
   starter: starterIn,
+  guide,
   deleteAccount,
   lockAppsPreview,
   demo,
@@ -381,6 +384,8 @@ export function GameShell({
   deleteAccount?: DeleteAccountAction;
   /** Starter Week (migration 0122): ten missions for a new player's first week, marked as they happen and paid on read. */
   starter?: StarterApi;
+  /** The Guide (migration 0170, lib/guide.ts): the one recommended next step, played through and paid once. */
+  guide?: GuideApi;
   /** Preview: lock the apps that open at a rank, whatever the player's rank. */
   lockAppsPreview?: boolean;
   /** Demo mode (owner, Oct 27; components/demo): inviting and the end of the first session ask the guest to sign up. */
@@ -682,6 +687,12 @@ export function GameShell({
   const [deleteOpen, setDeleteOpen] = useState(false);
   // Sir Barksley (owner, Oct 27): his scene; `first` is the Starter Week consoling, once per device.
   const [barksley, setBarksley] = useState<{ first: boolean } | null>(null);
+  // The Guide (migration 0170): its state from the server, the step being played and how far, and steps put off this visit.
+  const [guideRaw, setGuideRaw] = useState<Omit<GuideState, "rank"> | null>(null);
+  const [guidePlay, setGuidePlay] = useState<{ id: string; phase: GuidePhase } | null>(null);
+  const guideBusy = useRef(false);
+  // Rewards wait until nothing covers the screen (a place card, a sheet, the Phone), so the banner is seen.
+  const guideClear = useRef(false);
   // #20: each tap on the place's regular inside the room starts their talk in the panel.
   const [talkNonce, setTalkNonce] = useState(0);
   // v0.11: which floor of the building (the exclusive venue has a second, the Penthouse Floor).
@@ -2627,6 +2638,78 @@ export function GameShell({
   // Migration 0151: C$ from other players over the weekly cap doesn't count (the server's net_worth agrees).
   const myWorth = Math.max(0, otherWorth + (biz ? businessesValue(biz.owned, me.clout) : 0) - (econ?.uncounted ?? 0));
   const myRank = rankFor(me.clout, myWorth);
+  // ---- The Guide (migration 0170) ----
+  const guideS: GuideState | null = guide && guideRaw && cityOn ? { ...guideRaw, rank: myRank.level } : null;
+  const guideNext = guideS ? nextStep(guideS) : null;
+  const loadGuide = async () => {
+    if (!guide || guideBusy.current) return;
+    guideBusy.current = true;
+    try {
+      let st = await guide.state();
+      let paidAny = false;
+      if (!guideClear.current) { if (st) setGuideRaw(st); return; }
+      // Pay what's done (each step once) with a banner; the chapter's last step also brings its takeover.
+      for (const id of st?.ready ?? []) {
+        const step = stepById(id);
+        const r = await guide.claim(id);
+        if (!step || !r) continue;
+        paidAny = true;
+        celebrate({
+          rung: 2, emoji: "✨", tag: `Guide ${step.id} done`, title: step.done,
+          rewards: [
+            ...(step.reward.cash ? [{ tone: "cash" as const, text: `+C$${step.reward.cash.toLocaleString("en-US")}` }] : []),
+            ...(step.reward.clout ? [{ tone: "clout" as const, text: `+${step.reward.clout} 🔥` }] : []),
+          ],
+        });
+        if (r.chapter) {
+          celebrate({
+            rung: 3, emoji: "🏅", tag: `Chapter ${r.chapter} complete`, title: "Off the Bus",
+            line: "You know your way around now. New York is not impressed yet, but it's paying attention.",
+            rewards: [{ tone: "cash", text: "+C$500" }, { text: "🏅 Off the Bus" }],
+            lola: "Chapter 2 is on its way. Keep the streak going in the meantime.",
+          });
+        }
+        setGuidePlay((cur) => (cur?.id === id ? null : cur));
+      }
+      if (paidAny) { st = await guide.state(); void cityApi?.refresh().then((r) => { if (r.ok) setCity(r.state); }); }
+      if (st) setGuideRaw(st);
+    } finally { guideBusy.current = false; }
+  };
+  const guideSeenMark = (id: string) => {
+    if (!guide || !guideS || guideS.paid.includes(id)) return;
+    void guide.seen(id).then(() => loadGuide());
+  };
+  // "Seen" steps: the screen opened (lib/guide.ts check { seen: true }).
+  useEffect(() => { if (place) guideSeenMark("1.1"); }, [place]); // eslint-disable-line react-hooks/exhaustive-deps
+  const guideAt = useRef<string | null | undefined>(undefined);
+  useEffect(() => {
+    const at = city?.player.at_place ?? null;
+    if (guideAt.current !== undefined && at && at !== guideAt.current) guideSeenMark("1.2");
+    if (city) guideAt.current = at;
+  }, [city?.player.at_place]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (panel === "leaderboard") guideSeenMark("1.4"); }, [panel]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (phone.open && phone.app === "messages") guideSeenMark("1.10"); }, [phone.open, phone.app]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (barksley) guideSeenMark("1.13"); }, [barksley]); // eslint-disable-line react-hooks/exhaustive-deps
+  // Lola's tip for the next step pops up once per step on this device, when nothing else is open.
+  guideClear.current = !panel && !place && flow === "none" && !phone.open && !choiceCard && !barksley;
+  const guideQuiet = guideClear.current && !welcomeOpen && !trip && !guidePlay;
+  useEffect(() => {
+    if (!guideNext || !guideQuiet) return;
+    // After the last step's banner (3.4 s) has gone.
+    const id = setTimeout(() => { if (firstTime("guide-tip", guideNext.id)) setGuidePlay({ id: guideNext.id, phase: "tip" }); }, 4500);
+    return () => clearTimeout(id);
+  }, [guideNext?.id, guideQuiet]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (guidePlay?.phase === "show") guide?.shown?.(guidePlay.id); }, [guidePlay?.id, guidePlay?.phase]); // eslint-disable-line react-hooks/exhaustive-deps
+  // Check now and then, and soon after anything changes in the city (a task, a trip, a payment) or a screen closes.
+  useEffect(() => (guide && cityOn ? everyVisible(() => void loadGuide(), 20_000) : undefined),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [guide, cityOn]);
+  useEffect(() => {
+    if (!guide || !cityOn) return;
+    const id = setTimeout(() => void loadGuide(), 1200);
+    return () => clearTimeout(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [city, panel, place, phone.open, barksley, guide, cityOn]);
   useEffect(() => {
     if (!city || !bizTried) return;
     if (seenRank.current !== null && myRank.level > seenRank.current) setRankUp(myRank);
@@ -3247,6 +3330,7 @@ export function GameShell({
               npcNames={(insideTemplate?.npcs ?? []).map((_, i) => (i === 0 && insideFloor === 1 && regularAt(inside.id) ? callName(regularAt(inside.id)!.name) : crowdName(inside.id, insideFloor, i)))}
               npcHost={insideFloor === 1 && regularAt(inside.id) ? 0 : undefined}
               onNpcTap={(i) => void (async () => {
+                guideSeenMark("1.3");
                 // #20 (owner, Oct 14): the first NPC is the place's regular (Sal at the deli): the same talk as the card,
                 // hunt clue first, in the panel below the room.
                 if (i === 0 && insideFloor === 1 && regularAt(inside.id) && handlers.regular) { setTalkNonce((n) => n + 1); return; }
@@ -3514,9 +3598,11 @@ export function GameShell({
         headline={latestNews ? { text: latestNews.headline, onOpen: () => openCityNews(latestNews.id) } : null}
         onLocate={tab === "map" && !trip ? () => mapRef.current?.locatePlayer() : undefined}
         atPlace={atPlaceInfo && !trip && tab === "map" && !inside ? { name: atPlaceInfo.name, onOpen: () => setPlace(atPlaceInfo) } : null}
-        starter={!inside && flow === "none" && !visitView && (starter || (passS && tab === "home")) ? (
+        onStatsOpen={() => guideSeenMark("1.9")}
+        starter={!inside && flow === "none" && !visitView && (starter || guideNext || (passS && tab === "home")) ? (
           <>
-            {starter && <StarterPill done={starter.done} day={starterDay(starter)} onOpen={() => setPanel("starter")} />}
+            {guideNext && <GuidePill step={guideNext} onOpen={() => setGuidePlay({ id: guideNext.id, phase: "tip" })} />}
+            {starter && !guideNext && <StarterPill done={starter.done} day={starterDay(starter)} onOpen={() => setPanel("starter")} />}
             {/* Owner, Nov 16: the Clout Pass gets its own way in, on the home screen. */}
             {passS && tab === "home" && <PassPill state={passS} today={city?.today ?? new Date().toISOString().slice(0, 10)} onOpen={() => { setTasksTab("pass"); setPanel("tasks"); }} />}
           </>
@@ -3677,6 +3763,11 @@ export function GameShell({
         cliqueCount={clique.length}
         city={cityOn ? city : null}
         goals={goalsNow}
+        guide={guideS ? {
+          node: <GuideTab state={guideS} current={guideNext} onPlay={(st) => { setPanel(null); setTasksTab(undefined); setGuidePlay({ id: st.id, phase: "tip" }); }}
+            extra={starter ? <button className="guide-step" onClick={() => setPanel("starter")}><span className="guide-step-n">🗓️</span><span style={{ flex: 1 }}>Starter Week missions<span className="meta" style={{ display: "block" }}>{starter.done.length} done · today&apos;s and what&apos;s next</span></span></button> : undefined} />,
+          next: !!guideNext,
+        } : null}
         repair={repairOffer ? <StreakRepairCard offer={repairOffer} busy={busy === "repair"} onRepair={(m) => void repairStreak(m)} /> : null}
         onOpenPlace={openPlace}
         skills={skills}
@@ -4289,6 +4380,10 @@ export function GameShell({
       )}
       {unlockReveal && !rankUp && flow === "none" && (
         <UnlockReveal onClose={() => setUnlockReveal(false)} onOpen={() => { setUnlockReveal(false); setPanel(null); setPhone({ open: true, app: null }); }} />
+      )}
+      {guidePlay && stepById(guidePlay.id) && !guideS?.paid.includes(guidePlay.id) && (
+        <GuideFlow step={stepById(guidePlay.id)!} phase={guidePlay.phase}
+          onPhase={(ph) => setGuidePlay({ id: guidePlay.id, phase: ph })} onClose={() => setGuidePlay(null)} />
       )}
       <CelebrationHost hold={!!choiceCard || !!trip || flow !== "none" || welcomeOpen || !!cutscene} />
       <ProfileSheet

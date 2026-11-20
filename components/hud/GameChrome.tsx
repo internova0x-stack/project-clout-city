@@ -64,6 +64,7 @@ export function GameChrome({
   atPlace = null,
   homeScore = null,
   starter = null,
+  onStatsOpen,
   onLocate,
 }: {
   time: string;
@@ -88,6 +89,8 @@ export function GameChrome({
   homeScore?: { score: number; tier: string; onOpen: () => void } | null;
   /** Starter Week (owner, Oct 26): the current mission, under the invite. */
   starter?: ReactNode;
+  /** The Guide (migration 0170): the stats panel was opened (step 1.9). */
+  onStatsOpen?: () => void;
   /** Shown until finished: this week's hunt and the story you're following, a red dot when something's new. */
   quests?: QuestButton[];
   /** #14 (owner, Oct 14): "find me" lives at the bottom of the side column, on the map only. */
@@ -273,7 +276,7 @@ export function GameChrome({
             })}
           </>
         ) : (
-          <button className="stats-mini" onClick={() => setStatsOpen(true)} aria-label="Expand stats">
+          <button className="stats-mini" onClick={() => { setStatsOpen(true); onStatsOpen?.(); }} aria-label="Expand stats">
             {(["energy", "mood", "confidence"] as const).map((k) => (
               <span key={k} className="stat-track">
                 {values && <span className={`stat-fill ${statLevel(values.stats[k])}`} style={{ display: "block", width: `${values.stats[k]}%` }} />}

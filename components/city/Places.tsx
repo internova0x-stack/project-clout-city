@@ -719,7 +719,7 @@ export function LocationSheet({
                 </>
               ) : (
                 <>
-                  <button className="btn btn-taxi" onClick={() => handlers.travel!.onGoThere(place)}>Go there ›</button>
+                  <button className="btn btn-taxi" data-guide="travel-go" onClick={() => handlers.travel!.onGoThere(place)}>Go there ›</button>
                   <p className="meta" style={{ margin: 0, textAlign: "center" }}>{place.template && place.template !== "apartment" ? "Everything here happens inside. Go there, then step in." : "Actions unlock when you arrive."}</p>
                 </>
               )}

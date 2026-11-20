@@ -1,5 +1,6 @@
 "use client";
 
+import { createGuideSim } from "@/lib/guideSim";
 import { previewCoutureMap, previewPlazaBook, previewPlazaWeeks } from "@/app/preview/coutureActions";
 import type { CoutureApi } from "@/lib/coutureMap";
 import { previewRadioReport, previewRadioRequest, previewRadioState } from "@/app/preview/radioActions";
@@ -482,6 +483,12 @@ export function PreviewHome({
 
   // City actions can finish story tasks (as do_action does in SQL).
   // Starter Week in memory (lib/starterSim.ts): the wrapped calls below mark missions the way migration 0122's triggers do.
+  // The Guide (migration 0170) in memory: ?guide=new|mid|done; its rewards land in the simulated bank and clout.
+  const guideSim = useMemo(() => {
+    const preset = typeof window === "undefined" ? null : new URLSearchParams(window.location.search).get("guide");
+    const g = createGuideSim(preset === "mid" || preset === "done" ? preset : "new");
+    return { ...g, async claim(step: string) { const r = await g.claim(step); if (r) sim.huntReward(r.cash, r.clout); return r; } };
+  }, [sim]);
   const starterSim = useMemo(() => createStarterSim(starterPreset ?? 0, (cash, clout) => sim.huntReward(cash, clout)), [starterPreset, sim]);
   const mark = starterSim.mark;
   // Migration 0163's new missions: a workday, a choice made, people over.
@@ -710,6 +717,7 @@ export function PreviewHome({
       sublet={cityOff ? undefined : sublet}
       visits={cityOff ? undefined : starterVisits}
       starter={cityOff || starterPreset === undefined ? undefined : starterSim.api}
+      guide={cityOff ? undefined : guideSim}
       lockAppsPreview={appsPreset === "locked"}
       // Delete my account: the preview says what would happen and deletes nothing.
       deleteAccount={async () => { await new Promise((r) => setTimeout(r, 600)); return { ok: false, error: "Preview: nothing is deleted here. In the game this deletes the account and lands on the welcome page." }; }}
