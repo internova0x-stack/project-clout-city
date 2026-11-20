@@ -16,6 +16,8 @@ export interface ModelInfo {
   width?: number;
   /** Hangs from the ceiling: its top at this height instead of standing on the floor (a chandelier). */
   hangTop?: number;
+  /** Came out standing on its edge (a rug): laid flat, its thin side down. */
+  layFlat?: boolean;
   /** Credit for the file's maker (CC0 needs none; kept for our records). */
   source: string;
 }
@@ -28,6 +30,31 @@ export const MODELS: Record<string, ModelInfo> = {
   execDesk: { file: "exec-desk.glb", width: 1.9, source: "Higgsfield (Tripo), generated Nov 20" },
   receptionDesk: { file: "reception-desk.glb", width: 2.6, turn: 2, source: "Higgsfield (Tripo), generated Nov 20" },
   sectional: { file: "sectional.glb", width: 3.2, source: "Higgsfield (Tripo), generated Nov 20" },
+  // The second batch (Nov 20): clubs, the station, Clout TV, campus and luxury pieces for any room.
+  booth: { file: "booth.glb", width: 2.4, source: "Higgsfield (Tripo), generated Nov 20" },
+  bar: { file: "bar.glb", width: 3.2, source: "Higgsfield (Tripo), generated Nov 20" },
+  djBooth: { file: "dj-booth.glb", width: 2.2, source: "Higgsfield (Tripo), generated Nov 20" },
+  barStool: { file: "bar-stool.glb", height: 1.0, source: "Higgsfield (Tripo), generated Nov 20" },
+  turnstile: { file: "turnstile.glb", height: 1.05, source: "Higgsfield (Tripo), generated Nov 20" },
+  stationBench: { file: "station-bench.glb", width: 2.0, source: "Higgsfield (Tripo), generated Nov 20" },
+  newsDesk: { file: "news-desk.glb", width: 2.6, source: "Higgsfield (Tripo), generated Nov 20" },
+  tvCamera: { file: "tv-camera.glb", height: 1.7, source: "Higgsfield (Tripo), generated Nov 20" },
+  bookshelf: { file: "bookshelf.glb", height: 2.2, source: "Higgsfield (Tripo), generated Nov 20" },
+  readingTable: { file: "reading-table.glb", width: 2.2, source: "Higgsfield (Tripo), generated Nov 20" },
+  lectureDesks: { file: "lecture-desks.glb", width: 3.0, source: "Higgsfield (Tripo), generated Nov 20" },
+  diningSet: { file: "dining-set.glb", width: 1.8, source: "Higgsfield (Tripo), generated Nov 20" },
+  velvetChair: { file: "velvet-chair.glb", width: 0.9, source: "Higgsfield (Tripo), generated Nov 20" },
+  figTree: { file: "fig-tree.glb", height: 1.9, source: "Higgsfield (Tripo), generated Nov 20" },
+  arcLamp: { file: "arc-lamp.glb", height: 2.0, source: "Higgsfield (Tripo), generated Nov 20" },
+  marbleTable: { file: "marble-table.glb", width: 1.2, source: "Higgsfield (Tripo), generated Nov 20" },
+  grandPiano: { file: "grand-piano.glb", width: 1.6, source: "Higgsfield (Tripo), generated Nov 20" },
+  tvWall: { file: "tv-wall.glb", width: 2.6, source: "Higgsfield (Tripo), generated Nov 20" },
+  poolTable: { file: "pool-table.glb", width: 2.5, source: "Higgsfield (Tripo), generated Nov 20" },
+  bookcase: { file: "bookcase.glb", width: 1.8, turn: 2, source: "Higgsfield (Tripo), generated Nov 20" },
+  rug: { file: "rug.glb", width: 3.0, layFlat: true, source: "Higgsfield (Tripo), generated Nov 20" },
+  bed: { file: "bed.glb", width: 1.7, source: "Higgsfield (Tripo), generated Nov 20" },
+  sofa: { file: "sofa.glb", width: 2.2, source: "Higgsfield (Tripo), generated Nov 20" },
+  monstera: { file: "monstera.glb", height: 1.4, source: "Higgsfield (Tripo), generated Nov 20" },
   // Kenney's Furniture Kit (CC0, kenney.nl; public/models/kenney/LICENSE.txt): everyday pieces.
   "k:chairDesk": { file: "kenney/chairDesk.glb", source: "Kenney Furniture Kit 2.0 (CC0)" },
   "k:chairModernCushion": { file: "kenney/chairModernCushion.glb", source: "Kenney Furniture Kit 2.0 (CC0)" },
@@ -90,6 +117,7 @@ export async function placedModel(id: string, w: number, d: number): Promise<Gro
   if (!src) return null;
   const inner = src.clone(true);
   inner.rotation.y = ((info.turn ?? 0) * Math.PI) / 2;
+  if (info.layFlat) inner.rotation.z = Math.PI / 2;
   const holder = new Group();
   holder.add(inner);
   holder.updateMatrixWorld(true);
