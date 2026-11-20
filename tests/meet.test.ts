@@ -49,7 +49,8 @@ test("crowded places: every room holds 3 to 7 players beside its regulars (party
     const n = playerSlots(t);
     if (t.crowdSpots) assert.equal(n, t.crowdSpots.length, t.id);
     else {
-      assert.ok(n >= 3 && n <= 7, `${t.id}: ${n}`);
+      // Big public floors (owner, Nov 20: 20 × 14 m) hold up to 14.
+      assert.ok(n >= 3 && n <= (t.w * t.d >= 200 ? 14 : 7), `${t.id}: ${n}`);
       assert.equal(openSpots(t, t.items, n).length, n, `${t.id} has room for ${n}`);
     }
   }

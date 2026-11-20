@@ -909,6 +909,185 @@ export function buildFurniture(item: RoomItem, k: Kit, opts: { night: boolean })
       for (let x = -w / 2; x <= w / 2 + 0.01; x += 0.8) box(0.05, 1.0, 0.05, METAL, x, 0, 0);
       return { group: g };
     }
+    // ---- Campaign HQ (owner, Nov 20) ----
+    case "phoneBank": {
+      // A long volunteers' table: three desk phones, three laptops, call sheets and a coffee cup each.
+      box(w, 0.05, d, "#F4F2EE", 0, 0.72);
+      for (const sx of [-1, 1]) box(0.06, 0.72, d - 0.1, METAL, sx * (w / 2 - 0.1), 0, 0);
+      box(w - 0.3, 0.3, 0.03, "#D9D3C8", 0, 0.4, -d / 2 + 0.06);
+      for (const i of [-1, 0, 1]) {
+        const x = i * 0.85;
+        box(0.22, 0.06, 0.16, BLACK, x - 0.22, 0.77, -0.12);
+        box(0.2, 0.03, 0.05, "#2B2B33", x - 0.22, 0.83, -0.16);
+        box(0.34, 0.02, 0.24, "#C9CED6", x + 0.12, 0.77, 0.02);
+        const lid = box(0.34, 0.22, 0.015, k.mat("#2B2B33"), x + 0.12, 0.78, -0.1);
+        lid.rotation.x = -0.25;
+        box(0.3, 0.17, 0.005, glow("#9FD4FF", 0.5), x + 0.12, 0.81, -0.085).rotation.x = -0.25;
+        box(0.18, 0.005, 0.24, "#FFFFFF", x - 0.2, 0.775, 0.14);
+        cyl(0.035, 0.03, 0.09, "#C62C3B", x + 0.36, 0.77, 0.15, 8);
+      }
+      return { group: g };
+    }
+    case "warTable": {
+      // The war room's big table with the city's map on it, pins in the swing districts.
+      box(w, 0.08, d, WOOD_DARK, 0, 0.72);
+      for (const sx of [-1, 1]) box(0.16, 0.72, d - 0.4, WOOD_DARK, sx * (w / 2 - 0.4), 0, 0);
+      let face: Material = k.mat("#E8E1CF");
+      if (typeof document !== "undefined") {
+        const c = document.createElement("canvas");
+        c.width = 512; c.height = 256;
+        const x = c.getContext("2d");
+        if (x) {
+          x.fillStyle = "#E8E1CF"; x.fillRect(0, 0, 512, 256);
+          x.fillStyle = "#9FC7E8"; x.fillRect(150, 0, 60, 256); x.fillRect(0, 180, 512, 30);
+          const blobs: [number, number, number, number, string][] = [[60, 60, 80, 90, "#E9A8A0"], [260, 40, 140, 110, "#A8C0E9"], [300, 210, 160, 40, "#E9A8A0"], [40, 210, 90, 40, "#A8C0E9"], [420, 70, 70, 80, "#E9D29A"]];
+          for (const [bx, by, bw, bh, col] of blobs) { x.fillStyle = col; x.fillRect(bx, by, bw, bh); }
+          x.strokeStyle = "#5A4A3A"; x.lineWidth = 2;
+          for (const [bx, by, bw, bh] of blobs) x.strokeRect(bx, by, bw, bh);
+          for (const [px, py, col] of [[100, 100, "#C62C3B"], [320, 90, "#2F5BBF"], [360, 120, "#C62C3B"], [450, 100, "#2F5BBF"], [380, 225, "#C62C3B"]] as const) {
+            x.fillStyle = col; x.beginPath(); x.arc(px, py, 9, 0, Math.PI * 2); x.fill();
+          }
+          const tex = new CanvasTexture(c); tex.colorSpace = SRGBColorSpace;
+          face = k.mat("#ffffff", { map: tex, roughness: 0.8 });
+        }
+      }
+      box(w - 0.3, 0.01, d - 0.3, face, 0, 0.8);
+      for (const [x, z] of [[-1.2, -0.4], [0.8, 0.3], [1.4, -0.5]]) cyl(0.05, 0.05, 0.1, "#F4F1EA", x, 0.81, z, 8);
+      return { group: g };
+    }
+    case "pressBackdrop": {
+      // The step-and-repeat: a wall of VOTE logos in the campaign's red and blue, on two posts.
+      let face: Material = k.mat("#F4F2EE");
+      if (typeof document !== "undefined") {
+        const c = document.createElement("canvas");
+        c.width = 512; c.height = 320;
+        const x = c.getContext("2d");
+        if (x) {
+          x.fillStyle = "#F4F2EE"; x.fillRect(0, 0, 512, 320);
+          x.textAlign = "center"; x.textBaseline = "middle"; x.font = "900 34px system-ui, sans-serif";
+          for (let r = 0; r < 5; r++) for (let col = 0; col < 4; col++) {
+            x.fillStyle = (r + col) % 2 ? "#2F5BBF" : "#C62C3B";
+            x.fillText((r + col) % 2 ? "★ QNS ★" : "VOTE", 64 + col * 128 + (r % 2 ? 32 : 0), 34 + r * 64);
+          }
+          const tex = new CanvasTexture(c); tex.colorSpace = SRGBColorSpace;
+          face = k.mat("#ffffff", { map: tex, roughness: 0.8 });
+        }
+      }
+      box(w, 2.2, 0.04, face, 0, 0.1, 0);
+      for (const sx of [-1, 1]) box(0.06, 2.4, 0.06, METAL, sx * (w / 2), 0, 0.03);
+      box(w + 0.3, 0.04, 0.5, METAL, 0, 0, 0.1);
+      return { group: g };
+    }
+    case "campaignBanner": {
+      // A long banner on the wall: red, white and blue stripes and a big star.
+      const y0 = 1.55;
+      box(w, 0.7, 0.03, "#F4F2EE", 0, y0, -d / 2 + 0.02);
+      box(w, 0.16, 0.035, "#C62C3B", 0, y0, -d / 2 + 0.025);
+      box(w, 0.16, 0.035, "#2F5BBF", 0, y0 + 0.54, -d / 2 + 0.025);
+      const star = new Mesh(k.geo(new CylinderGeometry(0.2, 0.2, 0.03, 5)), k.mat("#C62C3B"));
+      star.rotation.x = Math.PI / 2;
+      star.position.set(0, y0 + 0.35, -d / 2 + 0.05);
+      g.add(star);
+      for (const sx of [-1, 1]) box(0.36, 0.08, 0.035, "#2F5BBF", sx * 0.7, y0 + 0.31, -d / 2 + 0.03);
+      return { group: g };
+    }
+    case "flagStand": {
+      // A flag on a pole with a gold finial, in a heavy round base.
+      cyl(0.16, 0.18, 0.06, "#3A3A40");
+      cyl(0.018, 0.018, 2.1, "#C9A227", 0, 0.06, 0, 6);
+      const ball = new Mesh(k.geo(new SphereGeometry(0.045, 8, 6)), k.mat("#C9A227", { metalness: 0.6, roughness: 0.3 }));
+      ball.position.set(0, 2.2, 0); g.add(ball);
+      const flag = new Group();
+      flag.position.set(0.02, 1.55, 0);
+      const stripe = (y: number, c: string) => { const m = new Mesh(k.geo(new BoxGeometry(0.6, 0.11, 0.01)), k.mat(c)); m.position.set(0.3, y, 0); flag.add(m); };
+      [0.28, 0.17, 0.06, -0.05].forEach((y, i) => stripe(y, i % 2 ? "#F4F2EE" : "#C62C3B"));
+      const canton = new Mesh(k.geo(new BoxGeometry(0.24, 0.2, 0.012)), k.mat("#2F5BBF"));
+      canton.position.set(0.13, 0.23, 0.001); flag.add(canton);
+      g.add(flag);
+      return { group: g, tick: (t) => { flag.rotation.y = Math.sin(t * 1.3 + item.x) * 0.18; } };
+    }
+    case "pendantLamp": {
+      // A pendant lamp hanging from the ceiling: a long cord, a brass dome and a warm glow under it.
+      cyl(0.006, 0.006, 0.6, BLACK, 0, 2.1, 0, 4);
+      cyl(0.06, 0.26, 0.22, k.mat("#C9A227", { metalness: 0.5, roughness: 0.35 }), 0, 1.9, 0, 14);
+      const bulb = new Mesh(k.geo(new SphereGeometry(0.08, 10, 8)), glow("#FFE3B0", 1.6));
+      bulb.position.set(0, 1.88, 0); g.add(bulb);
+      return { group: g };
+    }
+    case "waterCooler": {
+      cyl(0.17, 0.17, 0.9, "#E8ECEF", 0, 0, 0, 10);
+      cyl(0.16, 0.16, 0.42, k.mat("#7FB8E6", { opacity: 0.75, roughness: 0.1 }), 0, 0.9, 0, 12);
+      box(0.06, 0.05, 0.06, "#2F5BBF", -0.06, 0.55, 0.17);
+      box(0.06, 0.05, 0.06, "#C62C3B", 0.06, 0.55, 0.17);
+      return { group: g };
+    }
+    case "pollBoard": {
+      // The war room's wall screen: tonight's poll as bars, citywide and by borough.
+      let face: Material = glow("#1F2A44", 0.4);
+      if (typeof document !== "undefined") {
+        const c = document.createElement("canvas");
+        c.width = 512; c.height = 256;
+        const x = c.getContext("2d");
+        if (x) {
+          x.fillStyle = "#14192A"; x.fillRect(0, 0, 512, 256);
+          x.fillStyle = "#FFFFFF"; x.font = "800 26px system-ui, sans-serif"; x.fillText("TONIGHT'S POLL", 24, 40);
+          const rows: [string, number, number][] = [["CITY", 0.42, 0.45], ["QUEENS", 0.38, 0.47], ["BROOKLYN", 0.4, 0.44], ["BRONX", 0.36, 0.5]];
+          rows.forEach(([name, you, mayor], i) => {
+            const y = 70 + i * 44;
+            x.fillStyle = "#AFC0DA"; x.font = "700 18px system-ui, sans-serif"; x.fillText(name, 24, y + 18);
+            x.fillStyle = "#FF5A6A"; x.fillRect(150, y, 330 * you, 14);
+            x.fillStyle = "#4F86FF"; x.fillRect(150, y + 18, 330 * mayor, 14);
+          });
+          const tex = new CanvasTexture(c); tex.colorSpace = SRGBColorSpace;
+          const m = k.mat("#ffffff", { map: tex, emissive: "#ffffff", emissiveIntensity: opts.night ? 0.5 : 0.3 }) as MeshStandardMaterial;
+          m.emissiveMap = tex;
+          face = m;
+        }
+      }
+      box(w, 1.6, 0.08, BLACK, 0, 0.9, 0);
+      box(w - 0.12, 1.48, 0.01, face, 0, 0.96, 0.045);
+      return { group: g };
+    }
+    case "rallyStage": {
+      // A raised stage with a skirt of bunting, the podium in the middle and the backdrop behind.
+      box(w, 0.4, d, "#2F3A55");
+      for (let i = 0; i < 12; i++) box(w / 12 - 0.02, 0.18, 0.02, i % 2 ? "#F4F2EE" : "#C62C3B", -w / 2 + (i + 0.5) * (w / 12), 0.2, d / 2 + 0.01);
+      box(w - 0.6, 0.02, d - 0.6, "#C62C3B", 0, 0.4, 0);
+      box(0.7, 1.1, 0.5, WOOD_DARK, 0, 0.4, 0.4);
+      box(0.6, 0.08, 0.3, "#2F5BBF", 0, 1.32, 0.4);
+      cyl(0.012, 0.012, 0.3, METAL, 0.12, 1.5, 0.3, 5);
+      box(w * 0.8, 1.9, 0.06, "#2F5BBF", 0, 0.4, -d / 2 + 0.1);
+      box(w * 0.8 - 0.3, 0.5, 0.07, "#F4F2EE", 0, 1.3, -d / 2 + 0.1);
+      for (let i = -3; i <= 3; i++) {
+        const s = new Mesh(k.geo(new CylinderGeometry(0.1, 0.1, 0.02, 5)), k.mat("#C62C3B"));
+        s.rotation.x = Math.PI / 2; s.position.set(i * 0.55, 1.55, -d / 2 + 0.14); g.add(s);
+      }
+      return { group: g, seatY: 0.4 };
+    }
+    case "stringLights": {
+      // Warm bulbs on a sagging wire across the roof, between two poles.
+      for (const sx of [-1, 1]) cyl(0.03, 0.03, 2.8, BLACK, sx * w / 2, 0, 0, 6);
+      const bulb = glow("#FFD58A", 1.8);
+      const n = Math.round(w / 0.6);
+      for (let i = 0; i <= n; i++) {
+        const t = i / n, x = -w / 2 + t * w, y = 2.75 - Math.sin(t * Math.PI) * 0.6;
+        const m = new Mesh(k.geo(new SphereGeometry(0.05, 6, 5)), bulb);
+        m.position.set(x, y, 0); g.add(m);
+      }
+      return { group: g };
+    }
+    case "patioUmbrella": {
+      // A round patio table under a striped umbrella, two chairs.
+      cyl(0.4, 0.4, 0.04, "#F4F2EE", 0, 0.72, 0, 14);
+      cyl(0.03, 0.03, 0.72, METAL, 0, 0, 0, 6);
+      cyl(0.02, 0.02, 2.3, METAL, 0, 0.72, 0, 6);
+      for (let i = 0; i < 8; i++) {
+        const seg = new Mesh(k.geo(new ConeGeometry(0.95, 0.35, 8, 1, true, (i * Math.PI) / 4, Math.PI / 4)), k.mat(i % 2 ? "#F4F2EE" : "#C62C3B"));
+        seg.position.set(0, 2.3, 0); g.add(seg);
+      }
+      for (const sx of [-1, 1]) { box(0.4, 0.05, 0.4, "#F4F2EE", sx * 0.65, 0.45, 0); box(0.4, 0.4, 0.05, "#F4F2EE", sx * 0.65, 0.45, -0.18); legs4(0.4, 0.4, 0.45, METAL, 0.015); }
+      return { group: g };
+    }
     case "cat": {
       const fur = "#E8A44A";
       const bodyM = new Mesh(k.geo(new SphereGeometry(0.13, 7, 5)), k.mat(fur));

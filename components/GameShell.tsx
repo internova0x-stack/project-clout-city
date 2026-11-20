@@ -2658,6 +2658,8 @@ export function GameShell({
     if (it.use?.kind === "lotto") return lottoOn ? setLottoAt(p.id) : setToast("Benny's still setting up the counter. Come back soon.");
     if (it.use?.kind === "action") return handlers.onAction(p.id, it.use.actionId);
     if (it.use?.kind === "gigs") return handlers.onOpenGigs();
+    // Campaign HQ's reception desk and war-room table (owner, Nov 20) open the campaign.
+    if (it.use?.kind === "campaign") return campaign ? setCampaignOpen(true) : setToast("Campaign HQ opens soon.");
     if (it.use?.kind === "floor") {
       if (it.use.to <= 1) return setInsideFloor(it.use.to);
       // The Hub's floors are open to everyone, and so are the tower offices' (TOWERS).

@@ -40,7 +40,11 @@ export type FurnitureKind =
   // Tower offices (owner, Oct 31): cubicles, display glass, robots, server racks and the elevator bank
   | "cubicle" | "glassWall" | "displayCase" | "robot" | "serverRack" | "elevator"
   // Wall art (migration 0120): a framed painting that hangs on a wall
-  | "painting";
+  | "painting"
+  // Campaign HQ (owner, Nov 20: "spacious floors, with great furniture"): the phone bank, the war room, the press room and
+  // the rally roof
+  | "phoneBank" | "warTable" | "pressBackdrop" | "campaignBanner" | "flagStand" | "pendantLamp" | "waterCooler" | "pollBoard"
+  | "rallyStage" | "stringLights" | "patioUmbrella";
 
 export type ItemUse =
   | { kind: "action"; actionId: string }
@@ -62,6 +66,8 @@ export type ItemUse =
   | { kind: "vip" }
   /** v0.11 the gigs board (offices): opens today's gigs in the Phone. */
   | { kind: "gigs" }
+  /** Campaign HQ's reception desk (owner, Nov 20): opens the Campaign HQ sheet. */
+  | { kind: "campaign" }
   /** v0.15 campus areas: open Campus life on a tab (classes at the lecture desks, exams in the library, the dining hall). */
   | { kind: "campus"; tab: "classes" | "exams" | "dining" | "pride" }
   /** Boutique racks open the Shop on a category (shopping places don't sell anything themselves). */
@@ -104,6 +110,12 @@ export interface RoomTemplate {
   rooms?: { name: string; x0: number; z0: number; x1: number; z1: number; floor: string; floorKind: RoomTemplate["floorKind"] }[];
   /** #19: waist-high walls between rooms, as axis-aligned segments [x0, z0, x1, z1]; the gaps are doorways. */
   walls?: [number, number, number, number][];
+  /** Big public floors (owner, Nov 20): the walls between rooms stand full height, like a dollhouse cut open from above. */
+  tallWalls?: boolean;
+  /** Recessed spotlights along the far walls, each washing the wall below with warm light. */
+  spotlights?: boolean;
+  /** A roof terrace: a waist-high parapet instead of walls, open sky, no sign or window. */
+  open?: boolean;
   items: RoomItem[];
   /** Where the avatar enters. */
   spawn: [number, number];
@@ -175,6 +187,17 @@ export const FURNITURE: Record<FurnitureKind, { w: number; d: number; walkable?:
   starSign: { w: 1.6, d: 0.2, label: "Sign" },
   lottoBoard: { w: 1.8, d: 0.2, label: "Odds board" },
   stairs: { w: 1.2, d: 1.8, label: "Stairs" },
+  phoneBank: { w: 2.6, d: 0.8, label: "Phone bank" },
+  warTable: { w: 3.8, d: 1.9, label: "War room table" },
+  pressBackdrop: { w: 3.6, d: 0.2, label: "Press backdrop" },
+  campaignBanner: { w: 2.4, d: 0.12, walkable: true, label: "Campaign banner" },
+  flagStand: { w: 0.4, d: 0.4, label: "Flag" },
+  pendantLamp: { w: 0.5, d: 0.5, walkable: true, label: "Pendant lamp" },
+  waterCooler: { w: 0.4, d: 0.4, label: "Water cooler" },
+  pollBoard: { w: 3.6, d: 0.2, label: "Poll board" },
+  rallyStage: { w: 6.0, d: 2.8, label: "Rally stage" },
+  stringLights: { w: 18.0, d: 0.2, walkable: true, label: "String lights" },
+  patioUmbrella: { w: 1.6, d: 1.6, label: "Patio table" },
   cubicle: { w: 1.6, d: 1.5, label: "Cubicle" },
   glassWall: { w: 3.0, d: 0.12, label: "Glass wall" },
   displayCase: { w: 0.9, d: 0.9, label: "Display case" },
@@ -481,7 +504,7 @@ export function homeTemplate(homeId: string | null | undefined, houseSku?: strin
   return (houseSku && HOME_TEMPLATES[houseSku]) || HOME_TEMPLATES[homeId ?? ""] || HOME_TEMPLATES.astoria_studio;
 }
 
-export type PlaceTemplateId = "restroom" | "vip" | "club" | "cafe" | "counter" | "lounge" | "store" | "showroom" | "campus" | "unisphere" | "gantries" | "lotto" | "office" | "officeSmall" | "officeBig" | "towerLobby" | "techFloor" | "execFloor" | "newsroom" | "streamHouse" | "streamFloor" | "atelier" | "tradingFloor" | "lawOffice" | "backRoom" | "civic" | "gym" | "plaza" | "penthouse" | "radio" | "broadcast" | "hub" | "hubGames" | "hubLounge" | "campusQuad" | "campusLibrary" | "campusDining" | "campusGreek";
+export type PlaceTemplateId = "campaignGround" | "campaignWar" | "campaignRoof" | "restroom" | "vip" | "club" | "cafe" | "counter" | "lounge" | "store" | "showroom" | "campus" | "unisphere" | "gantries" | "lotto" | "office" | "officeSmall" | "officeBig" | "towerLobby" | "techFloor" | "execFloor" | "newsroom" | "streamHouse" | "streamFloor" | "atelier" | "tradingFloor" | "lawOffice" | "backRoom" | "civic" | "gym" | "plaza" | "penthouse" | "radio" | "broadcast" | "hub" | "hubGames" | "hubLounge" | "campusQuad" | "campusLibrary" | "campusDining" | "campusGreek";
 
 // v0.11 (spec section 11): every place can be entered. The shared templates take a place's own
 // actions: "*0" and "*1" are its first and second action (see placeRoom), so one office serves the
@@ -1254,6 +1277,158 @@ export const PLACE_TEMPLATES: Record<PlaceTemplateId, RoomTemplate> = {
   },
   // Office sizes (owner, Oct 31: "different office sizes… depending on the size of the company"). The small one: two desks
   // shoved together, a mini fridge and nowhere to stand (a storefront campaign office, a tiny startup).
+  // ---- Campaign HQ (owner, Nov 20: "spacious floors, with great furniture"; the competitor's houses as the reference) ----
+  // A three-floor building, 20 × 14 m a floor (the old storefront was 5 × 4.4): full-height walls between rooms, bright tile,
+  // recessed spotlights, pendant lamps, art and plants; volunteers and staff at work. Ground floor: reception, the phone bank,
+  // the volunteers' kitchen and the press room.
+  campaignGround: {
+    id: "campaignGround", w: 20, d: 14, wall: "#F4F2EE", wallAccent: "#C62C3B", floor: "#ECE8E1", floorKind: "tile", window: true, alwaysLit: true,
+    tallWalls: true, spotlights: true,
+    rooms: [
+      { name: "Phone bank", x0: -10, z0: -7, x1: -3, z1: 7, floor: "#C9D1DC", floorKind: "concrete" },
+      { name: "Kitchen", x0: -3, z0: -7, x1: 5, z1: 1, floor: "#D8BE98", floorKind: "wood" },
+      { name: "Reception", x0: -3, z0: 1, x1: 5, z1: 7, floor: "#EFEBE4", floorKind: "tile" },
+      { name: "Press room", x0: 5, z0: -7, x1: 10, z1: 2, floor: "#7E5A3C", floorKind: "wood" },
+    ],
+    walls: [[-3, -7, -3, -2.2], [-3, -0.6, -3, 3.2], [-3, 4.8, -3, 7], [-3, 1, 0.2, 1], [1.8, 1, 5, 1], [5, -7, 5, -3.6], [5, -2, 5, 2], [5, 2, 6.6, 2]],
+    items: [
+      // Reception: the front desk (Campaign HQ itself), a waiting corner, flags and the candidates' banner.
+      { id: "reception", kind: "storeCounter", x: 1.0, z: 4.0, rot: 0, color: "#F4F2EE", use: { kind: "campaign" }, label: "🗳️ Campaign HQ" },
+      { id: "banner-rec", kind: "campaignBanner", x: 1.0, z: 1.12, rot: 0 },
+      { id: "flag-1", kind: "flagStand", x: -1.9, z: 1.6, rot: 0 },
+      { id: "flag-2", kind: "flagStand", x: 3.9, z: 1.6, rot: 0 },
+      { id: "wait-1", kind: "armchair", x: -2.2, z: 3.8, rot: 1, color: "#2F4A7A" },
+      { id: "wait-2", kind: "armchair", x: -2.2, z: 5.0, rot: 1, color: "#2F4A7A" },
+      { id: "wait-table", kind: "coffeeTable", x: -1.1, z: 4.4, rot: 1 },
+      { id: "rec-rug", kind: "rug", x: -1.3, z: 4.4, rot: 1, color: "#C62C3B" },
+      { id: "plant-door", kind: "plant", x: 4.4, z: 6.4, rot: 0 },
+      { id: "lamp-rec-1", kind: "pendantLamp", x: 1.0, z: 3.0, rot: 0 },
+      // The phone bank: four long tables of volunteers, a banner over them, a whiteboard of call targets.
+      ...[-5.3, -2.8, -0.3, 2.2].flatMap((z, row) => [
+        { id: `bank-${row}`, kind: "phoneBank" as const, x: -6.5, z, rot: 0, ...(row === 1 ? { use: MAIN(0), label: "*" } : {}) },
+        ...[-0.85, 0, 0.85].map((dx, i) => ({ id: `bank-chair-${row}-${i}`, kind: "chair" as const, x: -6.5 + dx, z: z + 0.75, rot: 2 })),
+      ]),
+      { id: "banner-bank", kind: "campaignBanner", x: -6.5, z: -6.92, rot: 0 },
+      { id: "board-bank", kind: "chalkboard", x: -9.85, z: 0.0, rot: 1 },
+      { id: "plant-bank-1", kind: "plant", x: -9.5, z: 6.4, rot: 0 },
+      { id: "plant-bank-2", kind: "plant", x: -3.6, z: -6.5, rot: 0 },
+      { id: "lamp-bank-1", kind: "pendantLamp", x: -6.5, z: -4.0, rot: 0 },
+      { id: "lamp-bank-2", kind: "pendantLamp", x: -6.5, z: 1.0, rot: 0 },
+      // The volunteers' kitchen: cold pizza on the big table, coffee, the water cooler and a sofa for the night shift.
+      { id: "kitchen", kind: "kitchen", x: 1.0, z: -6.62, rot: 0 },
+      { id: "fridge", kind: "fridge", x: 3.8, z: -6.55, rot: 0 },
+      { id: "cooler", kind: "waterCooler", x: -2.5, z: -6.5, rot: 0 },
+      { id: "pizza-table", kind: "diningTable", x: 1.0, z: -3.6, rot: 0 },
+      ...[[-0.5, -4.4, 0], [0.5, -4.4, 0], [1.5, -4.4, 0], [-0.5, -2.8, 2], [0.5, -2.8, 2], [1.5, -2.8, 2]].map(([x, z, rot], i) => ({ id: `pizza-chair-${i}`, kind: "chair" as const, x: x + 0.5 - 0.5, z, rot })),
+      { id: "kitchen-sofa", kind: "sofa", x: 3.6, z: -0.4, rot: 2, color: "#C62C3B" },
+      { id: "art-kitchen", kind: "painting", x: -1.6, z: -6.92, rot: 0, art: "/art/art-rent-is-due.webp" },
+      { id: "lamp-kitchen", kind: "pendantLamp", x: 1.0, z: -3.6, rot: 0 },
+      // The press room: the step-and-repeat, the podium, the cameras and rows of reporters' chairs.
+      { id: "backdrop", kind: "pressBackdrop", x: 7.5, z: -6.82, rot: 0 },
+      { id: "podium", kind: "lectern", x: 7.5, z: -5.7, rot: 0, use: MAIN(1), label: "*" },
+      { id: "press-flag-1", kind: "flagStand", x: 5.7, z: -6.3, rot: 0 },
+      { id: "press-flag-2", kind: "flagStand", x: 9.3, z: -6.3, rot: 0 },
+      ...[-3.6, -2.4, -1.2].flatMap((z, row) => [6.3, 7.5, 8.7].map((x, i) => ({ id: `press-chair-${row}-${i}`, kind: "chair" as const, x, z, rot: 2 }))),
+      { id: "press-cam", kind: "tvCamera", x: 9.3, z: 0.6, rot: 2 },
+      { id: "press-light", kind: "ringLight", x: 5.8, z: 0.6, rot: 2 },
+    ],
+    spawn: [1.0, 6.2],
+    npcs: [
+      { x: -7.35, z: -4.55, facing: 3.14, seated: true }, { x: -5.65, z: -4.55, facing: 3.14, seated: true },
+      { x: -6.5, z: -2.05, facing: 3.14, seated: true }, { x: -7.35, z: 0.45, facing: 3.14, seated: true },
+      { x: -5.65, z: 0.45, facing: 3.14, seated: true }, { x: -6.5, z: 2.95, facing: 3.14, seated: true },
+      { x: 1.0, z: 3.2, facing: 0 }, { x: 2.2, z: -2.2, facing: 2.6 }, { x: 0.0, z: -4.4, facing: 0, seated: true },
+      { x: 7.5, z: -2.4, facing: 3.14, seated: true }, { x: 8.7, z: -1.2, facing: 3.14, seated: true },
+    ],
+  },
+  // The second floor: the war room (the big table, the poll board, the map), the candidate's office and the staff lounge.
+  campaignWar: {
+    id: "campaignWar", w: 20, d: 14, wall: "#F4F2EE", wallAccent: "#2F5BBF", floor: "#ECE8E1", floorKind: "tile", window: true, alwaysLit: true,
+    tallWalls: true, spotlights: true,
+    rooms: [
+      { name: "War room", x0: -10, z0: -7, x1: 1, z1: 0, floor: "#3B4558", floorKind: "concrete" },
+      { name: "The candidate's office", x0: 1, z0: -7, x1: 10, z1: 0, floor: "#8A6242", floorKind: "wood" },
+      { name: "Staff lounge", x0: -10, z0: 0, x1: 10, z1: 7, floor: "#EFEBE4", floorKind: "tile" },
+    ],
+    walls: [[-10, 0, -6.2, 0], [-4.4, 0, 3.6, 0], [5.4, 0, 10, 0], [1, -7, 1, -3.6], [1, -2, 1, 0]],
+    items: [
+      // The war room.
+      { id: "war-table", kind: "warTable", x: -4.5, z: -3.6, rot: 0, use: { kind: "campaign" }, label: "🗺️ Plan the week" },
+      ...[-5.8, -4.5, -3.2].flatMap((x, i) => [
+        { id: `war-chair-n-${i}`, kind: "chair" as const, x, z: -4.85, rot: 0 },
+        { id: `war-chair-s-${i}`, kind: "chair" as const, x, z: -2.35, rot: 2 },
+      ]),
+      { id: "war-chair-w", kind: "chair", x: -6.75, z: -3.6, rot: 1 },
+      { id: "poll-board", kind: "pollBoard", x: -4.5, z: -6.85, rot: 0 },
+      { id: "war-board", kind: "chalkboard", x: -9.85, z: -3.6, rot: 1 },
+      { id: "war-lamp", kind: "pendantLamp", x: -4.5, z: -3.6, rot: 0 },
+      { id: "war-plant", kind: "plant", x: 0.4, z: -6.4, rot: 0 },
+      // The candidate's office.
+      { id: "office-desk", kind: "desk", x: 5.6, z: -5.2, rot: 0, color: "#5A3E2B" },
+      { id: "office-chair", kind: "chair", x: 5.6, z: -6.0, rot: 0 },
+      { id: "office-shelf-1", kind: "bookshelf", x: 2.4, z: -6.7, rot: 0 },
+      { id: "office-shelf-2", kind: "bookshelf", x: 8.8, z: -6.7, rot: 0 },
+      { id: "office-flag-1", kind: "flagStand", x: 4.0, z: -6.4, rot: 0 },
+      { id: "office-flag-2", kind: "flagStand", x: 7.2, z: -6.4, rot: 0 },
+      { id: "office-art", kind: "painting", x: 5.6, z: -6.92, rot: 0, art: "/art/art-self-made.webp" },
+      { id: "office-sofa", kind: "sofa", x: 5.6, z: -1.0, rot: 2, color: "#EDE6D6", use: { kind: "sit" }, label: "Sit" },
+      { id: "office-arm-1", kind: "armchair", x: 3.4, z: -2.6, rot: 1, color: "#2F4A7A" },
+      { id: "office-arm-2", kind: "armchair", x: 7.8, z: -2.6, rot: 3, color: "#2F4A7A" },
+      { id: "office-table", kind: "coffeeTable", x: 5.6, z: -2.4, rot: 0 },
+      { id: "office-rug", kind: "rug", x: 5.6, z: -2.2, rot: 0, color: "#7A2E3A" },
+      { id: "office-lamp", kind: "floorLamp", x: 9.4, z: -1.0, rot: 0 },
+      // The staff lounge: a long sofa set, the coffee bar, the TV on the news, plants and art.
+      { id: "lounge-tv", kind: "tvStand", x: -9.6, z: 3.5, rot: 1 },
+      { id: "lounge-sofa-1", kind: "sofa", x: -6.6, z: 2.6, rot: 3, color: "#EDE6D6", use: { kind: "sit" }, label: "Sit" },
+      { id: "lounge-sofa-2", kind: "sofa", x: -6.6, z: 4.6, rot: 3, color: "#EDE6D6" },
+      { id: "lounge-table", kind: "coffeeTable", x: -8.0, z: 3.6, rot: 1 },
+      { id: "lounge-rug", kind: "rug", x: -8.0, z: 3.6, rot: 1, color: "#C9B79C" },
+      { id: "coffee-bar", kind: "kitchenIsland", x: 2.0, z: 3.4, rot: 0, use: MAIN(0), label: "*" },
+      ...[1.0, 2.0, 3.0].map((x, i) => ({ id: `bar-stool-${i}`, kind: "barStool" as const, x, z: 4.4, rot: 2 })),
+      { id: "lounge-cooler", kind: "waterCooler", x: 9.5, z: 0.6, rot: 0 },
+      { id: "lounge-art-1", kind: "painting", x: -9.92, z: 0.9, rot: 1, art: "/art/art-astoria-rooftops.webp" },
+      { id: "lounge-plant-1", kind: "plant", x: -9.4, z: 6.4, rot: 0 },
+      { id: "lounge-plant-2", kind: "plant", x: 7.6, z: 6.4, rot: 0 },
+      { id: "lounge-arm-1", kind: "armchair", x: 6.4, z: 3.0, rot: 2, color: "#C62C3B" },
+      { id: "lounge-arm-2", kind: "armchair", x: 7.6, z: 3.0, rot: 2, color: "#C62C3B" },
+      { id: "lounge-lamp-1", kind: "pendantLamp", x: 2.0, z: 3.4, rot: 0 },
+      { id: "lounge-lamp-2", kind: "pendantLamp", x: -7.6, z: 3.6, rot: 0 },
+    ],
+    spawn: [8.4, 4.0],
+    npcs: [
+      { x: -5.8, z: -4.85, facing: 0, seated: true }, { x: -3.2, z: -4.85, facing: 0, seated: true }, { x: -4.5, z: -2.35, facing: 3.14, seated: true },
+      { x: -6.75, z: -3.6, facing: 1.57, seated: true }, { x: 5.6, z: -6.0, facing: 0, seated: true },
+      { x: -6.6, z: 2.6, facing: -1.57, seated: true }, { x: 2.0, z: 4.4, facing: 3.14, seated: true }, { x: 6.9, z: 4.4, facing: 2.8 },
+    ],
+  },
+  // The rally roof: the stage with the podium and speakers, rows of supporters' chairs, patio tables, string lights.
+  campaignRoof: {
+    id: "campaignRoof", w: 20, d: 14, wall: "#D9D3C8", wallAccent: "#C62C3B", floor: "#A9A39A", floorKind: "concrete", alwaysLit: true, open: true,
+    rooms: [{ name: "Deck", x0: -10, z0: 2.5, x1: 10, z1: 7, floor: "#B98E62", floorKind: "wood" }],
+    items: [
+      { id: "stage", kind: "rallyStage", x: 0, z: -5.4, rot: 0, use: MAIN(0), label: "*" },
+      { id: "speaker-1", kind: "speaker", x: -3.8, z: -5.8, rot: 0 },
+      { id: "speaker-2", kind: "speaker", x: 3.8, z: -5.8, rot: 0 },
+      { id: "flag-roof-1", kind: "flagStand", x: -5.0, z: -6.3, rot: 0 },
+      { id: "flag-roof-2", kind: "flagStand", x: 5.0, z: -6.3, rot: 0 },
+      ...[-2.6, -1.4, -0.2, 1.0].flatMap((z, row) => [-3.0, -1.8, -0.6, 0.6, 1.8, 3.0].map((x, i) => ({ id: `rally-chair-${row}-${i}`, kind: "chair" as const, x, z, rot: 2 }))),
+      { id: "lights-1", kind: "stringLights", x: 0, z: -2.4, rot: 0 },
+      { id: "lights-2", kind: "stringLights", x: 0, z: 2.2, rot: 0 },
+      ...[[-7.6, 4.2], [-4.6, 5.4], [4.6, 5.4], [7.6, 4.2]].map(([x, z], i) => ({ id: `patio-${i}`, kind: "patioUmbrella" as const, x, z, rot: 0 })),
+      { id: "roof-banner-1", kind: "campaignBanner", x: -7.8, z: -6.9, rot: 0 },
+      { id: "roof-banner-2", kind: "campaignBanner", x: 7.8, z: -6.9, rot: 0 },
+      { id: "roof-plant-1", kind: "plant", x: -9.4, z: -6.4, rot: 0 },
+      { id: "roof-plant-2", kind: "plant", x: 9.4, z: -6.4, rot: 0 },
+      { id: "roof-plant-3", kind: "plant", x: -9.4, z: 6.4, rot: 0 },
+      { id: "roof-plant-4", kind: "plant", x: 9.4, z: 6.4, rot: 0 },
+      { id: "roof-bench", kind: "bench", x: 0, z: 6.2, rot: 2 },
+    ],
+    spawn: [8.4, 0.5],
+    npcs: [
+      ...[[-3.0, -2.6], [-1.8, -2.6], [0.6, -2.6], [1.8, -2.6], [-0.6, -1.4], [3.0, -1.4], [-1.8, -0.2], [1.8, 1.0]].map(([x, z]) => ({ x, z, facing: 3.14, seated: true })),
+      { x: 0, z: -5.2, facing: 0 }, { x: -7.0, z: 3.4, facing: 1.2 }, { x: 4.6, z: 4.6, facing: -2.4 },
+    ],
+  },
   officeSmall: {
     id: "officeSmall", w: 5.0, d: 4.4, wall: "#EEF0F2", wallAccent: "#5B7FA6", floor: "#BDB6AA", floorKind: "concrete", window: true,
     items: [
@@ -1408,12 +1583,19 @@ export interface RoomPlace {
  * the gigs board and Shop racks follow the place. Places that used to be scene cards are recolored
  * with their palette.
  */
+/**
+ * Places rebuilt as big buildings (owner, Nov 20) whose ground floor isn't the template in the city seed: the code picks it,
+ * so no migration is needed. Their other floors are TOWERS.
+ */
+export const PLACE_GROUND: Record<string, PlaceTemplateId> = { "campaign-hq": "campaignGround" };
+
 export function placeRoom(place: RoomPlace & { tags?: string[] }, area?: PlaceTemplateId): RoomTemplate | null {
   // Club nights, campus events and exclusive parties are held here; elsewhere the dance floor is just a floor.
   const hasEvents = CLUB_EVENTS.some((e) => e.placeId === place.id) || !!place.tags?.includes("exclusive_venue");
   // v0.15: a campus opens on the Quad; its other areas come through placeFloor (CAMPUS_AREAS).
   const campusArea = area ?? (place.tags?.includes("campus") && place.template === "campus" ? "campusQuad" : undefined);
-  const base = campusArea ? PLACE_TEMPLATES[campusArea] : place.template && place.template !== "apartment" ? PLACE_TEMPLATES[place.template as PlaceTemplateId] : undefined;
+  const ground = PLACE_GROUND[place.id];
+  const base = campusArea ? PLACE_TEMPLATES[campusArea] : ground ? PLACE_TEMPLATES[ground] : place.template && place.template !== "apartment" ? PLACE_TEMPLATES[place.template as PlaceTemplateId] : undefined;
   if (!base) return null;
   const ids = new Set(place.actions.map((a) => a.id));
   const free = place.actions.filter((a) => !base.items.some((i) => i.use?.kind === "action" && i.use.actionId === a.id));
@@ -1512,6 +1694,13 @@ export const TOWERS: Record<string, Record<number, { name: string; emoji: string
     2: { name: "Trading floor", emoji: "📈", template: "tradingFloor" },
     3: { name: "Executive floor", emoji: "🥂", template: "execFloor" },
   },
+  // Campaign HQ (owner, Nov 20): a three-floor building with stairs up from reception (the ground floor replaces the place's
+  // own storefront template: PLACE_GROUND).
+  "campaign-hq": {
+    1: { name: "Ground floor", emoji: "🗳️", template: "campaignGround", stairs: true, lift: [8.6, 5.4, 0] },
+    2: { name: "War room floor", emoji: "🗺️", template: "campaignWar", stairs: true, lift: [9.2, 5.4, 0] },
+    3: { name: "Rally roof", emoji: "📣", template: "campaignRoof", stairs: true, lift: [9.2, 0.4, 0] },
+  },
   "clout-tower": {
     1: { name: "Studio", emoji: "📺", template: "broadcast", lift: [2.5, -2.62, 0] },
     2: { name: "Newsroom", emoji: "🗞️", template: "newsroom" },
@@ -1554,7 +1743,7 @@ export const PLACE_STYLES: Record<string, InteriorStyle> = {
   "atelier-vernon": "minimalist", "glow-up-house": "futuristic",
   // Real Estate, Finance and Law (owner, Oct 31).
   "no-fee-realty": "modern", "pablos-luggage": "oldEnglish", "queensboro-capital": "modern", "whitlock-hale": "oldEnglish",
-  "clout-tower": "modern", "altitude-718": "modern", "campaign-hq": "modern", "fifs-furniture": "modern",
+  "clout-tower": "modern", "altitude-718": "modern", "fifs-furniture": "modern",
 };
 
 const RESTYLED: FurnitureKind[] = ["sofa", "armchair", "booth"];
@@ -1871,6 +2060,7 @@ export const PLAYER_SLOTS: Record<PlaceTemplateId, number> = {
   restroom: 3, vip: 4, club: 6, cafe: 5, counter: 4, lounge: 5, store: 5, showroom: 7, campus: 6, lotto: 4,
   unisphere: 7, gantries: 7, office: 5, officeSmall: 3, officeBig: 7, towerLobby: 6, techFloor: 7, execFloor: 6, newsroom: 7, streamHouse: 6, streamFloor: 7, atelier: 6, tradingFloor: 7, lawOffice: 6, backRoom: 3, civic: 5, gym: 5, plaza: 7, penthouse: 10, radio: 4, broadcast: 5,
   hub: 7, hubGames: 7, hubLounge: 7, campusQuad: 7, campusLibrary: 5, campusDining: 6, campusGreek: 7,
+  campaignGround: 12, campaignWar: 10, campaignRoof: 14,
 };
 /** The player figures a room holds (its party spots, or PLAYER_SLOTS by template; floors are "vip:place"). */
 export function playerSlots(t: RoomTemplate): number {

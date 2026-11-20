@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import {
   ACESFilmicToneMapping, AmbientLight, BoxGeometry, CanvasTexture, Color, DirectionalLight, Fog, Group, HemisphereLight, Mesh,
   MeshStandardMaterial, OrthographicCamera, PCFSoftShadowMap, Plane, PlaneGeometry, PointLight, Raycaster, RepeatWrapping,
-  RingGeometry, SRGBColorSpace, Scene, Vector2, Vector3, WebGLRenderer, type Object3D,
+  RingGeometry, SRGBColorSpace, Scene, Sprite, SpriteMaterial, AdditiveBlending, Vector2, Vector3, WebGLRenderer, type Object3D,
 } from "three";
 import { randomLook, type Look } from "@/lib/look";
 import type { CrowdMember } from "@/lib/partyRoom";
@@ -30,7 +30,7 @@ import { frameWatch, renderQuality, setAutoLowGraphics } from "@/lib/graphics";
 
 const WALL_H = 2.7;
 /** #19: walls between rooms stop at the waist (owner, Oct 14), so every room reads at once. */
-const INNER_WALL_H = 1.05;
+const INNER_WALL_H_LOW = 1.05;
 const WALK_SPEED = 1.5;
 /** New bodies jog when the way is longer than RUN_FROM meters (owner, Oct 21), at RUN_SPEED. */
 const RUN_FROM = 5;
@@ -270,11 +270,13 @@ export default function Room3D(props: Room3DProps) {
     room.add(floor);
     const wallMat = dream ? gradientWallMaterial(template, night) : kit.mat(template.wall, { roughness: 0.95 });
     const trimMat = kit.mat(template.wallAccent);
-    const back = new Mesh(kit.geo(new BoxGeometry(template.w + 0.12, WALL_H, 0.12)), wallMat);
-    back.position.set(-0.06, WALL_H / 2, -template.d / 2 - 0.06);
+    // A roof terrace (owner, Nov 20) has a waist-high parapet instead of walls.
+    const shellH = template.open ? 1.05 : WALL_H;
+    const back = new Mesh(kit.geo(new BoxGeometry(template.w + 0.12, shellH, 0.12)), wallMat);
+    back.position.set(-0.06, shellH / 2, -template.d / 2 - 0.06);
     back.receiveShadow = true;
-    const left = new Mesh(kit.geo(new BoxGeometry(0.12, WALL_H, template.d)), wallMat);
-    left.position.set(-template.w / 2 - 0.06, WALL_H / 2, 0);
+    const left = new Mesh(kit.geo(new BoxGeometry(0.12, shellH, template.d)), wallMat);
+    left.position.set(-template.w / 2 - 0.06, shellH / 2, 0);
     left.receiveShadow = true;
     const skirtB = new Mesh(kit.geo(new BoxGeometry(template.w, 0.12, 0.03)), trimMat);
     skirtB.position.set(0, 0.06, -template.d / 2 + 0.015);
@@ -283,11 +285,11 @@ export default function Room3D(props: Room3DProps) {
     // Rotatable rooms get all four walls; only the two away from the camera show (see aim()).
     const walls = { xNeg: new Group(), xPos: new Group(), zNeg: new Group(), zPos: new Group() };
     if (props.rotatable && !template.outdoor) {
-      const front = new Mesh(kit.geo(new BoxGeometry(template.w + 0.12, WALL_H, 0.12)), wallMat);
-      front.position.set(0.06, WALL_H / 2, template.d / 2 + 0.06);
+      const front = new Mesh(kit.geo(new BoxGeometry(template.w + 0.12, shellH, 0.12)), wallMat);
+      front.position.set(0.06, shellH / 2, template.d / 2 + 0.06);
       front.receiveShadow = true;
-      const right = new Mesh(kit.geo(new BoxGeometry(0.12, WALL_H, template.d)), wallMat);
-      right.position.set(template.w / 2 + 0.06, WALL_H / 2, 0);
+      const right = new Mesh(kit.geo(new BoxGeometry(0.12, shellH, template.d)), wallMat);
+      right.position.set(template.w / 2 + 0.06, shellH / 2, 0);
       right.receiveShadow = true;
       const skirtF = new Mesh(kit.geo(new BoxGeometry(template.w, 0.12, 0.03)), trimMat);
       skirtF.position.set(0, 0.06, template.d / 2 - 0.015);
@@ -331,7 +333,7 @@ export default function Room3D(props: Room3DProps) {
       walls.xNeg.add(left, skirtL);
       room.add(walls.xNeg, walls.xPos, walls.zNeg, walls.zPos);
     }
-    if (template.window && !template.outdoor) {
+    if (template.window && !template.outdoor && !template.open) {
       const winTex = windowTexture(night);
       const win = new Mesh(kit.geo(new PlaneGeometry(1.8, 1.2)), kit.mat("#ffffff", { map: winTex, emissive: "#ffffff", emissiveIntensity: night ? 0.55 : 0.85 }));
       (win.material as MeshStandardMaterial).emissiveMap = winTex;
@@ -341,7 +343,7 @@ export default function Room3D(props: Room3DProps) {
       frame.position.set(-template.w / 2 + 0.005, 1.55, -template.d / 4);
       (template.outdoor ? room : walls.xNeg).add(frame, win);
     }
-    if (sign && !template.outdoor) {
+    if (sign && !template.outdoor && !template.open) {
       const signTex = signTexture(sign, template);
       const board = new Mesh(kit.geo(new PlaneGeometry(2.6, 0.65)), kit.mat("#ffffff", { map: signTex, emissive: "#ffffff", emissiveIntensity: template.dark ? 1.1 : 0.35 }));
       (board.material as MeshStandardMaterial).emissiveMap = signTex;
@@ -372,6 +374,8 @@ export default function Room3D(props: Room3DProps) {
       room.add(f);
     }
     const innerMat = kit.mat(template.wall, { roughness: 0.95 });
+    // Big public floors (owner, Nov 20): walls between rooms stand full height, a dollhouse seen from above.
+    const INNER_WALL_H = template.tallWalls ? WALL_H - 0.25 : INNER_WALL_H_LOW;
     for (const [x0, z0, x1, z1] of template.walls ?? []) {
       const alongX = z0 === z1;
       const len = alongX ? Math.abs(x1 - x0) : Math.abs(z1 - z0);
@@ -389,6 +393,34 @@ export default function Room3D(props: Room3DProps) {
         post.position.set(px, (INNER_WALL_H + 0.25) / 2, pz);
         post.castShadow = true;
         room.add(post);
+      }
+    }
+    // Recessed spotlights (owner, Nov 20: the reference's bright, expensive rooms): a small lit disc under the ceiling line
+    // every 1.6 m along the two far walls, each washing the wall below it in warm light. Sprites, not lights: cheap on phones.
+    if (template.spotlights && !template.outdoor && !template.open) {
+      const washTex = (() => {
+        const c = document.createElement("canvas");
+        c.width = 64; c.height = 128;
+        const g2 = c.getContext("2d")!;
+        const grad = g2.createRadialGradient(32, 10, 2, 32, 30, 70);
+        grad.addColorStop(0, "rgba(255,226,170,0.95)"); grad.addColorStop(0.35, "rgba(255,214,150,0.35)"); grad.addColorStop(1, "rgba(255,214,150,0)");
+        g2.fillStyle = grad; g2.fillRect(0, 0, 64, 128);
+        return new CanvasTexture(c);
+      })();
+      const washMat = new SpriteMaterial({ map: washTex, transparent: true, depthWrite: false, blending: AdditiveBlending, opacity: night ? 0.9 : 0.55 });
+      const discMat = kit.mat("#FFF4DC", { emissive: "#FFE7B8", emissiveIntensity: 1.4 });
+      const along = (len: number) => { const n = Math.max(2, Math.floor(len / 1.6)); return Array.from({ length: n }, (_, i) => -len / 2 + (i + 0.5) * (len / n)); };
+      for (const x of along(template.w)) {
+        const disc = new Mesh(kit.geo(new BoxGeometry(0.16, 0.02, 0.16)), discMat);
+        disc.position.set(x, WALL_H - 0.04, -template.d / 2 + 0.16);
+        const wash = new Sprite(washMat); wash.scale.set(1.2, 2.2, 1); wash.position.set(x, WALL_H - 1.05, -template.d / 2 + 0.03);
+        walls.zNeg.add(disc, wash);
+      }
+      for (const z of along(template.d)) {
+        const disc = new Mesh(kit.geo(new BoxGeometry(0.16, 0.02, 0.16)), discMat);
+        disc.position.set(-template.w / 2 + 0.16, WALL_H - 0.04, z);
+        const wash = new Sprite(washMat); wash.scale.set(1.2, 2.2, 1); wash.position.set(-template.w / 2 + 0.03, WALL_H - 1.05, z);
+        walls.xNeg.add(disc, wash);
       }
     }
     scene.add(room);
