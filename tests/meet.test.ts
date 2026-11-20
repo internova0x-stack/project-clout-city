@@ -56,7 +56,7 @@ test("crowded places: every room holds 3 to 7 players beside its regulars (party
   }
   const club = PLACES.find((p) => p.id === "velvet-static")!;
   assert.equal(playerSlots(placeFloor(club, 0)!), 3, "the restroom holds three");
-  assert.equal(playerSlots(placeFloor(club, 2)!), 4, "VIP holds four");
+  assert.equal(playerSlots(placeFloor(club, 2)!), 7, "the big clubs' VIP holds seven");
 });
 
 test("crowded places: who's in view (opened first, then crew, then turns)", () => {

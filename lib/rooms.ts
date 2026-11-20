@@ -44,7 +44,9 @@ export type FurnitureKind =
   // Campaign HQ (owner, Nov 20: "spacious floors, with great furniture"): the phone bank, the war room, the press room and
   // the rally roof
   | "phoneBank" | "warTable" | "pressBackdrop" | "campaignBanner" | "flagStand" | "pendantLamp" | "waterCooler" | "pollBoard"
-  | "rallyStage" | "stringLights" | "patioUmbrella" | "sectional" | "chandelier";
+  | "rallyStage" | "stringLights" | "patioUmbrella" | "sectional" | "chandelier"
+  // The big clubs (owner, Nov 20: "a bar, a stage with go-go dancers, a vip, lighting"): the DJ stage, podiums, video walls
+  | "djStage" | "gogoPodium" | "ledWall" | "clubPillar" | "velvetRope";
 
 export type ItemUse =
   | { kind: "action"; actionId: string }
@@ -121,13 +123,15 @@ export interface RoomTemplate {
   spotlights?: boolean;
   /** A roof terrace: a waist-high parapet instead of walls, open sky, no sign or window. */
   open?: boolean;
+  /** The big clubs: moving light beams from a rig over the floor and colored pools of light sweeping the floor. */
+  clubLights?: boolean;
   items: RoomItem[];
   /** Where the avatar enters. */
   spawn: [number, number];
   /** v0.11 party floors: where the 8 to 10 people at a party stand (lib/partyRoom.ts crowdFor). */
   crowdSpots?: { x: number; z: number; facing: number }[];
   /** People hanging out (positions and facing), drawn as random New Yorkers. */
-  npcs?: { x: number; z: number; facing: number; seated?: boolean }[];
+  npcs?: { x: number; z: number; facing: number; seated?: boolean; dance?: boolean; y?: number }[];
 }
 
 /** Footprint (x, z) at rot 0, and whether people can walk over it. */
@@ -205,6 +209,11 @@ export const FURNITURE: Record<FurnitureKind, { w: number; d: number; walkable?:
   patioUmbrella: { w: 1.6, d: 1.6, label: "Patio table" },
   sectional: { w: 3.0, d: 2.0, label: "Sectional sofa" },
   chandelier: { w: 1.0, d: 1.0, walkable: true, label: "Chandelier" },
+  djStage: { w: 10.0, d: 2.6, label: "DJ stage" },
+  gogoPodium: { w: 1.2, d: 1.2, label: "Go-go podium" },
+  ledWall: { w: 8.0, d: 0.15, walkable: true, label: "Video wall" },
+  clubPillar: { w: 0.6, d: 0.6, label: "Pillar" },
+  velvetRope: { w: 2.0, d: 0.25, label: "Velvet rope" },
   cubicle: { w: 1.6, d: 1.5, label: "Cubicle" },
   glassWall: { w: 3.0, d: 0.12, label: "Glass wall" },
   displayCase: { w: 0.9, d: 0.9, label: "Display case" },
@@ -511,7 +520,7 @@ export function homeTemplate(homeId: string | null | undefined, houseSku?: strin
   return (houseSku && HOME_TEMPLATES[houseSku]) || HOME_TEMPLATES[homeId ?? ""] || HOME_TEMPLATES.astoria_studio;
 }
 
-export type PlaceTemplateId = "campaignGround" | "campaignWar" | "campaignRoof" | "restroom" | "vip" | "club" | "cafe" | "counter" | "lounge" | "store" | "showroom" | "campus" | "unisphere" | "gantries" | "lotto" | "office" | "officeSmall" | "officeBig" | "towerLobby" | "techFloor" | "execFloor" | "newsroom" | "streamHouse" | "streamFloor" | "atelier" | "tradingFloor" | "lawOffice" | "backRoom" | "civic" | "gym" | "plaza" | "penthouse" | "radio" | "broadcast" | "hub" | "hubGames" | "hubLounge" | "campusQuad" | "campusLibrary" | "campusDining" | "campusGreek";
+export type PlaceTemplateId = "campaignGround" | "campaignWar" | "campaignRoof" | "clubBig" | "vipBig" | "restroom" | "vip" | "club" | "cafe" | "counter" | "lounge" | "store" | "showroom" | "campus" | "unisphere" | "gantries" | "lotto" | "office" | "officeSmall" | "officeBig" | "towerLobby" | "techFloor" | "execFloor" | "newsroom" | "streamHouse" | "streamFloor" | "atelier" | "tradingFloor" | "lawOffice" | "backRoom" | "civic" | "gym" | "plaza" | "penthouse" | "radio" | "broadcast" | "hub" | "hubGames" | "hubLounge" | "campusQuad" | "campusLibrary" | "campusDining" | "campusGreek";
 
 // v0.11 (spec section 11): every place can be entered. The shared templates take a place's own
 // actions: "*0" and "*1" are its first and second action (see placeRoom), so one office serves the
@@ -538,6 +547,123 @@ export const PLACE_TEMPLATES: Record<PlaceTemplateId, RoomTemplate> = {
     npcs: [
       { x: -1.4, z: -1.75, facing: 3.14 }, { x: 0.8, z: -1.75, facing: 3.14 }, { x: 0.3, z: -1.0, facing: -2.2 },
       { x: -0.6, z: 2.3, facing: 3.14, seated: true },
+    ],
+  },
+  // ---- The big clubs (owner, Nov 20: "Start with the clubs"; then the references: "a bar, a stage with go-go dancers, a vip,
+  // lighting, a bigger floor plan") ----
+  // 28 × 18 m. The back wall is the show: a raised DJ stage under a video wall, a go-go dancer at each end and two more on lit
+  // podiums at the dance floor's corners, CO2 cannons, a lighting rig with moving beams (clubLights). The long bar runs down the
+  // left wall under a second video wall; the roped-off VIP section (gold carpet, gold booths, bottle tables, the stairs to the
+  // VIP floor) takes the front right; the lounge (and each club's signature piece: PLACE_SIGNATURE) the front left.
+  clubBig: {
+    id: "clubBig", w: 28, d: 18, wall: "#1B1426", wallAccent: "#FF2E88", floor: "#1E1828", floorKind: "concrete", dark: true,
+    clubLights: true,
+    rooms: [
+      { name: "Dance floor", x0: -11, z0: -9, x1: 14, z1: 2, floor: "#1E1828", floorKind: "concrete" },
+      { name: "Bar", x0: -14, z0: -9, x1: -11, z1: 4, floor: "#2A1E24", floorKind: "wood" },
+      { name: "Lounge", x0: -14, z0: 4, x1: 5, z1: 9, floor: "#241A30", floorKind: "wood" },
+      { name: "VIP", x0: 5, z0: 2, x1: 14, z1: 9, floor: "#3A2A12", floorKind: "wood" },
+      { name: "Floor", x0: -11, z0: 2, x1: 5, z1: 4, floor: "#1E1828", floorKind: "concrete" },
+    ],
+    items: [
+      // The show: stage, video walls, dancers' podiums, pillars.
+      { id: "stage", kind: "djStage", x: 0, z: -7.55, rot: 0 },
+      { id: "screen-back", kind: "ledWall", x: 0, z: -8.9, rot: 0 },
+      { id: "screen-side", kind: "ledWall", x: -13.9, z: -4.5, rot: 1 },
+      { id: "speaker-1", kind: "speaker", x: -6.0, z: -8.4, rot: 0, model: "k:speaker" },
+      { id: "speaker-2", kind: "speaker", x: 6.0, z: -8.4, rot: 0, model: "k:speaker" },
+      { id: "podium-1", kind: "gogoPodium", x: -6.2, z: -3.2, rot: 0 },
+      { id: "podium-2", kind: "gogoPodium", x: 6.2, z: -3.2, rot: 0 },
+      { id: "pillar-1", kind: "clubPillar", x: -8.5, z: -6.0, rot: 0 },
+      { id: "pillar-2", kind: "clubPillar", x: 8.5, z: -6.0, rot: 0 },
+      { id: "pillar-3", kind: "clubPillar", x: -8.5, z: 1.0, rot: 0 },
+      { id: "pillar-4", kind: "clubPillar", x: 8.5, z: 1.0, rot: 0 },
+      // The dance floor: six lit tiles, 9 × 6 m, in front of the stage.
+      { id: "floor", kind: "danceFloor", x: 0, z: -1.0, rot: 0, use: { kind: "events" }, label: "Dance" },
+      { id: "floor-2", kind: "danceFloor", x: -3.0, z: -1.0, rot: 0 },
+      { id: "floor-3", kind: "danceFloor", x: 3.0, z: -1.0, rot: 0 },
+      { id: "floor-4", kind: "danceFloor", x: -3.0, z: -4.0, rot: 0 },
+      { id: "floor-5", kind: "danceFloor", x: 0, z: -4.0, rot: 0 },
+      { id: "floor-6", kind: "danceFloor", x: 3.0, z: -4.0, rot: 0 },
+      // The bar down the left wall: three lengths of neon bar, bartenders behind, stools in front.
+      { id: "bar", kind: "bar", x: -12.9, z: -1.2, rot: 1, use: { kind: "action", actionId: "visit" }, label: "Get seen", model: "bar" },
+      { id: "bar-2", kind: "bar", x: -12.9, z: -4.4, rot: 1, model: "bar" },
+      { id: "bar-3", kind: "bar", x: -12.9, z: 2.0, rot: 1, model: "bar" },
+      ...[-5.6, -4.6, -3.6, -2.4, -1.4, -0.4, 0.8, 1.8, 2.8].map((z, i) => ({ id: `stool-${i + 1}`, kind: "barStool" as const, x: -11.9, z, rot: 1, model: "barStool" })),
+      // The lounge: sofas facing the floor, velvet chairs, low marble tables; the left end is the feature corner.
+      { id: "lounge-sofa-1", kind: "sofa", x: -6.0, z: 8.3, rot: 2, color: "#3B2A55", model: "sofa" },
+      { id: "lounge-table-1", kind: "coffeeTable", x: -6.0, z: 7.1, rot: 0, model: "marbleTable" },
+      { id: "lounge-chair-1", kind: "armchair", x: -7.6, z: 6.6, rot: 1, color: "#6B2BD9", model: "velvetChair", use: sit, label: "Sit" },
+      { id: "lounge-chair-2", kind: "armchair", x: -4.4, z: 6.6, rot: 3, color: "#6B2BD9", model: "velvetChair" },
+      { id: "lounge-sofa-2", kind: "sofa", x: -0.5, z: 8.3, rot: 2, color: "#3B2A55", model: "sofa" },
+      { id: "lounge-table-2", kind: "coffeeTable", x: -0.5, z: 7.1, rot: 0, model: "marbleTable" },
+      { id: "lounge-chair-3", kind: "armchair", x: -2.1, z: 6.6, rot: 1, color: "#6B2BD9", model: "velvetChair" },
+      { id: "lounge-chair-4", kind: "armchair", x: 1.1, z: 6.6, rot: 3, color: "#6B2BD9", model: "velvetChair" },
+      { id: "lounge-lamp", kind: "floorLamp", x: 3.6, z: 8.5, rot: 0, model: "arcLamp" },
+      { id: "lounge-plant", kind: "plant", x: -13.5, z: 8.5, rot: 0, model: "figTree" },
+      // The VIP section: roped off, gold carpet, gold booths with bottle tables, a chandelier, the stairs to the VIP floor.
+      { id: "vip-rug", kind: "rug", x: 9.5, z: 5.5, rot: 0, color: "#C9A227" },
+      { id: "rope-1", kind: "velvetRope", x: 6.2, z: 2.3, rot: 0 },
+      { id: "rope-2", kind: "velvetRope", x: 11.6, z: 2.3, rot: 0 },
+      { id: "rope-3", kind: "velvetRope", x: 5.3, z: 4.4, rot: 1 },
+      { id: "rope-4", kind: "velvetRope", x: 5.3, z: 7.6, rot: 1 },
+      { id: "vip-booth-1", kind: "booth", x: 13.4, z: 3.8, rot: 3, color: "#F2A900", model: "booth" },
+      { id: "vip-table-1", kind: "coffeeTable", x: 12.2, z: 3.8, rot: 1, model: "marbleTable" },
+      { id: "vip-booth-2", kind: "booth", x: 13.4, z: 6.6, rot: 3, color: "#F2A900", model: "booth" },
+      { id: "vip-table-2", kind: "coffeeTable", x: 12.2, z: 6.6, rot: 1, model: "marbleTable" },
+      { id: "vip-booth-3", kind: "booth", x: 8.0, z: 8.4, rot: 2, color: "#F2A900", model: "booth" },
+      { id: "vip-table-3", kind: "coffeeTable", x: 8.0, z: 7.3, rot: 0, model: "marbleTable" },
+      { id: "vip-chandelier", kind: "chandelier", x: 9.5, z: 5.5, rot: 0, model: "chandelier" },
+      { id: "vip-plant", kind: "plant", x: 13.5, z: 8.5, rot: 0, model: "monstera" },
+    ],
+    spawn: [-2.0, 3.0],
+    npcs: [
+      // The show: the DJ and two dancers on the stage, two on the podiums.
+      { x: 0, z: -8.2, facing: 0, y: 0.6 },
+      { x: -3.9, z: -7.2, facing: 0, y: 0.6, dance: true }, { x: 3.9, z: -7.2, facing: 0, y: 0.6, dance: true },
+      { x: -6.2, z: -3.2, facing: 0.4, y: 0.95, dance: true }, { x: 6.2, z: -3.2, facing: -0.4, y: 0.95, dance: true },
+      // The floor.
+      { x: -3.4, z: -1.4, facing: 0.6 }, { x: -1.0, z: -0.4, facing: -2.4 }, { x: 1.2, z: -3.4, facing: 2.0 }, { x: 3.4, z: -1.2, facing: -1.2 },
+      { x: 0.2, z: -4.8, facing: 0.2 }, { x: -2.6, z: -4.4, facing: 1.0 }, { x: 2.4, z: 0.2, facing: 3.0 },
+      // Bartenders, the bar, the lounge, VIP.
+      { x: -13.65, z: -2.2, facing: 1.57 }, { x: -13.65, z: 1.4, facing: 1.57 },
+      { x: -11.9, z: -4.6, facing: -1.57, seated: true }, { x: -11.9, z: -0.4, facing: -1.57, seated: true }, { x: -11.9, z: 1.8, facing: -1.57, seated: true },
+      { x: -6.0, z: 8.2, facing: 3.14, seated: true }, { x: -0.5, z: 8.2, facing: 3.14, seated: true },
+      { x: 13.0, z: 3.8, facing: -1.57, seated: true }, { x: 13.0, z: 6.6, facing: -1.57, seated: true }, { x: 10.0, z: 5.2, facing: 2.4 },
+    ],
+  },
+  // The big clubs' VIP floor (14 × 10 m): the gold bar where you get seen, a grand piano nobody may touch, a pool table under the
+  // chandelier, gold booths and a chesterfield corner.
+  vipBig: {
+    id: "vipBig", w: 14, d: 10, wall: "#1E1730", wallAccent: "#F2A900", floor: "#2A2036", floorKind: "wood", dark: true,
+    clubLights: true,
+    items: [
+      { id: "screen", kind: "ledWall", x: 2.4, z: -4.9, rot: 0 },
+      { id: "pillar-1", kind: "clubPillar", x: -0.4, z: -1.6, rot: 0 },
+      { id: "pillar-2", kind: "clubPillar", x: 4.4, z: 2.4, rot: 0 },
+      { id: "stairs-down", kind: "stairs", x: -6.0, z: 3.9, rot: 0, use: { kind: "floor", to: 1 }, label: "↓", name: "Back down to the club" },
+      { id: "bar", kind: "bar", x: -2.5, z: -4.45, rot: 0, color: "#F2A900", use: { kind: "vip" }, label: "🥂", name: "Get seen in VIP" },
+      ...[-3.7, -2.9, -2.1, -1.3].map((x, i) => ({ id: `stool-${i + 1}`, kind: "barStool" as const, x, z: -3.6, rot: 0, model: "barStool" })),
+      { id: "piano", kind: "piano", x: 4.6, z: -3.9, rot: 0, model: "grandPiano" },
+      { id: "pool", kind: "poolTable", x: 2.0, z: 0.2, rot: 0, model: "poolTable" },
+      { id: "pool-light", kind: "chandelier", x: 2.0, z: 0.2, rot: 0, model: "chandelier" },
+      { id: "booth-1", kind: "booth", x: -6.4, z: -1.2, rot: 1, color: "#F2A900", model: "booth" },
+      { id: "table-1", kind: "coffeeTable", x: -5.3, z: -1.2, rot: 1, model: "marbleTable" },
+      { id: "booth-2", kind: "booth", x: 6.4, z: 1.6, rot: 3, color: "#F2A900", model: "booth" },
+      { id: "table-2", kind: "coffeeTable", x: 5.3, z: 1.6, rot: 1, model: "marbleTable" },
+      { id: "sofa", kind: "sofa", x: -1.5, z: 4.4, rot: 2, color: "#7A2E3A", use: sit, label: "Sit", model: "chesterfield" },
+      { id: "chair-1", kind: "armchair", x: -3.2, z: 3.0, rot: 1, color: "#1F6B4A", model: "velvetChair" },
+      { id: "chair-2", kind: "armchair", x: 0.2, z: 3.0, rot: 3, color: "#1F6B4A", model: "velvetChair" },
+      { id: "table", kind: "coffeeTable", x: -1.5, z: 3.0, rot: 0, model: "marbleTable" },
+      { id: "lamp", kind: "floorLamp", x: -4.3, z: 4.5, rot: 0, model: "arcLamp" },
+      { id: "plant-1", kind: "plant", x: 6.5, z: -4.5, rot: 0, model: "figTree" },
+      { id: "plant-2", kind: "plant", x: 6.5, z: 4.5, rot: 0, model: "monstera" },
+    ],
+    spawn: [-4.6, 3.9],
+    npcs: [
+      { x: -3.7, z: -3.6, facing: 3.14, seated: true }, { x: -2.1, z: -3.6, facing: 3.14, seated: true }, { x: -2.5, z: -4.95, facing: 0 },
+      { x: 2.0, z: 1.3, facing: 3.14 }, { x: 3.4, z: -0.6, facing: -1.6 }, { x: -6.0, z: -1.2, facing: 1.57, seated: true },
+      { x: 4.6, z: -2.9, facing: 3.14 }, { x: -1.5, z: 3.8, facing: 3.14 },
     ],
   },
   // VIP: gold booths, a private bar where you get seen, and a piano nobody is allowed to touch.
@@ -1568,6 +1694,7 @@ const VENUE_STAIRS: RoomItem = { id: "stairs-up", kind: "stairs", x: 0.7, z: -2.
 /** #19 clubs: stairs down to the restroom floor (floor 0) and up to VIP (floor 2), by room template. */
 const CLUB_STAIRS: Partial<Record<PlaceTemplateId, { down: [number, number, number]; up?: [number, number, number] }>> = {
   club: { down: [-3.05, -0.6, 1], up: [3.1, 0.9, 3] },
+  clubBig: { down: [-12.8, 6.6, 0], up: [10.6, 8.3, 1] },
   lounge: { down: [-1.7, 2.65, 1] },
 };
 
@@ -1594,7 +1721,29 @@ export interface RoomPlace {
  * Places rebuilt as big buildings (owner, Nov 20) whose ground floor isn't the template in the city seed: the code picks it,
  * so no migration is needed. Their other floors are TOWERS.
  */
-export const PLACE_GROUND: Record<string, PlaceTemplateId> = { "campaign-hq": "campaignGround" };
+export const PLACE_GROUND: Record<string, PlaceTemplateId> = {
+  "campaign-hq": "campaignGround",
+  // The big clubs (owner, Nov 20); their VIP floor is vipBig (placeFloor).
+  "velvet-static": "clubBig", "hellgate-hall": "clubBig", "the-sticky-floor": "clubBig", "discount-disco": "clubBig", "ultraviolet-society": "clubBig",
+};
+
+/**
+ * Each special place's signature piece (owner, Nov 20: "a special furniture piece for each of the 18 locations"): pieces added
+ * to its ground floor, and models swapped onto the shared template's own pieces (by item id).
+ */
+export const PLACE_SIGNATURE: Record<string, { add?: RoomItem[]; models?: Record<string, string> }> = {
+  // The clubs' feature corner is the lounge's left end (clubBig: x -11.5 to -9, z 4.5 to 9).
+  "velvet-static": { add: [{ id: "sig-banquette", kind: "booth", x: -10.2, z: 8.3, rot: 2, color: "#8B1A2B", model: "velvetBanquette", name: "The velvet booth" }] },
+  "hellgate-hall": { add: [{ id: "sig-kiln", kind: "booth", x: -10.2, z: 8.3, rot: 2, color: "#FF5A36", model: "kilnBar", name: "The kiln" }] },
+  "the-sticky-floor": { add: [{ id: "sig-jukebox", kind: "arcade", x: -10.2, z: 8.4, rot: 2, color: "#3DDC97", model: "jukebox", name: "The jukebox" }] },
+  "discount-disco": { models: Object.fromEntries(["floor", "floor-2", "floor-3", "floor-4", "floor-5", "floor-6"].map((id) => [id, "discoFloor"])) },
+  "ultraviolet-society": {
+    add: [
+      { id: "sig-pod-1", kind: "armchair", x: -10.8, z: 8.2, rot: 2, color: "#9B5CFF", model: "uvPod", name: "UV pod" },
+      { id: "sig-pod-2", kind: "armchair", x: -9.6, z: 8.2, rot: 2, color: "#9B5CFF", model: "uvPod", name: "UV pod" },
+    ],
+  },
+};
 
 export function placeRoom(place: RoomPlace & { tags?: string[] }, area?: PlaceTemplateId): RoomTemplate | null {
   // Club nights, campus events and exclusive parties are held here; elsewhere the dance floor is just a floor.
@@ -1631,6 +1780,10 @@ export function placeRoom(place: RoomPlace & { tags?: string[] }, area?: PlaceTe
   if (place.tags?.includes("exclusive_venue")) items.push(VENUE_STAIRS);
   // Tower offices: the ground floor's elevator doors.
   if (TOWERS[place.id] && !area) items.push(...towerElevators(base, place.id, 1));
+  // The place's signature piece (on its ground floor, not a campus area).
+  const sig = !area ? PLACE_SIGNATURE[place.id] : undefined;
+  if (sig?.models) items.forEach((it, i) => { if (sig.models![it.id]) items[i] = { ...it, model: sig.models![it.id] }; });
+  if (sig?.add) items.push(...sig.add);
   // #19 clubs: stairs down to the restroom, and up to VIP where there is one.
   const stairs = place.club && CLUB_STAIRS[base.id as PlaceTemplateId];
   if (stairs) {
@@ -1676,7 +1829,9 @@ export function placeFloor(place: RoomPlace & { tags?: string[] }, floor: number
   if (floor === 0) return place.club ? { ...PLACE_TEMPLATES.restroom, id: `restroom:${place.id}` } : null;
   if (floor !== 2) return null;
   if (place.tags?.includes("exclusive_venue")) return { ...PLACE_TEMPLATES.penthouse, id: `penthouse:${place.id}` };
-  return place.club?.vip ? { ...PLACE_TEMPLATES.vip, id: `vip:${place.id}` } : null;
+  if (!place.club?.vip) return null;
+  const vip = PLACE_GROUND[place.id] === "clubBig" ? PLACE_TEMPLATES.vipBig : PLACE_TEMPLATES.vip;
+  return { ...vip, id: `${vip.id}:${place.id}` };
 }
 
 /**
@@ -2067,7 +2222,7 @@ export const PLAYER_SLOTS: Record<PlaceTemplateId, number> = {
   restroom: 3, vip: 4, club: 6, cafe: 5, counter: 4, lounge: 5, store: 5, showroom: 7, campus: 6, lotto: 4,
   unisphere: 7, gantries: 7, office: 5, officeSmall: 3, officeBig: 7, towerLobby: 6, techFloor: 7, execFloor: 6, newsroom: 7, streamHouse: 6, streamFloor: 7, atelier: 6, tradingFloor: 7, lawOffice: 6, backRoom: 3, civic: 5, gym: 5, plaza: 7, penthouse: 10, radio: 4, broadcast: 5,
   hub: 7, hubGames: 7, hubLounge: 7, campusQuad: 7, campusLibrary: 5, campusDining: 6, campusGreek: 7,
-  campaignGround: 12, campaignWar: 10, campaignRoof: 14,
+  campaignGround: 12, campaignWar: 10, campaignRoof: 14, clubBig: 14, vipBig: 7,
 };
 /** The player figures a room holds (its party spots, or PLAYER_SLOTS by template; floors are "vip:place"). */
 export function playerSlots(t: RoomTemplate): number {

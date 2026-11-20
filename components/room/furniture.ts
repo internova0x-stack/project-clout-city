@@ -5,7 +5,7 @@
 
 import {
   BoxGeometry, CanvasTexture, Color, ConeGeometry, CylinderGeometry, DodecahedronGeometry, Group, Mesh,
-  MeshStandardMaterial, SRGBColorSpace, SphereGeometry, TorusGeometry, type BufferGeometry, type Material, type Object3D,
+  MeshStandardMaterial, RepeatWrapping, SRGBColorSpace, SphereGeometry, TorusGeometry, type BufferGeometry, type Material, type Object3D,
 } from "three";
 import { FURNITURE, type RoomItem } from "@/lib/rooms";
 import { placedModel } from "./models";
@@ -1137,6 +1137,95 @@ function buildBoxFurniture(item: RoomItem, k: Kit, opts: { night: boolean }): Bu
       box(w, 0.5, 0.2, c, 0, 0.38, -d / 2 + 0.1);
       box(0.95, 0.42, d - 0.9, c, w / 2 - 0.475, 0, 0.45);
       return { group: g, seatY: 0.5 };
+    }
+    case "djStage": {
+      // The DJ stage (owner, Nov 20, the references): a raised white deck with a lit front edge, the DJ's table of decks in the
+      // middle, steps at the sides and a CO2 cannon at each front corner that fires a white plume every few seconds.
+      const H = 0.6;
+      box(w, H, d, "#EDEAF2");
+      const edge = box(w + 0.02, 0.07, 0.06, glow("#FF2E88", 1.6), 0, H - 0.1, d / 2 + 0.01);
+      box(w + 0.02, 0.05, 0.05, glow("#8A5CFF", 1.4), 0, 0.06, d / 2 + 0.01);
+      box(2.6, 0.95, 0.8, "#14111A", 0, H, -0.35);
+      box(2.62, 0.05, 0.82, glow("#3DDC97", 1.0), 0, H + 0.95, -0.35);
+      for (const x of [-0.75, 0.75]) cyl(0.24, 0.24, 0.03, "#2A2A33", x, H + 1.0, -0.4, 16);
+      box(0.6, 0.04, 0.35, glow("#6CC4FF", 0.9), 0, H + 1.0, -0.4);
+      const plumes: Mesh[] = [];
+      for (const sx of [-1, 1]) {
+        cyl(0.12, 0.14, 0.5, "#2A2A33", sx * (w / 2 - 0.35), H, d / 2 - 0.3, 10);
+        const p = new Mesh(k.geo(new ConeGeometry(0.45, 2.4, 10, 1, true)), new MeshStandardMaterial({ color: "#FFFFFF", transparent: true, opacity: 0, emissive: "#FFFFFF", emissiveIntensity: 0.6, depthWrite: false }));
+        p.rotation.x = Math.PI; p.position.set(sx * (w / 2 - 0.35), H + 0.5 + 1.2, d / 2 - 0.3); g.add(p); plumes.push(p);
+      }
+      return {
+        group: g,
+        tick: (t) => {
+          (edge.material as MeshStandardMaterial).emissive.setHSL((t * 0.1) % 1, 0.9, 0.55);
+          const c = t % 7, on = c < 1.4 ? Math.sin((c / 1.4) * Math.PI) : 0;
+          plumes.forEach((p) => { (p.material as MeshStandardMaterial).opacity = on * 0.75; p.scale.setScalar(0.6 + on * 0.6); p.visible = on > 0.02; });
+        },
+      };
+    }
+    case "gogoPodium": {
+      // A round lit podium for a go-go dancer: a glowing ring at the base and the top, the column between pulsing with the beat.
+      const H = 0.9;
+      const col = cyl(0.5, 0.56, H, k.mat("#1B1626", { emissive: "#FF2E88", emissiveIntensity: 0.25 }).clone(), 0, 0, 0, 20);
+      const top = cyl(0.56, 0.56, 0.05, glow("#FFFFFF", 1.4), 0, H, 0, 20);
+      const ring = new Mesh(k.geo(new TorusGeometry(0.56, 0.03, 6, 28)), glow("#FF2E88", 1.8).clone());
+      ring.rotation.x = Math.PI / 2; ring.position.y = 0.05; g.add(ring);
+      return {
+        group: g,
+        tick: (t) => {
+          const hue = (t * 0.12 + item.x * 0.05) % 1;
+          (ring.material as MeshStandardMaterial).emissive.setHSL(hue, 0.9, 0.55);
+          (col.material as MeshStandardMaterial).emissive.setHSL(hue, 0.9, 0.3);
+          (top.material as MeshStandardMaterial).emissiveIntensity = 0.9 + (Math.floor(t * 2.2) % 2) * 0.6;
+        },
+      };
+    }
+    case "ledWall": {
+      // A video wall high on the wall: moving color bars and a pulsing glow, like the screens in the references.
+      const c = document.createElement("canvas");
+      c.width = 256; c.height = 64;
+      const x2 = c.getContext("2d")!;
+      for (let i = 0; i < 16; i++) {
+        x2.fillStyle = `hsl(${(i * 47) % 360} 90% ${i % 3 ? 45 : 65}%)`;
+        x2.fillRect(i * 16, 0, 16, 64);
+      }
+      x2.fillStyle = "rgba(0,0,0,0.35)";
+      for (let y = 0; y < 64; y += 4) x2.fillRect(0, y, 256, 1);
+      const tex = new CanvasTexture(c);
+      tex.colorSpace = SRGBColorSpace; tex.wrapS = RepeatWrapping;
+      const screenMat = new MeshStandardMaterial({ color: "#000000", map: tex, emissive: "#ffffff", emissiveMap: tex, emissiveIntensity: 1.1 });
+      box(w + 0.1, 1.5, 0.08, "#0B0910", 0, 1.15, 0);
+      const screen = box(w - 0.1, 1.38, 0.02, screenMat, 0, 1.21, 0.05);
+      return {
+        group: g,
+        tick: (t) => { tex.offset.x = (t * 0.06) % 1; tex.repeat.x = 0.6 + Math.sin(t * 0.4) * 0.15; (screen.material as MeshStandardMaterial).emissiveIntensity = 0.9 + Math.sin(t * 4.4) * 0.25; },
+      };
+    }
+    case "clubPillar": {
+      // A tall dark mirrored column with LED strips up its corners, color cycling.
+      box(w, 2.7, d, k.mat("#1A1622", { metalness: 0.6, roughness: 0.25 }));
+      const strips: Mesh[] = [];
+      for (const sx of [-1, 1]) for (const sz of [-1, 1]) strips.push(box(0.04, 2.6, 0.04, glow("#8A5CFF", 1.6).clone(), sx * (w / 2), 0.05, sz * (d / 2)));
+      return { group: g, tick: (t) => strips.forEach((m, i) => (m.material as MeshStandardMaterial).emissive.setHSL((t * 0.08 + i * 0.07 + item.z * 0.03) % 1, 0.9, 0.55)) };
+    }
+    case "velvetRope": {
+      // Brass stanchions and a red velvet rope: the VIP section's edge.
+      const brass = k.mat("#C9A227", { metalness: 0.6, roughness: 0.3 });
+      const n = 3;
+      for (let i = 0; i < n; i++) {
+        const x = -w / 2 + 0.1 + (i * (w - 0.2)) / (n - 1);
+        cyl(0.12, 0.14, 0.04, brass, x, 0, 0, 12);
+        cyl(0.025, 0.025, 0.9, brass, x, 0.04, 0, 8);
+        const knob = new Mesh(k.geo(new SphereGeometry(0.05, 8, 6)), brass); knob.position.set(x, 0.96, 0); g.add(knob);
+      }
+      const span = (w - 0.2) / (n - 1);
+      for (let i = 0; i < n - 1; i++) {
+        const x = -w / 2 + 0.1 + span * (i + 0.5);
+        const rope = new Mesh(k.geo(new TorusGeometry(span / 2, 0.025, 6, 16, Math.PI)), k.mat(color ?? "#9B1B30"));
+        rope.position.set(x, 0.88, 0); rope.rotation.z = Math.PI; rope.scale.y = 0.45; g.add(rope);
+      }
+      return { group: g };
     }
     case "chandelier": {
       // A brass ring of candle lights on a chain (the box-built stand-in).

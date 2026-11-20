@@ -3,7 +3,7 @@
 import { sceneFailed, sceneReady, watchContext } from "@/lib/loadStats";
 import { useEffect, useRef, useState } from "react";
 import {
-  ACESFilmicToneMapping, AmbientLight, BoxGeometry, CanvasTexture, Color, DirectionalLight, Fog, Group, HemisphereLight, Mesh,
+  ACESFilmicToneMapping, AmbientLight, BoxGeometry, CanvasTexture, CircleGeometry, Color, ConeGeometry, DoubleSide, MeshBasicMaterial, DirectionalLight, Fog, Group, HemisphereLight, Mesh,
   MeshStandardMaterial, OrthographicCamera, PCFSoftShadowMap, Plane, PlaneGeometry, PointLight, Raycaster, RepeatWrapping,
   RingGeometry, SRGBColorSpace, Scene, Sprite, SpriteMaterial, AdditiveBlending, Vector2, Vector3, WebGLRenderer, type Object3D,
 } from "three";
@@ -50,6 +50,8 @@ interface Actor {
   phase: number;
   /** New bodies: a long walk is a jog (the run clip, at RUN_SPEED). */
   run?: boolean;
+  /** Standing on something (a go-go dancer on her podium, the DJ on the stage). */
+  y?: number;
 }
 
 export interface Room3DProps {
@@ -260,6 +262,36 @@ export default function Room3D(props: Room3DProps) {
       }
     }
 
+    // The big clubs (owner, Nov 20, the references): a lighting rig over the floor, moving-head beams sweeping the room and
+    // colored pools of light running across the floor. Additive, unlit and cheap; fewer of them on low graphics.
+    const beams: { pivot: Group; mat: MeshBasicMaterial; seed: number }[] = [];
+    const pools: { m: Mesh; seed: number }[] = [];
+    if (template.clubLights) {
+      const n = lowGraphics() ? 4 : 8;
+      const spanX = template.w * 0.55, z0 = -template.d / 2 + 2.2;
+      const rig = new Mesh(kit.geo(new BoxGeometry(spanX + 1, 0.12, 0.12)), kit.mat("#2A2A33", { metalness: 0.6 }));
+      rig.position.set(0, 3.9, z0 + 1.2); scene.add(rig);
+      const rig2 = rig.clone(); rig2.position.z = z0 + 5.5; scene.add(rig2);
+      for (let i = 0; i < n; i++) {
+        const pivot = new Group();
+        const x = -spanX / 2 + (spanX * (i + 0.5)) / n;
+        pivot.position.set(x, 3.85, i % 2 ? z0 + 5.5 : z0 + 1.2);
+        const head = new Mesh(kit.geo(new BoxGeometry(0.22, 0.22, 0.22)), kit.mat("#14111A"));
+        pivot.add(head);
+        const mat = new MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.16, blending: AdditiveBlending, depthWrite: false, side: DoubleSide });
+        const cone = new Mesh(kit.geo(new ConeGeometry(0.75, 4.6, 16, 1, true)), mat);
+        cone.position.y = -2.3;
+        pivot.add(cone);
+        scene.add(pivot);
+        beams.push({ pivot, mat, seed: i * 1.37 });
+      }
+      for (let i = 0; i < (lowGraphics() ? 3 : 6); i++) {
+        const m = new Mesh(kit.geo(new CircleGeometry(1.1, 24)), new MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.32, blending: AdditiveBlending, depthWrite: false }));
+        m.rotation.x = -Math.PI / 2; m.position.y = 0.03; scene.add(m);
+        pools.push({ m, seed: i * 2.1 });
+      }
+    }
+
     // Room shell: floor, two cutaway walls, trim and a window or sign.
     const room = new Group();
     const floorTex = floorTexture(template, night, dream);
@@ -455,7 +487,7 @@ export default function Room3D(props: Room3DProps) {
     const me: Actor = { rig: new Group(), parts: null, x: template.spawn[0], z: template.spawn[1], heading: 0.6, mode: "idle", path: [], pending: null, phase: 0 };
     scene.add(me.rig);
     const npcs: Actor[] = (template.npcs ?? []).map((n, i) => {
-      const a: Actor = { rig: new Group(), parts: null, x: n.x, z: n.z, heading: n.facing, mode: n.seated ? "sit" : "idle", path: [], pending: null, phase: i * 1.7 };
+      const a: Actor = { rig: new Group(), parts: null, x: n.x, z: n.z, heading: n.facing, mode: n.seated ? "sit" : n.dance ? "dance" : "idle", path: [], pending: null, phase: i * 1.7, y: n.y };
       let seed = (template.id.length * 977 + i * 7919) % 2147483647;
       const rand = () => ((seed = (seed * 48271) % 2147483647) / 2147483647);
       a.parts = buildModelAvatar(randomLook(rand, STARTING_STYLES.map((s) => s.id)), { pedestal: false });
@@ -463,7 +495,8 @@ export default function Room3D(props: Room3DProps) {
       a.rig.add(a.parts.root);
       if (n.seated) poseSit(a.parts, 0.78);
       const onFloor = (template.items.find((it) => it.kind === "danceFloor"));
-      if (onFloor && Math.abs(n.x - onFloor.x) < 1.5 && Math.abs(n.z - onFloor.z) < 1.5) a.mode = "dance";
+      if (!n.seated && template.items.some((it) => it.kind === "danceFloor" && Math.abs(n.x - it.x) < 1.5 && Math.abs(n.z - it.z) < 1.5)) a.mode = "dance";
+      void onFloor;
       scene.add(a.rig);
       return a;
     });
@@ -745,6 +778,17 @@ export default function Room3D(props: Room3DProps) {
         for (const b of wld.built.values()) b.tick?.(t);
         motes.forEach((m, i) => { m.position.y = m.userData.baseY + Math.sin(t * 0.6 + i) * 0.12; m.rotation.y = t * 0.4 + i; });
         glowLights.forEach((l, i) => { l.position.x = Math.sin(t * 0.7 + i * 2.1) * 2.6; l.position.z = Math.cos(t * 0.5 + i) * 2; });
+        beams.forEach(({ pivot, mat, seed }) => {
+          pivot.rotation.z = Math.sin(t * 0.7 + seed) * 0.75;
+          pivot.rotation.x = Math.cos(t * 0.55 + seed * 1.3) * 0.45;
+          mat.color.setHSL((t * 0.05 + seed * 0.13) % 1, 1, 0.5);
+          mat.opacity = Math.floor(t * 2.2 + seed) % 4 === 0 ? 0.34 : 0.2;
+        });
+        pools.forEach(({ m, seed }) => {
+          m.position.x = Math.sin(t * 0.35 + seed) * template.w * 0.3;
+          m.position.z = Math.cos(t * 0.27 + seed * 1.7) * template.d * 0.3;
+          (m.material as MeshBasicMaterial).color.setHSL((t * 0.07 + seed * 0.2) % 1, 0.9, 0.55);
+        });
       }
       // Ring: the tap target while walking, or the selected piece while arranging.
       const { editing: ed, selected: sel } = editRef.current;
@@ -1315,7 +1359,7 @@ function stepActor(a: Actor, dt: number, t: number, reduce: boolean, onArrive?: 
 
 function poseActor(a: Actor, dt: number, t: number, reduce: boolean, onArrive?: (it: RoomItem | null) => void) {
   const p = a.parts;
-  a.rig.position.set(a.x, 0, a.z);
+  a.rig.position.set(a.x, a.y ?? 0, a.z);
   if (!p) return;
   if (a.mode === "walk") {
     const target = a.path[0];

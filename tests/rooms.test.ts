@@ -180,3 +180,20 @@ test("interior styles (owner, Oct 31): every styled place keeps a room that fits
   const min = styleRoom(PLACE_TEMPLATES.office, "minimalist");
   assert.ok(min.items.filter((i) => i.kind === "plant").length <= 1, "minimalist: one plant");
 });
+
+test("the big clubs (Nov 20): every club's floors fit, with its signature piece and stairs", () => {
+  for (const id of ["velvet-static", "hellgate-hall", "the-sticky-floor", "discount-disco", "ultraviolet-society"]) {
+    const p = PLACES.find((x) => x.id === id)!;
+    const ground = placeRoom(p)!;
+    assert.match(ground.id, /^clubBig:/, id);
+    assert.ok(ground.items.some((i) => i.id.startsWith("sig-") || i.model === "discoFloor"), `${id} has its signature piece`);
+    assert.ok(ground.items.some((i) => i.use?.kind === "floor" && i.use.to === 0), `${id} has stairs to the restroom`);
+    const floors = [ground, placeFloor(p, 0), placeFloor(p, 2)].filter((t): t is RoomTemplate => !!t);
+    if (p.club?.vip) assert.match(placeFloor(p, 2)!.id, /^vipBig:/);
+    for (const t of floors) {
+      for (const i of t.items) assert.ok(placementOk(t, t.items, i), `${t.id}/${i.id}`);
+      const grid = makeGrid(t, t.items);
+      for (const i of t.items.filter((x) => x.use)) assert.ok(findPath(grid, t.spawn, useSpot(i)).length > 0, `${t.id}/${i.id} can be reached`);
+    }
+  }
+});

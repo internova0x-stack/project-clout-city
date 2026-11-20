@@ -442,6 +442,11 @@ components live in `app/globals.css`.
   `width`, `height` or the footprint, `turn` quarter turns, `layFlat`, `hangTop`. Add one with `node scripts/models.mjs <in.glb> <name>.glb`
   (simplified, meshopt-compressed, WebP textures stepped down until under 80 KB; the loader has the meshopt decoder). Every place's
   signature piece is listed there by place (fire engine, water tower, talk-show set…); `/preview/models?pick=a,b` checks them.
+  The big clubs (owner, Nov 20: "a bar, a stage with go-go dancers, a vip, lighting, a bigger floor plan", with reference photos): all five
+  clubs' ground floor is `clubBig` (28 × 18 m, `PLACE_GROUND`): the DJ stage (`djStage`: CO2 cannons) under a video wall (`ledWall`),
+  go-go dancers on the stage and on lit podiums (`gogoPodium`; template npcs take `y` and `dance`), lit pillars, six dance-floor tiles,
+  the long bar down the left wall, the lounge, and the roped-off VIP section (`velvetRope`) with the stairs to `vipBig` (14 × 10 m);
+  `clubLights` adds the moving beams and floor pools (Room3D). `PLACE_SIGNATURE` adds each place's signature piece (or swaps models).
 - Rate limits (migration 0126, owner Oct 27): PostgREST's pre-request hook (`pgrst.db_pre_request` = `check_request()`) counts each
   signed-in player's writes per minute (`rate_counters`, `rate_hit`): 240 in all, plus buckets for guesses (hunt answers, exams,
   gossip, name checks: 20), reviewed posts (10), chat (30) and checkouts (10). Reads, signed-out requests and the service role are

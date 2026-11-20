@@ -57,10 +57,10 @@ export const MODELS: Record<string, ModelInfo> = {
   sofa: { file: "sofa.glb", width: 2.2, source: "Higgsfield (Tripo), generated Nov 20" },
   monstera: { file: "monstera.glb", height: 1.4, source: "Higgsfield (Tripo), generated Nov 20" },
   // Signature pieces, one per special place (owner, Nov 20: "a special furniture piece for each of the 18 locations").
-  velvetBanquette: { file: "velvet-banquette.glb", width: 2.6, source: "Higgsfield (Tripo), generated Nov 20" }, // Velvet Static
-  kilnBar: { file: "kiln-bar.glb", width: 3.0, source: "Higgsfield (Tripo), generated Nov 20" }, // The Kiln
+  velvetBanquette: { file: "velvet-banquette.glb", width: 2.3, source: "Higgsfield (Tripo), generated Nov 20" }, // Velvet Static
+  kilnBar: { file: "kiln-bar.glb", width: 2.4, source: "Higgsfield (Tripo), generated Nov 20" }, // The Kiln
   jukebox: { file: "jukebox.glb", height: 1.6, source: "Higgsfield (Tripo), generated Nov 20" }, // The Sticky Floor
-  discoFloor: { file: "disco-floor.glb", width: 4.0, source: "Higgsfield (Tripo), generated Nov 20" }, // Discount Disco
+  discoFloor: { file: "disco-floor.glb", width: 3.0, source: "Higgsfield (Tripo), generated Nov 20" }, // Discount Disco
   uvPod: { file: "uv-pod.glb", height: 1.6, source: "Higgsfield (Tripo), generated Nov 20" }, // Ultraviolet Society
   firePit: { file: "fire-pit.glb", width: 3.0, source: "Higgsfield (Tripo), generated Nov 20" }, // Altitude 718 Rooftop
   cabana: { file: "cabana.glb", width: 2.4, source: "Higgsfield (Tripo), generated Nov 20" }, // Ditmars Heights Rooftop
