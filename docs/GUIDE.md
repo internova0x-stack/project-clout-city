@@ -21,6 +21,12 @@ game_settings 'guide' to `guideSettings()` (tests/guide.test.ts compares it with
 step's `check` is one of: `seen` (GameShell calls `guideSeenMark` when the screen opens), `ledger` kinds, `gossip`,
 `events`, `streak`. `targets` are CSS selectors (or `text:<button words>`) for the glow, tried in order.
 
+## Starter Week
+The Guide replaces Starter Week for new players (owner, Nov 20). When migration 0170 runs, game_settings 'starter' gets
+`until`: accounts made after it never start Starter Week; players already in their week finish it (a row in the Guide app).
+Chapter 1's finish pays Starter Week's prize instead: C$1,000 and the violet rug. Businesses, Jobs and Campaign still wait
+until day 3, counted from the account's first New York day.
+
 ## Optional steps
 Steps some players can't or won't do (dating, gifts, together plans, holding, Pablo, the Gala, Clout TV, the Mayor, every
 Big play) are `optional: true`: they pay when done, the chapter doesn't wait for them, and their tip card has "Not for me:

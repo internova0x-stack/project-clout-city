@@ -2123,7 +2123,9 @@ export function GameShell({
   const [starter, setStarter] = useState<StarterState | null>(null);
   const starterLoading = useRef(false);
   /** Rank 2's apps wait until Starter Week's day 3 (owner, Nov 5: day 1 is just the city). */
-  const starterHold = !!starter?.active && starterDay(starter) < STARTER_UNLOCK_DAY;
+  // Businesses, Jobs and Campaign wait for day 3: Starter Week's day, or, for players who joined after the Guide replaced it,
+  // the account's own New York day (the Guide's state carries it).
+  const starterHold = starter?.active ? starterDay(starter) < STARTER_UNLOCK_DAY : !!guideRaw && guideRaw.day < STARTER_UNLOCK_DAY;
   // Null or over once: never asked again this session (older players, hidden, finished, or past its days).
   const starterOver = useRef(false);
   const loadStarter = useCallback(async () => {
@@ -2166,7 +2168,8 @@ export function GameShell({
   // Nov 6: inside, never from the card outside).
   const atPark = inside?.id === BARKSLEY.placeId;
   useEffect(() => {
-    if (atPark && starter && !barksleyMet() && !barksley) setBarksley({ first: true });
+    // The first visit meets him: during Starter Week, or while the Guide (which replaced it) still has his step open.
+    if (atPark && (starter || (guideS && !guideS.paid.includes("1.13"))) && !barksleyMet() && !barksley) setBarksley({ first: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [atPark, !!starter]);
   // Moral Choices (migration 0131): the server decides whether a card turns up after something happened; consequences
@@ -2682,6 +2685,7 @@ export function GameShell({
               ...(ch.reward.cash ? [{ tone: "cash" as const, text: `+C$${ch.reward.cash.toLocaleString("en-US")}` }] : []),
               ...(ch.reward.clout ? [{ tone: "clout" as const, text: `+${ch.reward.clout} 🔥` }] : []),
               { text: `🏅 ${ch.badge}` },
+              ...(ch.item ? [{ text: `🛋️ ${ch.item.name}` }] : []),
             ],
             lola: after?.live ? `Next up: ${after.title}.` : "More of the Guide is on its way. Keep the streak going in the meantime.",
           });

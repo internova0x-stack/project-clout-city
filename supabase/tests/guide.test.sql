@@ -53,10 +53,16 @@ select public.guide_seen(s) from unnest(array['1.2', '1.3', '1.4', '1.9', '1.10'
 select public.guide_claim(s) from unnest(array['1.2', '1.3', '1.4', '1.5', '1.7', '1.8', '1.9', '1.10', '1.11', '1.12']) s;
 select pg_temp.assert(pg_temp.paid('guide_chapter', pg_temp.u(11), 'cash') = 0, 'no chapter reward with a step left');
 select pg_temp.assert((public.guide_claim('1.13') ->> 'chapter')::int = 1, 'the last step finishes the chapter');
-select pg_temp.assert(pg_temp.paid('guide_chapter', pg_temp.u(11), 'cash') = 500, 'chapter pays C$500');
+select pg_temp.assert(pg_temp.paid('guide_chapter', pg_temp.u(11), 'cash') = 1000, 'chapter 1 pays C$1,000 (Starter Week''s finish)');
 select pg_temp.assert(public.guide_state() -> 'chapters' = '[1]', 'chapter 1 paid');
 reset role;
 select pg_temp.assert(exists (select 1 from public.player_badges where player_id = pg_temp.u(11) and badge_id = 'guide-1'), 'the Off the Bus badge');
+select pg_temp.assert(exists (select 1 from public.player_items where player_id = pg_temp.u(11) and sku = 'home-rug-violet' and acquired = 'earned'), 'and the violet rug');
+-- Starter Week is closed to accounts made after the Guide arrived; older ones still have it.
+select pg_temp.assert(not public.starter_active(pg_temp.u(11)), 'a new account never starts Starter Week');
+update public.game_settings set value = value || jsonb_build_object('until', now() + interval '1 hour') where key = 'starter';
+select pg_temp.assert(public.starter_active(pg_temp.u(11)), 'an account from before the cut-off still has it');
+update public.game_settings set value = value || jsonb_build_object('until', now()) where key = 'starter';
 select pg_temp.assert(pg_temp.paid('guide', pg_temp.u(11), 'cash') = 50 + 150 + 50 + 150, 'step cash: 1.2, 1.6, 1.9, 1.13');
 select pg_temp.assert(pg_temp.paid('guide', pg_temp.u(11), 'clout') = 15 + 15 + 15 + 20 + 20 + 30 + 15 + 30 + 30, 'step clout');
 
@@ -75,7 +81,7 @@ select pg_temp.assert(public.guide_state() -> 'ready' @> '["2.1", "2.2", "2.3", 
 select public.guide_claim(s) from unnest(array['2.1', '2.2', '2.3', '2.4', '2.5', '2.6']) s;
 select pg_temp.assert(public.guide_state() -> 'chapters' @> '[1, 2]', 'chapter 2 paid');
 reset role;
-select pg_temp.assert(pg_temp.paid('guide_chapter', pg_temp.u(11), 'cash') = 500 + 300, 'chapter 2 pays C$300');
+select pg_temp.assert(pg_temp.paid('guide_chapter', pg_temp.u(11), 'cash') = 1000 + 300, 'chapter 2 pays C$300');
 select pg_temp.assert(exists (select 1 from public.player_badges where player_id = pg_temp.u(11) and badge_id = 'guide-2'), 'Adulting (Allegedly)');
 
 -- ---- Chapter 3: gigs, shifts, a career, a business and the Jobs board ----

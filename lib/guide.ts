@@ -68,6 +68,8 @@ export interface GuideChapter {
   badge: string;
   badgeId: string;
   reward: { cash?: number; clout?: number };
+  /** A reward-only piece given with the chapter (acquired 'earned', value 0). */
+  item?: { sku: string; name: string };
   /** False until its steps are written: shown as "Coming soon". */
   live: boolean;
   /** Finished after any this many of its steps (Big plays: three); otherwise every step that isn't optional. */
@@ -75,7 +77,9 @@ export interface GuideChapter {
 }
 
 export const CHAPTERS: GuideChapter[] = [
-  { n: 1, title: "Arrival", day: 1, badge: "Off the Bus", badgeId: "guide-1", reward: { cash: 500 }, live: true },
+  // Owner, Nov 20 ("go with your recommendation"): the Guide replaces Starter Week for new players, so Chapter 1's finish takes
+  // over Starter Week's: C$1,000 and the violet rug.
+  { n: 1, title: "Arrival", day: 1, badge: "Off the Bus", badgeId: "guide-1", reward: { cash: 1000 }, item: { sku: "home-rug-violet", name: "the violet rug" }, live: true },
   { n: 2, title: "Looking after yourself", day: 1, badge: "Adulting (Allegedly)", badgeId: "guide-2", reward: { cash: 300 }, live: true },
   { n: 3, title: "Money", day: 2, badge: "Bag Secured", badgeId: "guide-3", reward: { cash: 500 }, live: true },
   { n: 4, title: "More clout", day: 2, badge: "Locally Relevant", badgeId: "guide-4", reward: { clout: 150 }, live: true },
@@ -868,7 +872,7 @@ export function guideSettings() {
   return {
     steps: Object.fromEntries(STEPS.map((s) => [s.id, { chapter: s.chapter, check: s.check, cash: s.reward.cash ?? 0, clout: s.reward.clout ?? 0 }])),
     chapters: Object.fromEntries(CHAPTERS.filter((c) => c.live).map((c) => [String(c.n), {
-      badge: c.badgeId, cash: c.reward.cash ?? 0, clout: c.reward.clout ?? 0,
+      badge: c.badgeId, cash: c.reward.cash ?? 0, clout: c.reward.clout ?? 0, ...(c.item ? { item: c.item.sku } : {}),
       ...(c.need ? { need: c.need, all: chapterSteps(c.n).map((s) => s.id) } : { steps: chapterSteps(c.n).filter((s) => !s.optional).map((s) => s.id) }),
     }])),
   };

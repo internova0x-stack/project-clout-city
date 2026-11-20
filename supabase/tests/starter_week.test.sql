@@ -12,6 +12,9 @@ create function pg_temp.u(n int) returns uuid language sql as $$ select ('000000
 create function pg_temp.paid(k text, p uuid) returns bigint language sql security definer as
   $$ select coalesce(sum(amount), 0) from public.ledger where kind = k and player_id = p $$;
 
+-- Migration 0170 closed Starter Week to accounts made after the Guide arrived; these test accounts stand for players who
+-- joined before it (supabase/tests/guide.test.sql checks the cut-off).
+update public.game_settings set value = value - 'until' where key = 'starter';
 insert into auth.users (id) select pg_temp.u(n) from generate_series(11, 13) n;
 set role authenticated;
 do $$

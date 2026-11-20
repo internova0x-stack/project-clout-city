@@ -167,7 +167,7 @@ export function GuideApp({ state, current, onPlay, starter }: {
                 })}
               </ul>
             )}
-            {c.live && <span className="meta">{c.need ? `Any ${c.need} of these finish it` : "Finish it"}: the &quot;{c.badge}&quot; badge and {rewardText(c.reward)}.{state.chapters.includes(c.n) ? " ✓ Collected." : ""}</span>}
+            {c.live && <span className="meta">{c.need ? `Any ${c.need} of these finish it` : "Finish it"}: the &quot;{c.badge}&quot; badge, {rewardText(c.reward)}{c.item ? ` and ${c.item.name}` : ""}.{state.chapters.includes(c.n) ? " ✓ Collected." : ""}</span>}
           </section>
         );
       })}

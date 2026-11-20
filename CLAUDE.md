@@ -894,7 +894,10 @@ components live in `app/globals.css`.
   `guide_state()`, `guide_seen(step)` (seen steps, marked by GameShell `guideSeenMark` when the screen opens), `guide_claim(step)`
   (once, ledger 'guide'; the chapter's last step pays ledger 'guide_chapter' and badge 'guide-<n>'). GameShell checks every 20 s and
   after city changes, pays only when nothing covers the screen (`guideClear`), and pops the next tip once per step per device
-  (`firstTime('guide-tip')`). The pill (`GuidePill`) replaces Starter Week's pill (owner, Nov 20: "hide the starter week pill"; it shows only without the Guide); there's no Guide tab in Tasks (owner, Nov 20: "Remove the guide tab from tasks"). The Phone's Guide app (owner, Nov 20: "Create an app for the guide"; 🧭 after Messages, `GuideApp`, `/home?open=guide`): Next up with Show me how, Starter Week's missions row while it runs, then every chapter and step (any open step, a skipped optional one included, plays from there).
+  (`firstTime('guide-tip')`). The Guide replaces Starter Week for new players (owner, Nov 20: "go with your recommendation", after the overlap table): migration
+  0170 sets game_settings 'starter' `until` and `starter_active` refuses accounts made after it (those in their week finish it);
+  Chapter 1's finish takes Starter Week's C$1,000 and the violet rug (`GuideChapter.item`, given acquired 'earned' at 0); the day-3 hold
+  on Businesses, Jobs and Campaign runs on the account's New York day (`guideRaw.day`) when there's no Starter Week. The pill (`GuidePill`) replaces Starter Week's pill (owner, Nov 20: "hide the starter week pill"; it shows only without the Guide); there's no Guide tab in Tasks (owner, Nov 20: "Remove the guide tab from tasks"). The Phone's Guide app (owner, Nov 20: "Create an app for the guide"; 🧭 after Messages, `GuideApp`, `/home?open=guide`): Next up with Show me how, Starter Week's missions row while it runs, then every chapter and step (any open step, a skipped optional one included, plays from there).
   `?guide=new|mid|done` in the preview (lib/guideSim.ts: a checked step counts done 6 s after its "Show me").
 - Build mode (migration 0169, owner Nov 20: "Move walls, add rooms, landscapes"; "Renters can move walls"; contractor "Instant"):
   players.home_plan (lib/homeBuild.ts `HomePlan`, keyed to the home it was built in; moving clears it) holds each floor's rooms
