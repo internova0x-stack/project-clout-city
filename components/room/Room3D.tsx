@@ -1561,10 +1561,10 @@ function canvas(w: number, h: number) {
 function floorTexture(t: RoomTemplate, night: boolean, dream = false): CanvasTexture {
   const px = 128;
   const [c, g] = canvas(px * t.w, px * t.d);
-  // Tiled floors are off-white tiles (owner, Nov 20: "I don't like the tiled floors. Make the floor off-white tiles"), except in
-  // dark rooms; a checker is plain tiles too.
+  // Tiled floors are plain white (owner, Nov 20: "Make the floor off-white tiles", then, after a side-by-side, "go with white"):
+  // one smooth white surface, no tile lines, except in dark rooms; a checker is the same.
   const tiled = (t.floorKind === "tile" || t.floorKind === "checker") && !t.dark;
-  const base = new Color(tiled ? "#F3EFE7" : t.floor);
+  const base = new Color(tiled ? "#FFFFFF" : t.floor);
   if (night && !t.dark) base.multiplyScalar(0.8);
   g.fillStyle = base.getStyle();
   g.fillRect(0, 0, c.width, c.height);
@@ -1578,6 +1578,8 @@ function floorTexture(t: RoomTemplate, night: boolean, dream = false): CanvasTex
       g.fillStyle = `rgba(255,255,255,${0.03 + ((y / plank) % 4) * 0.015})`;
       g.fillRect(0, y + 2, c.width, plank - 2);
     }
+  } else if (tiled) {
+    // Plain white: nothing drawn on it.
   } else if (t.floorKind === "tile" || t.floorKind === "checker") {
     const s = px * 0.6;
     let seed = 17;
