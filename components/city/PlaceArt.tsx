@@ -132,7 +132,7 @@ function SignLeft({ b, text, color, ink, v, night }: { b: BoxSpec; text: string;
 // Color themes (owner, Oct 13): deep blue gradients, red, yellow, green, purple, brown, grey,
 // off-white and cream, spread across the places so neighbors never look alike. A theme sets
 // the sky, the island and the main building color; the place's palette keeps its accents.
-type ThemeName = "deepBlue" | "red" | "yellow" | "green" | "purple" | "brown" | "grey" | "offWhite" | "cream";
+type ThemeName = "deepBlue" | "red" | "yellow" | "green" | "purple" | "brown" | "grey" | "offWhite" | "cream" | "blueWhite";
 const THEMES: Record<ThemeName, { main: string; sky: [string, string, string]; isle: string }> = {
   deepBlue: { main: "#2E4FB8", sky: ["#D6E4FF", "#7FA2EE", "#2F4FA8"], isle: "#C9D8F5" },
   red: { main: "#D93A2F", sky: ["#FFE6DE", "#FFA898", "#D9584A"], isle: "#F6D2CA" },
@@ -143,13 +143,15 @@ const THEMES: Record<ThemeName, { main: string; sky: [string, string, string]; i
   grey: { main: "#6B6F7A", sky: ["#F0F1F4", "#C4C8D2", "#7C8291"], isle: "#DADDE3" },
   offWhite: { main: "#F4F1EA", sky: ["#FFFFFF", "#E9EDF3", "#B9C3D3"], isle: "#EFEDE8" },
   cream: { main: "#F2E3C4", sky: ["#FFF9EC", "#F4E2BC", "#D8B98A"], isle: "#F3E6CB" },
+  // St. Johnsons (owner, Nov 20: "white and blue").
+  blueWhite: { main: "#2B5BA8", sky: ["#FFFFFF", "#DCE7F7", "#8FB0E0"], isle: "#E8EEF8" },
 };
 const PLACE_THEME: Record<string, ThemeName> = {
   "velvet-static": "purple", "grind-and-gossip": "brown", "lucky-seven-deli": "red", "altitude-718": "deepBlue",
   "flushing-meadows": "green", "pedal-pushers": "yellow", "skybridge-tower": "grey", "skyline-pier": "deepBlue",
   "hunters-pier": "offWhite", "rockaway-diner": "red", "radiant-harbor": "cream", "pressed-iron-gym": "grey",
   unisphere: "deepBlue", "gantry-plaza": "brown", "low-light-lounge": "purple", "thread-count": "offWhite", "fifs-furniture": "yellow",
-  "boulevard-motors": "red", "st-johnsons": "red", "queensborough-u": "deepBlue",
+  "boulevard-motors": "red", "st-johnsons": "blueWhite", "queensborough-u": "deepBlue",
   "ditmars-deli": "green", "two-bros-pizza": "red", "neon-spoon": "deepBlue", "up-on-thirty": "purple",
   "steinway-fresh": "cream", "hellgate-hall": "red", "triborough-works": "grey", "ditmars-library": "brown",
   "precinct-114-half": "deepBlue", "engine-7": "red", "astoria-cc": "green", "harmony-chapel": "offWhite",
@@ -783,13 +785,13 @@ function Scene({ place, night }: { place: Place; night: boolean }) {
       );
     }
     case "st-johnsons": {
-      // A campus around a lawn: the red brick chapel hall with its cupola, a dorm and the library.
+      // A campus around a lawn: the white stone hall with its cupola, a dorm and the library, in the school's white and blue.
       const lawn: BoxSpec = { ...isle, color: night ? "#5E8F6A" : "#BFE3B4" };
-      const brick = mixHex(a, "#8A3A2E", 0.35);
+      const brick = "#F2F5FA";
       const hall: BoxSpec = { x: -5.6, y: -5.6, z: 0, w: 4.6, d: 4, h: 4.4, color: brick };
-      const trim: BoxSpec = { x: -5.75, y: -5.75, z: 4.4, w: 4.9, d: 4.3, h: 0.3, color: "#F2E6D8" };
+      const trim: BoxSpec = { x: -5.75, y: -5.75, z: 4.4, w: 4.9, d: 4.3, h: 0.3, color: a };
       const drum: BoxSpec = { x: -4.2, y: -4.5, z: 4.7, w: 1.8, d: 1.8, h: 1.4, color: "#F4EEE4" };
-      const dorm: BoxSpec = { x: 0.6, y: -5.6, z: 0, w: 4.8, d: 3, h: 3.4, color: mixHex(brick, "#C9A08A", 0.25) };
+      const dorm: BoxSpec = { x: 0.6, y: -5.6, z: 0, w: 4.8, d: 3, h: 3.4, color: mixHex(brick, a, 0.25) };
       const library: BoxSpec = { x: -5.6, y: 0.8, z: 0, w: 3, d: 4.6, h: 2.8, color: mixHex(b, "#D9C4A0", 0.3) };
       const steps: BoxSpec = { x: -4.2, y: -1.6, z: 0, w: 1.8, d: 0.9, h: 0.35, color: "#E8E2D6" };
       const path1: BoxSpec = { x: -2.4, y: -1, z: 0, w: 1.2, d: 6.8, h: 0.05, color: night ? "#B8A8D8" : "#EADFCC" };

@@ -6,7 +6,7 @@
 export type CampusId = "st-johnsons" | "queensborough-u";
 
 export const CAMPUSES: readonly { id: CampusId; name: string; short: string; emoji: string; dorm: string; mascot: string }[] = [
-  { id: "st-johnsons", name: "St. Johnsons University", short: "St. Johnsons", emoji: "🎓", dorm: "sj_dorm", mascot: "the Red Pigeons" },
+  { id: "st-johnsons", name: "St. Johnsons University", short: "St. Johnsons", emoji: "🎓", dorm: "sj_dorm", mascot: "the Blue Pigeons" },
   { id: "queensborough-u", name: "Queensborough University", short: "Queensborough", emoji: "🏛️", dorm: "qu_dorm", mascot: "the Fighting Bagels" },
 ];
 

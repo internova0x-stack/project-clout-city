@@ -573,7 +573,7 @@ export const PLACES: Place[] = [
   // ---- The parody universities (brought forward from location wave 4): invented campuses, no real names ----
   {
     id: "st-johnsons", name: "St. Johnsons University", emoji: "🎓", category: "campus", neighborhood: "Jamaica",
-    at: [40.7224, -73.7949], depth: "full", template: "campus", palette: ["#C8102E", "#F2E6D8", "#1F2A44"],
+    at: [40.7224, -73.7949], depth: "full", template: "campus", palette: ["#2B5BA8", "#FFFFFF", "#1F2A44"],
     tags: ["university", "campus"],
     lore: "Red brick, a chapel nobody can find and a basketball team that matters more than the library. Half the students are here on scholarship; the other half are here on a parking permit.",
     actions: [

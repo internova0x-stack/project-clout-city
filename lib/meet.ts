@@ -50,7 +50,7 @@ const CAMPUS_LINES = [
   "Is this seat taken?",
   "Did you do the reading? Please say no.",
   "Want to form a study group? Mostly snacks, some studying.",
-  "Red Pigeons or Fighting Bagels? Choose carefully.",
+  "Blue Pigeons or Fighting Bagels? Choose carefully.",
   "Be honest: did you make it to the 8 AM?",
   "Library or the Quad: where does the real studying happen?",
 ];

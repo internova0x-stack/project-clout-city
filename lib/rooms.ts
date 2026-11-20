@@ -522,7 +522,7 @@ export const HOME_TEMPLATES: Record<string, RoomTemplate> = {
   jackson_heights_1br: jacksonHeights,
   lic_highrise: licHighrise,
   // v0.15 Campus: the dorm rooms, in each school's colors (the roommate's side arrives with the campus screens).
-  sj_dorm: { id: "sj_dorm", w: 5.4, d: 5.2, wall: "#F2E6D8", wallAccent: "#C8102E", floor: "#B08A5E", floorKind: "wood", window: true, items: studioItems(1), spawn: [0.6, 2.3] },
+  sj_dorm: { id: "sj_dorm", w: 5.4, d: 5.2, wall: "#F7F8FC", wallAccent: "#2B5BA8", floor: "#B08A5E", floorKind: "wood", window: true, items: studioItems(1), spawn: [0.6, 2.3] },
   qu_dorm: { id: "qu_dorm", w: 5.4, d: 5.2, wall: "#E8E2D0", wallAccent: "#3B6FB6", floor: "#B08A5E", floorKind: "wood", window: true, items: studioItems(1), spawn: [0.6, 2.3] },
   "house-astoria-townhouse": astoriaTownhouse,
   "house-lic-penthouse": licPenthouse,
@@ -596,8 +596,8 @@ export const PLACE_TEMPLATES: Record<PlaceTemplateId, RoomTemplate> = {
   },
   // The Lecture Hall: rows of desks either side of the aisle, facing the lectern, the chalkboard and the projector screen.
   lectureHall: {
-    id: "lectureHall", w: 20, d: 14, wall: "#F2EBDD", wallAccent: "#7A5A3A", floor: "#C9A57A", floorKind: "wood", window: true, spotlights: true,
-    rooms: [{ name: "Front", x0: -10, z0: -7, x1: 10, z1: -3.6, floor: "#E2D6C2", floorKind: "tile" }],
+    id: "lectureHall", w: 20, d: 14, wall: "#F7F8FC", wallAccent: "#2B5BA8", floor: "#C9A57A", floorKind: "wood", window: true, spotlights: true,
+    rooms: [{ name: "Front", x0: -10, z0: -7, x1: 10, z1: -3.6, floor: "#E6ECF5", floorKind: "tile" }],
     items: [
       { id: "board", kind: "chalkboard", x: -4.0, z: -6.85, rot: 0, use: { kind: "events" }, label: "Campus events" },
       { id: "projector", kind: "bigScreen", x: 3.6, z: -6.9, rot: 0 },
@@ -622,7 +622,7 @@ export const PLACE_TEMPLATES: Record<PlaceTemplateId, RoomTemplate> = {
   // The Library: tall stacks in rows on the left, reading tables with green lamps on the right, the librarian's desk, the exam
   // table and a reading nook.
   libraryBig: {
-    id: "libraryBig", w: 20, d: 14, wall: "#EFE6D6", wallAccent: "#6B4A2E", floor: "#B48A5E", floorKind: "wood", window: true, spotlights: true,
+    id: "libraryBig", w: 20, d: 14, wall: "#F7F8FC", wallAccent: "#2B5BA8", floor: "#B48A5E", floorKind: "wood", window: true, spotlights: true,
     rooms: [{ name: "Reading room", x0: 0, z0: -7, x1: 10, z1: 7, floor: "#C9A57A", floorKind: "wood" }],
     items: [
       ...[-6.6, -3.8, -1.0].flatMap((z) => [-8.6, -7.6, -6.6, -4.4, -3.4, -2.4].map((x, i) => ({ id: `stack-${z}-${i}`, kind: "bookshelf" as const, x, z, rot: 0, model: "bookshelf" }))),
@@ -650,7 +650,7 @@ export const PLACE_TEMPLATES: Record<PlaceTemplateId, RoomTemplate> = {
   },
   // The Dining Hall: the tray line and the menu along the back, round marble tables and long tables, a drinks corner.
   diningBig: {
-    id: "diningBig", w: 20, d: 14, wall: "#F3EBDD", wallAccent: "#C8102E", floor: "#E2DACB", floorKind: "checker", window: true, alwaysLit: true, spotlights: true,
+    id: "diningBig", w: 20, d: 14, wall: "#F7F8FC", wallAccent: "#2B5BA8", floor: "#E8ECF2", floorKind: "checker", window: true, alwaysLit: true, spotlights: true,
     items: [
       { id: "line", kind: "cafeCounter", x: -5.6, z: -6.4, rot: 0, use: { kind: "campus", tab: "dining" }, label: "Grab a tray" },
       { id: "line-2", kind: "cafeCounter", x: -2.6, z: -6.4, rot: 0 },
