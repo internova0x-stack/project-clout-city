@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { rewardText, type GuideStep } from "@/lib/guide";
+import { CHAPTERS, chapterOpen, chapterSteps, rewardText, stepOpen, type GuideState, type GuideStep } from "@/lib/guide";
 
 // The Guide (migration 0170, lib/guide.ts; owner Nov 20). The pill under "Invite your Crew" names the one recommended step;
 // GuideFlow plays it: Lola's tip, the explainer cards, then "Show me": a glow on the real button while the player does it.
-// GameShell sees it done (guide_state) and pays it (guide_claim) with a celebration banner.
+// GameShell sees it done (guide_state) and pays it (guide_claim) with a celebration banner. GuideApp is the Phone's Guide app
+// (owner, Nov 20: "Create an app for the guide"): every chapter and step, and the way back to a step put off or skipped.
 
 const FACE = { lola: "/cast/lola-lowdown.webp", barksley: "/cast/sir-barksley.webp" } as const;
 const WHO = { lola: "Lola says", barksley: "Sir Barksley (via Dmitri)" } as const;
@@ -102,5 +103,74 @@ export function GuideFlow({ step, phase, onPhase, onClose, onSkip }: {
         <button className="guide-x" onClick={onClose} aria-label="Close the hint">✕</button>
       </div>
     </>
+  );
+}
+
+/** The Phone's Guide app: what's next, Starter Week while it runs, then every chapter with its steps. Any open step can be
+ *  played from here, a skipped optional one included. */
+export function GuideApp({ state, current, onPlay, starter }: {
+  state: GuideState; current: GuideStep | null; onPlay: (s: GuideStep) => void;
+  starter?: { done: number; total: number; onOpen: () => void };
+}) {
+  const live = CHAPTERS.filter((c) => c.live);
+  const done = live.filter((c) => state.chapters.includes(c.n)).length;
+  return (
+    <div className="stack-12">
+      {current ? (
+        <div className="guide-next">
+          <img src={FACE[current.who ?? "lola"]} alt="" />
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div className="guide-who">Next up · Step {current.id}</div>
+            <div className="guide-line">{current.tip}</div>
+            <div className="meta" style={{ marginBottom: 10 }}>{rewardText(current.reward)}</div>
+            <button className="btn btn-taxi guide-btn" onClick={() => onPlay(current)}>Show me how</button>
+          </div>
+        </div>
+      ) : (
+        <p className="meta" style={{ margin: 0 }}>Nothing new right now. More opens as your rank and days go up.</p>
+      )}
+      <p className="meta" style={{ margin: 0 }}>{done} of {live.length} chapters done.</p>
+      {starter && (
+        <button className="guide-step" onClick={starter.onOpen}>
+          <span className="guide-step-n">🗓️</span>
+          <span style={{ flex: 1, minWidth: 0 }}>Starter Week missions<span className="meta" style={{ display: "block" }}>{starter.done} of {starter.total} done</span></span>
+        </button>
+      )}
+      {CHAPTERS.map((c) => {
+        const steps = chapterSteps(c.n);
+        const open = chapterOpen(c, state);
+        const paid = steps.filter((s) => state.paid.includes(s.id)).length;
+        return (
+          <section key={c.n} className="guide-chapter">
+            <div className="row" style={{ gap: 8 }}>
+              <span className="title" style={{ flex: 1 }}>{state.chapters.includes(c.n) ? "🏅 " : ""}Chapter {c.n}: {c.title}</span>
+              {c.live ? <span className="meta">{paid}/{steps.length}</span> : <span className="tag tag-neutral">Coming soon</span>}
+            </div>
+            {c.live && !open && <span className="meta">🔒 Opens {c.day ? `on day ${c.day}` : `at Rank ${c.rank}`}.</span>}
+            {c.live && open && (
+              <ul className="guide-steps">
+                {steps.map((s) => {
+                  const isPaid = state.paid.includes(s.id);
+                  const later = !isPaid && !stepOpen(s, state);
+                  const skipped = !isPaid && !!state.skipped?.includes(s.id);
+                  return (
+                    <li key={s.id}>
+                      <button className={`guide-step${s.id === current?.id ? " is-next" : ""}`} onClick={() => onPlay(s)} disabled={isPaid || later}>
+                        <span className="guide-step-n">{isPaid ? "✓" : later ? "🔒" : s.id}</span>
+                        <span style={{ flex: 1, minWidth: 0 }}>{s.tip}<span className="meta" style={{ display: "block" }}>
+                          {later ? (s.opens?.rank ? `Opens at Rank ${s.opens.rank}` : `Opens on day ${s.opens?.day}`) : rewardText(s.reward)}
+                          {s.optional && !later ? (skipped ? " · skipped" : " · optional") : ""}
+                        </span></span>
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+            {c.live && <span className="meta">{c.need ? `Any ${c.need} of these finish it` : "Finish it"}: the &quot;{c.badge}&quot; badge and {rewardText(c.reward)}.{state.chapters.includes(c.n) ? " ✓ Collected." : ""}</span>}
+          </section>
+        );
+      })}
+    </div>
   );
 }

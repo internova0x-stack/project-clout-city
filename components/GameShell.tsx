@@ -114,7 +114,7 @@ import { GameChrome, type ChromeAction, type QuestButton, type Tab } from "./hud
 import { handle } from "@/lib/validation";
 import { rankCelebration } from "./game/Ranks";
 import { CelebrationHost, celebrate } from "./Celebrate";
-import { GuideFlow, GuidePill, type GuidePhase } from "./game/Guide";
+import { GuideApp, GuideFlow, GuidePill, type GuidePhase } from "./game/Guide";
 import { CHAPTERS, nextStep, stepById, type GuideApi, type GuideState } from "@/lib/guide";
 import { crewNightsRead, dateNightsRead, nightsCouple, type NightCtx } from "./nightResults";
 import { coupleRead, evictionRead, streakRead, subletRead, type BadNewsCtx } from "./game/badNewsReads";
@@ -1579,7 +1579,7 @@ export function GameShell({
     if (!open) return;
     url.searchParams.delete("open");
     window.history.replaceState(null, "", url.toString());
-    if (open === "messages" || open === "gigs" || open === "businesses" || open === "apartments") setPhone({ open: true, app: open });
+    if (open === "messages" || open === "gigs" || open === "businesses" || open === "apartments" || open === "guide") setPhone({ open: true, app: open });
     else if (open === "bills" || open === "tasks" || open === "events" || open === "us") setPanel(open);
     // A visit invite (migration 0121).
     else if (open === "plans") setPanel("visits");
@@ -4075,6 +4075,12 @@ export function GameShell({
         </>
       )}
       <PhoneModal
+        guide={guideS ? {
+          dot: !!guideNext && !guideS.paid.includes(guideNext.id),
+          node: <GuideApp state={guideS} current={guideNext}
+            onPlay={(st) => { setPhone({ open: false, app: null }); setGuidePlay({ id: st.id, phase: "tip" }); }}
+            starter={starter ? { done: starter.done.length, total: STARTER_MISSIONS.length, onOpen: () => { setPhone({ open: false, app: null }); setPanel("starter"); } } : undefined} />,
+        } : undefined}
         locked={lockAppsPreview || myRank.level < 2 || starterHold ? Object.fromEntries(Object.entries(APP_UNLOCKS).filter(([, u]) => lockAppsPreview || starterHold || myRank.level < u.rank).map(([id, u]) => [id, starterHold && myRank.level >= u.rank ? `day ${STARTER_UNLOCK_DAY} of Starter Week` : u.label])) : undefined}
         invite={(() => {
           const e = city?.calendar && cityApi?.calendarAttend ? phoneInvite(calendarData.events, city.calendar.attended, gameNow) : null;

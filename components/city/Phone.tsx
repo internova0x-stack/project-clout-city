@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { PushSettings } from "../push/Push";
 import { MembershipRow } from "../store/Membership";
 import { GraphicsSwitch } from "../GraphicsSwitch";
@@ -49,12 +50,14 @@ import { whenLine, type CalendarEvent } from "@/lib/calendar";
 import { PerkAction, type PerkHandlers } from "../game/Skills";
 import { SKILLS, SKILL_PERKS, perkStatus } from "@/lib/skills";
 
-export type App = "gigs" | "bank" | "settings" | "news" | "messages" | "collection" | "tea" | "apartments" | "businesses" | "jobs" | "radio" | "tv" | "mayor" | "campaign" | "careers" | "market" | "university";
+export type App = "gigs" | "bank" | "settings" | "news" | "messages" | "collection" | "tea" | "apartments" | "businesses" | "jobs" | "radio" | "tv" | "mayor" | "campaign" | "careers" | "market" | "university" | "guide";
 
 // Emoji on gradient tiles (the gradients come from the shared icon family).
 const APPS: { id: App; label: string; emoji: string; tile: GlyphName; soon?: boolean }[] = [
   { id: "news", label: "News", emoji: "📰", tile: "news" },
   { id: "messages", label: "Messages", emoji: "💬", tile: "chat", soon: true },
+  // The Guide (migration 0170, owner Nov 20: "Create an app for the guide"), up front where new players look; hidden without it.
+  { id: "guide", label: "Guide", emoji: "🧭", tile: "book" },
   // v0.10 neighborhood gossip (migration 0035); hidden until it runs.
   { id: "tea", label: "Tea", emoji: "🍵", tile: "tree" },
   // v0.14 Real Clout FM (migration 0057); hidden until it runs.
@@ -98,8 +101,10 @@ export function PhoneModal({
   open, onClose, time, state, busy, onAccept, onCollect, perks, muted, onToggleSound, gossip, initialApp, story, news, focusBeat, cityNews,
   chat, chatWith, chatUnread = 0, onChatUnread, onToast, dating, crew, onOpenCollection, handle = "", tea, apartments, onChatPass, businesses, jobs, radio, radioDot, tv, stations, lola, openForm, push, membership, onDeleteAccount,
   invite, mayor, locked, onOpenCampaign, onOpenUniversity, onOpenCareers, election, scandals, blotter, conditions, companies, economy, onOpenGifts, market,
-  assets,
+  assets, guide,
 }: {
+  /** The Guide (migration 0170): the app's content (components/game/Guide.tsx GuideApp) and a dot while a step is waiting. */
+  guide?: { node: ReactNode; dot: boolean };
   open: boolean;
   onClose: () => void;
   time: string;
@@ -240,7 +245,7 @@ export function PhoneModal({
                 </button>
               )}
               <div className="phone-grid">
-                {APPS.filter((a) => (a.id !== "collection" || onOpenCollection) && (a.id !== "tea" || tea) && (a.id !== "apartments" || (apartments && state)) && (a.id !== "businesses" || businesses) && (a.id !== "jobs" || jobs) && (a.id !== "tv" || tv) && (a.id !== "mayor" || mayor) && (a.id !== "campaign" || onOpenCampaign) && (a.id !== "careers" || onOpenCareers) && (a.id !== "university" || onOpenUniversity) && (a.id !== "market" || market)).map((a) => (
+                {APPS.filter((a) => (a.id !== "collection" || onOpenCollection) && (a.id !== "tea" || tea) && (a.id !== "apartments" || (apartments && state)) && (a.id !== "businesses" || businesses) && (a.id !== "jobs" || jobs) && (a.id !== "tv" || tv) && (a.id !== "mayor" || mayor) && (a.id !== "campaign" || onOpenCampaign) && (a.id !== "careers" || onOpenCareers) && (a.id !== "university" || onOpenUniversity) && (a.id !== "market" || market) && (a.id !== "guide" || guide)).map((a) => (
                   <button key={a.id} className={`phone-app${locked?.[a.id] ? " locked" : ""}`} aria-label={locked?.[a.id] ? `${a.label}, opens at ${locked[a.id]}` : undefined}
                     onClick={() => (a.id === "campaign" ? onOpenCampaign!() : a.id === "university" ? onOpenUniversity!() : a.id === "careers" ? onOpenCareers!() : locked?.[a.id] ? onToast?.(`🔒 ${a.label} opens at ${locked[a.id]}. Keep earning clout.`) : a.id === "collection" ? onOpenCollection!() : setApp(a.id))}>
                     <span style={{ position: "relative" }}>
@@ -251,6 +256,7 @@ export function PhoneModal({
                       {a.id === "mayor" && mayor && mayor.unseen > 0 && <span className="count-badge">{mayor.unseen}</span>}
                       {a.id === "apartments" && subletAlerts(apartments?.sublets?.state ?? null) > 0 && <span className="count-badge">{subletAlerts(apartments!.sublets!.state)}</span>}
                       {a.id === "gigs" && payoutReady && <span className="pin-dot" style={{ top: -3, right: -3 }} />}
+                      {a.id === "guide" && guide?.dot && <span className="pin-dot" style={{ top: -3, right: -3 }} />}
                       {a.id === "market" && !!market?.alerts && <span className="count-badge">{market.alerts}</span>}
                       {a.id === "tea" && tea && tea.state.stories.some((x) => !x.done && x.pieces.some((p) => p.found)) && <span className="pin-dot" style={{ top: -3, right: -3 }} />}
                       {a.id === "news" && unseenBeats(story ?? null) > 0 && <span className="count-badge">{unseenBeats(story ?? null)}</span>}
@@ -278,6 +284,7 @@ export function PhoneModal({
               {app === "market" && market && <MarketApp api={market.api} cash={market.cash} onChanged={market.onChanged} onToast={market.onToast} />}
               {app === "radio" && <MusicPlayer />}
               {app === "radio" && radio && <RadioApp api={radio} startForm={openForm && app === initialApp} onToast={(t) => onToast?.(t)} />}
+              {app === "guide" && guide?.node}
               {app === "mayor" && mayor && <MayorApp api={mayor.api} onSeen={mayor.onSeen} onToast={(t) => onToast?.(t)} />}
               {app === "tv" && tv && <TvApp api={tv.api} startForm={openForm && app === initialApp} onChange={tv.onChange} onToast={(t) => onToast?.(t)} />}
               {app === "apartments" && apartments && state && (apartments.sublets

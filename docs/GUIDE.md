@@ -12,7 +12,8 @@ https://claude.ai/artifact/V1x7duTPhWNARC12Vyy7s5.
 4. **Done**: the game sees it done, pays once and shows a banner; a chapter's last step adds a takeover with its badge.
 
 The pill under "Invite your Crew" always names the one recommended step (Starter Week's pill stays under it). There's
-no Guide tab in Tasks (owner, Nov 20). Lola's tip pops up once per step per device, only when nothing else is open.
+no Guide tab in Tasks (owner, Nov 20); the Phone's Guide app lists every chapter and step, and any open step plays from
+there (a skipped optional one too). Lola's tip pops up once per step per device, only when nothing else is open.
 
 ## Adding a chapter
 Write its steps in `lib/guide.ts` (`STEPS`), set the chapter `live: true`, then add a migration that updates
