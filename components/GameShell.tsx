@@ -3633,7 +3633,8 @@ export function GameShell({
         starter={!inside && flow === "none" && !visitView && (starter || guideNext || (passS && tab === "home")) ? (
           <>
             {guideNext && <GuidePill step={guideNext} onOpen={() => setGuidePlay({ id: guideNext.id, phase: "tip" })} />}
-            {starter && <StarterPill done={starter.done} day={starterDay(starter)} onOpen={() => setPanel("starter")} />}
+            {/* Owner, Nov 20: "hide the starter week pill": Starter Week is a row in the Phone's Guide app while the Guide is on. */}
+            {starter && !guideS && <StarterPill done={starter.done} day={starterDay(starter)} onOpen={() => setPanel("starter")} />}
             {/* Owner, Nov 16: the Clout Pass gets its own way in, on the home screen. */}
             {passS && tab === "home" && <PassPill state={passS} today={city?.today ?? new Date().toISOString().slice(0, 10)} onOpen={() => { setTasksTab("pass"); setPanel("tasks"); }} />}
           </>

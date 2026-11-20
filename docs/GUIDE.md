@@ -11,7 +11,7 @@ https://claude.ai/artifact/V1x7duTPhWNARC12Vyy7s5.
 3. **Show me**: the real button gets a glowing ring (taps go through to it) and Lola's hint.
 4. **Done**: the game sees it done, pays once and shows a banner; a chapter's last step adds a takeover with its badge.
 
-The pill under "Invite your Crew" always names the one recommended step (Starter Week's pill stays under it). There's
+The pill under "Invite your Crew" always names the one recommended step (Starter Week's pill is hidden: its missions are a row in the Guide app). There's
 no Guide tab in Tasks (owner, Nov 20); the Phone's Guide app lists every chapter and step, and any open step plays from
 there (a skipped optional one too). Lola's tip pops up once per step per device, only when nothing else is open.
 
