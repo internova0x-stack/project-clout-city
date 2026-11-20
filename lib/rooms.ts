@@ -2135,7 +2135,7 @@ export const PLACE_STYLES: Record<string, InteriorStyle> = {
   "atelier-vernon": "minimalist", "glow-up-house": "futuristic",
   // Real Estate, Finance and Law (owner, Oct 31).
   "no-fee-realty": "modern", "pablos-luggage": "oldEnglish", "queensboro-capital": "modern", "whitlock-hale": "oldEnglish",
-"altitude-718": "modern", "fifs-furniture": "modern",
+  "altitude-718": "modern", "fifs-furniture": "modern",
 };
 
 const RESTYLED: FurnitureKind[] = ["sofa", "armchair", "booth"];
