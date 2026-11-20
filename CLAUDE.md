@@ -454,8 +454,7 @@ components live in `app/globals.css`.
   The rooftops (owner, Nov 20: "next the rooftops"): Altitude 718, Ditmars Heights and Up on Wythe are `rooftop` (24 × 16 m, open,
   `PLACE_GROUND`): the bar along the back, six round marble dining sets (`roundDining`, the dining action) under string lights and
   heat lamps (`heatLamp`), planters (`planter`), a front lounge and sun loungers. Signature pieces: the fire pit, the cabana and the
-  water tower. `skyline` (rooftops and the station) gives a real sky behind (Room3D `skyBackdrop`: blue by day, navy at night), not one
-  from the walls' colors; nothing else around (owner, Nov 20: "Leave out the background buildings. Keep it at just the interior").
+  water tower. `skyline` (rooftops and the station) gives the plain Monument Valley dusk behind, not one tinted by the walls; nothing else around (owner, Nov 20: "Leave out the background buildings. Keep it at just the interior").
   The station (owner, Nov 20: "next the station"): Astoria Blvd station, a map label until then, can be entered: `station` (24 × 14 m,
   open, skyline, `PLACE_GROUND`): the platform along `subwayTrack` (the room's width; a three-car train pulls in, opens its doors and
   leaves every 36 s, clipped at the room's edges: Room3D turns on local clipping), benches facing the tracks (the platform action), green `stationColumn`s, a coffee cart, the fare
@@ -866,6 +865,9 @@ components live in `app/globals.css`.
 - Interiors are light (owner, Nov 20: "Stay away from making interiors dark. Only if it is context relevant (e.g clubs)"): light
   walls and floors everywhere; dark rooms (`dark: true`, near-black walls or floors) only where the setting is dark (clubs, a club's
   VIP and restroom, the speakeasy, the content house's stream floor).
+  Backgrounds behind every room are the Monument Valley dusk (owner, Nov 20: "All these colors are harsh… and deviate from the
+  delightful monument valley gradient we've used"): Room3D `derivedBackdrop` = `MV_SKY` (peach → rose → lavender by day, lavender →
+  dusty violet → rose at night, never dark) with only a fifth of the room's own wall/accent tint; `skyline` rooms get it untinted.
 - Players see "Crew" for their invited friends; code, types and database tables still say `clique`
   (renaming stored data isn't worth the risk). Keep player-facing copy on "crew".
 - Culture packs (docs/culture/, one at a time, only when the owner says "Build C<number>"): slang, invented stand-ins

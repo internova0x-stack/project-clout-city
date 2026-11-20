@@ -1669,33 +1669,32 @@ function gradientWallMaterial(t: RoomTemplate, night: boolean): MeshStandardMate
  * walls, accent and floor), so each place's sky is an offshoot of its inside.
  */
 /**
- * The sky behind a place open to the sky (owner, Nov 20: just the place itself, no city around it): blue by day, warm toward
- * the horizon; deep navy at night with a dusky horizon. Not the walls' colors (a green station got a mint sky).
+ * The Monument Valley dusk (owner, Nov 20: "All these colors are harsh… and deviate from the delightful monument valley gradient
+ * we've used"): peach to rose to lavender by day, lavender to dusty violet to rose at night; soft at every hour, never dark.
  */
-function skyBackdrop(night: boolean): { css: string; haze: string } {
-  const [top, mid, bot] = night ? ["#0B1330", "#24305C", "#5A4A72"] : ["#7FB6E6", "#B9D9F0", "#F1E2CC"];
-  const glow = night ? "hsla(220,60%,70%,.25)" : "hsla(45,100%,96%,.8)";
-  return { css: `radial-gradient(85% 45% at 72% 16%, ${glow}, transparent 70%), linear-gradient(180deg, ${top} 0%, ${mid} 55%, ${bot} 100%)`, haze: mid };
-}
+const MV_SKY = { day: ["#FCE6D8", "#F6CAD3", "#D9C9EF"], night: ["#8E7EC4", "#C49BCB", "#F2B4BC"] };
+const mixHexes = (a: string, b: string, k: number) => new Color(a).lerp(new Color(b), k).getStyle(SRGBColorSpace);
 
+/**
+ * The gradient behind a room: the Monument Valley dusk, with only a hint (a fifth) of the room's own colors so each place
+ * still feels like itself. Places open to the sky get the dusk as it is.
+ */
 export function derivedBackdrop(t: RoomTemplate, daytime: boolean): { css: string; haze: string } {
   const night = !(daytime || t.alwaysLit) || !!t.dark;
-  if (t.skyline) return skyBackdrop(night);
-  const hsl = (hex: string) => { const o = { h: 0, s: 0, l: 0 }; new Color(hex).getHSL(o, SRGBColorSpace); return o; };
-  const wall = hsl(t.wall);
-  const accent = hsl(t.wallAccent);
-  // Hue drifts from the walls (top) toward the accent (bottom), with saturation lifted
-  // to a pastel so even beige rooms get a warm, delightful sky.
-  const mix = (a: number, b: number, k: number) => { let d = b - a; if (d > 0.5) d -= 1; if (d < -0.5) d += 1; return (a + d * k + 1) % 1; };
-  const sat = (x: number, min: number) => Math.min(0.85, Math.max(min, x * 1.4));
-  const stop = (h: number, s: number, l: number) => new Color().setHSL(h, s, l, SRGBColorSpace).getStyle(SRGBColorSpace);
-  const hTop = mix(wall.h, accent.h, 0.1);
-  const hMid = mix(wall.h, accent.h, 0.5);
-  const hBot = mix(accent.h, (accent.h + 0.94) % 1, 0.5); // a touch cooler at the base, like dusk
-  const top = night ? stop(hTop, sat(wall.s, 0.4), 0.2) : stop(hTop, sat(wall.s, 0.55), 0.9);
-  const mid = night ? stop(hMid, sat(accent.s, 0.45), 0.32) : stop(hMid, sat(accent.s, 0.5), 0.8);
-  const bot = night ? stop(hBot, sat(accent.s, 0.45), 0.42) : stop(hBot, sat(accent.s, 0.45), 0.7);
-  const glow = night ? `hsla(${Math.round(accent.h * 360)},80%,70%,.45)` : `hsla(${Math.round(hTop * 360)},90%,96%,.75)`;
+  const sky = night ? MV_SKY.night : MV_SKY.day;
+  let [top, mid, bot] = sky;
+  if (!t.skyline) {
+    // The room's tint: its walls at the top, its accent below, at the sky's own lightness.
+    const hsl = (hex: string) => { const o = { h: 0, s: 0, l: 0 }; new Color(hex).getHSL(o, SRGBColorSpace); return o; };
+    const tint = (hex: string, like: string) => {
+      const c = hsl(hex), ref = hsl(like);
+      return new Color().setHSL(c.h, Math.min(0.5, Math.max(0.25, c.s)), ref.l, SRGBColorSpace).getStyle(SRGBColorSpace);
+    };
+    top = mixHexes(top, tint(t.wall, top), 0.2);
+    mid = mixHexes(mid, tint(t.wallAccent, mid), 0.2);
+    bot = mixHexes(bot, tint(t.wallAccent, bot), 0.15);
+  }
+  const glow = night ? "hsla(330,80%,88%,.35)" : "hsla(30,100%,97%,.8)";
   return {
     css: `radial-gradient(85% 45% at 72% 16%, ${glow}, transparent 70%), linear-gradient(180deg, ${top} 0%, ${mid} 52%, ${bot} 100%)`,
     haze: mid,
