@@ -19,7 +19,7 @@ import type { AvatarParts } from "../avatar/buildAvatar";
 import { dance, poseLie, poseSit, resetLimbs } from "../room/Room3D";
 import { BUILDS, DEFAULT_LOOK, HAIR_COLORS, SKIN_TONES, type Look } from "@/lib/look";
 import { getStyle, starterOutfit, type Outfit } from "@/lib/styles";
-import { OUTFIT_SETS } from "@/lib/avatarCatalog";
+import { OUTFIT_SETS, gogoPieces } from "@/lib/avatarCatalog";
 import { ACCESSORIES } from "@/lib/accessories";
 import { CATALOG_WEAR, catalogPieces } from "@/lib/catalogWear";
 import { GLOW_SKUS } from "@/lib/wearing";
@@ -50,6 +50,8 @@ export function AvatarMoves({ skin = 3, build, outfit, size, pick }: { skin?: nu
   const sets = outfit === "sets";
   const extras = outfit === "accessories";
   const catalog = outfit === "catalog";
+  // ?outfit=gogo (owner, Nov 20): the clubs' go-go dancers' stage costumes, every color, standing and dancing.
+  const gogo = outfit === "gogo";
   const LOOKS: [string, Partial<Outfit>][] = [
     ["Tee + trousers", { top: "tee", topColor: "#F4F1EA", topAccent: "#2B2B2B", bottom: "pants", bottomColor: "#2E3A55" }],
     ["Crop + skirt", { top: "crop", topColor: "#E86A92", topAccent: "#2B2B2B", bottom: "skirt", bottomColor: "#2B2B2B" }],
@@ -74,9 +76,14 @@ export function AvatarMoves({ skin = 3, build, outfit, size, pick }: { skin?: nu
   const WARDROBE_ROWS: [string, "curvy" | "straight", string][] = diagnose ? DIAG_ROWS : [["Female", "curvy", "Idle"], ["Female, sitting", "curvy", "Sit"], ["Male", "straight", "Idle"], ["Male, walking", "straight", "Walk"]];
   const HAIR_COLS = ["short", "buzz", "long", "ponytail", "bun", "braids", "curls", "locs", "long + cap"];
   const picked = (all: string[]) => (pick ? all.filter((c) => pick.split(",").includes(c)) : all);
-  const moves: string[] = catalog ? picked(Object.keys(CATALOG_WEAR)) : extras ? picked([...Object.keys(ACCESSORIES), ...GLOW_SKUS, TIARA]) : sets ? picked(OUTFIT_SETS.map((o) => o.id)) : anims ? CLIPS.map((c) => c[0]) : diagnose ? DIAG_LOOKS.map((l) => l[0]) : wardrobe ? LOOKS.map((l) => l[0]) : hairs ? HAIR_COLS : garment ? GARMENT_MOVES : ALL_MOVES;
+  const moves: string[] = gogo ? ["Standing", "Dance"] : catalog ? picked(Object.keys(CATALOG_WEAR)) : extras ? picked([...Object.keys(ACCESSORIES), ...GLOW_SKUS, TIARA]) : sets ? picked(OUTFIT_SETS.map((o) => o.id)) : anims ? CLIPS.map((c) => c[0]) : diagnose ? DIAG_LOOKS.map((l) => l[0]) : wardrobe ? LOOKS.map((l) => l[0]) : hairs ? HAIR_COLS : garment ? GARMENT_MOVES : ALL_MOVES;
   const cell = size ?? (garment ? 170 : 220);
   const rowsOf = (): { look: Look; outfit?: Outfit; label: string; back?: boolean; move?: string; bare?: boolean }[] => {
+    if (gogo) return [0, 1, 2, 3, 4].map((i) => ({
+      look: { ...DEFAULT_LOOK, body: "curvy", build: (["curvy", "athletic", "petite", "plus", "athletic"] as const)[i] as Look["build"], skin: SKIN_TONES[(skin + i * 2) % 8], hair: i % 2 ? "ponytail" : "long", hairColor: HAIR_COLORS[i % 3], covering: "none", glasses: "none", style: "bodega_drip" } as Look,
+      outfit: { ...starterOutfit(getStyle("bodega_drip"), "curvy", null), accessory: "none", pieces: gogoPieces(i) } as Outfit,
+      label: `Dancer ${i + 1}`,
+    }));
     if (anims) return (["curvy", "straight"] as const).flatMap((body, b) => [true, false].map((bare) => ({
       look: { ...DEFAULT_LOOK, body, build: body === "curvy" ? "curvy" : "athletic", skin: SKIN_TONES[(skin + b * 3) % 8], hair: bare ? "bald" : body === "curvy" ? "long" : "short", hairColor: HAIR_COLORS[b], covering: "none", accessory: "none", style: "bodega_drip" } as Look,
       outfit: { ...starterOutfit(getStyle(body === "curvy" ? "pilates_princess" : "bodega_drip"), body, null), accessory: "none" } as Outfit,
@@ -120,7 +127,7 @@ export function AvatarMoves({ skin = 3, build, outfit, size, pick }: { skin?: nu
     const tiles: { scene: Scene; cam: PerspectiveCamera; parts: AvatarParts; move: string; rig: Group }[] = [];
     rows.forEach(({ look: base, outfit: rowOutfit, back, move: rowMove, bare }) => moves.forEach((col) => {
       const look: Look = hairs ? { ...base, hair: col.split(" ")[0] as Look["hair"], covering: col.endsWith("cap") ? "cap" : "none" } : base;
-      const move = sets || extras || catalog ? rowMove! : anims ? CLIPS.find((c) => c[0] === col)![1] : hairs ? (back ? "Back" : "Idle") : wardrobe ? rowMove! : col;
+      const move = gogo ? CLIPS.find((c) => c[0] === col)![1] : sets || extras || catalog ? rowMove! : anims ? CLIPS.find((c) => c[0] === col)![1] : hairs ? (back ? "Back" : "Idle") : wardrobe ? rowMove! : col;
       const o: Outfit | undefined = catalog ? { ...rowOutfit!, pieces: catalogPieces([col]) } : extras ? { ...rowOutfit!, top: "tee", topColor: "#F4F1EA", topAccent: "#2B2B2B", ...(GLOW_SKUS.has(col) ? { glow: true } : { extras: [col === TIARA ? { ...ACCESSORIES["clout-crown"], kind: "tiara" as const } : ACCESSORIES[col]] }) } : sets ? { ...rowOutfit!, set: col } : wardrobe ? { ...rowOutfit!, shoes: undefined, set: undefined, ...(diagnose ? DIAG_LOOKS : LOOKS).find((l) => l[0] === col)![1] } as Outfit : rowOutfit;
       const scene = new Scene();
       scene.background = new Color("#EDE6DA");

@@ -15,7 +15,8 @@ import {
   type LayoutEntry, type RoomItem, type RoomTemplate,
   openSpots,
 } from "@/lib/rooms";
-import { STARTING_STYLES, type Outfit } from "@/lib/styles";
+import { STARTING_STYLES, starterOutfit, type Outfit } from "@/lib/styles";
+import { gogoPieces } from "@/lib/avatarCatalog";
 import type { AvatarParts } from "../avatar/buildAvatar";
 import { buildModelAvatar } from "../avatar/modelAvatar";
 import { goldStatue } from "../avatar/goldStatue";
@@ -490,7 +491,13 @@ export default function Room3D(props: Room3DProps) {
       const a: Actor = { rig: new Group(), parts: null, x: n.x, z: n.z, heading: n.facing, mode: n.seated ? "sit" : n.dance ? "dance" : "idle", path: [], pending: null, phase: i * 1.7, y: n.y };
       let seed = (template.id.length * 977 + i * 7919) % 2147483647;
       const rand = () => ((seed = (seed * 48271) % 2147483647) / 2147483647);
-      a.parts = buildModelAvatar(randomLook(rand, STARTING_STYLES.map((s) => s.id)), { pedestal: false });
+      const look = randomLook(rand, STARTING_STYLES.map((s) => s.id));
+      // The clubs' go-go dancers (owner, Nov 20) wear their stage costume.
+      if (n.costume === "gogo") {
+        const dancer: Look = { ...look, body: "curvy", covering: "none", glasses: "none" };
+        const base = starterOutfit(STARTING_STYLES.find((st) => st.id === dancer.style) ?? STARTING_STYLES[0], "curvy", null);
+        a.parts = buildModelAvatar(dancer, { pedestal: false, outfit: { ...base, accessory: "none", pieces: gogoPieces(i) } });
+      } else a.parts = buildModelAvatar(look, { pedestal: false });
       castShadows(a.parts.root);
       a.rig.add(a.parts.root);
       if (n.seated) poseSit(a.parts, 0.78);

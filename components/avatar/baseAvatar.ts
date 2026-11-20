@@ -19,7 +19,7 @@
 //   * Low-graphics mode loads the lighter files (fewer triangles, a 512 px texture).
 
 import {
-  AnimationMixer, Box3, LoopOnce, LoopRepeat, BufferAttribute, Color, DoubleSide, Euler, Group, Matrix4, MeshStandardMaterial, Object3D, Quaternion,
+  AnimationMixer, type AnimationClip, Box3, LoopOnce, LoopRepeat, BufferAttribute, Color, DoubleSide, Euler, Group, Matrix4, MeshStandardMaterial, Object3D, Quaternion,
   Skeleton, SkinnedMesh, Vector2, Vector3, type AnimationAction, type BufferGeometry, type Bone, type Material,
   type WebGLProgramParametersWithUniforms,
 } from "three";
@@ -40,6 +40,22 @@ import type { ModelAvatarOptions } from "./modelAvatar";
 
 const cache = new Map<string, Promise<GLTF>>();
 let loader: GLTFLoader | null = null;
+/**
+ * The female dance clip travels: its hips wander about a meter sideways (owner, Nov 20: a go-go dancer stepped off her
+ * podium). Dancing stays on the spot: the hips keep their bounce (height) but stand over the feet, where the walk's do
+ * (in the file's centimeters). Clips are shared between avatars, so each is fixed once.
+ */
+function danceInPlace(clip: AnimationClip): AnimationClip {
+  if (clip.name !== "dance" || clip.userData.inPlace) return clip;
+  for (const tr of clip.tracks) {
+    if (!/Hips\.position$/.test(tr.name)) continue;
+    const v = tr.values;
+    for (let i = 0; i < v.length; i += 3) { v[i] = 0; v[i + 2] = -4; }
+  }
+  clip.userData.inPlace = true;
+  return clip;
+}
+
 function load(path: string): Promise<GLTF> {
   let p = cache.get(path);
   if (!p) {
@@ -689,7 +705,7 @@ void main() {`)
     mixer = new AnimationMixer(rig);
     const anims = await load(`/avatars/body/${sex}-anims.glb`).catch(() => null);
     if (disposed) return;
-    for (const clip of anims?.animations ?? []) actions[clip.name] = mixer.clipAction(clip);
+    for (const clip of anims?.animations ?? []) actions[clip.name] = mixer.clipAction(danceInPlace(clip));
     // The sit and sleep clips' first frames, measured: where the hips, knees and head end up.
     const at = (name: string) => { const b = bones.get(name); return b ? body.worldToLocal(b.getWorldPosition(new Vector3())) : new Vector3(); };
     for (const [kind, clip] of [["sit", "sit"], ["lie", "sleep"]] as const) {

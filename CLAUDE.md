@@ -447,6 +447,10 @@ components live in `app/globals.css`.
   go-go dancers on the stage and on lit podiums (`gogoPodium`; template npcs take `y` and `dance`), lit pillars, six dance-floor tiles,
   the long bar down the left wall, the lounge, and the roped-off VIP section (`velvetRope`) with the stairs to `vipBig` (14 × 10 m);
   `clubLights` adds the moving beams and floor pools (Room3D). `PLACE_SIGNATURE` adds each place's signature piece (or swaps models).
+  Stage costumes (owner, Nov 20: "booty shorts and bras"): garment templates `bra` and `hotpants` (scripts/wardrobe.mjs, cover bits
+  262144/524288, never sold); npcs with `costume: "gogo"` wear `gogoPieces(i)` (lib/avatarCatalog.ts) with knee boots on the female
+  body (`?outfit=gogo` in /preview/moves). The dance clip dances on the spot (baseAvatar `danceInPlace`: the female clip's hips
+  wandered a meter).
 - Rate limits (migration 0126, owner Oct 27): PostgREST's pre-request hook (`pgrst.db_pre_request` = `check_request()`) counts each
   signed-in player's writes per minute (`rate_counters`, `rate_hit`): 240 in all, plus buckets for guesses (hunt answers, exams,
   gossip, name checks: 20), reviewed posts (10), chat (30) and checkouts (10). Reads, signed-out requests and the service role are

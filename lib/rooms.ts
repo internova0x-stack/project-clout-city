@@ -131,7 +131,7 @@ export interface RoomTemplate {
   /** v0.11 party floors: where the 8 to 10 people at a party stand (lib/partyRoom.ts crowdFor). */
   crowdSpots?: { x: number; z: number; facing: number }[];
   /** People hanging out (positions and facing), drawn as random New Yorkers. */
-  npcs?: { x: number; z: number; facing: number; seated?: boolean; dance?: boolean; y?: number }[];
+  npcs?: { x: number; z: number; facing: number; seated?: boolean; dance?: boolean; y?: number; costume?: "gogo" }[];
 }
 
 /** Footprint (x, z) at rot 0, and whether people can walk over it. */
@@ -620,8 +620,8 @@ export const PLACE_TEMPLATES: Record<PlaceTemplateId, RoomTemplate> = {
     npcs: [
       // The show: the DJ and two dancers on the stage, two on the podiums.
       { x: 0, z: -8.2, facing: 0, y: 0.6 },
-      { x: -3.9, z: -7.2, facing: 0, y: 0.6, dance: true }, { x: 3.9, z: -7.2, facing: 0, y: 0.6, dance: true },
-      { x: -6.2, z: -3.2, facing: 0.4, y: 0.95, dance: true }, { x: 6.2, z: -3.2, facing: -0.4, y: 0.95, dance: true },
+      { x: -3.9, z: -7.2, facing: 0, y: 0.6, dance: true, costume: "gogo" }, { x: 3.9, z: -7.2, facing: 0, y: 0.6, dance: true, costume: "gogo" },
+      { x: -6.2, z: -3.2, facing: 0.4, y: 0.95, dance: true, costume: "gogo" }, { x: 6.2, z: -3.2, facing: -0.4, y: 0.95, dance: true, costume: "gogo" },
       // The floor.
       { x: -3.4, z: -1.4, facing: 0.6 }, { x: -1.0, z: -0.4, facing: -2.4 }, { x: 1.2, z: -3.4, facing: 2.0 }, { x: 3.4, z: -1.2, facing: -1.2 },
       { x: 0.2, z: -4.8, facing: 0.2 }, { x: -2.6, z: -4.4, facing: 1.0 }, { x: 2.4, z: 0.2, facing: 3.0 },

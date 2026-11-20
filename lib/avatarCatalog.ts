@@ -40,6 +40,8 @@ export const GARMENT_TEMPLATES: Record<string, { cover: number; slot: "top" | "b
   gown: { cover: 16384, slot: "bottom", kind: 15 }, overalls: { cover: 32768, slot: "bottom", kind: 16 },
   // The Shop catalog's pieces (lib/catalogWear.ts): a midi skirt, knee-high boots, a long coat's tails (they hide no skin).
   midi: { cover: 65536, slot: "bottom", kind: 15 }, kneeboots: { cover: 131072, slot: "shoes", kind: 13 }, coattail: { cover: 0, slot: "top", kind: 2 },
+  // Stage costumes (owner, Nov 20): the go-go dancers' sports bra and hot pants (not sold; GOGO_OUTFIT).
+  bra: { cover: 262144, slot: "top", kind: 3, hem: 0.3 }, hotpants: { cover: 524288, slot: "bottom", kind: 10 },
 };
 
 /**
@@ -232,5 +234,20 @@ export function modelParts(look: Pick<Look, "body">, top: TopKind, bottom: Botto
     body: full?.ref ?? TOP_MODEL[top][sex],
     legs: full?.ref ?? BOTTOM_MODEL[bottom][sex],
     feet: full?.ref ?? (shoes ? SHOE_MODEL[shoes][sex] : FEET_MODEL[bottom][sex]),
+  };
+}
+
+/**
+ * The clubs' go-go dancers' stage costumes (owner, Nov 20: "On stage costumes. Booty shorts and bras"): a sports bra, hot
+ * pants and knee-high boots in shiny stage colors, a different pair of colors for each dancer. Worn by a room's npcs with
+ * `costume: "gogo"` (components/room/Room3D.tsx); never sold.
+ */
+const GOGO_COLORS: [string, string][] = [["#FF2E88", "#FFFFFF"], ["#C9A227", "#14111A"], ["#D9DDE3", "#FF2E88"], ["#14111A", "#C9A227"], ["#8A5CFF", "#FFFFFF"]];
+export function gogoPieces(i: number): Partial<Record<"top" | "bottom" | "shoes", { file: string; color: string; accent: string; finish?: Finish }[]>> {
+  const [c, a] = GOGO_COLORS[((i % GOGO_COLORS.length) + GOGO_COLORS.length) % GOGO_COLORS.length];
+  return {
+    top: [{ file: "bra", color: c, accent: a, finish: "patent" }],
+    bottom: [{ file: "hotpants", color: c, accent: a, finish: "patent" }],
+    shoes: [{ file: "kneeboots", color: a === "#14111A" ? "#14111A" : "#FFFFFF", accent: "#2B2B2B", finish: "patent" }],
   };
 }
