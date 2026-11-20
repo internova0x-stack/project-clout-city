@@ -461,6 +461,10 @@ components live in `app/globals.css`.
   leaves every 36 s, clipped at the room's edges: Room3D turns on local clipping), benches facing the tracks (the platform action), green `stationColumn`s, a coffee cart, the fare
   line (`turnstile`s and railings, the gate open in the middle), `fareMachine`s, the agent's `ticketBooth` and the street entrance
   (`stationEntrance`, the signature subwayEntrance model).
+  Clout TV Tower (owner, Nov 20): floors 1 and 2 are `tvStudio` (lobby with the reception desk, the Big Screen and the crew's sofa,
+  the control room, the studio with the talk-show set (signature) under a video wall, cameras, `studioLight`s and audience seats, a
+  green room, the "Get on Billboard" set) and `tvNewsroom` (the news desk set on a `tvSet` riser, writers' desks, edit bays, a break
+  corner), 20 × 14 m each; the Executive floor stays `execFloor`. Its "modern" interior style is gone (the floors carry their own).
 - Rate limits (migration 0126, owner Oct 27): PostgREST's pre-request hook (`pgrst.db_pre_request` = `check_request()`) counts each
   signed-in player's writes per minute (`rate_counters`, `rate_hit`): 240 in all, plus buckets for guesses (hunt answers, exams,
   gossip, name checks: 20), reviewed posts (10), chat (30) and checkouts (10). Reads, signed-out requests and the service role are

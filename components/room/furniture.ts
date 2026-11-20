@@ -1369,6 +1369,26 @@ function buildBoxFurniture(item: RoomItem, k: Kit, opts: { night: boolean }): Bu
       }
       return { group: g };
     }
+    case "tvSet": {
+      // A show's set: a low round-cornered riser with a lit edge (the box-built stand-in under the modeled desk or couch).
+      box(w, 0.25, d, "#2A2530");
+      const edge = box(w + 0.02, 0.05, 0.05, glow("#FF2E88", 1.4).clone(), 0, 0.2, d / 2);
+      box(w - 0.6, 0.02, d - 0.6, "#FF6A3D", 0, 0.25, 0);
+      return { group: g, tick: (t) => { (edge.material as MeshStandardMaterial).emissive.setHSL((0.92 + Math.sin(t * 0.3) * 0.05 + 1) % 1, 0.9, 0.55); } };
+    }
+    case "studioLight": {
+      // A studio light on a tripod: three legs, a pole and a soft box aimed at the set, glowing.
+      for (let i = 0; i < 3; i++) {
+        const leg = new Mesh(k.geo(new CylinderGeometry(0.02, 0.02, 1.0, 5)), k.mat(BLACK));
+        const a = (i / 3) * Math.PI * 2;
+        leg.position.set(Math.cos(a) * 0.22, 0.45, Math.sin(a) * 0.22); leg.rotation.set(Math.sin(a) * 0.45, 0, -Math.cos(a) * 0.45); g.add(leg);
+      }
+      cyl(0.025, 0.025, 1.5, BLACK, 0, 0.8, 0, 6);
+      const head = new Group(); head.position.set(0, 2.3, 0); head.rotation.x = 0.35; g.add(head);
+      const boxM = new Mesh(k.geo(new BoxGeometry(0.6, 0.45, 0.25)), k.mat("#1F1B26")); head.add(boxM);
+      const face = new Mesh(k.geo(new BoxGeometry(0.52, 0.38, 0.02)), glow("#FFF6E0", 1.8)); face.position.z = 0.13; head.add(face);
+      return { group: g };
+    }
     case "chandelier": {
       // A brass ring of candle lights on a chain (the box-built stand-in).
       const brass = k.mat("#C9A227", { metalness: 0.5, roughness: 0.35 });
