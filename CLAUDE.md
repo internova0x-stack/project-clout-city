@@ -856,6 +856,9 @@ components live in `app/globals.css`.
   panel lists only that floor's (`ActionList`/`PlaceTasks` `floor`, `taskFloor`); place-wide rows stay on the ground floor. Task titles
   name the action ("<action label> at <place>", never "Be seen at"). A list action plays out in the room: Room3D `act` walks the avatar
   to its piece (sofa, bed, counter) and poses without calling onUse again.
+- Interiors are light (owner, Nov 20: "Stay away from making interiors dark. Only if it is context relevant (e.g clubs)"): light
+  walls and floors everywhere; dark rooms (`dark: true`, near-black walls or floors) only where the setting is dark (clubs, a club's
+  VIP and restroom, the speakeasy, the content house's stream floor).
 - Players see "Crew" for their invited friends; code, types and database tables still say `clique`
   (renaming stored data isn't worth the risk). Keep player-facing copy on "crew".
 - Culture packs (docs/culture/, one at a time, only when the owner says "Build C<number>"): slang, invented stand-ins

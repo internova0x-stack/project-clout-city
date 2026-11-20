@@ -1371,7 +1371,7 @@ function buildBoxFurniture(item: RoomItem, k: Kit, opts: { night: boolean }): Bu
     }
     case "tvSet": {
       // A show's set: a low round-cornered riser with a lit edge (the box-built stand-in under the modeled desk or couch).
-      box(w, 0.25, d, "#2A2530");
+      box(w, 0.25, d, "#F2EEF5");
       const edge = box(w + 0.02, 0.05, 0.05, glow("#FF2E88", 1.4).clone(), 0, 0.2, d / 2);
       box(w - 0.6, 0.02, d - 0.6, "#FF6A3D", 0, 0.25, 0);
       return { group: g, tick: (t) => { (edge.material as MeshStandardMaterial).emissive.setHSL((0.92 + Math.sin(t * 0.3) * 0.05 + 1) % 1, 0.9, 0.55); } };

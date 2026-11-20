@@ -574,13 +574,13 @@ export const PLACE_TEMPLATES: Record<PlaceTemplateId, RoomTemplate> = {
   // control room (the mixing desk and monitors), the main studio (the talk-show set under a video wall, three cameras, lights on
   // stands, audience seats), the green room and the "Get on Billboard" photo set.
   tvStudio: {
-    id: "tvStudio", w: 20, d: 14, wall: "#2A2530", wallAccent: "#FF2E88", floor: "#3A3440", floorKind: "tile", alwaysLit: true,
+    id: "tvStudio", w: 20, d: 14, wall: "#F4F1F6", wallAccent: "#FF2E88", floor: "#E8E4EC", floorKind: "tile", alwaysLit: true,
     spotlights: true,
     rooms: [
-      { name: "Control room", x0: -10, z0: -7, x1: -3, z1: -1, floor: "#2E2A36", floorKind: "concrete" },
-      { name: "Studio", x0: -3, z0: -7, x1: 10, z1: 2, floor: "#1F1B26", floorKind: "concrete" },
-      { name: "Lobby", x0: -10, z0: -1, x1: -3, z1: 7, floor: "#EDE8F2", floorKind: "tile" },
-      { name: "Green room", x0: -3, z0: 2, x1: 4, z1: 7, floor: "#4E7A3A", floorKind: "wood" },
+      { name: "Control room", x0: -10, z0: -7, x1: -3, z1: -1, floor: "#DCD8E2", floorKind: "concrete" },
+      { name: "Studio", x0: -3, z0: -7, x1: 10, z1: 2, floor: "#D6D2DC", floorKind: "concrete" },
+      { name: "Lobby", x0: -10, z0: -1, x1: -3, z1: 7, floor: "#F7F4F8", floorKind: "tile" },
+      { name: "Green room", x0: -3, z0: 2, x1: 4, z1: 7, floor: "#9CC488", floorKind: "wood" },
       { name: "Billboard set", x0: 4, z0: 2, x1: 10, z1: 7, floor: "#FFE3EE", floorKind: "tile" },
     ],
     walls: [
@@ -597,7 +597,7 @@ export const PLACE_TEMPLATES: Record<PlaceTemplateId, RoomTemplate> = {
       { id: "lobby-plant-1", kind: "plant", x: -4.6, z: 6.5, rot: 0, model: "figTree" },
       { id: "lobby-plant-2", kind: "plant", x: -3.5, z: 6.5, rot: 0, model: "monstera" },
       // The control room.
-      { id: "mixing-desk", kind: "micDesk", x: -6.5, z: -3.8, rot: 0, color: "#1F1B26" },
+      { id: "mixing-desk", kind: "micDesk", x: -6.5, z: -3.8, rot: 0, color: "#C9C4D2" },
       ...[-7.6, -6.5, -5.4].map((x, i) => ({ id: `control-chair-${i}`, kind: "chair" as const, x, z: -2.9, rot: 2, model: "k:chairDesk" })),
       { id: "monitors", kind: "bigScreen", x: -6.5, z: -6.85, rot: 0 },
       { id: "on-air", kind: "onAirSign", x: -4.0, z: -6.85, rot: 0 },
@@ -634,12 +634,12 @@ export const PLACE_TEMPLATES: Record<PlaceTemplateId, RoomTemplate> = {
   // The Newsroom floor, 20 × 14 m: the news desk set under a video wall with its cameras and lights, the writers' desks, three
   // glass edit bays and a break corner.
   tvNewsroom: {
-    id: "tvNewsroom", w: 20, d: 14, wall: "#2A2530", wallAccent: "#FF6A3D", floor: "#3A3440", floorKind: "tile", window: true, alwaysLit: true,
+    id: "tvNewsroom", w: 20, d: 14, wall: "#F4F1F6", wallAccent: "#FF6A3D", floor: "#ECE8EE", floorKind: "tile", window: true, alwaysLit: true,
     tallWalls: true, spotlights: true,
     rooms: [
-      { name: "News set", x0: -2, z0: -7, x1: 10, z1: 0, floor: "#1F1B26", floorKind: "concrete" },
-      { name: "Writers", x0: -10, z0: -7, x1: -2, z1: 3, floor: "#4A4458", floorKind: "tile" },
-      { name: "Edit bays", x0: -10, z0: 3, x1: -2, z1: 7, floor: "#2E2A36", floorKind: "concrete" },
+      { name: "News set", x0: -2, z0: -7, x1: 10, z1: 0, floor: "#D6D2DC", floorKind: "concrete" },
+      { name: "Writers", x0: -10, z0: -7, x1: -2, z1: 3, floor: "#F2EFF4", floorKind: "tile" },
+      { name: "Edit bays", x0: -10, z0: 3, x1: -2, z1: 7, floor: "#E2DEE8", floorKind: "concrete" },
       { name: "Break corner", x0: 4, z0: 0, x1: 10, z1: 7, floor: "#C9B79C", floorKind: "wood" },
     ],
     walls: [[-10, 3, -7.6, 3], [-6.0, 3, -2, 3], [-6.4, 3, -6.4, 7], [-4.2, 3, -4.2, 7], [-2, 3, -2, 4.4]],
