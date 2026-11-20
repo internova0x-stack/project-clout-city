@@ -37,7 +37,7 @@ test("the next step is the first unpaid one in an open chapter", () => {
   assert.equal(nextStep({ ...base, paid: both, day: 2 })?.id, "3.1");
   const ch3 = chapterSteps(3).map((s) => s.id);
   const early = [...both, ...ch3.filter((id) => id !== "3.10" && id !== "3.11")];
-  assert.equal(nextStep({ ...base, paid: early, day: 2 }), null, "businesses and the Jobs board wait for Rank 2");
+  assert.equal(nextStep({ ...base, paid: early, day: 2 })?.id, "4.1", "businesses and the Jobs board wait for Rank 2; Chapter 4 comes next");
   assert.equal(nextStep({ ...base, paid: early, day: 2, rank: 2 })?.id, "3.10");
   assert.equal(chapterDue({ ...base, paid: all })?.n, 1);
   assert.equal(chapterDue({ ...base, paid: all, chapters: [1] }), null);

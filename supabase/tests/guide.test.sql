@@ -101,4 +101,18 @@ select public.guide_claim(s) from unnest(array['3.1', '3.2', '3.3', '3.4', '3.5'
 select pg_temp.assert(public.guide_state() -> 'chapters' @> '[1, 2, 3]', 'chapter 3 paid');
 select pg_temp.as_(pg_temp.u(12)::text);
 select pg_temp.assert(public.guide_state() -> 'ready' ? '3.11', 'posting a job counts too');
+
+-- ---- Chapter 4: a club, VIP, a place's activity, a hunt clue, a post, a calendar event, the Pass, a shoutout ----
+select pg_temp.as_(pg_temp.u(11)::text);
+select public.guide_seen('4.1');
+reset role;
+select public.ledger_once(pg_temp.u(11), 'clout', 5, k, 'x') from unnest(array['vip', 'place_life', 'story_read', 'calendar', 'season_free']) k;
+insert into public.hunts (id, week, data) values ('guide-test', '2031-01-04', '{}');
+insert into public.hunt_progress (player_id, hunt_id, style, step) values (pg_temp.u(11), 'guide-test', 'bodega_drip', 1);
+insert into public.radio_shoutouts (player_id, handle, message, ny_date, owner_confirmed) values (pg_temp.u(11), 'guided', 'Hello Queens', public.ny_today(), true);
+set role authenticated;
+select pg_temp.as_(pg_temp.u(11)::text);
+select pg_temp.assert(public.guide_state() -> 'ready' @> '["4.1", "4.2", "4.3", "4.4", "4.5", "4.6", "4.7", "4.8"]', 'every Chapter 4 step ready');
+select public.guide_claim(s) from unnest(array['4.1', '4.2', '4.3', '4.4', '4.5', '4.6', '4.7', '4.8']) s;
+select pg_temp.assert(public.guide_state() -> 'chapters' @> '[4]', 'chapter 4 paid');
 rollback;

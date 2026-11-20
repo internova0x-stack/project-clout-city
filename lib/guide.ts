@@ -27,7 +27,7 @@ export type GuideCheck =
   | { bill: true }
   /** Has one of these (each a table the server reads): an aspiration, a career job, a workday done, an office move, a
    *  business, a job on the players' Jobs board (posted or taken). */
-  | { has: "aspiration" | "job" | "workday" | "office_move" | "business" | "board_job" };
+  | { has: "aspiration" | "job" | "workday" | "office_move" | "business" | "board_job" | "hunt_step" | "shoutout" };
 
 export interface GuideCard { art: string; t: string; b: string }
 export interface GuideStep {
@@ -69,7 +69,7 @@ export const CHAPTERS: GuideChapter[] = [
   { n: 1, title: "Arrival", day: 1, badge: "Off the Bus", badgeId: "guide-1", reward: { cash: 500 }, live: true },
   { n: 2, title: "Looking after yourself", day: 1, badge: "Adulting (Allegedly)", badgeId: "guide-2", reward: { cash: 300 }, live: true },
   { n: 3, title: "Money", day: 2, badge: "Bag Secured", badgeId: "guide-3", reward: { cash: 500 }, live: true },
-  { n: 4, title: "More clout", day: 2, badge: "Locally Relevant", badgeId: "guide-4", reward: { clout: 150 }, live: false },
+  { n: 4, title: "More clout", day: 2, badge: "Locally Relevant", badgeId: "guide-4", reward: { clout: 150 }, live: true },
   { n: 5, title: "Home", day: 3, badge: "Landlord's Nightmare", badgeId: "guide-5", reward: { cash: 400 }, live: false },
   { n: 6, title: "Skills", day: 3, badge: "Multi-Hyphenate", badgeId: "guide-6", reward: { clout: 100 }, live: false },
   { n: 7, title: "Style", day: 2, badge: "Main Character Fit", badgeId: "guide-7", reward: { clout: 100 }, live: false },
@@ -366,6 +366,82 @@ STEPS.push(
     ],
     hint: "Open Jobs in your Phone and take or post one", targets: [PHONE],
     check: { has: "board_job" }, reward: { clout: 20 }, done: "Networking, but make it paid.",
+  },
+);
+
+// ---- Chapter 4: More clout (the clout basics are in Chapter 1).
+STEPS.push(
+  {
+    id: "4.1", chapter: 4, tag: "Nightlife", tip: "Get on the list.",
+    cards: [
+      { art: "🚪", t: "Clubs have a door.", b: "Each club wants a certain clout to get in, or a cover. Some nights are free; the big ones aren't." },
+      { art: "🕺", t: "Other ways past the rope.", b: "Rank 5 opens the exclusive door, Dance at level 3 gets you into every club, and a guest-list pass works once." },
+    ],
+    hint: "Go inside any club", targets: [".map-pin", ".compact-dot", MAP],
+    check: { seen: true }, reward: { clout: 20 }, done: "You're in. Act like you've been here before.",
+  },
+  {
+    id: "4.2", chapter: 4, tag: "Nightlife", tip: "VIP: same drinks, better lighting.",
+    cards: [
+      { art: "🍾", t: "Every club has a VIP floor.", b: "It's upstairs, behind the rope. Pay the cover, or get in free with enough clout." },
+      { art: "📸", t: "Get seen in VIP.", b: "Once a day per club it pays twice the main floor's clout. That's the whole point of VIP." },
+    ],
+    hint: "Go up to a club's VIP floor and get seen", targets: [".map-pin", ".compact-dot", MAP],
+    check: { ledger: ["vip"] }, reward: { clout: 40 }, done: "Seen in VIP. Your mother would be confused.",
+  },
+  {
+    id: "4.3", chapter: 4, tag: "Places", tip: "Every place has its thing.",
+    cards: [
+      { art: "✨", t: "Signature activities.", b: "Each place has something only it does, once a New York day. Pick an option; your skills help it go well." },
+      { art: "🗓️", t: "Happenings and regular cards.", b: "Some hours have a happening on. Visit a place on 3, 7 and 15 days and you become a regular, with a perk." },
+    ],
+    hint: "Do a place's signature activity", targets: ['button[aria-label^="Show "][aria-label$=" actions"]', ".map-pin", ".compact-dot", MAP],
+    check: { ledger: ["place_life"] }, reward: { clout: 20 }, done: "Very on brand for that place.",
+  },
+  {
+    id: "4.4", chapter: 4, tag: "Hunts", tip: "Saturday is hunt day.",
+    cards: [
+      { art: "🗺️", t: "A new treasure hunt every Saturday.", b: "Join it, follow the clues around the city and answer the question at each stop." },
+      { art: "🎁", t: "The chest at the end.", b: "Finish the hunt for a big C$ and clout reward. A wrong answer only slows you down." },
+    ],
+    hint: "Join this week's hunt and solve a clue", targets: ['button[aria-label^="New treasure hunt"]', 'button[aria-label^="Treasure hunt"]', 'button[aria-label^="Tasks and goals"]'],
+    check: { has: "hunt_step" }, reward: { clout: 30 }, done: "Clue solved. Very National Treasure of you.",
+  },
+  {
+    id: "4.5", chapter: 4, tag: "Stories", tip: "Read the drama.",
+    cards: [
+      { art: "📰", t: "The city has a main story.", b: "New chapters land in News. The full blog posts tell you what really happened." },
+      { art: "🔥", t: "Reading pays.", b: "Each full post you read pays 10 clout, once. Stories also send you tasks and events." },
+    ],
+    hint: "Open News in your Phone and read a full post", targets: [PHONE],
+    check: { ledger: ["story_read"] }, reward: { cash: 50 }, done: "Caught up. You know things now.",
+  },
+  {
+    id: "4.6", chapter: 4, tag: "Calendar", tip: "Mark your calendar.",
+    cards: [
+      { art: "📅", t: "Real-date events.", b: "Holidays, name days and big nights happen on their real dates. Invites show on your Phone two weeks out." },
+      { art: "🎁", t: "Bring a gift, dress up.", b: "Some invites expect a gift box from the deli. Wearing something from the Shop pays extra clout." },
+    ],
+    hint: "Go to a calendar event when one is on", targets: ['button[aria-label="Events"]', PHONE],
+    check: { ledger: ["calendar"] }, reward: { clout: 30 }, done: "You showed up. Half of life, apparently.",
+  },
+  {
+    id: "4.7", chapter: 4, tag: "Clout Pass", tip: "The Clout Pass.",
+    cards: [
+      { art: "🎟️", t: "Tasks and goals fill the Pass.", b: "Daily tasks, all five and goals earn Pass XP. Each level has a free reward." },
+      { art: "📆", t: "Three challenges a week.", b: "They pay extra XP. The paid row adds pieces you can't buy; VIP includes it." },
+    ],
+    hint: "Open the Clout Pass and collect a reward", targets: ['button[aria-label^="Clout Pass"]', 'button[aria-label^="Tasks and goals"]'],
+    check: { ledger: ["season_free"] }, reward: { clout: 20 }, done: "Collected. Free stuff hits different.",
+  },
+  {
+    id: "4.8", chapter: 4, tag: "On air", tip: "Get yourself on the radio.",
+    cards: [
+      { art: "📻", t: "Real Clout FM reads shoutouts.", b: "Send one with your handle. The best ones go on air for the whole city." },
+      { art: "📺", t: "Clout TV has a Big Screen.", b: "Send a photo; picks rotate every three hours. Being on air or on screen pays clout." },
+    ],
+    hint: "Send Real Clout FM a shoutout from your Phone", targets: [PHONE],
+    check: { has: "shoutout" }, reward: { clout: 20 }, done: "Shoutout sent. Fingers crossed.",
   },
 );
 
