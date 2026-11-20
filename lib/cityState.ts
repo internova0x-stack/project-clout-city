@@ -119,6 +119,8 @@ export interface CityState {
   devTools: boolean;
   /** Saved furniture positions at home (lib/rooms.ts LayoutEntry[]), or null for the default. */
   homeLayout: unknown;
+  /** Build mode (migration 0169): the player's plan for their home (lib/homeBuild.ts HomePlan), or null. */
+  homePlan?: unknown;
   /** Studio-approved lines for the regulars live today (migration 0016): regular id → lines. */
   npcLines?: Record<string, string[]>;
   /** v0.8 rest at home (migration 0026): naps and sits used today. Missing until 0026 runs. */
@@ -193,6 +195,8 @@ export interface CityApi {
   payBill(billId: number): Promise<CityResult>;
   setClockOffset(hours: number): Promise<CityResult>;
   saveHomeLayout(layout: { id: string; x: number; z: number; rot: number }[]): Promise<CityResult>;
+  /** Build mode (migration 0169): the server checks the plan, charges what it costs over the last one and stores it. */
+  saveHomePlan?(plan: import("./homeBuild.ts").HomePlan): Promise<CityResult>;
   /** #19 clubs (migration 0046): up to a club's VIP floor. Without `pay` it only says what the cover is. */
   enterVip?(placeId: string, pay: boolean): Promise<CityResult>;
   /** #19 clubs: "Get seen in VIP", once a day per club, twice the main floor's clout. */

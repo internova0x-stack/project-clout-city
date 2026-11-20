@@ -67,6 +67,8 @@ import { DateSheet, DatingPrompt, DatingSheet } from "./dating/Dating";
 import { CouplePrompt, CoupleSheet } from "./dating/Couple";
 import { CohabitHomeBar, SubletHomeBar, type SubletHandlers } from "./city/Sublets";
 import { HomeScoreSheet } from "./home/HomeScore";
+import { BuildMode } from "./home/BuildMode";
+import { OUTSIDE, OUTSIDE_FLOOR, builtTemplate, homeFloorsFor, homeKeyOf, planFor, yardTemplate } from "@/lib/homeBuild";
 import { StarterPill, StarterSheet, UnlockReveal } from "./game/Starter";
 import { BarksleySheet } from "./city/Barksley";
 import type { CompanyView } from "@/lib/companies";
@@ -509,6 +511,7 @@ export function GameShell({
   const online = usePlayersOnline(player.id);
   const [busy, setBusy] = useState<string | null>(null);
   const [arranging, setArranging] = useState(false);
+  const [buildOpen, setBuildOpen] = useState(false);
   const [gain, setGain] = useState<Gain | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const [campaignOpen, setCampaignOpen] = useState(false);
@@ -1910,7 +1913,13 @@ export function GameShell({
   // #19: the home in the room view: a listing being looked at, else your home (upstairs when you're there).
   const baseHome = homeTemplate(me.home_id, city?.player.house_sku);
   const upstairs = homeFloor > 1 ? HOME_FLOORS[baseHome.id]?.[homeFloor] : undefined;
-  const floorNow = upstairs ? homeFloor : 1;
+  // Build mode (migration 0169): the plan for this home, and the Outside floor (floor 0).
+  const homeKey = homeKeyOf(me.home_id, city?.player.house_sku);
+  const myPlan = planFor(city?.homePlan, homeKey);
+  const outsideNow = homeFloor === OUTSIDE_FLOOR;
+  const floorNow = upstairs ? homeFloor : outsideNow ? OUTSIDE_FLOOR : 1;
+  const floorKeyNow = outsideNow ? OUTSIDE : String(floorNow);
+  const myHome = builtTemplate(outsideNow ? yardTemplate(homeKey, !!city?.player.house_sku) : upstairs ?? baseHome, myPlan, floorKeyNow);
   const viewing = viewHome ? HOME_TEMPLATES[viewHome] : undefined;
   // #19 Fif's Furniture: what the player bought for their home (placed or in storage).
   // A catalog piece (Clout Couture's sofa and statue) has its furniture in CATALOG_FURNITURE and its words in the catalog.
@@ -3335,7 +3344,7 @@ export function GameShell({
         <div className="layer">
           <Room3D
             act={viewing || decor ? null : roomAct}
-            template={viewing ?? decorHome ?? visitView?.template ?? sharedHome?.template ?? upstairs ?? baseHome}
+            template={viewing ?? decorHome ?? visitView?.template ?? sharedHome?.template ?? myHome}
             floor={viewing || decorHome || visitView || sharedHome ? 1 : floorNow}
             layout={viewing ? null : decor ? decor.layout : visitView ? visitView.layout : sharedHome ? sharedHome.layout : city?.homeLayout}
             crowd={viewing || decor ? undefined : visitCrowd}
@@ -3358,6 +3367,8 @@ export function GameShell({
               if (kitchenOn && it.use?.kind === "cook") setKitchenOpen(true);
             }}
             onEditingChange={setArranging}
+            onBuild={cityApi?.saveHomePlan && !decor && !tryHome ? () => setBuildOpen(true) : undefined}
+            outside={cityOn && flow === "none" && !viewing && !decor && !visitView && !sharedHome ? { label: outsideNow ? "🏠 Inside" : "🌳 Outside", go: () => setHomeFloor(outsideNow ? 1 : OUTSIDE_FLOOR) } : undefined}
             mood={roomMood}
             onSaveLayout={(l) => (decor && together ? saveDecor(l) : cityApi ? run("layout", () => cityApi.saveHomeLayout(mergeFloorLayout(city?.homeLayout, l, floorNow))) : Promise.resolve(true))}
             owned={viewing ? undefined : decor ? decorPieces : visitView ? visitView.owned : sharedHome ? sharedHome.owned : ownedHere}
@@ -3373,6 +3384,18 @@ export function GameShell({
               return cityApi.saveHomeLayout(mergeFloorLayout(r.state.homeLayout, l.map((e) => (e.id === "trial" ? { ...e, id: ownedId(it.id) } : e)), floorNow));
             }))}
           />
+          {buildOpen && city && cityApi?.saveHomePlan && (
+            <BuildMode
+              floors={homeFloorsFor(me.home_id, city.player.house_sku)}
+              startFloor={floorKeyNow}
+              saved={myPlan}
+              homeKey={homeKey}
+              bank={city.player.bank_cash}
+              furniture={{ [floorKeyNow]: applyLayout(myHome, city.homeLayout, ownedHere, floorNow) }}
+              onSave={(plan) => run("build", () => cityApi.saveHomePlan!(plan)).then((ok) => { if (ok) setToast("Built. The contractor didn't even ghost you."); return ok; })}
+              onClose={() => setBuildOpen(false)}
+            />
+          )}
           {visitView && visitRoomS && (
             <VisitBar title={`${KIND_LABEL[visitRoomS.kind].emoji} At ${handle(visitView.hostName)}'s`} clock={visitClock(visitRoomS.starts, visitRoomS.ends)}
               here={visitRoomS.people.length + 1} unread={0} onChat={() => setVisitChatOpen(true)} onLeave={() => void leaveVisit()} leaveLabel="Leave" />

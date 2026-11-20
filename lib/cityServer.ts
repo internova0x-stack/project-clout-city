@@ -21,7 +21,7 @@ export async function loadCityState(supabase: SupabaseClient): Promise<CityState
   const player = me as CityPlayer & { id: string };
   const { data: today } = await supabase.rpc("ny_today");
   const day = today as string;
-  const [tasks, gigs, bills, items, visits, attended, dev, layout, npc, rest, uses, lotto, perks, days, calendar, catalog, style, rentPart] = await Promise.all([
+  const [tasks, gigs, bills, items, visits, attended, dev, layout, plan, npc, rest, uses, lotto, perks, days, calendar, catalog, style, rentPart] = await Promise.all([
     supabase.from("daily_tasks").select("*").eq("ny_date", day).order("slot"),
     supabase
       .from("gig_offers")
@@ -36,6 +36,8 @@ export async function loadCityState(supabase: SupabaseClient): Promise<CityState
     supabase.from("game_settings").select("value").eq("key", "dev").maybeSingle(),
     // Migration 0006; missing until it runs, which just means the default layout.
     supabase.from("players").select("home_layout").eq("id", player.id).maybeSingle(),
+    // Migration 0169; missing until it runs, which just means the home as it came.
+    supabase.from("players").select("home_plan").eq("id", player.id).maybeSingle(),
     // Migration 0016; missing until it runs, which just means the evergreen lines.
     supabase.rpc("npc_lines_live"),
     // Migration 0026; missing until it runs, which hides Nap and Sit.
@@ -98,6 +100,7 @@ export async function loadCityState(supabase: SupabaseClient): Promise<CityState
     clockOffsetSeconds: Number(devValue.clockOffsetSeconds ?? 0),
     devTools: devValue.tools === true,
     homeLayout: layout.error ? null : (layout.data as { home_layout: unknown } | null)?.home_layout ?? null,
+    homePlan: plan.error ? null : (plan.data as { home_plan: unknown } | null)?.home_plan ?? null,
     npcLines: npc.error ? {} : ((npc.data ?? {}) as Record<string, string[]>),
     actionsToday: uses.error ? undefined : ((uses.data ?? []) as { place_id: string; action_id: string }[]).map((u) => `${u.place_id}:${u.action_id}`),
     lotto: lotto.error || !lotto.data ? undefined : (lotto.data as LottoState),

@@ -1473,6 +1473,62 @@ function buildBoxFurniture(item: RoomItem, k: Kit, opts: { night: boolean }): Bu
       }
       return { group: g };
     }
+    // ---- Build mode's garden (owner, Nov 20) ----
+    case "hedge": {
+      // A clipped box hedge on a soil strip.
+      box(w, 0.08, d, "#5A4030");
+      box(w - 0.04, 0.72, d - 0.06, "#3F7A35", 0, 0.08, 0);
+      for (let i = 0; i < Math.round(w / 0.4); i++) {
+        const b = new Mesh(k.geo(new DodecahedronGeometry(0.2)), k.mat(i % 2 ? "#4C8A3E" : "#3F7A35"));
+        b.position.set(-w / 2 + 0.2 + i * 0.4, 0.8, 0); b.scale.set(1, 0.6, 1); g.add(b);
+      }
+      return { group: g };
+    }
+    case "picketFence": {
+      // White pickets with two rails.
+      const white = "#F7F4EC";
+      for (const y of [0.25, 0.6]) box(w, 0.06, 0.04, white, 0, y, -0.02);
+      for (let x = -w / 2 + 0.07; x <= w / 2; x += 0.18) {
+        box(0.08, 0.85, 0.03, white, x, 0, 0.02);
+        const tip = new Mesh(k.geo(new ConeGeometry(0.055, 0.1, 4)), k.mat(white));
+        tip.position.set(x, 0.9, 0.02); tip.rotation.y = Math.PI / 4; g.add(tip);
+      }
+      return { group: g };
+    }
+    case "flowerBed": {
+      // A low brick-edged bed full of flowers.
+      box(w, 0.18, d, "#B5654A");
+      box(w - 0.1, 0.03, d - 0.1, "#4A3626", 0, 0.18, 0);
+      const colors = ["#FF6FA8", "#FFD23F", "#F7F4EC", "#B26BFF", "#FF7A45"];
+      let seed = 7;
+      const rnd = () => ((seed = (seed * 48271) % 2147483647) / 2147483647);
+      for (let i = 0; i < Math.round(w * d * 16); i++) {
+        const x = -w / 2 + 0.1 + rnd() * (w - 0.2), z = -d / 2 + 0.1 + rnd() * (d - 0.2);
+        box(0.02, 0.18, 0.02, "#3F7A35", x, 0.2, z);
+        const f = new Mesh(k.geo(new DodecahedronGeometry(0.05)), k.mat(colors[i % colors.length]));
+        f.position.set(x, 0.4, z); g.add(f);
+      }
+      return { group: g };
+    }
+    case "grill": {
+      // A kettle grill on legs with a side shelf.
+      for (const [x, z] of [[-0.2, -0.15], [0.2, -0.15], [0, 0.2]]) box(0.04, 0.6, 0.04, "#2A2A2E", x, 0, z);
+      const bowl = new Mesh(k.geo(new SphereGeometry(0.3, 12, 8, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2)), k.mat("#1F1F24", { roughness: 0.5 }));
+      bowl.position.y = 0.88; g.add(bowl);
+      const lid = new Mesh(k.geo(new SphereGeometry(0.3, 12, 8, 0, Math.PI * 2, 0, Math.PI / 2)), k.mat("#C0392B", { roughness: 0.4 }));
+      lid.position.y = 0.9; lid.scale.y = 0.7; g.add(lid);
+      box(0.3, 0.03, 0.25, WOOD, 0.42, 0.75, 0);
+      return { group: g };
+    }
+    case "sunLounger": {
+      // A teak lounger with a white cushion, its back raised at the head (-z).
+      for (const x of [-w / 2 + 0.05, w / 2 - 0.05]) box(0.05, 0.25, d, WOOD, x, 0, 0);
+      box(w, 0.05, d * 0.7, WOOD, 0, 0.25, d * 0.15);
+      box(w - 0.08, 0.06, d * 0.68, "#F7F4EC", 0, 0.3, d * 0.15);
+      const back = box(w - 0.08, 0.06, d * 0.32, "#F7F4EC", 0, 0.45, -d * 0.33);
+      back.rotation.x = 0.6;
+      return { group: g, seatY: 0.36 };
+    }
     case "fountain": {
       // A round fountain: a stone basin, the water, a tiered column and a jet that sparkles.
       cyl(w / 2, w / 2 + 0.05, 0.45, "#D9D3C8", 0, 0, 0, 28);

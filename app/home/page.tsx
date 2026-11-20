@@ -36,6 +36,7 @@ import { partyRoomReport, partyRoomSay, partyRoomState } from "./partyRoomAction
 import { radioReport, radioRequest, radioState } from "./radioActions";
 import { mayorSeen, mayorState, mayorWrite } from "./mayorActions";
 import { characterRemembered } from "./characterActions";
+import { saveHomePlan } from "./buildActions";
 import { choiceBail, choiceBlotter, choiceConditions, choiceChoose, choiceOffer, choiceSeen, choiceSkip, choiceState, favorOpen, favorPeek, npcBigFavor, npcBonds, npcPerk } from "./choiceActions";
 import { underworldDeclineHire, underworldHire, underworldHires, underworldJob, underworldLawyer, underworldRunHire, underworldRunners, underworldScreen, underworldSeen, underworldTable } from "./underworldActions";
 import { galaDonate, galaState } from "./galaActions";
@@ -132,6 +133,7 @@ export default async function HomePage() {
         payBill,
         setClockOffset,
         saveHomeLayout,
+        saveHomePlan,
         moveHome,
         enterVip,
         vipSeen,

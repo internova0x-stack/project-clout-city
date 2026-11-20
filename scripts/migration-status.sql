@@ -182,6 +182,7 @@ from (values
   ('0165_once_a_day_and_sleep.sql', to_regprocedure('public.do_action_v0039(text, text)') is not null),
   ('0166_lotto_odds.sql', coalesce((select prosrc like '%lotto_weekly_cap%' from pg_proc where oid = to_regprocedure('public.buy_lotto_card(text, text, boolean)')), false)),
   ('0167_season_pass_stakes.sql', to_regprocedure('public.season_titled()') is not null),
-  ('0168_trip_skip_price.sql', coalesce((select (value -> 'economy' -> 'travel' -> 'skip' ->> 'min')::int = 20 from public.game_settings where key = 'city'), false))
+  ('0168_trip_skip_price.sql', coalesce((select (value -> 'economy' -> 'travel' -> 'skip' ->> 'min')::int = 20 from public.game_settings where key = 'city'), false)),
+  ('0169_home_build.sql', to_regprocedure('public.home_build_save(uuid, jsonb, integer, text)') is not null)
 ) as m(file, ran)
 order by (m.ran is distinct from false), m.file;
