@@ -1398,6 +1398,91 @@ function buildBoxFurniture(item: RoomItem, k: Kit, opts: { night: boolean }): Bu
       for (let x = -w / 2 + 0.05; x <= w / 2 - 0.04; x += 0.15) cyl(0.022, 0.022, 2.3, steel, x, 0.04, 0, 6);
       return { group: g };
     }
+    case "dog": {
+      // A sitting dog (the firehouse's Hydrant, a park's regulars): a white coat with black spots, ears, a wagging tail.
+      const coat = k.mat(color ?? "#F4F1EA"), spot = k.mat("#1F1B26");
+      box(0.5, 0.28, 0.24, coat, -0.05, 0.18, 0);
+      box(0.22, 0.3, 0.22, coat, 0.22, 0.24, 0);
+      box(0.2, 0.18, 0.18, coat, 0.32, 0.5, 0);
+      box(0.12, 0.08, 0.12, spot, 0.43, 0.52, 0);
+      for (const sz of [-1, 1]) box(0.05, 0.1, 0.06, spot, 0.3, 0.68, sz * 0.07);
+      for (const [x, z] of [[-0.2, -0.09], [-0.2, 0.09], [0.18, -0.08], [0.18, 0.08]]) box(0.07, 0.18, 0.07, coat, x, 0, z);
+      box(0.12, 0.02, 0.1, spot, -0.1, 0.46, 0.06);
+      box(0.1, 0.02, 0.08, spot, 0.05, 0.46, -0.05);
+      const tail = new Group(); tail.position.set(-0.3, 0.38, 0); g.add(tail);
+      const tm = new Mesh(k.geo(new BoxGeometry(0.05, 0.2, 0.05)), coat); tm.position.y = 0.1; tail.add(tm);
+      return { group: g, tick: (t) => { tail.rotation.x = Math.sin(t * 6 + item.x) * 0.6; } };
+    }
+    case "fireTruck": {
+      // A red fire engine (the box-built stand-in for the modeled one): the cab, the body with lockers, a ladder on top, chrome.
+      const red = k.mat("#D93A2F"), chrome = k.mat("#D9DDE3", { metalness: 0.7, roughness: 0.25 });
+      box(w, 1.6, d - 0.2, red, 0, 0.45, 0);
+      box(1.6, 1.0, d - 0.2, red, w / 2 - 0.8, 2.05, 0);
+      box(0.05, 0.6, d - 0.6, k.mat("#2B3440"), w / 2 + 0.01, 2.2, 0);
+      box(w - 2.2, 0.12, 0.5, chrome, -0.9, 2.15, 0);
+      box(w, 0.2, d, chrome, 0, 0.4, 0);
+      for (const x of [-w / 2 + 1.1, -w / 2 + 2.4, w / 2 - 1.2]) for (const sz of [-1, 1]) {
+        const wheel = new Mesh(k.geo(new CylinderGeometry(0.42, 0.42, 0.28, 14)), k.mat("#1F1B26"));
+        wheel.rotation.x = Math.PI / 2; wheel.position.set(x, 0.42, sz * (d / 2 - 0.12)); g.add(wheel);
+      }
+      box(0.3, 0.12, 0.6, glow("#4FA3FF", 1.4), w / 2 - 0.8, 2.6, 0);
+      return { group: g };
+    }
+    case "gearLocker": {
+      // Turnout gear on a hook: the tan coat with yellow reflective bands, boots below, the helmet on the shelf.
+      box(w, 0.06, d, METAL, 0, 0, 0);
+      box(w, 0.04, d, METAL, 0, 1.95, 0);
+      for (const sx of [-1, 1]) box(0.04, 2.0, 0.04, METAL, sx * (w / 2 - 0.02), 0, -d / 2 + 0.02);
+      box(0.5, 0.8, 0.22, "#B89A62", 0, 0.85, 0);
+      box(0.52, 0.06, 0.24, glow("#E8D24A", 0.6), 0, 1.0, 0);
+      box(0.52, 0.06, 0.24, glow("#E8D24A", 0.6), 0, 1.35, 0);
+      for (const sx of [-1, 1]) box(0.14, 0.3, 0.22, "#1F1B26", sx * 0.12, 0.06, 0);
+      const helmet = new Mesh(k.geo(new SphereGeometry(0.16, 10, 8, 0, Math.PI * 2, 0, Math.PI / 2)), k.mat("#D93A2F"));
+      helmet.position.set(0, 1.99, 0); g.add(helmet);
+      return { group: g };
+    }
+    case "firePole": {
+      // The brass pole, floor to ceiling, through a ring in the ceiling and a round mat at its foot.
+      cyl(0.32, 0.32, 0.04, "#2B2B2B", 0, 0, 0, 16);
+      cyl(0.04, 0.04, 2.9, k.mat("#C9A227", { metalness: 0.7, roughness: 0.25 }), 0, 0.04, 0, 10);
+      const ring = new Mesh(k.geo(new TorusGeometry(0.28, 0.04, 6, 20)), k.mat("#D93A2F"));
+      ring.rotation.x = Math.PI / 2; ring.position.y = 2.9; g.add(ring);
+      return { group: g };
+    }
+    case "curtain": {
+      // A hospital bay's curtain on a ceiling rail: soft blue pleats.
+      box(w, 0.04, 0.04, METAL, 0, 2.3, 0);
+      const fab = k.mat(color ?? "#A8D3E8");
+      const n = 9;
+      for (let i = 0; i < n; i++) box(w / n + 0.02, 1.9, 0.05, fab, -w / 2 + (w * (i + 0.5)) / n, 0.35, i % 2 ? 0.03 : -0.03);
+      return { group: g };
+    }
+    case "runTrack": {
+      // A running track: a terracotta loop with white lane lines around an inner lawn, flat on the ground.
+      const clay = k.mat("#C9653F"), line = k.mat("#F4F1EA"), grass = k.mat("#8FCB7A");
+      box(w - 2.4, 0.015, d - 2.4, grass, 0, 0, 0);
+      const lane = 1.0;
+      for (const sz of [-1, 1]) {
+        box(w - d + 0.2, 0.02, lane, clay, 0, 0, sz * (d / 2 - lane / 2));
+        box(w - d + 0.2, 0.025, 0.04, line, 0, 0, sz * (d / 2 - lane / 2));
+      }
+      for (const sx of [-1, 1]) for (let i = 0; i <= 10; i++) {
+        const a = -Math.PI / 2 + (i / 10) * Math.PI, r = d / 2 - lane / 2;
+        const seg = new Mesh(k.geo(new BoxGeometry(0.34 * r, 0.02, lane)), clay);
+        seg.position.set(sx * ((w - d) / 2 + Math.cos(a) * r), 0.01, Math.sin(a) * r); seg.rotation.y = sx > 0 ? -a + Math.PI / 2 : a + Math.PI / 2; g.add(seg);
+      }
+      return { group: g };
+    }
+    case "fountain": {
+      // A round fountain: a stone basin, the water, a tiered column and a jet that sparkles.
+      cyl(w / 2, w / 2 + 0.05, 0.45, "#D9D3C8", 0, 0, 0, 28);
+      const water = cyl(w / 2 - 0.15, w / 2 - 0.15, 0.04, k.mat("#7FC8E8", { emissive: "#7FC8E8", emissiveIntensity: 0.25, roughness: 0.15 }).clone(), 0, 0.42, 0, 28);
+      cyl(0.25, 0.32, 1.0, "#C9C2B4", 0, 0.45, 0, 12);
+      cyl(0.8, 0.7, 0.14, "#D9D3C8", 0, 1.4, 0, 18);
+      cyl(0.12, 0.16, 0.5, "#C9C2B4", 0, 1.5, 0, 10);
+      const jet = cyl(0.06, 0.14, 0.6, k.mat("#BFE6F7", { emissive: "#BFE6F7", emissiveIntensity: 0.5 }).clone(), 0, 1.95, 0, 10);
+      return { group: g, tick: (t) => { jet.scale.y = 0.85 + Math.sin(t * 3.4) * 0.15; (water.material as MeshStandardMaterial).emissiveIntensity = 0.2 + Math.sin(t * 1.3) * 0.08; } };
+    }
     case "chandelier": {
       // A brass ring of candle lights on a chain (the box-built stand-in).
       const brass = k.mat("#C9A227", { metalness: 0.5, roughness: 0.35 });

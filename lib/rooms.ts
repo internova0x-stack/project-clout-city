@@ -54,7 +54,9 @@ export type FurnitureKind =
   // Clout TV Tower (owner, Nov 20): a show's set on a riser and the studio's lights on stands
   | "tvSet" | "studioLight"
   // The precinct (owner, Nov 20): a holding cell's bars
-  | "cellBars";
+  | "cellBars"
+  // The firehouse, the hospital and the parks (owner, Nov 20)
+  | "dog" | "fireTruck" | "gearLocker" | "firePole" | "curtain" | "runTrack" | "fountain";
 
 export type ItemUse =
   | { kind: "action"; actionId: string }
@@ -237,6 +239,13 @@ export const FURNITURE: Record<FurnitureKind, { w: number; d: number; walkable?:
   tvSet: { w: 4.4, d: 3.0, label: "The set" },
   studioLight: { w: 0.6, d: 0.6, label: "Studio light" },
   cellBars: { w: 2.9, d: 0.15, label: "Cell bars" },
+  dog: { w: 0.8, d: 0.4, label: "The dog" },
+  fireTruck: { w: 7.2, d: 2.6, label: "Fire engine" },
+  gearLocker: { w: 0.9, d: 0.5, label: "Gear" },
+  firePole: { w: 0.4, d: 0.4, label: "The pole" },
+  curtain: { w: 2.2, d: 0.1, label: "Curtain" },
+  runTrack: { w: 10.0, d: 6.0, walkable: true, label: "Running track" },
+  fountain: { w: 3.2, d: 3.2, label: "Fountain" },
   cubicle: { w: 1.6, d: 1.5, label: "Cubicle" },
   glassWall: { w: 3.0, d: 0.12, label: "Glass wall" },
   displayCase: { w: 0.9, d: 0.9, label: "Display case" },
@@ -543,7 +552,7 @@ export function homeTemplate(homeId: string | null | undefined, houseSku?: strin
   return (houseSku && HOME_TEMPLATES[houseSku]) || HOME_TEMPLATES[homeId ?? ""] || HOME_TEMPLATES.astoria_studio;
 }
 
-export type PlaceTemplateId = "campaignGround" | "campaignWar" | "campaignRoof" | "clubBig" | "vipBig" | "rooftop" | "station" | "tvStudio" | "tvNewsroom" | "quadBig" | "lectureHall" | "libraryBig" | "diningBig" | "greekBig" | "precinctBig" | "restroom" | "vip" | "club" | "cafe" | "counter" | "lounge" | "store" | "showroom" | "campus" | "unisphere" | "gantries" | "lotto" | "office" | "officeSmall" | "officeBig" | "towerLobby" | "techFloor" | "execFloor" | "newsroom" | "streamHouse" | "streamFloor" | "atelier" | "tradingFloor" | "lawOffice" | "backRoom" | "civic" | "gym" | "plaza" | "penthouse" | "radio" | "broadcast" | "hub" | "hubGames" | "hubLounge" | "campusQuad" | "campusLibrary" | "campusDining" | "campusGreek";
+export type PlaceTemplateId = "campaignGround" | "campaignWar" | "campaignRoof" | "clubBig" | "vipBig" | "rooftop" | "station" | "tvStudio" | "tvNewsroom" | "quadBig" | "lectureHall" | "libraryBig" | "diningBig" | "greekBig" | "precinctBig" | "firehouseBig" | "hospitalBig" | "parkRiver" | "parkMeadow" | "restroom" | "vip" | "club" | "cafe" | "counter" | "lounge" | "store" | "showroom" | "campus" | "unisphere" | "gantries" | "lotto" | "office" | "officeSmall" | "officeBig" | "towerLobby" | "techFloor" | "execFloor" | "newsroom" | "streamHouse" | "streamFloor" | "atelier" | "tradingFloor" | "lawOffice" | "backRoom" | "civic" | "gym" | "plaza" | "penthouse" | "radio" | "broadcast" | "hub" | "hubGames" | "hubLounge" | "campusQuad" | "campusLibrary" | "campusDining" | "campusGreek";
 
 // v0.11 (spec section 11): every place can be entered. The shared templates take a place's own
 // actions: "*0" and "*1" are its first and second action (see placeRoom), so one office serves the
@@ -570,6 +579,131 @@ export const PLACE_TEMPLATES: Record<PlaceTemplateId, RoomTemplate> = {
     npcs: [
       { x: -1.4, z: -1.75, facing: 3.14 }, { x: 0.8, z: -1.75, facing: 3.14 }, { x: 0.3, z: -1.0, facing: -2.2 },
       { x: -0.6, z: 2.3, facing: 3.14, seated: true },
+    ],
+  },
+  // ---- Engine 7 Firehouse (owner, Nov 20: "go ahead") ----
+  // 20 × 14 m, white with red: the apparatus bay (the fire engine, turnout gear, the pole), the crew's kitchen and long table, the
+  // lounge, and Hydrant the firehouse dog (the place's action).
+  firehouseBig: {
+    id: "firehouseBig", w: 20, d: 14, wall: "#F7F5F2", wallAccent: "#D93A2F", floor: "#D6D9DE", floorKind: "concrete", window: true, spotlights: true,
+    rooms: [
+      { name: "Kitchen", x0: 1, z0: -7, x1: 10, z1: 0, floor: "#C9B79C", floorKind: "wood" },
+      { name: "Lounge", x0: 1, z0: 0, x1: 10, z1: 7, floor: "#D8C6A8", floorKind: "wood" },
+    ],
+    walls: [[1, -7, 1, -2.4], [1, 1.2, 1, 7], [1, 0, 3.6, 0], [6.4, 0, 10, 0]],
+    items: [
+      { id: "truck", kind: "fireTruck", x: -5.2, z: -1.6, rot: 1, model: "fireEngine", name: "Engine 7" },
+      ...[-5.6, -4.6, -3.6, -2.6, -1.6, -0.6].map((z, i) => ({ id: `gear-${i}`, kind: "gearLocker" as const, x: -9.7, z, rot: 1 })),
+      { id: "pole", kind: "firePole", x: -1.4, z: -5.8, rot: 0 },
+      { id: "dog", kind: "dog", x: -1.4, z: 3.4, rot: 3, use: MAIN(0), label: "*", name: "Hydrant" },
+      { id: "bay-bench", kind: "bench", x: -1.6, z: 6.4, rot: 2, use: { kind: "sit" }, label: "Sit" },
+      { id: "flag", kind: "flagStand", x: -9.4, z: 6.4, rot: 0 },
+      // The kitchen.
+      { id: "kitchen", kind: "kitchen", x: 4.8, z: -6.6, rot: 0 },
+      { id: "fridge", kind: "fridge", x: 8.4, z: -6.5, rot: 0, model: "k:kitchenFridgeLarge" },
+      { id: "table-1", kind: "diningTable", x: 4.6, z: -3.2, rot: 0 },
+      { id: "table-2", kind: "diningTable", x: 5.8, z: -3.2, rot: 0 },
+      ...[4.3, 4.9, 5.5, 6.1].flatMap((x, i) => [
+        { id: `chair-a-${i}`, kind: "chair" as const, x, z: -3.95, rot: 0 },
+        { id: `chair-b-${i}`, kind: "chair" as const, x, z: -2.45, rot: 2 },
+      ]),
+      // The lounge.
+      { id: "tv", kind: "tvStand", x: 5.0, z: 0.6, rot: 0, model: "k:televisionModern" },
+      { id: "sofa", kind: "sofa", x: 5.0, z: 6.2, rot: 2, color: "#8E1F2F", model: "sofa" },
+      { id: "lounge-table", kind: "coffeeTable", x: 5.0, z: 4.8, rot: 0 },
+      { id: "recliner-1", kind: "armchair", x: 2.6, z: 4.4, rot: 1, model: "k:loungeChair" },
+      { id: "recliner-2", kind: "armchair", x: 7.6, z: 4.4, rot: 3, model: "k:loungeChair" },
+      { id: "plant", kind: "plant", x: 9.5, z: 6.5, rot: 0, model: "monstera" },
+    ],
+    spawn: [-3.0, 5.6],
+    npcs: [
+      { x: -2.6, z: -1.2, facing: -1.57 }, { x: -8.8, z: -3.6, facing: 1.57 }, { x: 4.3, z: -3.95, facing: 0, seated: true },
+      { x: 6.1, z: -2.45, facing: 3.14, seated: true }, { x: 4.9, z: -6.0, facing: 0 }, { x: 5.0, z: 6.1, facing: 3.14, seated: true },
+      { x: -0.8, z: 2.6, facing: 2.4 },
+    ],
+  },
+  // ---- St. Copay's General Hospital (owner, Nov 20) ----
+  // 20 × 14 m, white with soft blue: reception and the waiting room, five patient bays behind curtains along the back, the nurses'
+  // station (volunteering) and the exam room (the check-up).
+  hospitalBig: {
+    id: "hospitalBig", w: 20, d: 14, wall: "#F7FAFC", wallAccent: "#5FB3D9", floor: "#EEF3F7", floorKind: "tile", window: true, alwaysLit: true, spotlights: true,
+    rooms: [
+      { name: "Bays", x0: -10, z0: -7, x1: 10, z1: -2.2, floor: "#E2EDF4", floorKind: "concrete" },
+      { name: "Exam room", x0: 3.4, z0: -0.6, x1: 10, z1: 7, floor: "#DCEAF2", floorKind: "concrete" },
+    ],
+    walls: [[3.4, -0.6, 3.4, 2.2], [3.4, 4.2, 3.4, 7], [3.4, -0.6, 10, -0.6]],
+    items: [
+      ...[-8.0, -4.4, -0.8, 2.8, 6.4].map((x, i) => ({ id: `bay-bed-${i}`, kind: "bed" as const, x, z: -5.6, rot: 0, model: "hospitalBed" })),
+      ...[-6.2, -2.6, 1.0, 4.6].map((x, i) => ({ id: `bay-curtain-${i}`, kind: "curtain" as const, x, z: -5.6, rot: 1 })),
+      { id: "reception", kind: "storeCounter", x: -5.0, z: 0.6, rot: 0, color: "#5FB3D9" },
+      ...[-9.0, -8.2, -7.4, -6.6].flatMap((x, i) => [
+        { id: `wait-a-${i}`, kind: "chair" as const, x, z: 3.6, rot: 2, model: "k:chairRounded" },
+        { id: `wait-b-${i}`, kind: "chair" as const, x, z: 5.0, rot: 2, model: "k:chairRounded" },
+      ]),
+      { id: "vending", kind: "drinksFridge", x: -9.4, z: 0.4, rot: 1 },
+      { id: "cooler", kind: "waterCooler", x: -3.2, z: 6.6, rot: 0 },
+      { id: "station", kind: "storeCounter", x: 0.4, z: 0.6, rot: 0, color: "#5FB3D9", use: MAIN(1), label: "*" },
+      { id: "exam-bed", kind: "bed", x: 7.8, z: 2.4, rot: 3, model: "hospitalBed", use: MAIN(0), label: "*" },
+      { id: "exam-desk", kind: "desk", x: 5.0, z: 6.2, rot: 2, model: "k:desk" },
+      { id: "exam-chair", kind: "chair", x: 5.0, z: 5.45, rot: 0, model: "k:chairDesk" },
+      { id: "exam-sink", kind: "bathSink", x: 9.6, z: 5.8, rot: 3 },
+      { id: "plant-1", kind: "plant", x: -9.5, z: 6.5, rot: 0, model: "monstera" },
+      { id: "plant-2", kind: "plant", x: 2.8, z: 6.5, rot: 0, model: "figTree" },
+    ],
+    spawn: [-2.0, 5.2],
+    npcs: [
+      { x: -5.0, z: 0.0, facing: 0 }, { x: 0.4, z: 0.0, facing: 0 }, { x: -8.2, z: 3.6, facing: 3.14, seated: true },
+      { x: -6.6, z: 5.0, facing: 3.14, seated: true }, { x: -4.4, z: -4.2, facing: 3.14 }, { x: 2.8, z: -4.0, facing: 0.4 },
+      { x: 5.0, z: 5.45, facing: 0, seated: true }, { x: 1.2, z: 3.4, facing: 2.2 },
+    ],
+  },
+  // ---- The parks (owner, Nov 20) ----
+  // Astoria Park by the river: riverside benches (the bench by the river), the running track (a lap), the picnic lawn, the dog
+  // run (walking dogs), the iron fountain (the signature piece), trees and lamps.
+  parkRiver: {
+    id: "parkRiver", w: 26, d: 20, wall: "#BFD3E0", wallAccent: "#7FA36A", floor: "#E8E2D6", floorKind: "tile",
+    outdoor: { height: 4.5, edge: "#7FA36A", water: true, view: [13, 11] },
+    items: [
+      ...[-8.6, 0, 8.6].map((x, i) => ({ id: `rail-${i}`, kind: "railing" as const, x, z: -9.6, rot: 0 })),
+      { id: "river-bench-1", kind: "bench", x: -5.0, z: -8.6, rot: 2, use: MAIN(0), label: "*", model: "stationBench" },
+      { id: "river-bench-2", kind: "bench", x: 1.4, z: -8.6, rot: 2, use: { kind: "sit" }, label: "Sit", model: "stationBench" },
+      { id: "river-bench-3", kind: "bench", x: 7.6, z: -8.6, rot: 2, model: "stationBench" },
+      { id: "track", kind: "runTrack", x: -6.0, z: 1.0, rot: 0, use: MAIN(1), label: "*" },
+      { id: "lawn-1", kind: "rug", x: 6.0, z: 2.0, rot: 0, color: "#7CC86B" },
+      { id: "lawn-2", kind: "rug", x: 8.4, z: 2.0, rot: 0, color: "#7CC86B" },
+      { id: "picnic", kind: "rug", x: 7.2, z: 3.8, rot: 0, color: "#D93A2F", use: MAIN(2), label: "*" },
+      { id: "fountain", kind: "fountain", x: 4.6, z: -4.4, rot: 0 },
+      ...[6.2, 10.2].map((x, i) => ({ id: `dogrun-${i}`, kind: "bench" as const, x, z: 8.2, rot: 2 })),
+      { id: "dog", kind: "dog", x: 8.2, z: 6.8, rot: 1, use: MAIN(3), label: "*" },
+      { id: "dog-2", kind: "dog", x: 10.6, z: 6.2, rot: 2 },
+      ...[[-12, -6.4], [-12, 7.8], [12, -6.4], [12, 0.4], [-0.8, 8.6], [-12, 1.2], [2.6, -6.8], [12, 8.6]].map(([x, z], i) => ({ id: `tree-${i}`, kind: "tree" as const, x, z, rot: 0 })),
+      ...[[-1.6, -6.4], [9.6, -6.4], [0.2, 4.2], [-9.4, 7.6]].map(([x, z], i) => ({ id: `lamp-${i}`, kind: "lamppost" as const, x, z, rot: 0 })),
+      { id: "cart", kind: "foodCart", x: 2.6, z: 7.6, rot: 2, color: "#F2A900" },
+    ],
+    spawn: [0.0, 8.6],
+    npcs: [
+      { x: -5.0, z: -8.5, facing: 3.14, seated: true }, { x: -9.6, z: 1.0, facing: 0 }, { x: -2.4, z: 3.6, facing: 1.57 },
+      { x: 6.6, z: 3.6, facing: 2.2, seated: true }, { x: 7.8, z: 4.2, facing: -2.6, seated: true }, { x: 4.6, z: -2.2, facing: 3.14 },
+      { x: 8.8, z: 6.0, facing: 0.6 }, { x: 1.4, z: -8.5, facing: 3.14, seated: true },
+    ],
+  },
+  // Flushing Meadows: the big fountain plaza in the middle (hanging out by the fountains), lawns either side, benches round it,
+  // paths, trees and the ice-cream cart (the signature piece).
+  parkMeadow: {
+    id: "parkMeadow", w: 26, d: 20, wall: "#BFD3E0", wallAccent: "#7FA36A", floor: "#E8E2D6", floorKind: "tile",
+    outdoor: { height: 4.5, edge: "#7FA36A", view: [13, 11] },
+    items: [
+      { id: "fountain", kind: "fountain", x: 0, z: -1.0, rot: 0, use: MAIN(0), label: "*" },
+      ...[[-8, -5], [-8, -2], [-8, 3], [-8, 6], [8, -5], [8, -2], [8, 3], [8, 6]].map(([x, z], i) => ({ id: `lawn-${i}`, kind: "rug" as const, x, z, rot: 0, color: "#7CC86B" })),
+      ...[[-3.4, -1.0, 1], [3.4, -1.0, 3], [0, -4.4, 0], [0, 2.4, 2]].map(([x, z, r], i) => ({ id: `bench-${i}`, kind: "bench" as const, x, z, rot: r, model: "stationBench", ...(i === 0 ? { use: { kind: "sit" as const }, label: "Sit" } : {}) })),
+      ...[[-12, -8.4], [-12, -3.6], [-12, 1.2], [-12, 6.0], [12, -8.4], [12, -3.6], [12, 1.2], [12, 6.0], [-4, -8.6], [4, -8.6]].map(([x, z], i) => ({ id: `tree-${i}`, kind: "tree" as const, x, z, rot: 0 })),
+      ...[[-4.6, 5.4], [4.6, 5.4], [-4.6, -6.4], [4.6, -6.4]].map(([x, z], i) => ({ id: `lamp-${i}`, kind: "lamppost" as const, x, z, rot: 0 })),
+    ],
+    spawn: [0.0, 8.6],
+    npcs: [
+      { x: -2.0, z: -2.8, facing: 0.8 }, { x: 2.2, z: 0.8, facing: -2.4 }, { x: -3.4, z: -1.0, facing: 1.57, seated: true },
+      { x: -8.0, z: 3.0, facing: 1.0, seated: true }, { x: 8.2, z: -2.0, facing: -1.0, seated: true }, { x: 5.6, z: 6.8, facing: 2.2 },
+      { x: -1.0, z: 5.2, facing: 0.2 },
     ],
   },
   // ---- The 114½ Precinct (owner, Nov 20: "Next") ----
@@ -2133,8 +2267,9 @@ export const PLACE_GROUND: Record<string, PlaceTemplateId> = {
   "velvet-static": "clubBig", "hellgate-hall": "clubBig", "the-sticky-floor": "clubBig", "discount-disco": "clubBig", "ultraviolet-society": "clubBig",
   // The rooftops (owner, Nov 20).
   "altitude-718": "rooftop", "ditmars-heights-rooftop": "rooftop", "up-on-thirty": "rooftop",
-  // The 114½ Precinct (owner, Nov 20).
-  "precinct-114-half": "precinctBig",
+  // The 114½ Precinct, the firehouse, the hospital and the parks (owner, Nov 20).
+  "precinct-114-half": "precinctBig", "engine-7": "firehouseBig", "st-copays": "hospitalBig",
+  "hell-gate-park": "parkRiver", "flushing-meadows": "parkMeadow",
   // Clout TV Tower (owner, Nov 20): its Studio floor (the Newsroom is TOWERS' floor 2).
   "clout-tower": "tvStudio",
   // The subway station (owner, Nov 20): it used to be a map label only.
@@ -2159,6 +2294,8 @@ export const PLACE_SIGNATURE: Record<string, { add?: RoomItem[]; models?: Record
   "altitude-718": { add: [{ id: "sig-firepit", kind: "sectional", x: -5.5, z: 1.0, rot: 0, model: "firePit", name: "The fire pit" }] },
   "ditmars-heights-rooftop": { add: [{ id: "sig-cabana", kind: "sectional", x: -5.5, z: 1.0, rot: 0, color: "#F4F1EA", model: "cabana", name: "The cabana" }] },
   "precinct-114-half": { models: { desk: "precinctDesk" } },
+  "hell-gate-park": { models: { fountain: "parkFountain" } },
+  "flushing-meadows": { add: [{ id: "sig-cart", kind: "foodCart", x: 6.0, z: 8.2, rot: 2, color: "#D93A2F", model: "parkCart", name: "The ice-cream cart" }] },
   "clout-tower": { add: [{ id: "sig-talkshow", kind: "tvSet", x: 3.5, z: -4.6, rot: 0, model: "talkShow", name: "The talk-show set" }] },
   "astoria-blvd-station": { add: [{ id: "sig-entrance", kind: "stationEntrance", x: -8.6, z: 5.6, rot: 0, model: "subwayEntrance", name: "The way down to the street" }] },
   "up-on-thirty": { add: [{ id: "sig-tower", kind: "tree", x: -10.6, z: -4.4, rot: 0, model: "waterTower", name: "The water tower" }] },
@@ -2649,7 +2786,7 @@ export const PLAYER_SLOTS: Record<PlaceTemplateId, number> = {
   restroom: 3, vip: 4, club: 6, cafe: 5, counter: 4, lounge: 5, store: 5, showroom: 7, campus: 6, lotto: 4,
   unisphere: 7, gantries: 7, office: 5, officeSmall: 3, officeBig: 7, towerLobby: 6, techFloor: 7, execFloor: 6, newsroom: 7, streamHouse: 6, streamFloor: 7, atelier: 6, tradingFloor: 7, lawOffice: 6, backRoom: 3, civic: 5, gym: 5, plaza: 7, penthouse: 10, radio: 4, broadcast: 5,
   hub: 7, hubGames: 7, hubLounge: 7, campusQuad: 7, campusLibrary: 5, campusDining: 6, campusGreek: 7,
-  campaignGround: 12, campaignWar: 10, campaignRoof: 14, clubBig: 14, vipBig: 7, rooftop: 14, station: 12, tvStudio: 12, tvNewsroom: 12, quadBig: 14, lectureHall: 14, libraryBig: 12, diningBig: 14, greekBig: 14, precinctBig: 12,
+  campaignGround: 12, campaignWar: 10, campaignRoof: 14, clubBig: 14, vipBig: 7, rooftop: 14, station: 12, tvStudio: 12, tvNewsroom: 12, quadBig: 14, lectureHall: 14, libraryBig: 12, diningBig: 14, greekBig: 14, precinctBig: 12, firehouseBig: 12, hospitalBig: 12, parkRiver: 14, parkMeadow: 14,
 };
 /** The player figures a room holds (its party spots, or PLAYER_SLOTS by template; floors are "vip:place"). */
 export function playerSlots(t: RoomTemplate): number {

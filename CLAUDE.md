@@ -477,6 +477,12 @@ components live in `app/globals.css`.
   The 114½ Precinct (owner, Nov 20): `precinctBig` (20 × 14, light with blue, `PLACE_GROUND`): the lobby with Sgt. Bev's front desk
   (the report action; the signature precinctDesk model), waiting benches, flags, the notice board; the holding cell behind `cellBars`;
   the detectives' bullpen (eight desks, the case board, files, coffee); the interrogation room behind a one-way mirror (`glassWall`).
+  The firehouse, the hospital and the parks (owner, Nov 20: "go ahead"), all `PLACE_GROUND`: `firehouseBig` (the apparatus bay with the
+  `fireTruck` (signature fireEngine model), `gearLocker`s and the `firePole`, the kitchen and long table, the lounge, Hydrant the `dog` for
+  "Pet the firehouse dog"), `hospitalBig` (five patient bays behind `curtain`s with hospitalBed models, reception and waiting room, the
+  nurses' station for volunteering, the exam room for the check-up), `parkRiver` (Astoria Park, outdoor by the water: riverside benches,
+  the `runTrack`, the picnic lawn, the dog run, the `fountain` wearing the signature parkFountain model) and `parkMeadow` (Flushing
+  Meadows: the fountain plaza for hanging out, lawns, benches, the signature ice-cream cart). That finishes the 18 special places.
 - Rate limits (migration 0126, owner Oct 27): PostgREST's pre-request hook (`pgrst.db_pre_request` = `check_request()`) counts each
   signed-in player's writes per minute (`rate_counters`, `rate_hit`): 240 in all, plus buckets for guesses (hunt answers, exams,
   gossip, name checks: 20), reviewed posts (10), chat (30) and checkouts (10). Reads, signed-out requests and the service role are
