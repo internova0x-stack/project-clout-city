@@ -27,7 +27,8 @@ export type GuideCheck =
   | { bill: true }
   /** Has one of these (each a table the server reads): an aspiration, a career job, a workday done, an office move, a
    *  business, a job on the players' Jobs board (posted or taken). */
-  | { has: "aspiration" | "job" | "workday" | "office_move" | "business" | "board_job" | "hunt_step" | "shoutout" };
+  | { has: "aspiration" | "job" | "workday" | "office_move" | "business" | "board_job" | "hunt_step" | "shoutout"
+      | "layout" | "placed_piece" | "home_plan" | "garden" | "moved_up" | "hosted" };
 
 export interface GuideCard { art: string; t: string; b: string }
 export interface GuideStep {
@@ -70,7 +71,7 @@ export const CHAPTERS: GuideChapter[] = [
   { n: 2, title: "Looking after yourself", day: 1, badge: "Adulting (Allegedly)", badgeId: "guide-2", reward: { cash: 300 }, live: true },
   { n: 3, title: "Money", day: 2, badge: "Bag Secured", badgeId: "guide-3", reward: { cash: 500 }, live: true },
   { n: 4, title: "More clout", day: 2, badge: "Locally Relevant", badgeId: "guide-4", reward: { clout: 150 }, live: true },
-  { n: 5, title: "Home", day: 3, badge: "Landlord's Nightmare", badgeId: "guide-5", reward: { cash: 400 }, live: false },
+  { n: 5, title: "Home", day: 3, badge: "Landlord's Nightmare", badgeId: "guide-5", reward: { cash: 400 }, live: true },
   { n: 6, title: "Skills", day: 3, badge: "Multi-Hyphenate", badgeId: "guide-6", reward: { clout: 100 }, live: false },
   { n: 7, title: "Style", day: 2, badge: "Main Character Fit", badgeId: "guide-7", reward: { clout: 100 }, live: false },
   { n: 8, title: "People", day: 2, badge: "Plus One", badgeId: "guide-8", reward: { clout: 150 }, live: false },
@@ -442,6 +443,93 @@ STEPS.push(
     ],
     hint: "Send Real Clout FM a shoutout from your Phone", targets: [PHONE],
     check: { has: "shoutout" }, reward: { clout: 20 }, done: "Shoutout sent. Fingers crossed.",
+  },
+);
+
+// ---- Chapter 5: Home (Gary Pomeroy of No-Fee* Realty for the apartments). The doc's sublets step is left out: only renters
+// of the bigger homes can list a room, and a step some players can't do would hold their chapter back.
+const HOME_TAB = "text:Home";
+STEPS.push(
+  {
+    id: "5.1", chapter: 5, tag: "Home", tip: "Make it yours.",
+    cards: [
+      { art: "🛋️", t: "Arrange your home.", b: "Tap the sofa button at home, then tap a piece to move or turn it. Save when it looks right." },
+      { art: "📦", t: "Storage holds the rest.", b: "Pieces you've bought but not placed wait in storage. Put one away to make room." },
+    ],
+    hint: "Tap 🛋️ at home, move a piece and save", targets: ['button[aria-label^="Arrange your home"]', HOME_TAB],
+    check: { has: "layout" }, reward: { clout: 15 }, done: "Feng shui achieved. Allegedly.",
+  },
+  {
+    id: "5.2", chapter: 5, tag: "Home", tip: "Fif's has furniture. You have a floor.",
+    cards: [
+      { art: "🪑", t: "Furniture lives in the Shop.", b: "Under Furniture. Try it at home first: it appears where you'd put it before you pay." },
+      { art: "⭐", t: "Nicer pieces score higher.", b: "Every bought piece you place counts toward your Crib Rating, the better the piece, the more." },
+    ],
+    hint: "Buy a piece in the Shop and place it at home", targets: ["text:Shop"],
+    check: { has: "placed_piece" }, reward: { cash: 100 }, done: "New furniture. Very grown up.",
+  },
+  {
+    id: "5.3", chapter: 5, tag: "Crib Rating", tip: "Your Crib Rating.",
+    cards: [
+      { art: "🏠", t: "Out of 100, for the place you live now.", b: "Rooms with a bought piece, the quality of what you've placed, and art on the walls." },
+      { art: "🎉", t: "Milestones pay clout.", b: "40, 70 and 100 each pay once. A small place can hit 100 as easily as a penthouse." },
+    ],
+    hint: "Tap your Crib Rating at home", targets: ['button[aria-label^="Crib Rating"]', HOME_TAB],
+    check: { seen: true }, reward: { clout: 15 }, done: "Rated. No notes. Well, some notes.",
+  },
+  {
+    id: "5.4", chapter: 5, tag: "Build mode", tip: "Knock down a wall. Legally.",
+    cards: [
+      { art: "🔨", t: "Build mode changes the home itself.", b: "Add rooms; the walls and a doorway follow. Drag a room to move it, a corner to resize it." },
+      { art: "🎨", t: "Floors and paint too.", b: "Pick each room's floor and the whole home's paint. It's priced as you go and paid when you build." },
+    ],
+    hint: "Tap 🔨 at home and build something", targets: ['button[aria-label^="Build mode"]', HOME_TAB],
+    check: { has: "home_plan" }, reward: { cash: 100 }, done: "Renovated. The landlord will never know.",
+  },
+  {
+    id: "5.5", chapter: 5, tag: "Outside", tip: "Touch grass. Your own grass.",
+    cards: [
+      { art: "🌳", t: "Every home has an Outside.", b: "Tap Outside at home to see your lawn, then build mode to lay a patio, a path or a pool." },
+      { art: "🌷", t: "Plant things.", b: "Trees, hedges, flower beds, a grill, a hot tub. Each is paid when you build." },
+    ],
+    hint: "Go Outside and place a garden piece in build mode", targets: ['button[aria-label^="Build mode"]', HOME_TAB],
+    check: { has: "garden" }, reward: { clout: 30 }, done: "A garden in Queens. Iconic.",
+  },
+  {
+    id: "5.6", chapter: 5, tag: "Apartments", tip: "View a new apartment.",
+    cards: [
+      { art: "🏢", t: "Gary has listings.", b: "\"No fee. The asterisk is doing a lot of work.\" The Apartments app lists every rental with its weekly rent." },
+      { art: "🔑", t: "Some need clout.", b: "Bigger places want a certain clout before they'll take you. Look around any of them first, for free." },
+    ],
+    hint: "Open Apartments in your Phone and look around one", targets: [PHONE],
+    check: { seen: true }, reward: { clout: 20 }, done: "Toured. Gary will be in touch. Constantly.",
+  },
+  {
+    id: "5.7", chapter: 5, tag: "Apartments", tip: "Moving up.",
+    cards: [
+      { art: "📦", t: "Moving costs the first week and a fee.", b: "Your old place's rent stops; the new one's starts a week later." },
+      { art: "🧱", t: "What you built stays behind.", b: "Build mode's rooms belong to the home you built them in. Your furniture comes with you." },
+    ],
+    hint: "Move to a bigger rental in Apartments", targets: [PHONE],
+    check: { has: "moved_up" }, reward: { cash: 200 }, done: "Moved up. Literally.",
+  },
+  {
+    id: "5.8", chapter: 5, tag: "Houses", tip: "Own it.",
+    cards: [
+      { art: "🏡", t: "Houses end rent forever.", b: "A townhouse, a penthouse or a duplex. Buy one in the Shop and rent is a thing of your past." },
+      { art: "💼", t: "They hold their value.", b: "A house counts toward your net worth and can be sold to a friend later." },
+    ],
+    hint: "Look at the houses in the Shop", targets: ["text:Shop"],
+    check: { seen: true }, reward: { clout: 20 }, done: "Window shopping for a mortgage. Bold.",
+  },
+  {
+    id: "5.9", chapter: 5, tag: "Hosting", tip: "Have people over.",
+    cards: [
+      { art: "🥳", t: "Host a hangout or a party.", b: "Invite your crew, your partner or people you chat with. A hangout starts now; a party can be planned." },
+      { art: "🏠", t: "Your Crib Rating boosts it.", b: "Guests who stay two minutes pay you clout, more the better your home is rated." },
+    ],
+    hint: "Open your stats, then Mood, then Have people over", targets: ['button[aria-label="Expand stats"]'],
+    check: { has: "hosted" }, reward: { clout: 30 }, done: "Hosted. Nobody broke anything.",
   },
 );
 

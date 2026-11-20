@@ -115,4 +115,18 @@ select pg_temp.as_(pg_temp.u(11)::text);
 select pg_temp.assert(public.guide_state() -> 'ready' @> '["4.1", "4.2", "4.3", "4.4", "4.5", "4.6", "4.7", "4.8"]', 'every Chapter 4 step ready');
 select public.guide_claim(s) from unnest(array['4.1', '4.2', '4.3', '4.4', '4.5', '4.6', '4.7', '4.8']) s;
 select pg_temp.assert(public.guide_state() -> 'chapters' @> '[4]', 'chapter 4 paid');
+
+-- ---- Chapter 5: a layout with a bought piece, a build plan with a garden, a move up, hosting ----
+select pg_temp.assert(not (public.guide_state() -> 'ready' ? '5.1'), 'no layout yet');
+select public.guide_seen(s) from unnest(array['5.3', '5.6', '5.8']) s;
+reset role;
+update public.players set home_layout = '[{"id":"item:1","x":0,"z":0,"rot":0}]', moved_up = true,
+  home_plan = '{"v":1,"home":"astoria_studio","floors":{"out":{"rooms":[],"pieces":[{"id":"p1","k":"tree","x":0,"z":0,"rot":0}]}}}'
+  where id = pg_temp.u(11);
+insert into public.visits (host, kind, home_id, starts_at, ends_at, capacity, ny_date) values (pg_temp.u(11), 'hang', 'astoria_studio', now(), now() + interval '1 hour', 4, public.ny_today());
+set role authenticated;
+select pg_temp.as_(pg_temp.u(11)::text);
+select pg_temp.assert(public.guide_state() -> 'ready' @> '["5.1", "5.2", "5.3", "5.4", "5.5", "5.6", "5.7", "5.8", "5.9"]', 'every Chapter 5 step ready');
+select public.guide_claim(s) from unnest(array['5.1', '5.2', '5.3', '5.4', '5.5', '5.6', '5.7', '5.8', '5.9']) s;
+select pg_temp.assert(public.guide_state() -> 'chapters' @> '[5]', 'chapter 5 paid');
 rollback;

@@ -2696,6 +2696,8 @@ export function GameShell({
   useEffect(() => {
     if (panel === "leaderboard") guideSeenMark("1.4");
     if (panel === "networth") guideSeenMark("3.4");
+    if (panel === "homescore") guideSeenMark("5.3");
+    if (panel === "shop") guideSeenMark("5.8");
   }, [panel]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (phone.open && phone.app === "messages") guideSeenMark("1.10");
@@ -2703,6 +2705,7 @@ export function GameShell({
   }, [phone.open, phone.app]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { if (barksley) guideSeenMark("1.13"); }, [barksley]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { if (inside?.club) guideSeenMark("4.1"); }, [inside?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (viewHome) guideSeenMark("5.6"); }, [viewHome]); // eslint-disable-line react-hooks/exhaustive-deps
   // Lola's tip for the next step pops up once per step on this device, when nothing else is open.
   guideClear.current = !panel && !place && flow === "none" && !phone.open && !choiceCard && !barksley;
   const guideQuiet = guideClear.current && !welcomeOpen && !trip && !guidePlay;
