@@ -18,7 +18,8 @@ import { StreakRepairCard } from "./game/StreakRepair";
 import type { TodayPick } from "@/lib/placeLife";
 import { SEASON, STARTER_PACK, claimable, passBadge, type PassApi, type PassState, type StarterPackState } from "@/lib/seasonPass";
 import { PassPill, PassTab, StarterPackCard } from "./game/SeasonPass";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { CutsceneRequest } from "./cutscene/CutsceneHost";
 import type { PlayerUpdate } from "@/app/home/actions";
 import { ECONOMY, formatCash } from "@/lib/economy";
 import { inviteUrl } from "@/lib/invite";
@@ -196,6 +197,8 @@ export interface GameActions {
 }
 
 /** The first session after creation, in order (Clarifications section 1, steps 4 to 14). */
+const CutsceneHost = lazy(() => import("./cutscene/CutsceneHost"));
+
 export type Flow = "none" | "tour" | "party" | "partyDone" | "leaderboard" | "invitePrompt" | "pwa";
 
 type Panel = "tasks" | "skills" | "us" | "events" | "bank" | "leaderboard" | "profile" | "invite" | "crushInvite" | "places" | "bills" | "look" | "shop" | "networth" | "collection" | "dates" | "crew" | "homescore" | "visits" | "starter" | null;
@@ -487,6 +490,12 @@ export function GameShell({
   // v0.7 step 4: a Shop piece being tried on in Your Look.
   const [tryOn, setTryOn] = useState<ShopItem | null>(null);
   const [flow, setFlow] = useState<Flow>(() => previewFlow ?? initialFlow(player));
+  // Cutscenes (owner, Nov 19; components/cutscene): arriving in New York before Lola's tour, the first party, going
+  // official. Each plays once per device; the module downloads only when one plays.
+  const [cutscene, setCutscene] = useState<CutsceneRequest | null>(null);
+  useEffect(() => {
+    if (flow === "tour" && firstTime("cutscene", "arrival")) setCutscene({ kind: "arrival" });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
   const [tourStep, setTourStep] = useState(0);
   const [me, setMe] = useState(player);
   const [partyBusy, setPartyBusy] = useState(false);
@@ -943,11 +952,13 @@ export function GameShell({
       if (seen !== st.relId) {
         try { localStorage.setItem("cc-couple-seen", String(st.relId)); } catch { /* private mode */ }
         const name = handle(st.partner.name);
-        celebrate({ rung: 3, emoji: "💞", art: "people", twist: "chimes", tag: "It\u2019s official", title: `You and ${name}`,
+        const show = () => celebrate({ rung: 3, emoji: "💞", art: "people", twist: "chimes", tag: "It\u2019s official", title: `You and ${name}`,
           line: "Three date nights and nobody ghosted. In this economy.",
           rewards: [{ text: "💞 On your card" }, { tone: "clout", text: `+${COUPLES.dateClout} 🔥 a date` }, { text: `🏠 Move in from day ${COUPLES.moveInDays}` }],
           lola: "Official? In this city? I\u2019m already writing the headline.", share: `It's official: me and ${name} in Clout City.`, cta: "Open Us",
           onCta: () => setPanel("us") });
+        if (firstTime("cutscene", `official:${st.relId}`)) setCutscene({ kind: "official", partner: { ...st.partner, name }, onDone: show });
+        else show();
       }
     }
     // couple_state pays streak days and anniversaries as it reads them.
@@ -2265,7 +2276,7 @@ export function GameShell({
   };
   // One card at a time (owner, Nov 4: the Halo ↔ Hustler card "pops up sometimes when another modal is loaded"): a choice,
   // a consequence or the bench waits while another sheet is open, and shows when it closes.
-  const choiceWaits = welcomeOpen || !!place || !!panel || phone.open || careersOpen || campaignOpen || crownOpen || !!rivalMeet || backRoomOpen || !!lifeCard || !!travelPlan || !!trip;
+  const choiceWaits = welcomeOpen || !!cutscene || !!place || !!panel || phone.open || careersOpen || campaignOpen || crownOpen || !!rivalMeet || backRoomOpen || !!lifeCard || !!travelPlan || !!trip;
   // The Homecoming race: the first walk onto a campus's Quad (its ground floor) for an enrolled student without a race
   // brings on the reigning royal, once per device (cc-seen:crown-rival); "Run against" opens Crown HQ's Declare screen.
   const onQuad = !!school && !!inside && isCampusPlace(inside) && insideFloor === 1 ? inside.id : null;
@@ -2647,6 +2658,8 @@ export function GameShell({
     if (it.use?.kind === "lotto") return lottoOn ? setLottoAt(p.id) : setToast("Benny's still setting up the counter. Come back soon.");
     if (it.use?.kind === "action") return handlers.onAction(p.id, it.use.actionId);
     if (it.use?.kind === "gigs") return handlers.onOpenGigs();
+    // Campaign HQ's reception desk and war-room table (owner, Nov 20) open the campaign.
+    if (it.use?.kind === "campaign") return campaign ? setCampaignOpen(true) : setToast("Campaign HQ opens soon.");
     if (it.use?.kind === "floor") {
       if (it.use.to <= 1) return setInsideFloor(it.use.to);
       // The Hub's floors are open to everyone, and so are the tower offices' (TOWERS).
@@ -2809,6 +2822,7 @@ export function GameShell({
     if (!r.ok) return setPartyError(r.error);
     setMe((p) => ({ ...p, ...r.player }));
     setFlow("partyDone");
+    if (firstTime("cutscene", "party")) setCutscene({ kind: "party" });
   };
 
   const endHandoff = () => {
@@ -3567,6 +3581,11 @@ export function GameShell({
       )}
       <PartySheet open={flow === "party"} onClose={() => setFlow("none")} onAttend={attend} busy={partyBusy} error={partyError} />
       {flow === "partyDone" && <PartyDoneCard onContinue={() => setFlow("leaderboard")} />}
+      {cutscene && (
+        <Suspense fallback={null}>
+          <CutsceneHost req={cutscene} you={{ look, outfit, name: "You" }} onClose={() => setCutscene(null)} />
+        </Suspense>
+      )}
       <LeaderboardSheet
         open={flow === "leaderboard" || panel === "leaderboard"}
         onClose={() => (flow === "leaderboard" ? (demo ? endHandoff() : setFlow("invitePrompt")) : setPanel(null))}
@@ -4248,7 +4267,7 @@ export function GameShell({
       {unlockReveal && !rankUp && flow === "none" && (
         <UnlockReveal onClose={() => setUnlockReveal(false)} onOpen={() => { setUnlockReveal(false); setPanel(null); setPhone({ open: true, app: null }); }} />
       )}
-      <CelebrationHost hold={!!choiceCard || !!trip || flow !== "none" || welcomeOpen} />
+      <CelebrationHost hold={!!choiceCard || !!trip || flow !== "none" || welcomeOpen || !!cutscene} />
       <ProfileSheet
         open={panel === "profile"}
         onClose={() => setPanel(null)}

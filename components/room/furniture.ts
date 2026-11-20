@@ -5,9 +5,10 @@
 
 import {
   BoxGeometry, CanvasTexture, Color, ConeGeometry, CylinderGeometry, DodecahedronGeometry, Group, Mesh,
-  MeshStandardMaterial, SRGBColorSpace, SphereGeometry, TorusGeometry, type BufferGeometry, type Material, type Object3D,
+  MeshStandardMaterial, Plane, RepeatWrapping, SRGBColorSpace, Vector3, SphereGeometry, TorusGeometry, type BufferGeometry, type Material, type Object3D,
 } from "three";
 import { FURNITURE, type RoomItem } from "@/lib/rooms";
+import { placedModel } from "./models";
 
 export interface Kit {
   mat(color: string, o?: { emissive?: string; emissiveIntensity?: number; roughness?: number; metalness?: number; opacity?: number; map?: CanvasTexture }): MeshStandardMaterial;
@@ -60,7 +61,28 @@ const WOOD_DARK = "#5A3E2B";
 const METAL = "#B9BEC6";
 const BLACK = "#1F1B26";
 
-export function buildFurniture(item: RoomItem, k: Kit, opts: { night: boolean }): Built {
+/**
+ * A piece, box-built at once; when the item names a model (components/room/models.ts) the model replaces it once loaded,
+ * in the same group, so the room's placement, taps and shadows carry on (low graphics keeps the box-built piece).
+ */
+export function buildFurniture(item: RoomItem, k: Kit, opts: { night: boolean; low?: boolean }): Built {
+  const built = buildBoxFurniture(item, k, opts);
+  if (item.model && !opts.low && typeof window !== "undefined") {
+    const { w, d } = FURNITURE[item.kind];
+    void placedModel(item.model, w, d).then((m) => {
+      if (!m) return;
+      const keep = built.group.children.slice();
+      for (const c of keep) built.group.remove(c);
+      // Taps read itemId from userData: copy it onto the model's meshes.
+      const id = keep[0]?.userData.itemId;
+      if (id !== undefined) m.traverse((o) => { o.userData.itemId = id; });
+      built.group.add(m);
+    });
+  }
+  return built;
+}
+
+function buildBoxFurniture(item: RoomItem, k: Kit, opts: { night: boolean }): Built {
   const g = new Group();
   const box = (w: number, h: number, d: number, color: string | Material, x = 0, y = 0, z = 0) => {
     const m = new Mesh(k.geo(new BoxGeometry(w, h, d)), typeof color === "string" ? k.mat(color) : color);
@@ -735,7 +757,27 @@ export function buildFurniture(item: RoomItem, k: Kit, opts: { night: boolean })
       return { group: g };
     }
     case "stairs": {
-      // v0.11 the exclusive venue: a short flight rising toward the back, with a rail on one side.
+      // Stairs down (owner, Nov 20: "all stairs look like they're going up"): a stairwell, an opening in the floor with the
+      // steps dropping away into the dark, railed on three sides and open where you step in.
+      const down = /^(↓|⬇)/.test(item.label ?? "") || /\bdown/i.test(item.name ?? "");
+      if (down) {
+        const steps = 6;
+        const base = new Color(color ?? WOOD_DARK);
+        box(w + 0.12, 0.01, d + 0.12, "#14111A", 0, 0, 0);
+        for (let i = 0; i < steps; i++) {
+          const shade = base.clone().multiplyScalar(1 - (i / steps) * 0.85).getStyle();
+          box(w - 0.08, 0.012, d / steps - 0.03, shade, 0, 0.004, d / 2 - (i + 0.5) * (d / steps));
+          box(w - 0.08, 0.01, 0.025, new Color("#000000").lerp(base, 0.25 * (1 - i / steps)).getStyle(), 0, 0.006, d / 2 - (i + 1) * (d / steps) + 0.012);
+        }
+        for (const sx of [-1, 1]) {
+          box(0.04, 0.9, d, METAL, sx * (w / 2 + 0.04), 0.02, 0);
+          box(0.05, 0.05, d, METAL, sx * (w / 2 + 0.04), 0.92, 0);
+        }
+        box(w + 0.12, 0.9, 0.04, METAL, 0, 0.02, -d / 2 - 0.04);
+        box(w + 0.12, 0.05, 0.05, METAL, 0, 0.92, -d / 2 - 0.04);
+        return { group: g };
+      }
+      // Stairs up (v0.11 the exclusive venue): a short flight rising toward the back, with a rail on one side.
       const steps = 6;
       for (let i = 0; i < steps; i++) box(w, 0.22 * (i + 1), d / steps, color ?? WOOD_DARK, 0, 0, d / 2 - (i + 0.5) * (d / steps));
       box(0.05, 0.9, d, METAL, w / 2 - 0.03, 0.22 * steps * 0.5, 0);
@@ -907,6 +949,551 @@ export function buildFurniture(item: RoomItem, k: Kit, opts: { night: boolean })
       box(w, 0.05, 0.05, METAL, 0, 0.95, 0);
       box(w, 0.04, 0.04, METAL, 0, 0.5, 0);
       for (let x = -w / 2; x <= w / 2 + 0.01; x += 0.8) box(0.05, 1.0, 0.05, METAL, x, 0, 0);
+      return { group: g };
+    }
+    // ---- Campaign HQ (owner, Nov 20) ----
+    case "phoneBank": {
+      // A long volunteers' table: three desk phones, three laptops, call sheets and a coffee cup each.
+      box(w, 0.05, d, "#F4F2EE", 0, 0.72);
+      for (const sx of [-1, 1]) box(0.06, 0.72, d - 0.1, METAL, sx * (w / 2 - 0.1), 0, 0);
+      box(w - 0.3, 0.3, 0.03, "#D9D3C8", 0, 0.4, -d / 2 + 0.06);
+      for (const i of [-1, 0, 1]) {
+        const x = i * 0.85;
+        box(0.22, 0.06, 0.16, BLACK, x - 0.22, 0.77, -0.12);
+        box(0.2, 0.03, 0.05, "#2B2B33", x - 0.22, 0.83, -0.16);
+        box(0.34, 0.02, 0.24, "#C9CED6", x + 0.12, 0.77, 0.02);
+        const lid = box(0.34, 0.22, 0.015, k.mat("#2B2B33"), x + 0.12, 0.78, -0.1);
+        lid.rotation.x = -0.25;
+        box(0.3, 0.17, 0.005, glow("#9FD4FF", 0.5), x + 0.12, 0.81, -0.085).rotation.x = -0.25;
+        box(0.18, 0.005, 0.24, "#FFFFFF", x - 0.2, 0.775, 0.14);
+        cyl(0.035, 0.03, 0.09, "#C62C3B", x + 0.36, 0.77, 0.15, 8);
+      }
+      return { group: g };
+    }
+    case "warTable": {
+      // The war room's big table with the city's map on it, pins in the swing districts.
+      box(w, 0.08, d, WOOD_DARK, 0, 0.72);
+      for (const sx of [-1, 1]) box(0.16, 0.72, d - 0.4, WOOD_DARK, sx * (w / 2 - 0.4), 0, 0);
+      let face: Material = k.mat("#E8E1CF");
+      if (typeof document !== "undefined") {
+        const c = document.createElement("canvas");
+        c.width = 512; c.height = 256;
+        const x = c.getContext("2d");
+        if (x) {
+          x.fillStyle = "#E8E1CF"; x.fillRect(0, 0, 512, 256);
+          x.fillStyle = "#9FC7E8"; x.fillRect(150, 0, 60, 256); x.fillRect(0, 180, 512, 30);
+          const blobs: [number, number, number, number, string][] = [[60, 60, 80, 90, "#E9A8A0"], [260, 40, 140, 110, "#A8C0E9"], [300, 210, 160, 40, "#E9A8A0"], [40, 210, 90, 40, "#A8C0E9"], [420, 70, 70, 80, "#E9D29A"]];
+          for (const [bx, by, bw, bh, col] of blobs) { x.fillStyle = col; x.fillRect(bx, by, bw, bh); }
+          x.strokeStyle = "#5A4A3A"; x.lineWidth = 2;
+          for (const [bx, by, bw, bh] of blobs) x.strokeRect(bx, by, bw, bh);
+          for (const [px, py, col] of [[100, 100, "#C62C3B"], [320, 90, "#2F5BBF"], [360, 120, "#C62C3B"], [450, 100, "#2F5BBF"], [380, 225, "#C62C3B"]] as const) {
+            x.fillStyle = col; x.beginPath(); x.arc(px, py, 9, 0, Math.PI * 2); x.fill();
+          }
+          const tex = new CanvasTexture(c); tex.colorSpace = SRGBColorSpace;
+          face = k.mat("#ffffff", { map: tex, roughness: 0.8 });
+        }
+      }
+      box(w - 0.3, 0.01, d - 0.3, face, 0, 0.8);
+      for (const [x, z] of [[-1.2, -0.4], [0.8, 0.3], [1.4, -0.5]]) cyl(0.05, 0.05, 0.1, "#F4F1EA", x, 0.81, z, 8);
+      return { group: g };
+    }
+    case "pressBackdrop": {
+      // The step-and-repeat: a wall of VOTE logos in the campaign's red and blue, on two posts.
+      let face: Material = k.mat("#F4F2EE");
+      if (typeof document !== "undefined") {
+        const c = document.createElement("canvas");
+        c.width = 512; c.height = 320;
+        const x = c.getContext("2d");
+        if (x) {
+          x.fillStyle = "#F4F2EE"; x.fillRect(0, 0, 512, 320);
+          x.textAlign = "center"; x.textBaseline = "middle"; x.font = "900 34px system-ui, sans-serif";
+          for (let r = 0; r < 5; r++) for (let col = 0; col < 4; col++) {
+            x.fillStyle = (r + col) % 2 ? "#2F5BBF" : "#C62C3B";
+            x.fillText((r + col) % 2 ? "★ QNS ★" : "VOTE", 64 + col * 128 + (r % 2 ? 32 : 0), 34 + r * 64);
+          }
+          const tex = new CanvasTexture(c); tex.colorSpace = SRGBColorSpace;
+          face = k.mat("#ffffff", { map: tex, roughness: 0.8 });
+        }
+      }
+      box(w, 2.2, 0.04, face, 0, 0.1, 0);
+      for (const sx of [-1, 1]) box(0.06, 2.4, 0.06, METAL, sx * (w / 2), 0, 0.03);
+      box(w + 0.3, 0.04, 0.5, METAL, 0, 0, 0.1);
+      return { group: g };
+    }
+    case "campaignBanner": {
+      // A long banner on the wall: red, white and blue stripes and a big star.
+      const y0 = 1.55;
+      box(w, 0.7, 0.03, "#F4F2EE", 0, y0, -d / 2 + 0.02);
+      box(w, 0.16, 0.035, "#C62C3B", 0, y0, -d / 2 + 0.025);
+      box(w, 0.16, 0.035, "#2F5BBF", 0, y0 + 0.54, -d / 2 + 0.025);
+      const star = new Mesh(k.geo(new CylinderGeometry(0.2, 0.2, 0.03, 5)), k.mat("#C62C3B"));
+      star.rotation.x = Math.PI / 2;
+      star.position.set(0, y0 + 0.35, -d / 2 + 0.05);
+      g.add(star);
+      for (const sx of [-1, 1]) box(0.36, 0.08, 0.035, "#2F5BBF", sx * 0.7, y0 + 0.31, -d / 2 + 0.03);
+      return { group: g };
+    }
+    case "flagStand": {
+      // A flag on a pole with a gold finial, in a heavy round base.
+      cyl(0.16, 0.18, 0.06, "#3A3A40");
+      cyl(0.018, 0.018, 2.1, "#C9A227", 0, 0.06, 0, 6);
+      const ball = new Mesh(k.geo(new SphereGeometry(0.045, 8, 6)), k.mat("#C9A227", { metalness: 0.6, roughness: 0.3 }));
+      ball.position.set(0, 2.2, 0); g.add(ball);
+      const flag = new Group();
+      flag.position.set(0.02, 1.55, 0);
+      const stripe = (y: number, c: string) => { const m = new Mesh(k.geo(new BoxGeometry(0.6, 0.11, 0.01)), k.mat(c)); m.position.set(0.3, y, 0); flag.add(m); };
+      [0.28, 0.17, 0.06, -0.05].forEach((y, i) => stripe(y, i % 2 ? "#F4F2EE" : "#C62C3B"));
+      const canton = new Mesh(k.geo(new BoxGeometry(0.24, 0.2, 0.012)), k.mat("#2F5BBF"));
+      canton.position.set(0.13, 0.23, 0.001); flag.add(canton);
+      g.add(flag);
+      return { group: g, tick: (t) => { flag.rotation.y = Math.sin(t * 1.3 + item.x) * 0.18; } };
+    }
+    case "pendantLamp": {
+      // A pendant lamp hanging from the ceiling: a long cord, a brass dome and a warm glow under it.
+      cyl(0.006, 0.006, 0.6, BLACK, 0, 2.1, 0, 4);
+      cyl(0.06, 0.26, 0.22, k.mat("#C9A227", { metalness: 0.5, roughness: 0.35 }), 0, 1.9, 0, 14);
+      const bulb = new Mesh(k.geo(new SphereGeometry(0.08, 10, 8)), glow("#FFE3B0", 1.6));
+      bulb.position.set(0, 1.88, 0); g.add(bulb);
+      return { group: g };
+    }
+    case "waterCooler": {
+      cyl(0.17, 0.17, 0.9, "#E8ECEF", 0, 0, 0, 10);
+      cyl(0.16, 0.16, 0.42, k.mat("#7FB8E6", { opacity: 0.75, roughness: 0.1 }), 0, 0.9, 0, 12);
+      box(0.06, 0.05, 0.06, "#2F5BBF", -0.06, 0.55, 0.17);
+      box(0.06, 0.05, 0.06, "#C62C3B", 0.06, 0.55, 0.17);
+      return { group: g };
+    }
+    case "pollBoard": {
+      // The war room's wall screen: tonight's poll as bars, citywide and by borough.
+      let face: Material = glow("#1F2A44", 0.4);
+      if (typeof document !== "undefined") {
+        const c = document.createElement("canvas");
+        c.width = 512; c.height = 256;
+        const x = c.getContext("2d");
+        if (x) {
+          x.fillStyle = "#14192A"; x.fillRect(0, 0, 512, 256);
+          x.fillStyle = "#FFFFFF"; x.font = "800 26px system-ui, sans-serif"; x.fillText("TONIGHT'S POLL", 24, 40);
+          const rows: [string, number, number][] = [["CITY", 0.42, 0.45], ["QUEENS", 0.38, 0.47], ["BROOKLYN", 0.4, 0.44], ["BRONX", 0.36, 0.5]];
+          rows.forEach(([name, you, mayor], i) => {
+            const y = 70 + i * 44;
+            x.fillStyle = "#AFC0DA"; x.font = "700 18px system-ui, sans-serif"; x.fillText(name, 24, y + 18);
+            x.fillStyle = "#FF5A6A"; x.fillRect(150, y, 330 * you, 14);
+            x.fillStyle = "#4F86FF"; x.fillRect(150, y + 18, 330 * mayor, 14);
+          });
+          const tex = new CanvasTexture(c); tex.colorSpace = SRGBColorSpace;
+          const m = k.mat("#ffffff", { map: tex, emissive: "#ffffff", emissiveIntensity: opts.night ? 0.5 : 0.3 }) as MeshStandardMaterial;
+          m.emissiveMap = tex;
+          face = m;
+        }
+      }
+      box(w, 1.6, 0.08, BLACK, 0, 0.9, 0);
+      box(w - 0.12, 1.48, 0.01, face, 0, 0.96, 0.045);
+      return { group: g };
+    }
+    case "rallyStage": {
+      // A raised stage with a skirt of bunting, the podium in the middle and the backdrop behind.
+      box(w, 0.4, d, "#2F3A55");
+      for (let i = 0; i < 12; i++) box(w / 12 - 0.02, 0.18, 0.02, i % 2 ? "#F4F2EE" : "#C62C3B", -w / 2 + (i + 0.5) * (w / 12), 0.2, d / 2 + 0.01);
+      box(w - 0.6, 0.02, d - 0.6, "#C62C3B", 0, 0.4, 0);
+      box(0.7, 1.1, 0.5, WOOD_DARK, 0, 0.4, 0.4);
+      box(0.6, 0.08, 0.3, "#2F5BBF", 0, 1.32, 0.4);
+      cyl(0.012, 0.012, 0.3, METAL, 0.12, 1.5, 0.3, 5);
+      box(w * 0.8, 1.9, 0.06, "#2F5BBF", 0, 0.4, -d / 2 + 0.1);
+      box(w * 0.8 - 0.3, 0.5, 0.07, "#F4F2EE", 0, 1.3, -d / 2 + 0.1);
+      for (let i = -3; i <= 3; i++) {
+        const s = new Mesh(k.geo(new CylinderGeometry(0.1, 0.1, 0.02, 5)), k.mat("#C62C3B"));
+        s.rotation.x = Math.PI / 2; s.position.set(i * 0.55, 1.55, -d / 2 + 0.14); g.add(s);
+      }
+      return { group: g, seatY: 0.4 };
+    }
+    case "stringLights": {
+      // Warm bulbs on a sagging wire across the roof, between two poles.
+      for (const sx of [-1, 1]) cyl(0.03, 0.03, 2.8, BLACK, sx * w / 2, 0, 0, 6);
+      const bulb = glow("#FFD58A", 1.8);
+      const n = Math.round(w / 0.6);
+      for (let i = 0; i <= n; i++) {
+        const t = i / n, x = -w / 2 + t * w, y = 2.75 - Math.sin(t * Math.PI) * 0.6;
+        const m = new Mesh(k.geo(new SphereGeometry(0.05, 6, 5)), bulb);
+        m.position.set(x, y, 0); g.add(m);
+      }
+      return { group: g };
+    }
+    case "patioUmbrella": {
+      // A round patio table under a striped umbrella, two chairs.
+      cyl(0.4, 0.4, 0.04, "#F4F2EE", 0, 0.72, 0, 14);
+      cyl(0.03, 0.03, 0.72, METAL, 0, 0, 0, 6);
+      cyl(0.02, 0.02, 2.3, METAL, 0, 0.72, 0, 6);
+      for (let i = 0; i < 8; i++) {
+        const seg = new Mesh(k.geo(new ConeGeometry(0.95, 0.35, 8, 1, true, (i * Math.PI) / 4, Math.PI / 4)), k.mat(i % 2 ? "#F4F2EE" : "#C62C3B"));
+        seg.position.set(0, 2.3, 0); g.add(seg);
+      }
+      for (const sx of [-1, 1]) { box(0.4, 0.05, 0.4, "#F4F2EE", sx * 0.65, 0.45, 0); box(0.4, 0.4, 0.05, "#F4F2EE", sx * 0.65, 0.45, -0.18); legs4(0.4, 0.4, 0.45, METAL, 0.015); }
+      return { group: g };
+    }
+    case "sectional": {
+      // An L-shaped sofa (the box-built stand-in for the modeled one): a long seat and a chaise.
+      const c = color ?? "#EDE6D6";
+      box(w, 0.42, 0.9, c, 0, 0, -d / 2 + 0.45);
+      box(w, 0.5, 0.2, c, 0, 0.38, -d / 2 + 0.1);
+      box(0.95, 0.42, d - 0.9, c, w / 2 - 0.475, 0, 0.45);
+      return { group: g, seatY: 0.5 };
+    }
+    case "djStage": {
+      // The DJ stage (owner, Nov 20, the references): a raised white deck with a lit front edge, the DJ's table of decks in the
+      // middle, steps at the sides and a CO2 cannon at each front corner that fires a white plume every few seconds.
+      const H = 0.6;
+      box(w, H, d, "#EDEAF2");
+      const edge = box(w + 0.02, 0.07, 0.06, glow("#FF2E88", 1.6), 0, H - 0.1, d / 2 + 0.01);
+      box(w + 0.02, 0.05, 0.05, glow("#8A5CFF", 1.4), 0, 0.06, d / 2 + 0.01);
+      box(2.6, 0.95, 0.8, "#14111A", 0, H, -0.35);
+      box(2.62, 0.05, 0.82, glow("#3DDC97", 1.0), 0, H + 0.95, -0.35);
+      for (const x of [-0.75, 0.75]) cyl(0.24, 0.24, 0.03, "#2A2A33", x, H + 1.0, -0.4, 16);
+      box(0.6, 0.04, 0.35, glow("#6CC4FF", 0.9), 0, H + 1.0, -0.4);
+      const plumes: Mesh[] = [];
+      for (const sx of [-1, 1]) {
+        cyl(0.12, 0.14, 0.5, "#2A2A33", sx * (w / 2 - 0.35), H, d / 2 - 0.3, 10);
+        const p = new Mesh(k.geo(new ConeGeometry(0.45, 2.4, 10, 1, true)), new MeshStandardMaterial({ color: "#FFFFFF", transparent: true, opacity: 0, emissive: "#FFFFFF", emissiveIntensity: 0.6, depthWrite: false }));
+        p.rotation.x = Math.PI; p.position.set(sx * (w / 2 - 0.35), H + 0.5 + 1.2, d / 2 - 0.3); g.add(p); plumes.push(p);
+      }
+      return {
+        group: g,
+        tick: (t) => {
+          (edge.material as MeshStandardMaterial).emissive.setHSL((t * 0.1) % 1, 0.9, 0.55);
+          const c = t % 7, on = c < 1.4 ? Math.sin((c / 1.4) * Math.PI) : 0;
+          plumes.forEach((p) => { (p.material as MeshStandardMaterial).opacity = on * 0.75; p.scale.setScalar(0.6 + on * 0.6); p.visible = on > 0.02; });
+        },
+      };
+    }
+    case "gogoPodium": {
+      // A round lit podium for a go-go dancer: a glowing ring at the base and the top, the column between pulsing with the beat.
+      const H = 0.9;
+      const col = cyl(0.5, 0.56, H, k.mat("#1B1626", { emissive: "#FF2E88", emissiveIntensity: 0.25 }).clone(), 0, 0, 0, 20);
+      const top = cyl(0.56, 0.56, 0.05, glow("#FFFFFF", 1.4), 0, H, 0, 20);
+      const ring = new Mesh(k.geo(new TorusGeometry(0.56, 0.03, 6, 28)), glow("#FF2E88", 1.8).clone());
+      ring.rotation.x = Math.PI / 2; ring.position.y = 0.05; g.add(ring);
+      return {
+        group: g,
+        tick: (t) => {
+          const hue = (t * 0.12 + item.x * 0.05) % 1;
+          (ring.material as MeshStandardMaterial).emissive.setHSL(hue, 0.9, 0.55);
+          (col.material as MeshStandardMaterial).emissive.setHSL(hue, 0.9, 0.3);
+          (top.material as MeshStandardMaterial).emissiveIntensity = 0.9 + (Math.floor(t * 2.2) % 2) * 0.6;
+        },
+      };
+    }
+    case "ledWall": {
+      // A video wall high on the wall: moving color bars and a pulsing glow, like the screens in the references.
+      const c = document.createElement("canvas");
+      c.width = 256; c.height = 64;
+      const x2 = c.getContext("2d")!;
+      for (let i = 0; i < 16; i++) {
+        x2.fillStyle = `hsl(${(i * 47) % 360} 90% ${i % 3 ? 45 : 65}%)`;
+        x2.fillRect(i * 16, 0, 16, 64);
+      }
+      x2.fillStyle = "rgba(0,0,0,0.35)";
+      for (let y = 0; y < 64; y += 4) x2.fillRect(0, y, 256, 1);
+      const tex = new CanvasTexture(c);
+      tex.colorSpace = SRGBColorSpace; tex.wrapS = RepeatWrapping;
+      const screenMat = new MeshStandardMaterial({ color: "#000000", map: tex, emissive: "#ffffff", emissiveMap: tex, emissiveIntensity: 1.1 });
+      box(w + 0.1, 1.5, 0.08, "#0B0910", 0, 1.15, 0);
+      const screen = box(w - 0.1, 1.38, 0.02, screenMat, 0, 1.21, 0.05);
+      return {
+        group: g,
+        tick: (t) => { tex.offset.x = (t * 0.06) % 1; tex.repeat.x = 0.6 + Math.sin(t * 0.4) * 0.15; (screen.material as MeshStandardMaterial).emissiveIntensity = 0.9 + Math.sin(t * 4.4) * 0.25; },
+      };
+    }
+    case "clubPillar": {
+      // A tall dark mirrored column with LED strips up its corners, color cycling.
+      box(w, 2.7, d, k.mat("#1A1622", { metalness: 0.6, roughness: 0.25 }));
+      const strips: Mesh[] = [];
+      for (const sx of [-1, 1]) for (const sz of [-1, 1]) strips.push(box(0.04, 2.6, 0.04, glow("#8A5CFF", 1.6).clone(), sx * (w / 2), 0.05, sz * (d / 2)));
+      return { group: g, tick: (t) => strips.forEach((m, i) => (m.material as MeshStandardMaterial).emissive.setHSL((t * 0.08 + i * 0.07 + item.z * 0.03) % 1, 0.9, 0.55)) };
+    }
+    case "velvetRope": {
+      // Brass stanchions and a red velvet rope: the VIP section's edge.
+      const brass = k.mat("#C9A227", { metalness: 0.6, roughness: 0.3 });
+      const n = 3;
+      for (let i = 0; i < n; i++) {
+        const x = -w / 2 + 0.1 + (i * (w - 0.2)) / (n - 1);
+        cyl(0.12, 0.14, 0.04, brass, x, 0, 0, 12);
+        cyl(0.025, 0.025, 0.9, brass, x, 0.04, 0, 8);
+        const knob = new Mesh(k.geo(new SphereGeometry(0.05, 8, 6)), brass); knob.position.set(x, 0.96, 0); g.add(knob);
+      }
+      const span = (w - 0.2) / (n - 1);
+      for (let i = 0; i < n - 1; i++) {
+        const x = -w / 2 + 0.1 + span * (i + 0.5);
+        const rope = new Mesh(k.geo(new TorusGeometry(span / 2, 0.025, 6, 16, Math.PI)), k.mat(color ?? "#9B1B30"));
+        rope.position.set(x, 0.88, 0); rope.rotation.z = Math.PI; rope.scale.y = 0.45; g.add(rope);
+      }
+      return { group: g };
+    }
+    case "heatLamp": {
+      // A patio heater: a tall steel pole, a reflector hat and a glowing element under it.
+      cyl(0.22, 0.25, 0.08, METAL, 0, 0, 0, 12);
+      cyl(0.035, 0.035, 2.1, METAL, 0, 0.08, 0, 8);
+      const el = cyl(0.12, 0.12, 0.3, glow("#FF7A2E", 1.8), 0, 1.75, 0, 10);
+      const hat = new Mesh(k.geo(new ConeGeometry(0.42, 0.22, 14, 1, true)), k.mat("#B8B2A8", { metalness: 0.6, roughness: 0.3 }));
+      hat.position.y = 2.25; g.add(hat);
+      return { group: g, tick: (t) => { (el.material as MeshStandardMaterial).emissiveIntensity = (opts.night ? 1.8 : 1.0) + Math.sin(t * 2.3 + item.x) * 0.2; } };
+    }
+    case "roundDining": {
+      // A round marble table and four chairs (the box-built stand-in for the modeled dining set).
+      cyl(0.5, 0.5, 0.04, "#EDEAE4", 0, 0.72, 0, 18);
+      cyl(0.06, 0.18, 0.72, BLACK, 0, 0, 0, 10);
+      for (let i = 0; i < 4; i++) {
+        const a = (i / 4) * Math.PI * 2 + Math.PI / 4, cx = Math.cos(a) * 0.75, cz = Math.sin(a) * 0.75;
+        box(0.42, 0.06, 0.42, "#CBBFA9", cx, 0.45, cz);
+        for (const sx of [-1, 1]) for (const sz of [-1, 1]) cyl(0.015, 0.015, 0.45, METAL, cx + sx * 0.17, 0, cz + sz * 0.17, 6);
+        box(0.42, 0.42, 0.05, "#CBBFA9", cx - Math.cos(a) * 0.19, 0.5, cz - Math.sin(a) * 0.19).lookAt(0, 0.7, 0);
+      }
+      return { group: g };
+    }
+    case "planter": {
+      // A long timber planter with clipped shrubs.
+      box(w, 0.55, d, "#6B4A2B");
+      box(w - 0.06, 0.04, d - 0.06, "#3A2A1E", 0, 0.55, 0);
+      const n = Math.max(2, Math.round(w / 0.45));
+      for (let i = 0; i < n; i++) {
+        const b = new Mesh(k.geo(new DodecahedronGeometry(0.24)), k.mat(i % 2 ? "#4E7A3A" : "#5E8C45"));
+        b.position.set(-w / 2 + (w * (i + 0.5)) / n, 0.78, 0); b.scale.y = 0.85; g.add(b);
+      }
+      return { group: g };
+    }
+    case "subwayTrack": {
+      // The elevated tracks behind the platform edge, the room's width (owner, Nov 20: just the place itself), and a three-car
+      // train that pulls in, opens its doors, waits and leaves, on a loop (36 s), cut off at the room's edges as it comes and
+      // goes (clipping planes; Room3D turns local clipping on). The platform's yellow edge strip is here too.
+      const RUN = w;
+      box(RUN, 0.25, d, "#3A3632", 0, -0.2, 0);
+      for (let x = -RUN / 2; x < RUN / 2; x += 0.7) box(0.18, 0.06, d - 0.4, "#5A4A3A", x, 0.05, 0);
+      for (const z of [-0.72, 0.72]) box(RUN, 0.09, 0.07, METAL, 0, 0.11, z);
+      box(RUN, 0.06, 0.1, "#8A8478", 0, 0.08, 1.25);
+      box(w, 0.03, 0.4, "#FFC21A", 0, 0.0, d / 2 + 0.2);
+      const train = new Group();
+      const CAR = 7.6, GAP = 0.25, steel = k.mat("#C9CED6", { metalness: 0.55, roughness: 0.35 });
+      const doors: Mesh[] = [];
+      const lit = glow("#FFF2C8", 0.9);
+      for (let c = 0; c < 3; c++) {
+        const cx = (c - 1) * (CAR + GAP);
+        const body = new Mesh(k.geo(new BoxGeometry(CAR, 2.5, 2.6)), steel); body.position.set(cx, 1.55, 0); train.add(body);
+        const roof = new Mesh(k.geo(new BoxGeometry(CAR - 0.1, 0.18, 2.4)), k.mat("#8A8F98")); roof.position.set(cx, 2.88, 0); train.add(roof);
+        const stripe = new Mesh(k.geo(new BoxGeometry(CAR + 0.01, 0.12, 2.62)), k.mat("#FFC21A")); stripe.position.set(cx, 1.05, 0); train.add(stripe);
+        for (const wx of [-2.9, -0.95, 0.95, 2.9]) {
+          const win2 = new Mesh(k.geo(new BoxGeometry(1.2, 0.7, 0.02)), lit); win2.position.set(cx + wx, 2.05, 1.31); train.add(win2);
+        }
+        for (const dx of [-1.95, 1.95]) for (const half of [-1, 1]) {
+          const door = new Mesh(k.geo(new BoxGeometry(0.62, 2.0, 0.04)), k.mat("#AEB4BD", { metalness: 0.5, roughness: 0.35 }));
+          door.position.set(cx + dx + half * 0.31, 1.3, 1.32); door.userData.home = door.position.x; door.userData.half = half; train.add(door); doors.push(door);
+        }
+        for (const wx of [-2.6, 2.6]) for (const wz of [-0.72, 0.72]) {
+          const wheel = new Mesh(k.geo(new CylinderGeometry(0.32, 0.32, 0.12, 12)), k.mat("#2B2B2B"));
+          wheel.rotation.x = Math.PI / 2; wheel.position.set(cx + wx, 0.42, wz); train.add(wheel);
+        }
+      }
+      const bullet = new Mesh(k.geo(new CylinderGeometry(0.28, 0.28, 0.03, 20)), glow("#FFC21A", 1.2));
+      bullet.rotation.x = Math.PI / 2; bullet.position.set(-(CAR + GAP) - CAR / 2 + 0.6, 2.35, 1.32); train.add(bullet);
+      g.add(train);
+      // Its own copies of the materials (the kit's are shared with every other piece), clipped at the room's sides.
+      const clip = [new Plane(new Vector3(1, 0, 0), w / 2 - item.x), new Plane(new Vector3(-1, 0, 0), w / 2 + item.x)];
+      train.traverse((o) => {
+        const m = o as Mesh;
+        if (!m.isMesh) return;
+        const own = (m.material as Material).clone();
+        own.clippingPlanes = clip;
+        m.material = own;
+      });
+      const ease = (x: number) => (x <= 0 ? 0 : x >= 1 ? 1 : x * x * (3 - 2 * x));
+      return {
+        group: g,
+        tick: (t) => {
+          const c = (t + item.x) % 36;
+          // In from the left over 8 s, doors open 9-17 s, out to the right over 8 s, then an empty track.
+          const x = c < 8 ? -55 * (1 - ease(c / 8)) : c < 18 ? 0 : c < 26 ? 55 * ease((c - 18) / 8) : 999;
+          train.visible = x !== 999;
+          train.position.x = x;
+          const open = c > 9 && c < 17 ? Math.min(1, (c - 9) / 0.8, (17 - c) / 0.8) : 0;
+          for (const dm of doors) dm.position.x = dm.userData.home + dm.userData.half * open * 0.55;
+        },
+      };
+    }
+    case "turnstile": {
+      // A steel turnstile: the cabinet with its card reader glowing green, and three arms.
+      box(0.32, 1.0, d, "#9AA0A8", -0.24, 0, 0);
+      box(0.2, 0.06, 0.16, glow("#3DDC97", 1.2), -0.24, 1.0, 0.1);
+      for (let i = 0; i < 3; i++) {
+        const arm = new Mesh(k.geo(new CylinderGeometry(0.025, 0.025, 0.5, 6)), k.mat(METAL));
+        arm.rotation.z = Math.PI / 2; arm.rotation.x = (i * Math.PI * 2) / 3;
+        arm.position.set(0.12, 0.85, 0); g.add(arm);
+      }
+      return { group: g };
+    }
+    case "fareMachine": {
+      // A fare card machine: a steel cabinet, a glowing touch screen and a card slot.
+      box(w, 1.6, d, "#2B2D33");
+      const scr = box(w - 0.24, 0.5, 0.02, glow("#6CC4FF", 1.0), 0, 0.95, d / 2);
+      box(w - 0.3, 0.08, 0.04, "#FFC21A", 0, 0.62, d / 2);
+      box(w, 0.12, d, "#FFC21A", 0, 1.6);
+      return { group: g, tick: (t) => { (scr.material as MeshStandardMaterial).emissiveIntensity = 0.8 + Math.sin(t * 1.7 + item.z) * 0.15; } };
+    }
+    case "ticketBooth": {
+      // The station agent's booth: a steel base, glass on every side, a light inside, a little window counter.
+      box(w, 1.0, d, "#5A6068");
+      const glass = new MeshStandardMaterial({ color: "#BFE3F2", transparent: true, opacity: 0.35, roughness: 0.1, metalness: 0.1 });
+      for (const sx of [-1, 1]) box(0.04, 1.3, d, glass, sx * (w / 2 - 0.02), 1.0, 0);
+      for (const sz of [-1, 1]) box(w, 1.3, 0.04, glass, 0, 1.0, sz * (d / 2 - 0.02));
+      box(w + 0.1, 0.12, d + 0.1, "#3F6B4A", 0, 2.3);
+      box(0.9, 0.05, 0.3, "#C9CED6", 0, 1.0, d / 2 + 0.12);
+      box(0.6, 0.06, 0.4, glow("#FFF2C8", 0.8), 0, 2.24);
+      return { group: g };
+    }
+    case "stationColumn": {
+      // A green-painted steel column of the elevated structure, with a lamp near the top.
+      const green = k.mat("#3F6B4A", { metalness: 0.3, roughness: 0.6 });
+      box(0.3, 3.2, 0.3, green);
+      box(0.42, 0.08, 0.42, green, 0, 0, 0);
+      box(0.42, 0.1, 0.42, green, 0, 3.1, 0);
+      const lamp = new Mesh(k.geo(new SphereGeometry(0.14, 10, 8)), glow("#FFE6B0", 1.3));
+      lamp.position.set(0, 2.7, 0.24); g.add(lamp);
+      return { group: g };
+    }
+    case "stationEntrance": {
+      // The street entrance (the box-built stand-in for the modeled one): green railings round a stairwell going down, two lamps.
+      box(w - 0.6, 0.02, d - 0.4, "#2B2B2B", 0, 0.0, 0);
+      const rail = k.mat("#2F5A3A");
+      for (const sx of [-1, 1]) box(0.05, 1.0, d, rail, sx * (w / 2 - 0.2), 0, 0);
+      box(w - 0.4, 1.0, 0.05, rail, 0, 0, -d / 2);
+      for (const sx of [-1, 1]) {
+        cyl(0.04, 0.04, 2.2, rail, sx * (w / 2 - 0.2), 0, d / 2 - 0.1, 8);
+        const globe = new Mesh(k.geo(new SphereGeometry(0.16, 10, 8)), glow("#7FE0A0", 1.2));
+        globe.position.set(sx * (w / 2 - 0.2), 2.3, d / 2 - 0.1); g.add(globe);
+      }
+      return { group: g };
+    }
+    case "tvSet": {
+      // A show's set: a low round-cornered riser with a lit edge (the box-built stand-in under the modeled desk or couch).
+      box(w, 0.25, d, "#F2EEF5");
+      const edge = box(w + 0.02, 0.05, 0.05, glow("#FF2E88", 1.4).clone(), 0, 0.2, d / 2);
+      box(w - 0.6, 0.02, d - 0.6, "#FF6A3D", 0, 0.25, 0);
+      return { group: g, tick: (t) => { (edge.material as MeshStandardMaterial).emissive.setHSL((0.92 + Math.sin(t * 0.3) * 0.05 + 1) % 1, 0.9, 0.55); } };
+    }
+    case "studioLight": {
+      // A studio light on a tripod: three legs, a pole and a soft box aimed at the set, glowing.
+      for (let i = 0; i < 3; i++) {
+        const leg = new Mesh(k.geo(new CylinderGeometry(0.02, 0.02, 1.0, 5)), k.mat(BLACK));
+        const a = (i / 3) * Math.PI * 2;
+        leg.position.set(Math.cos(a) * 0.22, 0.45, Math.sin(a) * 0.22); leg.rotation.set(Math.sin(a) * 0.45, 0, -Math.cos(a) * 0.45); g.add(leg);
+      }
+      cyl(0.025, 0.025, 1.5, BLACK, 0, 0.8, 0, 6);
+      const head = new Group(); head.position.set(0, 2.3, 0); head.rotation.x = 0.35; g.add(head);
+      const boxM = new Mesh(k.geo(new BoxGeometry(0.6, 0.45, 0.25)), k.mat("#1F1B26")); head.add(boxM);
+      const face = new Mesh(k.geo(new BoxGeometry(0.52, 0.38, 0.02)), glow("#FFF6E0", 1.8)); face.position.z = 0.13; head.add(face);
+      return { group: g };
+    }
+    case "cellBars": {
+      // A holding cell's front: steel rails top and bottom and bars every 15 cm (a door in the middle third).
+      const steel = k.mat("#7C8594", { metalness: 0.6, roughness: 0.35 });
+      box(w, 0.08, d, steel, 0, 0, 0);
+      box(w, 0.08, d, steel, 0, 2.3, 0);
+      box(w, 0.06, d, steel, 0, 1.1, 0);
+      for (let x = -w / 2 + 0.05; x <= w / 2 - 0.04; x += 0.15) cyl(0.022, 0.022, 2.3, steel, x, 0.04, 0, 6);
+      return { group: g };
+    }
+    case "dog": {
+      // A sitting dog (the firehouse's Hydrant, a park's regulars): a white coat with black spots, ears, a wagging tail.
+      const coat = k.mat(color ?? "#F4F1EA"), spot = k.mat("#1F1B26");
+      box(0.5, 0.28, 0.24, coat, -0.05, 0.18, 0);
+      box(0.22, 0.3, 0.22, coat, 0.22, 0.24, 0);
+      box(0.2, 0.18, 0.18, coat, 0.32, 0.5, 0);
+      box(0.12, 0.08, 0.12, spot, 0.43, 0.52, 0);
+      for (const sz of [-1, 1]) box(0.05, 0.1, 0.06, spot, 0.3, 0.68, sz * 0.07);
+      for (const [x, z] of [[-0.2, -0.09], [-0.2, 0.09], [0.18, -0.08], [0.18, 0.08]]) box(0.07, 0.18, 0.07, coat, x, 0, z);
+      box(0.12, 0.02, 0.1, spot, -0.1, 0.46, 0.06);
+      box(0.1, 0.02, 0.08, spot, 0.05, 0.46, -0.05);
+      const tail = new Group(); tail.position.set(-0.3, 0.38, 0); g.add(tail);
+      const tm = new Mesh(k.geo(new BoxGeometry(0.05, 0.2, 0.05)), coat); tm.position.y = 0.1; tail.add(tm);
+      return { group: g, tick: (t) => { tail.rotation.x = Math.sin(t * 6 + item.x) * 0.6; } };
+    }
+    case "fireTruck": {
+      // A red fire engine (the box-built stand-in for the modeled one): the cab, the body with lockers, a ladder on top, chrome.
+      const red = k.mat("#D93A2F"), chrome = k.mat("#D9DDE3", { metalness: 0.7, roughness: 0.25 });
+      box(w, 1.6, d - 0.2, red, 0, 0.45, 0);
+      box(1.6, 1.0, d - 0.2, red, w / 2 - 0.8, 2.05, 0);
+      box(0.05, 0.6, d - 0.6, k.mat("#2B3440"), w / 2 + 0.01, 2.2, 0);
+      box(w - 2.2, 0.12, 0.5, chrome, -0.9, 2.15, 0);
+      box(w, 0.2, d, chrome, 0, 0.4, 0);
+      for (const x of [-w / 2 + 1.1, -w / 2 + 2.4, w / 2 - 1.2]) for (const sz of [-1, 1]) {
+        const wheel = new Mesh(k.geo(new CylinderGeometry(0.42, 0.42, 0.28, 14)), k.mat("#1F1B26"));
+        wheel.rotation.x = Math.PI / 2; wheel.position.set(x, 0.42, sz * (d / 2 - 0.12)); g.add(wheel);
+      }
+      box(0.3, 0.12, 0.6, glow("#4FA3FF", 1.4), w / 2 - 0.8, 2.6, 0);
+      return { group: g };
+    }
+    case "gearLocker": {
+      // Turnout gear on a hook: the tan coat with yellow reflective bands, boots below, the helmet on the shelf.
+      box(w, 0.06, d, METAL, 0, 0, 0);
+      box(w, 0.04, d, METAL, 0, 1.95, 0);
+      for (const sx of [-1, 1]) box(0.04, 2.0, 0.04, METAL, sx * (w / 2 - 0.02), 0, -d / 2 + 0.02);
+      box(0.5, 0.8, 0.22, "#B89A62", 0, 0.85, 0);
+      box(0.52, 0.06, 0.24, glow("#E8D24A", 0.6), 0, 1.0, 0);
+      box(0.52, 0.06, 0.24, glow("#E8D24A", 0.6), 0, 1.35, 0);
+      for (const sx of [-1, 1]) box(0.14, 0.3, 0.22, "#1F1B26", sx * 0.12, 0.06, 0);
+      const helmet = new Mesh(k.geo(new SphereGeometry(0.16, 10, 8, 0, Math.PI * 2, 0, Math.PI / 2)), k.mat("#D93A2F"));
+      helmet.position.set(0, 1.99, 0); g.add(helmet);
+      return { group: g };
+    }
+    case "firePole": {
+      // The brass pole, floor to ceiling, through a ring in the ceiling and a round mat at its foot.
+      cyl(0.32, 0.32, 0.04, "#2B2B2B", 0, 0, 0, 16);
+      cyl(0.04, 0.04, 2.9, k.mat("#C9A227", { metalness: 0.7, roughness: 0.25 }), 0, 0.04, 0, 10);
+      const ring = new Mesh(k.geo(new TorusGeometry(0.28, 0.04, 6, 20)), k.mat("#D93A2F"));
+      ring.rotation.x = Math.PI / 2; ring.position.y = 2.9; g.add(ring);
+      return { group: g };
+    }
+    case "curtain": {
+      // A hospital bay's curtain on a ceiling rail: soft blue pleats.
+      box(w, 0.04, 0.04, METAL, 0, 2.3, 0);
+      const fab = k.mat(color ?? "#A8D3E8");
+      const n = 9;
+      for (let i = 0; i < n; i++) box(w / n + 0.02, 1.9, 0.05, fab, -w / 2 + (w * (i + 0.5)) / n, 0.35, i % 2 ? 0.03 : -0.03);
+      return { group: g };
+    }
+    case "runTrack": {
+      // A running track: a terracotta loop with white lane lines around an inner lawn, flat on the ground.
+      const clay = k.mat("#C9653F"), line = k.mat("#F4F1EA"), grass = k.mat("#4C9A3F");
+      box(w - 2.4, 0.015, d - 2.4, grass, 0, 0, 0);
+      const lane = 1.0;
+      for (const sz of [-1, 1]) {
+        box(w - d + 0.2, 0.02, lane, clay, 0, 0, sz * (d / 2 - lane / 2));
+        box(w - d + 0.2, 0.025, 0.04, line, 0, 0, sz * (d / 2 - lane / 2));
+      }
+      for (const sx of [-1, 1]) for (let i = 0; i <= 10; i++) {
+        const a = -Math.PI / 2 + (i / 10) * Math.PI, r = d / 2 - lane / 2;
+        const seg = new Mesh(k.geo(new BoxGeometry(0.34 * r, 0.02, lane)), clay);
+        seg.position.set(sx * ((w - d) / 2 + Math.cos(a) * r), 0.01, Math.sin(a) * r); seg.rotation.y = sx > 0 ? -a + Math.PI / 2 : a + Math.PI / 2; g.add(seg);
+      }
+      return { group: g };
+    }
+    case "fountain": {
+      // A round fountain: a stone basin, the water, a tiered column and a jet that sparkles.
+      cyl(w / 2, w / 2 + 0.05, 0.45, "#D9D3C8", 0, 0, 0, 28);
+      const water = cyl(w / 2 - 0.15, w / 2 - 0.15, 0.04, k.mat("#7FC8E8", { emissive: "#7FC8E8", emissiveIntensity: 0.25, roughness: 0.15 }).clone(), 0, 0.42, 0, 28);
+      cyl(0.25, 0.32, 1.0, "#C9C2B4", 0, 0.45, 0, 12);
+      cyl(0.8, 0.7, 0.14, "#D9D3C8", 0, 1.4, 0, 18);
+      cyl(0.12, 0.16, 0.5, "#C9C2B4", 0, 1.5, 0, 10);
+      const jet = cyl(0.06, 0.14, 0.6, k.mat("#BFE6F7", { emissive: "#BFE6F7", emissiveIntensity: 0.5 }).clone(), 0, 1.95, 0, 10);
+      return { group: g, tick: (t) => { jet.scale.y = 0.85 + Math.sin(t * 3.4) * 0.15; (water.material as MeshStandardMaterial).emissiveIntensity = 0.2 + Math.sin(t * 1.3) * 0.08; } };
+    }
+    case "chandelier": {
+      // A brass ring of candle lights on a chain (the box-built stand-in).
+      const brass = k.mat("#C9A227", { metalness: 0.5, roughness: 0.35 });
+      cyl(0.008, 0.008, 0.5, BLACK, 0, 2.15, 0, 4);
+      const ring = new Mesh(k.geo(new TorusGeometry(0.38, 0.025, 6, 24)), brass);
+      ring.rotation.x = Math.PI / 2; ring.position.y = 2.1; g.add(ring);
+      for (let i = 0; i < 6; i++) {
+        const a2 = (i / 6) * Math.PI * 2;
+        const b = new Mesh(k.geo(new SphereGeometry(0.045, 8, 6)), glow("#FFE3B0", 1.6));
+        b.position.set(Math.cos(a2) * 0.38, 2.18, Math.sin(a2) * 0.38); g.add(b);
+      }
       return { group: g };
     }
     case "cat": {

@@ -418,6 +418,71 @@ components live in `app/globals.css`.
   the map city pop; GameShell `setScene`), crossfading in 1.5 s. The Radio app opens with the player (components/city/MusicPlayer.tsx:
   pause, previous/next style, volume; a skipped-to style plays everywhere until "Back to the music for where you are"; kept on the
   device: cc_music_volume, cc_music_paused, cc_music_pick). Settings' Music switch still mutes it. tests/music.test.ts.
+- Cutscenes (owner, Nov 19: "add cutscenes early in first play"; no migration): components/cutscene (scripts.ts: arrival, party,
+  official; sets.ts: box-built sets, skyline, fireworks; CutscenePlayer.tsx: letterbox, typed subtitles, Skip, the closing card;
+  CutsceneHost.tsx, lazy-loaded by GameShell). Arriving in New York plays before Lola's tour, Peyton Pastel's party before "You got in",
+  and going official before the It's official celebration; each once per device (`firstTime('cutscene', …)`), with the player's
+  own look and outfit. Don't call resetLimbs every frame on the base bodies (it sinks them into the floor; `stand()` after a dance).
+  `/preview/cutscene?scene=arrival|party|official&shot=N`.
+- Solid shoes (owner, Nov 19: "clothes and shoes… look chopped or distorted"; components/avatar/shoes.ts): shoes are no longer cut from
+  the foot's skin. Each is built from this body's foot (`attachShoes`: sneaker, dress, heel, sandal, boot, kneeboot by `shoeStyle`),
+  the heel half on the foot bone and the toe half on the toe bone, soles from the floor up; the foot skin under them is hidden (the
+  template's cover bit) and a sock (or a boot's shaft on the shin bone) reaches just past where the hidden skin ends (`coverTop`).
+  `/preview/moves?outfit=diagnose` (`&pick=feet|hem`) is the close-up check of shoes and hems on both bodies.
+- Big public floors (owner, Nov 20: the competitor's spacious houses as the reference; pilot Campaign HQ; no migration): a place can be a
+  building of 20 × 14 m floors (`PLACE_GROUND` picks its ground floor template in code, TOWERS its other floors). Campaign HQ: Ground
+  floor (`campaignGround`: reception with the front desk that opens Campaign HQ, the phone bank, the volunteers' kitchen, the press room),
+  War room floor (`campaignWar`: the war table, poll board, the candidate's office, the staff lounge) and Rally roof (`campaignRoof`, `open`:
+  a parapet, the rally stage, chairs, string lights, patio tables), joined by stairs. Templates may set `tallWalls` (inner walls full
+  height), `spotlights` (recessed lights with a warm wall wash, sprites not lights) and `open`; floors of 200 m² or more open zoomed in
+  on the player (pinch out for the whole floor) and hold up to 14 players. New pieces: phoneBank, warTable, pressBackdrop,
+  campaignBanner, flagStand, pendantLamp, waterCooler, pollBoard, rallyStage, stringLights, patioUmbrella; item use `campaign`.
+  Modeled furniture (owner, Nov 20): a room item's `model` names a GLB in components/room/models.ts `MODELS` (Higgsfield pieces and
+  Kenney's CC0 kit in public/models/kenney/), swapped in over the box-built piece once loaded (low graphics keeps the boxes); fit by
+  `width`, `height` or the footprint, `turn` quarter turns, `layFlat`, `hangTop`. Add one with `node scripts/models.mjs <in.glb> <name>.glb`
+  (simplified, meshopt-compressed, WebP textures stepped down until under 80 KB; the loader has the meshopt decoder). Every place's
+  signature piece is listed there by place (fire engine, water tower, talk-show set…); `/preview/models?pick=a,b` checks them.
+  The big clubs (owner, Nov 20: "a bar, a stage with go-go dancers, a vip, lighting, a bigger floor plan", with reference photos): all five
+  clubs' ground floor is `clubBig` (28 × 18 m, `PLACE_GROUND`): the DJ stage (`djStage`: CO2 cannons) under a video wall (`ledWall`),
+  go-go dancers on the stage and on lit podiums (`gogoPodium`; template npcs take `y` and `dance`), lit pillars, six dance-floor tiles,
+  the long bar down the left wall, the lounge, and the roped-off VIP section (`velvetRope`) with the stairs to `vipBig` (14 × 10 m);
+  `clubLights` adds the moving beams and floor pools (Room3D). `PLACE_SIGNATURE` adds each place's signature piece (or swaps models).
+  Stage costumes (owner, Nov 20: "booty shorts and bras"): garment templates `bra` and `hotpants` (scripts/wardrobe.mjs, cover bits
+  262144/524288, never sold); npcs with `costume: "gogo"` wear `gogoPieces(i)` (lib/avatarCatalog.ts) with knee boots on the female
+  body (`?outfit=gogo` in /preview/moves). The dance clip dances on the spot (baseAvatar `danceInPlace`: the female clip's hips
+  wandered a meter).
+  The rooftops (owner, Nov 20: "next the rooftops"): Altitude 718, Ditmars Heights and Up on Wythe are `rooftop` (24 × 16 m, open,
+  `PLACE_GROUND`): the bar along the back, six round marble dining sets (`roundDining`, the dining action) under string lights and
+  heat lamps (`heatLamp`), planters (`planter`), a front lounge and sun loungers. Signature pieces: the fire pit, the cabana and the
+  water tower. `skyline` (rooftops and the station) gives the plain Monument Valley dusk behind, not one tinted by the walls; nothing else around (owner, Nov 20: "Leave out the background buildings. Keep it at just the interior").
+  The station (owner, Nov 20: "next the station"): Astoria Blvd station, a map label until then, can be entered: `station` (24 × 14 m,
+  open, skyline, `PLACE_GROUND`): the platform along `subwayTrack` (the room's width; a three-car train pulls in, opens its doors and
+  leaves every 36 s, clipped at the room's edges: Room3D turns on local clipping), benches facing the tracks (the platform action), green `stationColumn`s, a coffee cart, the fare
+  line (`turnstile`s and railings, the gate open in the middle), `fareMachine`s, the agent's `ticketBooth` and the street entrance
+  (`stationEntrance`, the signature subwayEntrance model).
+  Clout TV Tower (owner, Nov 20): floors 1 and 2 are `tvStudio` (lobby with the reception desk, the Big Screen and the crew's sofa,
+  the control room, the studio with the talk-show set (signature) under a video wall, cameras, `studioLight`s and audience seats, a
+  green room, the "Get on Billboard" set) and `tvNewsroom` (the news desk set on a `tvSet` riser, writers' desks, edit bays, a break
+  corner), 20 × 14 m each; the Executive floor stays `execFloor`. Its "modern" interior style is gone (the floors carry their own).
+  The schools (owner, Nov 20): CAMPUS_AREAS now point at big floors for all three schools: `quadBig` (24 × 18 outdoor: lawns, benches,
+  trees, lamps, the events board, a coffee cart), `lectureHall` (30 desk rows either side of the aisle, the lectern, chalkboard and
+  projector), `libraryBig` (rows of stacks, reading tables, the librarian's desk, the exam table, a reading nook), `diningBig` (the tray
+  line and menu, round marble and long tables) and `greekBig` (dark on purpose: a party house with the dance floor, DJ, `clubLights`,
+  pool table, beer pong, sofas, piano). The small campus* templates stay for nothing else. PLACE_SIGNATURE takes `area` (a campus
+  area's template): St. Johnsons' founder statue on the Quad, Queensborough's oak lectern and Grand Street's trophy case in the
+  Lecture Hall.
+  St. Johnsons is white and blue (owner, Nov 20): palette #2B5BA8 / white / navy (it tints every campus area and the dorm), PlaceArt theme
+  `blueWhite` (a white stone hall), the map model's white facades and blue roofs, the mascot "the Blue Pigeons"; the campus areas'
+  walls are white for every school (Greek Row stays a dark party room).
+  The 114½ Precinct (owner, Nov 20): `precinctBig` (20 × 14, light with blue, `PLACE_GROUND`): the lobby with Sgt. Bev's front desk
+  (the report action; the signature precinctDesk model), waiting benches, flags, the notice board; the holding cell behind `cellBars`;
+  the detectives' bullpen (eight desks, the case board, files, coffee); the interrogation room behind a one-way mirror (`glassWall`).
+  The firehouse, the hospital and the parks (owner, Nov 20: "go ahead"), all `PLACE_GROUND`: `firehouseBig` (the apparatus bay with the
+  `fireTruck` (signature fireEngine model), `gearLocker`s and the `firePole`, the kitchen and long table, the lounge, Hydrant the `dog` for
+  "Pet the firehouse dog"), `hospitalBig` (five patient bays behind `curtain`s with hospitalBed models, reception and waiting room, the
+  nurses' station for volunteering, the exam room for the check-up), `parkRiver` (Astoria Park, outdoor by the water: riverside benches,
+  the `runTrack`, the picnic lawn, the dog run, the `fountain` wearing the signature parkFountain model) and `parkMeadow` (Flushing
+  Meadows: the fountain plaza for hanging out, lawns, benches, the signature ice-cream cart). That finishes the 18 special places.
 - Rate limits (migration 0126, owner Oct 27): PostgREST's pre-request hook (`pgrst.db_pre_request` = `check_request()`) counts each
   signed-in player's writes per minute (`rate_counters`, `rate_hit`): 240 in all, plus buckets for guesses (hunt answers, exams,
   gossip, name checks: 20), reviewed posts (10), chat (30) and checkouts (10). Reads, signed-out requests and the service role are
@@ -809,6 +874,17 @@ components live in `app/globals.css`.
   panel lists only that floor's (`ActionList`/`PlaceTasks` `floor`, `taskFloor`); place-wide rows stay on the ground floor. Task titles
   name the action ("<action label> at <place>", never "Be seen at"). A list action plays out in the room: Room3D `act` walks the avatar
   to its piece (sofa, bed, counter) and poses without calling onUse again.
+- Interiors are light (owner, Nov 20: "Stay away from making interiors dark. Only if it is context relevant (e.g clubs)"): light
+  walls and floors everywhere; dark rooms (`dark: true`, near-black walls or floors) only where the setting is dark (clubs, a club's
+  VIP and restroom, the speakeasy, the content house's stream floor).
+  Backgrounds behind every room are the Monument Valley dusk (owner, Nov 20: "All these colors are harsh… and deviate from the
+  delightful monument valley gradient we've used"): Room3D `derivedBackdrop` = `MV_SKY` (peach → rose → lavender by day, lavender →
+  dusty violet → rose at night, never dark) with only a fifth of the room's own wall/accent tint; `skyline` rooms get it untinted.
+  Tiled floors are plain white (owner, Nov 20: "I don't like the tiled floors", then after a side-by-side of off-white tiles, white
+  tiles and plain white, "go with white"): Room3D `floorTexture` draws every `tile` and `checker` floor (and room zone) as one smooth
+  white surface, no lines or checker squares, whatever the template's floor color; dark rooms and outdoor places (`outdoor`:
+  parks, the Quad, plazas) keep their ground. The parks and the Quad are lush grass (#4C9A3F, one solid color: outdoor ground gets no speckle
+  or light wash) with paved paths as room zones; no lawn patches (owner, Nov 20); the track sits inside its grass with room around it.
 - Players see "Crew" for their invited friends; code, types and database tables still say `clique`
   (renaming stored data isn't worth the risk). Keep player-facing copy on "crew".
 - Culture packs (docs/culture/, one at a time, only when the owner says "Build C<number>"): slang, invented stand-ins

@@ -46,10 +46,9 @@ test("room hotspots point at real place actions", () => {
   }
 });
 
-test("v0.11: every place but subway stations can be entered, and its room uses its own actions", () => {
+test("v0.11: every place can be entered (the station too, since Nov 20), and its room uses its own actions", () => {
   for (const p of PLACES) {
     const room = placeRoom(p);
-    if (p.tags.includes("subway")) { assert.equal(room, null, `${p.id}: subway stations stay a map label`); continue; }
     assert.ok(room, `${p.id} has a room`);
     const uses = room!.items.filter((i) => i.use?.kind === "action" || i.use?.kind === "gigs");
     for (const i of uses) {
@@ -179,4 +178,49 @@ test("interior styles (owner, Oct 31): every styled place keeps a room that fits
   assert.ok(lib.items.some((i) => i.id.startsWith("style-art")), "Old English hangs paintings");
   const min = styleRoom(PLACE_TEMPLATES.office, "minimalist");
   assert.ok(min.items.filter((i) => i.kind === "plant").length <= 1, "minimalist: one plant");
+});
+
+test("the big clubs (Nov 20): every club's floors fit, with its signature piece and stairs", () => {
+  for (const id of ["velvet-static", "hellgate-hall", "the-sticky-floor", "discount-disco", "ultraviolet-society"]) {
+    const p = PLACES.find((x) => x.id === id)!;
+    const ground = placeRoom(p)!;
+    assert.match(ground.id, /^clubBig:/, id);
+    assert.ok(ground.items.some((i) => i.id.startsWith("sig-") || i.model === "discoFloor"), `${id} has its signature piece`);
+    assert.ok(ground.items.some((i) => i.use?.kind === "floor" && i.use.to === 0), `${id} has stairs to the restroom`);
+    const floors = [ground, placeFloor(p, 0), placeFloor(p, 2)].filter((t): t is RoomTemplate => !!t);
+    if (p.club?.vip) assert.match(placeFloor(p, 2)!.id, /^vipBig:/);
+    for (const t of floors) {
+      for (const i of t.items) assert.ok(placementOk(t, t.items, i), `${t.id}/${i.id}`);
+      const grid = makeGrid(t, t.items);
+      for (const i of t.items.filter((x) => x.use)) assert.ok(findPath(grid, t.spawn, useSpot(i)).length > 0, `${t.id}/${i.id} can be reached`);
+    }
+  }
+});
+
+test("the rooftops (Nov 20): an open roof with the skyline, its signature piece, dining that works", () => {
+  for (const id of ["altitude-718", "ditmars-heights-rooftop", "up-on-thirty"]) {
+    const p = PLACES.find((x) => x.id === id)!;
+    const t = placeRoom(p)!;
+    assert.match(t.id, /^rooftop:/, id);
+    assert.ok(t.open && t.skyline, `${id} is open to the sky`);
+    assert.ok(t.items.some((i) => i.id.startsWith("sig-")), `${id} has its signature piece`);
+    assert.ok(t.items.some((i) => i.use?.kind === "action" && (i.use as { actionId: string }).actionId === "eat"), `${id}: dining is in the room`);
+    for (const i of t.items) assert.ok(placementOk(t, t.items, i), `${t.id}/${i.id}`);
+    const grid = makeGrid(t, t.items);
+    for (const i of t.items.filter((x) => x.use)) assert.ok(findPath(grid, t.spawn, useSpot(i)).length > 0, `${t.id}/${i.id} can be reached`);
+  }
+});
+
+test("the station (Nov 20): the platform, the train, the fare line, people-watching on a bench", () => {
+  const p = PLACES.find((x) => x.id === "astoria-blvd-station")!;
+  const t = placeRoom(p)!;
+  assert.match(t.id, /^station:/);
+  assert.ok(t.items.some((i) => i.kind === "subwayTrack"), "the tracks and the train");
+  assert.ok(t.items.filter((i) => i.kind === "turnstile").length >= 4, "the turnstiles");
+  assert.ok(t.items.some((i) => i.id === "sig-entrance"), "the street entrance");
+  const watch = t.items.find((i) => i.use?.kind === "action")!;
+  assert.equal((watch.use as { actionId: string }).actionId, "platform");
+  for (const i of t.items) assert.ok(placementOk(t, t.items, i), `${t.id}/${i.id}`);
+  const grid = makeGrid(t, t.items);
+  assert.ok(findPath(grid, t.spawn, useSpot(watch)).length > 0, "through the open gate to the platform");
 });

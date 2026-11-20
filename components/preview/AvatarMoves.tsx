@@ -19,7 +19,7 @@ import type { AvatarParts } from "../avatar/buildAvatar";
 import { dance, poseLie, poseSit, resetLimbs } from "../room/Room3D";
 import { BUILDS, DEFAULT_LOOK, HAIR_COLORS, SKIN_TONES, type Look } from "@/lib/look";
 import { getStyle, starterOutfit, type Outfit } from "@/lib/styles";
-import { OUTFIT_SETS } from "@/lib/avatarCatalog";
+import { OUTFIT_SETS, gogoPieces } from "@/lib/avatarCatalog";
 import { ACCESSORIES } from "@/lib/accessories";
 import { CATALOG_WEAR, catalogPieces } from "@/lib/catalogWear";
 import { GLOW_SKUS } from "@/lib/wearing";
@@ -42,11 +42,16 @@ const CLIPS: [string, string][] = [["Standing", "idle"], ["Walk", "walk"], ["Run
 export function AvatarMoves({ skin = 3, build, outfit, size, pick }: { skin?: number; build?: Look["build"]; outfit?: string; size?: number; pick?: string }) {
   const garment = outfit === "hoodie";
   const hairs = outfit === "hair";
-  const wardrobe = outfit === "wardrobe";
+  // ?outfit=diagnose (owner, Nov 19: "clothes and shoes look chopped or distorted"): the problem garments close up, on both
+  // bodies standing, walking, sitting and dancing.
+  const diagnose = outfit === "diagnose";
+  const wardrobe = outfit === "wardrobe" || diagnose;
   const anims = outfit === "anims";
   const sets = outfit === "sets";
   const extras = outfit === "accessories";
   const catalog = outfit === "catalog";
+  // ?outfit=gogo (owner, Nov 20): the clubs' go-go dancers' stage costumes, every color, standing and dancing.
+  const gogo = outfit === "gogo";
   const LOOKS: [string, Partial<Outfit>][] = [
     ["Tee + trousers", { top: "tee", topColor: "#F4F1EA", topAccent: "#2B2B2B", bottom: "pants", bottomColor: "#2E3A55" }],
     ["Crop + skirt", { top: "crop", topColor: "#E86A92", topAccent: "#2B2B2B", bottom: "skirt", bottomColor: "#2B2B2B" }],
@@ -57,12 +62,28 @@ export function AvatarMoves({ skin = 3, build, outfit, size, pick }: { skin?: nu
     ["Puffer + shorts + boots", { top: "puffer", topColor: "#F2A541", topAccent: "#14111A", bottom: "shorts", bottomColor: "#3A3F47", shoes: "boots", shoeColor: "#5A3A22", shoeAccent: "#2B2B2B" }],
     ["Hoodie + skirt + boots", { top: "hoodie", topColor: "#6C8CFF", topAccent: "#F4F1EA", bottom: "skirt", bottomColor: "#B33A3A", shoes: "boots", shoeColor: "#14111A", shoeAccent: "#F4F1EA" }],
   ];
-  const WARDROBE_ROWS: [string, "curvy" | "straight", string][] = [["Female", "curvy", "Idle"], ["Female, sitting", "curvy", "Sit"], ["Male", "straight", "Idle"], ["Male, walking", "straight", "Walk"]];
+  const DIAG_LOOKS: [string, Partial<Outfit>][] = [
+    ["Tee + trousers + sneakers", LOOKS[0][1]],
+    ["Crop + skirt", LOOKS[1][1]],
+    ["Midi skirt", { top: "tee", topColor: "#F4F1EA", topAccent: "#2B2B2B", pieces: { bottom: [{ file: "midi", color: "#6C3FB0", accent: "#2B2B2B" }] } }],
+    ["Gown", { pieces: { top: [{ file: "vest", color: "#B33A3A", accent: "#C9A227" }], bottom: [{ file: "gown", color: "#B33A3A", accent: "#C9A227" }] } }],
+    ["Coat tails", { pieces: { top: [{ file: "zip", color: "#1F1B26", accent: "#C9A227" }, { file: "coattail", color: "#1F1B26", accent: "#C9A227" }] }, bottom: "pants", bottomColor: "#1F1B26" }],
+    ["Puffer + boots", LOOKS[6][1]],
+    ["Knee boots", { top: "tee", topColor: "#F4F1EA", topAccent: "#2B2B2B", bottom: "shorts", bottomColor: "#3A3F47", pieces: { shoes: [{ file: "kneeboots", color: "#14111A", accent: "#2B2B2B" }] } }],
+  ];
+  const DIAG_ROWS: [string, "curvy" | "straight", string][] = [["Female", "curvy", "Idle"], ["Female, walking", "curvy", "Walk"], ["Female, sitting", "curvy", "Sit"],
+    ["Female, dancing", "curvy", "Dance: hands up"], ["Male, walking", "straight", "Walk"], ["Male, sitting", "straight", "Sit"]];
+  const WARDROBE_ROWS: [string, "curvy" | "straight", string][] = diagnose ? DIAG_ROWS : [["Female", "curvy", "Idle"], ["Female, sitting", "curvy", "Sit"], ["Male", "straight", "Idle"], ["Male, walking", "straight", "Walk"]];
   const HAIR_COLS = ["short", "buzz", "long", "ponytail", "bun", "braids", "curls", "locs", "long + cap"];
   const picked = (all: string[]) => (pick ? all.filter((c) => pick.split(",").includes(c)) : all);
-  const moves: string[] = catalog ? picked(Object.keys(CATALOG_WEAR)) : extras ? picked([...Object.keys(ACCESSORIES), ...GLOW_SKUS, TIARA]) : sets ? picked(OUTFIT_SETS.map((o) => o.id)) : anims ? CLIPS.map((c) => c[0]) : wardrobe ? LOOKS.map((l) => l[0]) : hairs ? HAIR_COLS : garment ? GARMENT_MOVES : ALL_MOVES;
+  const moves: string[] = gogo ? ["Standing", "Dance"] : catalog ? picked(Object.keys(CATALOG_WEAR)) : extras ? picked([...Object.keys(ACCESSORIES), ...GLOW_SKUS, TIARA]) : sets ? picked(OUTFIT_SETS.map((o) => o.id)) : anims ? CLIPS.map((c) => c[0]) : diagnose ? DIAG_LOOKS.map((l) => l[0]) : wardrobe ? LOOKS.map((l) => l[0]) : hairs ? HAIR_COLS : garment ? GARMENT_MOVES : ALL_MOVES;
   const cell = size ?? (garment ? 170 : 220);
   const rowsOf = (): { look: Look; outfit?: Outfit; label: string; back?: boolean; move?: string; bare?: boolean }[] => {
+    if (gogo) return [0, 1, 2, 3, 4].map((i) => ({
+      look: { ...DEFAULT_LOOK, body: "curvy", build: (["curvy", "athletic", "petite", "plus", "athletic"] as const)[i] as Look["build"], skin: SKIN_TONES[(skin + i * 2) % 8], hair: i % 2 ? "ponytail" : "long", hairColor: HAIR_COLORS[i % 3], covering: "none", glasses: "none", style: "bodega_drip" } as Look,
+      outfit: { ...starterOutfit(getStyle("bodega_drip"), "curvy", null), accessory: "none", pieces: gogoPieces(i) } as Outfit,
+      label: `Dancer ${i + 1}`,
+    }));
     if (anims) return (["curvy", "straight"] as const).flatMap((body, b) => [true, false].map((bare) => ({
       look: { ...DEFAULT_LOOK, body, build: body === "curvy" ? "curvy" : "athletic", skin: SKIN_TONES[(skin + b * 3) % 8], hair: bare ? "bald" : body === "curvy" ? "long" : "short", hairColor: HAIR_COLORS[b], covering: "none", accessory: "none", style: "bodega_drip" } as Look,
       outfit: { ...starterOutfit(getStyle(body === "curvy" ? "pilates_princess" : "bodega_drip"), body, null), accessory: "none" } as Outfit,
@@ -106,8 +127,8 @@ export function AvatarMoves({ skin = 3, build, outfit, size, pick }: { skin?: nu
     const tiles: { scene: Scene; cam: PerspectiveCamera; parts: AvatarParts; move: string; rig: Group }[] = [];
     rows.forEach(({ look: base, outfit: rowOutfit, back, move: rowMove, bare }) => moves.forEach((col) => {
       const look: Look = hairs ? { ...base, hair: col.split(" ")[0] as Look["hair"], covering: col.endsWith("cap") ? "cap" : "none" } : base;
-      const move = sets || extras || catalog ? rowMove! : anims ? CLIPS.find((c) => c[0] === col)![1] : hairs ? (back ? "Back" : "Idle") : wardrobe ? rowMove! : col;
-      const o: Outfit | undefined = catalog ? { ...rowOutfit!, pieces: catalogPieces([col]) } : extras ? { ...rowOutfit!, top: "tee", topColor: "#F4F1EA", topAccent: "#2B2B2B", ...(GLOW_SKUS.has(col) ? { glow: true } : { extras: [col === TIARA ? { ...ACCESSORIES["clout-crown"], kind: "tiara" as const } : ACCESSORIES[col]] }) } : sets ? { ...rowOutfit!, set: col } : wardrobe ? { ...rowOutfit!, shoes: undefined, set: undefined, ...LOOKS.find((l) => l[0] === col)![1] } as Outfit : rowOutfit;
+      const move = gogo ? CLIPS.find((c) => c[0] === col)![1] : sets || extras || catalog ? rowMove! : anims ? CLIPS.find((c) => c[0] === col)![1] : hairs ? (back ? "Back" : "Idle") : wardrobe ? rowMove! : col;
+      const o: Outfit | undefined = catalog ? { ...rowOutfit!, pieces: catalogPieces([col]) } : extras ? { ...rowOutfit!, top: "tee", topColor: "#F4F1EA", topAccent: "#2B2B2B", ...(GLOW_SKUS.has(col) ? { glow: true } : { extras: [col === TIARA ? { ...ACCESSORIES["clout-crown"], kind: "tiara" as const } : ACCESSORIES[col]] }) } : sets ? { ...rowOutfit!, set: col } : wardrobe ? { ...rowOutfit!, shoes: undefined, set: undefined, ...(diagnose ? DIAG_LOOKS : LOOKS).find((l) => l[0] === col)![1] } as Outfit : rowOutfit;
       const scene = new Scene();
       scene.background = new Color("#EDE6DA");
       scene.add(new HemisphereLight(0xffffff, 0x8a7f70, 1.6), new AmbientLight(0xffffff, 0.4));
@@ -130,7 +151,7 @@ export function AvatarMoves({ skin = 3, build, outfit, size, pick }: { skin?: nu
       }
       const lying = move === "Lie down" || move === "sleep";
       const cam = new PerspectiveCamera(lying ? 34 : 30, 1, 0.1, 50);
-      if (lying) { cam.position.set(1.6, 2.6, 2.2); cam.lookAt(0, 0.4, 0); } else if (hairs) { cam.position.set(0, 1.45, 1.5); cam.lookAt(0, 1.4, 0); } else { cam.position.set(0, 1.05, 4.1); cam.lookAt(0, 0.85, 0); }
+      if (lying) { cam.position.set(1.6, 2.6, 2.2); cam.lookAt(0, 0.4, 0); } else if (hairs) { cam.position.set(0, 1.45, 1.5); cam.lookAt(0, 1.4, 0); } else if (diagnose && pick === "feet") { cam.position.set(0, 0.55, 1.3); cam.lookAt(0, 0.15, 0); } else if (diagnose && pick === "hem") { cam.position.set(0, 1.0, 2.1); cam.lookAt(0, 0.75, 0); } else { cam.position.set(0, 1.05, 4.1); cam.lookAt(0, 0.85, 0); }
       tiles.push({ scene, cam, parts, move, rig });
     }));
     const clock = new Clock();

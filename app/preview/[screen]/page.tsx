@@ -1,4 +1,5 @@
 import { AvatarMoves } from "@/components/preview/AvatarMoves";
+import { ModelsPreview } from "@/components/preview/ModelsPreview";
 import { Cutscene } from "@/components/preview/Cutscene";
 import { previewShopAction, previewShopAudit, previewShopNewDrop, previewCoutureOwners, previewCoutureName, previewPlazaRemove, previewShopEdit, previewShopFiles, previewShopImport, previewShopList, previewShopProcessImages } from "../shopActions";
 import { notFound } from "next/navigation";
@@ -120,7 +121,7 @@ export default async function Preview({
 }) {
   if (process.env.NODE_ENV === "production") notFound();
   const { screen } = await params;
-  const { time, step, state, flow, city, room, mood, dev, story, live, tasks, dating, crew, party, hunt, lotto, gossip, rankup, biz, together, radio, tv, brooklyn, hint, campus, goals, push, member, via, skills, transit, rent, calendar, couture, mayor, skin, build, outfit, size, pick, restart, arc, still, at, couple, sublet, homescore, visit, starter, apps, campaign, school, crown, career, underworld, gala, choice, economy, assets, market, pass, pack, life, bonds, shot } = await searchParams;
+  const { time, step, state, flow, city, room, mood, dev, story, live, tasks, dating, crew, party, hunt, lotto, gossip, rankup, biz, together, radio, tv, brooklyn, hint, campus, goals, push, member, via, skills, transit, rent, calendar, couture, mayor, skin, build, outfit, size, pick, restart, arc, still, at, couple, sublet, homescore, visit, starter, apps, campaign, school, crown, career, underworld, gala, choice, economy, assets, market, pass, pack, life, bonds, shot, scene } = await searchParams;
   const daytimeOverride = time === "day" ? true : time === "night" ? false : undefined;
 
   switch (screen) {
@@ -275,9 +276,12 @@ export default async function Preview({
     // The avatar upgrade: the new base bodies doing every move (?skin=0-7, ?build=; ?outfit=hoodie for stage 3; ?size= tile pixels; ?pick=a,b only those columns).
     case "moves":
       return <AvatarMoves skin={Number(skin ?? 3)} build={build as import("@/lib/look").Look["build"] | undefined} outfit={outfit} size={size ? Number(size) : undefined} pick={pick} />;
-    // A prototype cutscene: going official on a rooftop (owner, Nov 19). ?shot=0-5 starts at a shot.
+    // The cutscenes (owner, Nov 19): ?scene=arrival|party|official, ?shot=N starts at a shot.
+    // Modeled furniture (owner, Nov 20): every model in components/room/models.ts (?pick=a,b filters by id).
+    case "models":
+      return <ModelsPreview pick={pick} />;
     case "cutscene":
-      return <Cutscene startShot={Number(shot ?? 0)} />;
+      return <Cutscene startShot={Number(shot ?? 0)} scene={scene} />;
     case "room":
       return <PreviewRoom room={room ?? "cafe"} daytime={time !== "night"} mood={mood === "natural" ? "natural" : "dream"} />;
     default:

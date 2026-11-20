@@ -19,7 +19,7 @@
 //   * Low-graphics mode loads the lighter files (fewer triangles, a 512 px texture).
 
 import {
-  AnimationMixer, Box3, LoopOnce, LoopRepeat, BufferAttribute, Color, DoubleSide, Euler, Group, Matrix4, MeshStandardMaterial, Object3D, Quaternion,
+  AnimationMixer, type AnimationClip, Box3, LoopOnce, LoopRepeat, BufferAttribute, Color, DoubleSide, Euler, Group, Matrix4, MeshStandardMaterial, Object3D, Quaternion,
   Skeleton, SkinnedMesh, Vector2, Vector3, type AnimationAction, type BufferGeometry, type Bone, type Material,
   type WebGLProgramParametersWithUniforms,
 } from "three";
@@ -27,7 +27,8 @@ import { GLTFLoader, type GLTF } from "three/examples/jsm/loaders/GLTFLoader.js"
 import { clone as cloneSkinned } from "three/examples/jsm/utils/SkeletonUtils.js";
 import type { Look } from "@/lib/look";
 import { getStyle, starterOutfit, type Outfit } from "@/lib/styles";
-import { garmentsFor, KEEPS_COVERING, modelSex, SET_LOOKS } from "@/lib/avatarCatalog";
+import { GARMENT_TEMPLATES, garmentsFor, KEEPS_COVERING, modelSex, SET_LOOKS } from "@/lib/avatarCatalog";
+import { attachShoes, shoeStyle } from "./shoes";
 import { lowGraphics } from "@/lib/graphics";
 import { widenOffsets, type V3 } from "@/lib/bodyTypes";
 import { buildAvatar, type AvatarParts } from "./buildAvatar";
@@ -39,6 +40,22 @@ import type { ModelAvatarOptions } from "./modelAvatar";
 
 const cache = new Map<string, Promise<GLTF>>();
 let loader: GLTFLoader | null = null;
+/**
+ * The female dance clip travels: its hips wander about a meter sideways (owner, Nov 20: a go-go dancer stepped off her
+ * podium). Dancing stays on the spot: the hips keep their bounce (height) but stand over the feet, where the walk's do
+ * (in the file's centimeters). Clips are shared between avatars, so each is fixed once.
+ */
+function danceInPlace(clip: AnimationClip): AnimationClip {
+  if (clip.name !== "dance" || clip.userData.inPlace) return clip;
+  for (const tr of clip.tracks) {
+    if (!/Hips\.position$/.test(tr.name)) continue;
+    const v = tr.values;
+    for (let i = 0; i < v.length; i += 3) { v[i] = 0; v[i + 2] = -4; }
+  }
+  clip.userData.inPlace = true;
+  return clip;
+}
+
 function load(path: string): Promise<GLTF> {
   let p = cache.get(path);
   if (!p) {
@@ -578,10 +595,24 @@ void main() {`)
     // The outfit's garments, on the body's own bones; the skin they hide isn't drawn.
     const low = lowGraphics() ? "-low" : "";
     const worn = opts.bare ? [] : garmentsFor(outfit, sex);
-    const files = await Promise.all(worn.map((g) => load(`/avatars/garments/${g.file}-${sex}${low}.glb`).catch(() => null)));
+    // Shoes are solid models now (owner, Nov 19: components/avatar/shoes.ts), not cut from the foot's skin.
+    const isShoe = (g: (typeof worn)[number]) => g.slot === "shoes";
+    const files = await Promise.all(worn.map((g) => (isShoe(g) ? null : load(`/avatars/garments/${g.file}-${sex}${low}.glb`).catch(() => null))));
     if (disposed) return;
     let cover = 0;
+    const shoe = worn.find(isShoe);
+    if (shoe) {
+      const style = shoeStyle(shoe.file, shoe.kind, shoe.pattern ?? 0, shoe.cover);
+      rig.updateMatrixWorld(true);
+      // The skin under them isn't drawn, and a boot's shaft or a low shoe's sock reaches just past where it ends, so no
+      // cut shows; a sandal or heel shows the foot.
+      const bit = style === "sandal" || style === "heel" ? 0 : GARMENT_TEMPLATES[shoe.file]?.cover ?? 0;
+      const made = attachShoes(mesh, bones, { style, color: shoe.color, accent: shoe.accent, finish: shoe.finish, glowSole: !!((shoe.pattern ?? 0) & 32768), low: !!low, coverBit: bit });
+      materials.push(...made.materials);
+      cover |= bit;
+    }
     worn.forEach((g, k) => {
+      if (isShoe(g)) return;
       let src: SkinnedMesh | null = null;
       files[k]?.scene.traverse((o) => { if ((o as SkinnedMesh).isSkinnedMesh) src = o as SkinnedMesh; });
       if (!src) return;
@@ -674,7 +705,7 @@ void main() {`)
     mixer = new AnimationMixer(rig);
     const anims = await load(`/avatars/body/${sex}-anims.glb`).catch(() => null);
     if (disposed) return;
-    for (const clip of anims?.animations ?? []) actions[clip.name] = mixer.clipAction(clip);
+    for (const clip of anims?.animations ?? []) actions[clip.name] = mixer.clipAction(danceInPlace(clip));
     // The sit and sleep clips' first frames, measured: where the hips, knees and head end up.
     const at = (name: string) => { const b = bones.get(name); return b ? body.worldToLocal(b.getWorldPosition(new Vector3())) : new Vector3(); };
     for (const [kind, clip] of [["sit", "sit"], ["lie", "sleep"]] as const) {

@@ -1501,9 +1501,9 @@ function lampRow(t: Themed, g: Group, x1: number, z1: number, x2: number, z2: nu
 // ---------------------------------------------------------------------------
 function stJohnsons(t: Themed): Group {
   const g = new Group();
-  const brick = facade(t, { wall: "#A9483A", glass: "#4E6B7A", style: "punched", lit: 0.7, seed: 201, frame: C.cream });
-  const dorm = facade(t, { wall: "#B9765A", glass: "#4E6B7A", style: "punched", lit: 0.8, seed: 203, frame: C.cream });
-  const slate = solid("#4A5A6A");
+  const brick = facade(t, { wall: "#EEF2F8", glass: "#2B5BA8", style: "punched", lit: 0.7, seed: 201, frame: C.cream });
+  const dorm = facade(t, { wall: "#D6E2F3", glass: "#2B5BA8", style: "punched", lit: 0.8, seed: 203, frame: C.cream });
+  const slate = solid("#2B5BA8");
   const white = glowing(t, "#F4F1EA", C.amber, 0.3, 0);
   // Grounds: the whole campus lawn, the great lawn in the middle, crossing paths.
   // Round grounds that sit inside the site, so no corner pokes out over a street.

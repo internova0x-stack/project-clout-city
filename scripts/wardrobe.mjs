@@ -42,6 +42,10 @@ export const WARDROBE = {
   midi: { kind: "skirt", bit: 65536, length: "midi" },
   kneeboots: { kind: "boots", bit: 131072, gap: 0.016, end: "knee" },
   coattail: { kind: "skirt", bit: 0, length: "coat" },
+  // Stage costumes (owner, Nov 20: the clubs' go-go dancers, "booty shorts and bras"): a sports bra (sleeveless, a scoop
+  // neck, the hem just under the chest) and hot pants (the legs end high on the thigh).
+  bra: { kind: "top", bit: 262144, hem: "bra", sleeve: "none", neck: "scoop", gap: 0.009 },
+  hotpants: { kind: "bottom", bit: 524288, end: "hot", gap: 0.006 },
 };
 if (Object.values(WARDROBE).some((t) => t.bit & COVER.hoodie)) throw new Error("cover bit clash");
 
@@ -56,6 +60,7 @@ export function wardrobeFit(body) {
     ...f,
     // The crop top stops between the chest and the navel; the waistband sits a little above the hip bone.
     cropY: lerp(B.Spine02, B.Spine01, 0.55)[1],
+    braY: lerp(B.Spine02, B.Spine01, 0.2)[1],
     waistY: B.Hips[1] + 0.035,
     // Overalls: the bib's top edge on the chest; each strap 7.5 cm either side of the middle.
     bibY: lerp(B.Spine01, B.Spine02, 0.75)[1],
@@ -69,6 +74,7 @@ export function wardrobeFit(body) {
     })),
     ankle: Object.fromEntries(sides.map((s) => [s, plane(at(`${s}Leg`, `${s}Foot`, 0.86), sub(B[`${s}Foot`], B[`${s}Leg`]))])),
     thigh: Object.fromEntries(sides.map((s) => [s, plane(at(`${s}UpLeg`, `${s}Leg`, 0.62), sub(B[`${s}Leg`], B[`${s}UpLeg`]))])),
+    hot: Object.fromEntries(sides.map((s) => [s, plane(at(`${s}UpLeg`, `${s}Leg`, 0.36), sub(B[`${s}Leg`], B[`${s}UpLeg`]))])),
     kneeLow: Object.fromEntries(sides.map((s) => [s, plane(at(`${s}Leg`, `${s}Foot`, 0.1), sub(B[`${s}Foot`], B[`${s}Leg`]))])),
     ankleTop: Object.fromEntries(sides.map((s) => [s, plane(at(`${s}Leg`, `${s}Foot`, 0.93), sub(B[`${s}Foot`], B[`${s}Leg`]))])),
     calf: Object.fromEntries(sides.map((s) => [s, plane(at(`${s}Leg`, `${s}Foot`, 0.5), sub(B[`${s}Foot`], B[`${s}Leg`]))])),
@@ -127,7 +133,7 @@ export function wardrobeKeep(body, f, t) {
       return { s, edge: k > 0.5 ? best.edge : base.edge };
     };
     if (t.kind === "top") {
-      const hemY = t.hem === "crop" ? f.cropY : f.hemY - t.hem;
+      const hemY = t.hem === "crop" ? f.cropY : t.hem === "bra" ? f.braY : f.hemY - t.hem;
       let base = { s: p[1] - hemY, edge: "hem" };
       const n = neckline(f, t, p);
       if (n < base.s) base = { s: n, edge: "neck" };
@@ -145,7 +151,7 @@ export function wardrobeKeep(body, f, t) {
     if (t.kind === "bottom") {
       const base = { s: f.waistY - p[1], edge: "waist" };
       const leg = (side) => {
-        const e = before(t.end === "ankle" ? f.ankle[side] : f.thigh[side], p);
+        const e = before(t.end === "ankle" ? f.ankle[side] : t.end === "hot" ? f.hot[side] : f.thigh[side], p);
         return e < base.s ? { s: e, edge: "cuff" } : base;
       };
       const arm = { s: -0.05, edge: "waist" };
