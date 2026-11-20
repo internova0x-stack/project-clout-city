@@ -403,23 +403,23 @@ export default function Room3D(props: Room3DProps) {
         c.width = 64; c.height = 128;
         const g2 = c.getContext("2d")!;
         const grad = g2.createRadialGradient(32, 10, 2, 32, 30, 70);
-        grad.addColorStop(0, "rgba(255,226,170,0.95)"); grad.addColorStop(0.35, "rgba(255,214,150,0.35)"); grad.addColorStop(1, "rgba(255,214,150,0)");
+        grad.addColorStop(0, "rgba(255,226,170,0.55)"); grad.addColorStop(0.4, "rgba(255,214,150,0.16)"); grad.addColorStop(1, "rgba(255,214,150,0)");
         g2.fillStyle = grad; g2.fillRect(0, 0, 64, 128);
         return new CanvasTexture(c);
       })();
-      const washMat = new SpriteMaterial({ map: washTex, transparent: true, depthWrite: false, blending: AdditiveBlending, opacity: night ? 0.9 : 0.55 });
+      const washMat = new SpriteMaterial({ map: washTex, transparent: true, depthWrite: false, blending: AdditiveBlending, opacity: night ? 0.7 : 0.35 });
       const discMat = kit.mat("#FFF4DC", { emissive: "#FFE7B8", emissiveIntensity: 1.4 });
       const along = (len: number) => { const n = Math.max(2, Math.floor(len / 1.6)); return Array.from({ length: n }, (_, i) => -len / 2 + (i + 0.5) * (len / n)); };
       for (const x of along(template.w)) {
         const disc = new Mesh(kit.geo(new BoxGeometry(0.16, 0.02, 0.16)), discMat);
         disc.position.set(x, WALL_H - 0.04, -template.d / 2 + 0.16);
-        const wash = new Sprite(washMat); wash.scale.set(1.2, 2.2, 1); wash.position.set(x, WALL_H - 1.05, -template.d / 2 + 0.03);
+        const wash = new Sprite(washMat); wash.scale.set(1.0, 1.5, 1); wash.position.set(x, WALL_H - 0.8, -template.d / 2 + 0.03);
         walls.zNeg.add(disc, wash);
       }
       for (const z of along(template.d)) {
         const disc = new Mesh(kit.geo(new BoxGeometry(0.16, 0.02, 0.16)), discMat);
         disc.position.set(-template.w / 2 + 0.16, WALL_H - 0.04, z);
-        const wash = new Sprite(washMat); wash.scale.set(1.2, 2.2, 1); wash.position.set(-template.w / 2 + 0.03, WALL_H - 1.05, z);
+        const wash = new Sprite(washMat); wash.scale.set(1.0, 1.5, 1); wash.position.set(-template.w / 2 + 0.03, WALL_H - 0.8, z);
         walls.xNeg.add(disc, wash);
       }
     }
@@ -479,7 +479,8 @@ export default function Room3D(props: Room3DProps) {
     let angle = 0;
     // Pinch zoom (owner, Oct 14): 1 shows the whole room; closer in, the view centers on the player.
     const ZOOM_MAX = 2.6;
-    let zoom = 1;
+    // Big public floors (owner, Nov 20) open a little zoomed in on the player; a pinch out shows the whole floor.
+    let zoom = template.w * template.d >= 200 ? 1.6 : 1;
     let zoomDirty = false;
     const playerAt = new Vector3();
     // Outdoor plazas start the camera over the player.

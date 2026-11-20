@@ -429,6 +429,14 @@ components live in `app/globals.css`.
   the heel half on the foot bone and the toe half on the toe bone, soles from the floor up; the foot skin under them is hidden (the
   template's cover bit) and a sock (or a boot's shaft on the shin bone) reaches just past where the hidden skin ends (`coverTop`).
   `/preview/moves?outfit=diagnose` (`&pick=feet|hem`) is the close-up check of shoes and hems on both bodies.
+- Big public floors (owner, Nov 20: the competitor's spacious houses as the reference; pilot Campaign HQ; no migration): a place can be a
+  building of 20 × 14 m floors (`PLACE_GROUND` picks its ground floor template in code, TOWERS its other floors). Campaign HQ: Ground
+  floor (`campaignGround`: reception with the front desk that opens Campaign HQ, the phone bank, the volunteers' kitchen, the press room),
+  War room floor (`campaignWar`: the war table, poll board, the candidate's office, the staff lounge) and Rally roof (`campaignRoof`, `open`:
+  a parapet, the rally stage, chairs, string lights, patio tables), joined by stairs. Templates may set `tallWalls` (inner walls full
+  height), `spotlights` (recessed lights with a warm wall wash, sprites not lights) and `open`; floors of 200 m² or more open zoomed in
+  on the player (pinch out for the whole floor) and hold up to 14 players. New pieces: phoneBank, warTable, pressBackdrop,
+  campaignBanner, flagStand, pendantLamp, waterCooler, pollBoard, rallyStage, stringLights, patioUmbrella; item use `campaign`.
 - Rate limits (migration 0126, owner Oct 27): PostgREST's pre-request hook (`pgrst.db_pre_request` = `check_request()`) counts each
   signed-in player's writes per minute (`rate_counters`, `rate_hit`): 240 in all, plus buckets for guesses (hunt answers, exams,
   gossip, name checks: 20), reviewed posts (10), chat (30) and checkouts (10). Reads, signed-out requests and the service role are
