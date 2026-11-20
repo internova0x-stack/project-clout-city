@@ -1389,6 +1389,15 @@ function buildBoxFurniture(item: RoomItem, k: Kit, opts: { night: boolean }): Bu
       const face = new Mesh(k.geo(new BoxGeometry(0.52, 0.38, 0.02)), glow("#FFF6E0", 1.8)); face.position.z = 0.13; head.add(face);
       return { group: g };
     }
+    case "cellBars": {
+      // A holding cell's front: steel rails top and bottom and bars every 15 cm (a door in the middle third).
+      const steel = k.mat("#7C8594", { metalness: 0.6, roughness: 0.35 });
+      box(w, 0.08, d, steel, 0, 0, 0);
+      box(w, 0.08, d, steel, 0, 2.3, 0);
+      box(w, 0.06, d, steel, 0, 1.1, 0);
+      for (let x = -w / 2 + 0.05; x <= w / 2 - 0.04; x += 0.15) cyl(0.022, 0.022, 2.3, steel, x, 0.04, 0, 6);
+      return { group: g };
+    }
     case "chandelier": {
       // A brass ring of candle lights on a chain (the box-built stand-in).
       const brass = k.mat("#C9A227", { metalness: 0.5, roughness: 0.35 });

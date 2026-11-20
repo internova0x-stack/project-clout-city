@@ -70,7 +70,7 @@ export const MODELS: Record<string, ModelInfo> = {
   founderStatue: { file: "founder-statue.glb", height: 2.8, source: "Higgsfield (Tripo), generated Nov 20" }, // St. Johnsons University
   oakLectern: { file: "oak-lectern.glb", height: 1.3, source: "Higgsfield (Tripo), generated Nov 20" }, // Queensborough University
   trophyCase: { file: "trophy-case.glb", width: 1.8, turn: 2, source: "Higgsfield (Tripo), generated Nov 20" }, // Grand Street Community College
-  precinctDesk: { file: "precinct-desk.glb", width: 3.4, source: "Higgsfield (Tripo), generated Nov 20" }, // The 114½ Precinct
+  precinctDesk: { file: "precinct-desk.glb", width: 2.6, source: "Higgsfield (Tripo), generated Nov 20" }, // The 114½ Precinct
   fireEngine: { file: "fire-engine.glb", width: 7.0, source: "Higgsfield (Tripo), generated Nov 20" }, // Engine 7 Firehouse
   hospitalBed: { file: "hospital-bed.glb", width: 2.4, source: "Higgsfield (Tripo), generated Nov 20" }, // St. Copay's General Hospital
   parkFountain: { file: "park-fountain.glb", width: 3.2, source: "Higgsfield (Tripo), generated Nov 20" }, // Astoria Park

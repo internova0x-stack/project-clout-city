@@ -474,6 +474,9 @@ components live in `app/globals.css`.
   St. Johnsons is white and blue (owner, Nov 20): palette #2B5BA8 / white / navy (it tints every campus area and the dorm), PlaceArt theme
   `blueWhite` (a white stone hall), the map model's white facades and blue roofs, the mascot "the Blue Pigeons"; the campus areas'
   walls are white for every school (Greek Row stays a dark party room).
+  The 114½ Precinct (owner, Nov 20): `precinctBig` (20 × 14, light with blue, `PLACE_GROUND`): the lobby with Sgt. Bev's front desk
+  (the report action; the signature precinctDesk model), waiting benches, flags, the notice board; the holding cell behind `cellBars`;
+  the detectives' bullpen (eight desks, the case board, files, coffee); the interrogation room behind a one-way mirror (`glassWall`).
 - Rate limits (migration 0126, owner Oct 27): PostgREST's pre-request hook (`pgrst.db_pre_request` = `check_request()`) counts each
   signed-in player's writes per minute (`rate_counters`, `rate_hit`): 240 in all, plus buckets for guesses (hunt answers, exams,
   gossip, name checks: 20), reviewed posts (10), chat (30) and checkouts (10). Reads, signed-out requests and the service role are

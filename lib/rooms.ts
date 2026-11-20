@@ -52,7 +52,9 @@ export type FurnitureKind =
   // The subway station (owner, Nov 20): the track and its train, turnstiles, fare machines, the agent's booth, columns, the entrance
   | "subwayTrack" | "turnstile" | "fareMachine" | "ticketBooth" | "stationColumn" | "stationEntrance"
   // Clout TV Tower (owner, Nov 20): a show's set on a riser and the studio's lights on stands
-  | "tvSet" | "studioLight";
+  | "tvSet" | "studioLight"
+  // The precinct (owner, Nov 20): a holding cell's bars
+  | "cellBars";
 
 export type ItemUse =
   | { kind: "action"; actionId: string }
@@ -234,6 +236,7 @@ export const FURNITURE: Record<FurnitureKind, { w: number; d: number; walkable?:
   stationEntrance: { w: 3.0, d: 2.0, label: "Subway entrance" },
   tvSet: { w: 4.4, d: 3.0, label: "The set" },
   studioLight: { w: 0.6, d: 0.6, label: "Studio light" },
+  cellBars: { w: 2.9, d: 0.15, label: "Cell bars" },
   cubicle: { w: 1.6, d: 1.5, label: "Cubicle" },
   glassWall: { w: 3.0, d: 0.12, label: "Glass wall" },
   displayCase: { w: 0.9, d: 0.9, label: "Display case" },
@@ -540,7 +543,7 @@ export function homeTemplate(homeId: string | null | undefined, houseSku?: strin
   return (houseSku && HOME_TEMPLATES[houseSku]) || HOME_TEMPLATES[homeId ?? ""] || HOME_TEMPLATES.astoria_studio;
 }
 
-export type PlaceTemplateId = "campaignGround" | "campaignWar" | "campaignRoof" | "clubBig" | "vipBig" | "rooftop" | "station" | "tvStudio" | "tvNewsroom" | "quadBig" | "lectureHall" | "libraryBig" | "diningBig" | "greekBig" | "restroom" | "vip" | "club" | "cafe" | "counter" | "lounge" | "store" | "showroom" | "campus" | "unisphere" | "gantries" | "lotto" | "office" | "officeSmall" | "officeBig" | "towerLobby" | "techFloor" | "execFloor" | "newsroom" | "streamHouse" | "streamFloor" | "atelier" | "tradingFloor" | "lawOffice" | "backRoom" | "civic" | "gym" | "plaza" | "penthouse" | "radio" | "broadcast" | "hub" | "hubGames" | "hubLounge" | "campusQuad" | "campusLibrary" | "campusDining" | "campusGreek";
+export type PlaceTemplateId = "campaignGround" | "campaignWar" | "campaignRoof" | "clubBig" | "vipBig" | "rooftop" | "station" | "tvStudio" | "tvNewsroom" | "quadBig" | "lectureHall" | "libraryBig" | "diningBig" | "greekBig" | "precinctBig" | "restroom" | "vip" | "club" | "cafe" | "counter" | "lounge" | "store" | "showroom" | "campus" | "unisphere" | "gantries" | "lotto" | "office" | "officeSmall" | "officeBig" | "towerLobby" | "techFloor" | "execFloor" | "newsroom" | "streamHouse" | "streamFloor" | "atelier" | "tradingFloor" | "lawOffice" | "backRoom" | "civic" | "gym" | "plaza" | "penthouse" | "radio" | "broadcast" | "hub" | "hubGames" | "hubLounge" | "campusQuad" | "campusLibrary" | "campusDining" | "campusGreek";
 
 // v0.11 (spec section 11): every place can be entered. The shared templates take a place's own
 // actions: "*0" and "*1" are its first and second action (see placeRoom), so one office serves the
@@ -567,6 +570,60 @@ export const PLACE_TEMPLATES: Record<PlaceTemplateId, RoomTemplate> = {
     npcs: [
       { x: -1.4, z: -1.75, facing: 3.14 }, { x: 0.8, z: -1.75, facing: 3.14 }, { x: 0.3, z: -1.0, facing: -2.2 },
       { x: -0.6, z: 2.3, facing: 3.14, seated: true },
+    ],
+  },
+  // ---- The 114½ Precinct (owner, Nov 20: "Next") ----
+  // 20 × 14 m, light with the precinct's blue: the lobby with Sgt. Bev's front desk (the signature piece and the precinct's
+  // action), waiting benches, flags and the notice board; the holding cell behind bars; the detectives' bullpen (desks, the case
+  // board, filing cabinets, coffee); the interrogation room behind a one-way mirror.
+  precinctBig: {
+    id: "precinctBig", w: 20, d: 14, wall: "#F4F6FA", wallAccent: "#2F5FB3", floor: "#E2E6EE", floorKind: "tile", window: true, spotlights: true,
+    rooms: [
+      { name: "Holding", x0: -10, z0: -7, x1: -4, z1: -2.6, floor: "#C9CDD6", floorKind: "concrete" },
+      { name: "Bullpen", x0: -4, z0: -7, x1: 10, z1: 1, floor: "#C9B79C", floorKind: "wood" },
+      { name: "Interrogation", x0: 5.5, z0: -7, x1: 10, z1: -3, floor: "#B8BEC8", floorKind: "concrete" },
+    ],
+    walls: [[-4, -7, -4, -2.8], [5.5, -7, 5.5, -5.6], [5.5, -4.2, 5.5, -3]],
+    items: [
+      // The lobby.
+      { id: "desk", kind: "storeCounter", x: -6.4, z: 1.2, rot: 0, color: "#2F5FB3", use: MAIN(0), label: "*" },
+      { id: "flag-1", kind: "flagStand", x: -9.2, z: 1.0, rot: 0 },
+      { id: "flag-2", kind: "flagStand", x: -3.6, z: 1.0, rot: 0 },
+      { id: "wait-1", kind: "bench", x: -8.6, z: 4.1, rot: 1, model: "stationBench", use: { kind: "sit" }, label: "Sit" },
+      { id: "wait-2", kind: "bench", x: -8.6, z: 6.1, rot: 1, model: "stationBench" },
+      { id: "wait-3", kind: "bench", x: -4.4, z: 6.6, rot: 2, model: "stationBench" },
+      { id: "notices", kind: "chalkboard", x: -9.8, z: -0.8, rot: 1, color: "#C9A27A" },
+      { id: "cooler", kind: "waterCooler", x: -2.6, z: 6.6, rot: 0 },
+      { id: "lobby-plant", kind: "plant", x: -0.6, z: 6.6, rot: 0, model: "monstera" },
+      // The holding cell: bars across its front, a bench inside.
+      { id: "bars-1", kind: "cellBars", x: -8.5, z: -2.6, rot: 0 },
+      { id: "bars-2", kind: "cellBars", x: -5.5, z: -2.6, rot: 0 },
+      { id: "cell-bench", kind: "bench", x: -7.0, z: -6.5, rot: 0 },
+      // The bullpen: two rows of four detectives' desks, the case board, files and coffee.
+      ...[-2.4, 0.0, 2.4, 4.6].flatMap((x, c) => [-5.2, -1.8].flatMap((z, r) => [
+        { id: `det-desk-${c}-${r}`, kind: "desk" as const, x, z, rot: 0, model: "k:desk" },
+        { id: `det-chair-${c}-${r}`, kind: "chair" as const, x, z: z + 0.75, rot: 2, model: "k:chairDesk" },
+      ])),
+      { id: "case-board", kind: "chalkboard", x: 0.4, z: -6.85, rot: 0 },
+      { id: "files-1", kind: "bookshelf", x: -3.4, z: -0.2, rot: 1, model: "k:bookcaseClosedWide" },
+      { id: "files-2", kind: "bookshelf", x: 9.6, z: 0.2, rot: 3, model: "k:bookcaseClosedWide" },
+      { id: "coffee", kind: "drinksFridge", x: 8.6, z: -2.4, rot: 0 },
+      // The interrogation room: a table, two chairs, a lamp, and the one-way mirror on its wall.
+      { id: "mirror", kind: "glassWall", x: 7.75, z: -3.0, rot: 0 },
+      { id: "int-table", kind: "diningTable", x: 7.75, z: -5.2, rot: 0 },
+      { id: "int-chair-1", kind: "chair", x: 7.75, z: -5.95, rot: 0 },
+      { id: "int-chair-2", kind: "chair", x: 7.75, z: -4.45, rot: 2 },
+      { id: "int-lamp", kind: "pendantLamp", x: 7.75, z: -5.2, rot: 0 },
+      // Front right: a bench and a plant by the door.
+      { id: "door-plant", kind: "plant", x: 9.5, z: 6.5, rot: 0, model: "figTree" },
+      { id: "door-bench", kind: "bench", x: 7.0, z: 6.6, rot: 2, model: "stationBench" },
+    ],
+    spawn: [-1.5, 5.6],
+    npcs: [
+      { x: -6.4, z: 0.6, facing: 0 }, { x: -7.0, z: -6.4, facing: 0, seated: true }, { x: -5.6, z: -4.2, facing: 0.6 },
+      { x: -2.4, z: -4.45, facing: 3.14, seated: true }, { x: 2.4, z: -1.05, facing: 3.14, seated: true }, { x: 4.6, z: -4.45, facing: 3.14, seated: true },
+      { x: 1.2, z: -6.2, facing: 0 }, { x: 7.75, z: -5.95, facing: 0, seated: true }, { x: 7.75, z: -4.45, facing: 3.14, seated: true },
+      { x: -8.6, z: 4.1, facing: 1.57, seated: true }, { x: -4.0, z: 3.8, facing: 2.6 },
     ],
   },
   // ---- The campuses (owner, Nov 20: "next"): every school's five areas as big floors (CAMPUS_AREAS) ----
@@ -2076,6 +2133,8 @@ export const PLACE_GROUND: Record<string, PlaceTemplateId> = {
   "velvet-static": "clubBig", "hellgate-hall": "clubBig", "the-sticky-floor": "clubBig", "discount-disco": "clubBig", "ultraviolet-society": "clubBig",
   // The rooftops (owner, Nov 20).
   "altitude-718": "rooftop", "ditmars-heights-rooftop": "rooftop", "up-on-thirty": "rooftop",
+  // The 114½ Precinct (owner, Nov 20).
+  "precinct-114-half": "precinctBig",
   // Clout TV Tower (owner, Nov 20): its Studio floor (the Newsroom is TOWERS' floor 2).
   "clout-tower": "tvStudio",
   // The subway station (owner, Nov 20): it used to be a map label only.
@@ -2099,6 +2158,7 @@ export const PLACE_SIGNATURE: Record<string, { add?: RoomItem[]; models?: Record
   // The rooftops' signature pieces stand in the middle of the deck (rooftop: around x -5.5, z 1.2), the water tower at the back.
   "altitude-718": { add: [{ id: "sig-firepit", kind: "sectional", x: -5.5, z: 1.0, rot: 0, model: "firePit", name: "The fire pit" }] },
   "ditmars-heights-rooftop": { add: [{ id: "sig-cabana", kind: "sectional", x: -5.5, z: 1.0, rot: 0, color: "#F4F1EA", model: "cabana", name: "The cabana" }] },
+  "precinct-114-half": { models: { desk: "precinctDesk" } },
   "clout-tower": { add: [{ id: "sig-talkshow", kind: "tvSet", x: 3.5, z: -4.6, rot: 0, model: "talkShow", name: "The talk-show set" }] },
   "astoria-blvd-station": { add: [{ id: "sig-entrance", kind: "stationEntrance", x: -8.6, z: 5.6, rot: 0, model: "subwayEntrance", name: "The way down to the street" }] },
   "up-on-thirty": { add: [{ id: "sig-tower", kind: "tree", x: -10.6, z: -4.4, rot: 0, model: "waterTower", name: "The water tower" }] },
@@ -2589,7 +2649,7 @@ export const PLAYER_SLOTS: Record<PlaceTemplateId, number> = {
   restroom: 3, vip: 4, club: 6, cafe: 5, counter: 4, lounge: 5, store: 5, showroom: 7, campus: 6, lotto: 4,
   unisphere: 7, gantries: 7, office: 5, officeSmall: 3, officeBig: 7, towerLobby: 6, techFloor: 7, execFloor: 6, newsroom: 7, streamHouse: 6, streamFloor: 7, atelier: 6, tradingFloor: 7, lawOffice: 6, backRoom: 3, civic: 5, gym: 5, plaza: 7, penthouse: 10, radio: 4, broadcast: 5,
   hub: 7, hubGames: 7, hubLounge: 7, campusQuad: 7, campusLibrary: 5, campusDining: 6, campusGreek: 7,
-  campaignGround: 12, campaignWar: 10, campaignRoof: 14, clubBig: 14, vipBig: 7, rooftop: 14, station: 12, tvStudio: 12, tvNewsroom: 12, quadBig: 14, lectureHall: 14, libraryBig: 12, diningBig: 14, greekBig: 14,
+  campaignGround: 12, campaignWar: 10, campaignRoof: 14, clubBig: 14, vipBig: 7, rooftop: 14, station: 12, tvStudio: 12, tvNewsroom: 12, quadBig: 14, lectureHall: 14, libraryBig: 12, diningBig: 14, greekBig: 14, precinctBig: 12,
 };
 /** The player figures a room holds (its party spots, or PLAYER_SLOTS by template; floors are "vip:place"). */
 export function playerSlots(t: RoomTemplate): number {
