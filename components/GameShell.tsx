@@ -2697,7 +2697,8 @@ export function GameShell({
     if (panel === "leaderboard") guideSeenMark("1.4");
     if (panel === "networth") guideSeenMark("3.4");
     if (panel === "homescore") guideSeenMark("5.3");
-    if (panel === "shop") guideSeenMark("5.8");
+    if (panel === "shop") { guideSeenMark("5.8"); guideSeenMark("7.4"); }
+    if (panel === "skills") guideSeenMark("6.1");
   }, [panel]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (phone.open && phone.app === "messages") guideSeenMark("1.10");

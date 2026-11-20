@@ -28,7 +28,8 @@ export type GuideCheck =
   /** Has one of these (each a table the server reads): an aspiration, a career job, a workday done, an office move, a
    *  business, a job on the players' Jobs board (posted or taken). */
   | { has: "aspiration" | "job" | "workday" | "office_move" | "business" | "board_job" | "hunt_step" | "shoutout"
-      | "layout" | "placed_piece" | "home_plan" | "garden" | "moved_up" | "hosted" };
+      | "layout" | "placed_piece" | "home_plan" | "garden" | "moved_up" | "hosted"
+      | "skill_task" | "skill2" | "skill3" | "look_saved" | "fashion" | "dressed_out" };
 
 export interface GuideCard { art: string; t: string; b: string }
 export interface GuideStep {
@@ -72,8 +73,8 @@ export const CHAPTERS: GuideChapter[] = [
   { n: 3, title: "Money", day: 2, badge: "Bag Secured", badgeId: "guide-3", reward: { cash: 500 }, live: true },
   { n: 4, title: "More clout", day: 2, badge: "Locally Relevant", badgeId: "guide-4", reward: { clout: 150 }, live: true },
   { n: 5, title: "Home", day: 3, badge: "Landlord's Nightmare", badgeId: "guide-5", reward: { cash: 400 }, live: true },
-  { n: 6, title: "Skills", day: 3, badge: "Multi-Hyphenate", badgeId: "guide-6", reward: { clout: 100 }, live: false },
-  { n: 7, title: "Style", day: 2, badge: "Main Character Fit", badgeId: "guide-7", reward: { clout: 100 }, live: false },
+  { n: 6, title: "Skills", day: 3, badge: "Multi-Hyphenate", badgeId: "guide-6", reward: { clout: 100 }, live: true },
+  { n: 7, title: "Style", day: 2, badge: "Main Character Fit", badgeId: "guide-7", reward: { clout: 100 }, live: true },
   { n: 8, title: "People", day: 2, badge: "Plus One", badgeId: "guide-8", reward: { clout: 150 }, live: false },
   { n: 9, title: "Choices", day: 1, badge: "It's Complicated", badgeId: "guide-9", reward: { clout: 100 }, live: false },
   { n: 10, title: "Big plays", rank: 2, badge: "Big Plans", badgeId: "guide-10", reward: { clout: 200 }, live: false },
@@ -530,6 +531,92 @@ STEPS.push(
     ],
     hint: "Open your stats, then Mood, then Have people over", targets: ['button[aria-label="Expand stats"]'],
     check: { has: "hosted" }, reward: { clout: 30 }, done: "Hosted. Nobody broke anything.",
+  },
+);
+
+// ---- Chapter 6: Skills, and Chapter 7: Style.
+const SKILLS = 'button[aria-label^="Skills"]';
+STEPS.push(
+  {
+    id: "6.1", chapter: 6, tag: "Skills", tip: "You're good at things. Some things.",
+    cards: [
+      { art: "🎯", t: "Nine skills, 0 to 10.", b: "Cooking, Dance, Aura, Smarts, Hustle and more. Doing things practises the skill that goes with them." },
+      { art: "🕸️", t: "Skills get rusty.", b: "Leave one alone too long and it slips back. A little practice keeps it sharp." },
+    ],
+    hint: "Open Skills on the side of the screen", targets: [SKILLS],
+    check: { seen: true }, reward: { clout: 15 }, done: "Self-awareness: unlocked.",
+  },
+  {
+    id: "6.2", chapter: 6, tag: "Skills", tip: "Practice makes slightly better.",
+    cards: [
+      { art: "📋", t: "One daily task is a skill task.", b: "It says which skill and where to practise it. Skills shows it on top." },
+      { art: "📍", t: "Every skill has its places.", b: "Dance at clubs, Cooking at home, Smarts at the library. Each skill lists where it's practised." },
+    ],
+    hint: "Do today's skill task", targets: [SKILLS],
+    check: { has: "skill_task" }, reward: { cash: 50 }, done: "Practised. Your future self thanks you.",
+  },
+  {
+    id: "6.3", chapter: 6, tag: "Skills", tip: "Level up.",
+    cards: [
+      { art: "⬆️", t: "A new best level pays clout.", b: "Ten times the level, once. Levels 5 and 10 come with a badge." },
+      { art: "🔁", t: "Practice counts once per thing.", b: "Doing the same thing twice in a day doesn't count twice. Mix it up." },
+    ],
+    hint: "Get any skill to level 2", targets: [SKILLS],
+    check: { has: "skill2" }, reward: { clout: 20 }, done: "Level 2. Practically an expert.",
+  },
+  {
+    id: "6.4", chapter: 6, tag: "Perks", tip: "Perks: the good part.",
+    cards: [
+      { art: "🎁", t: "Levels 3, 6 and 9 open a perk.", b: "A skill gig, an invite or access. Dance 3 gets you past every club door; Dance 9 onto every VIP floor." },
+      { art: "📈", t: "Perks use your level now.", b: "If a skill goes rusty below the level, its perk waits until you're back." },
+    ],
+    hint: "Get any skill to level 3", targets: [SKILLS],
+    check: { has: "skill3" }, reward: { clout: 40 }, done: "Perk unlocked. You're a professional now.",
+  },
+  {
+    id: "6.5", chapter: 6, tag: "Perks", tip: "Somebody wants you.",
+    cards: [
+      { art: "💌", t: "Skills bring invites.", b: "At their level, some skills get you invited somewhere. Accepting pays clout once." },
+      { art: "🏅", t: "Level 9's invite has a badge.", b: "The top invites come with a perk badge for your profile." },
+    ],
+    hint: "Accept a skill invite in Skills", targets: [SKILLS],
+    check: { ledger: ["skill_invite"] }, reward: { clout: 20 }, done: "Invited. Popular, even.",
+  },
+  {
+    id: "7.1", chapter: 7, tag: "Style", tip: "Let's talk about your outfit.",
+    cards: [
+      { art: "👕", t: "Your Look is your wardrobe.", b: "Tops, bottoms, shoes and the cap your style came with, free. Mix them and save." },
+      { art: "🧢", t: "Extras come from the Shop.", b: "Hats, jewellery, bags and the rest are Shop pieces. Once owned, they show up in Your Look." },
+    ],
+    hint: "Open Your Look, change a piece and save", targets: ['button[aria-label="Your look"]'],
+    check: { has: "look_saved" }, reward: { clout: 15 }, done: "New fit. Very main character.",
+  },
+  {
+    id: "7.2", chapter: 7, tag: "Shop", tip: "The Shop.",
+    cards: [
+      { art: "🛍️", t: "New in the Shop comes first.", b: "Every tab lists cheapest first. Some pieces want a certain clout before they'll sell to you." },
+      { art: "🔥", t: "Buying pays clout.", b: "Each new piece pays a little clout, less for each one after. Try clothes on before you buy." },
+    ],
+    hint: "Buy a piece of clothing in the Shop", targets: ["text:Shop"],
+    check: { has: "fashion" }, reward: { cash: 50 }, done: "Bought. Retail therapy is therapy.",
+  },
+  {
+    id: "7.3", chapter: 7, tag: "Style", tip: "Dress for the door.",
+    cards: [
+      { art: "🎟️", t: "Events notice what you wear.", b: "A Shop piece on at an event pays dress-code clout. Some invites expect it." },
+      { art: "🪞", t: "Wear it out.", b: "Put on something from the Shop in Your Look, then go to an event." },
+    ],
+    hint: "Wear a Shop piece and go to an event", targets: ['button[aria-label="Events"]'],
+    check: { has: "dressed_out" }, reward: { clout: 30 }, done: "Dressed for it. The door noticed.",
+  },
+  {
+    id: "7.4", chapter: 7, tag: "Couture", tip: "Gold means real money.",
+    cards: [
+      { art: "👑", t: "Clout Couture is real-money only.", b: "Numbered pieces in the Shop's Couture tab. Gold always means real money; C$ never buys it." },
+      { art: "🎟️", t: "VIP is the other real-money thing.", b: "Unlimited chat, every side story and the Clout Pass. Optional, always." },
+    ],
+    hint: "Open the Shop and look at Couture", targets: ["text:Shop"],
+    check: { seen: true }, reward: { clout: 15 }, done: "Looked. Didn't touch. Respect.",
   },
 );
 

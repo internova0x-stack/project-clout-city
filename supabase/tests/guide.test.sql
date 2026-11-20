@@ -129,4 +129,20 @@ select pg_temp.as_(pg_temp.u(11)::text);
 select pg_temp.assert(public.guide_state() -> 'ready' @> '["5.1", "5.2", "5.3", "5.4", "5.5", "5.6", "5.7", "5.8", "5.9"]', 'every Chapter 5 step ready');
 select public.guide_claim(s) from unnest(array['5.1', '5.2', '5.3', '5.4', '5.5', '5.6', '5.7', '5.8', '5.9']) s;
 select pg_temp.assert(public.guide_state() -> 'chapters' @> '[5]', 'chapter 5 paid');
+
+-- ---- Chapters 6 and 7: skills to level 3, a skill task, an invite; a saved look, a bought piece worn out ----
+select public.guide_seen(s) from unnest(array['6.1', '7.4']) s;
+reset role;
+select public.ledger_once(pg_temp.u(11), 'clout', 20, 'skill', 'dance:2'), public.ledger_once(pg_temp.u(11), 'clout', 30, 'skill', 'dance:3'),
+       public.ledger_once(pg_temp.u(11), 'clout', 50, 'skill_invite', 'x');
+select pg_temp.assert(not public.guide_done(pg_temp.u(11), '6.2', '{"has":"skill_task"}'), 'no skill task done yet');
+insert into public.daily_tasks (player_id, ny_date, slot, kind, place_id, action_id, reward, done_at, skill)
+  values (pg_temp.u(11), public.ny_today() - 1, 9, 'skill', 'ditmars-deli', 'x', 10, now(), 'dance');
+update public.players set look = coalesce(look, '{}') || '{"fit": {}}' where id = pg_temp.u(11);
+insert into public.player_items (player_id, sku, category, value, equipped) values (pg_temp.u(11), 'guide-test-tee', 'fashion', 40, true);
+set role authenticated;
+select pg_temp.as_(pg_temp.u(11)::text);
+select pg_temp.assert(public.guide_state() -> 'ready' @> '["6.1", "6.2", "6.3", "6.4", "6.5", "7.1", "7.2", "7.3", "7.4"]', 'every Chapter 6 and 7 step ready');
+select public.guide_claim(s) from unnest(array['6.1', '6.2', '6.3', '6.4', '6.5', '7.1', '7.2', '7.3', '7.4']) s;
+select pg_temp.assert(public.guide_state() -> 'chapters' @> '[6, 7]', 'chapters 6 and 7 paid');
 rollback;
