@@ -1,4 +1,5 @@
 import { AvatarMoves } from "@/components/preview/AvatarMoves";
+import { ModelsPreview } from "@/components/preview/ModelsPreview";
 import { Cutscene } from "@/components/preview/Cutscene";
 import { previewShopAction, previewShopAudit, previewShopNewDrop, previewCoutureOwners, previewCoutureName, previewPlazaRemove, previewShopEdit, previewShopFiles, previewShopImport, previewShopList, previewShopProcessImages } from "../shopActions";
 import { notFound } from "next/navigation";
@@ -276,6 +277,9 @@ export default async function Preview({
     case "moves":
       return <AvatarMoves skin={Number(skin ?? 3)} build={build as import("@/lib/look").Look["build"] | undefined} outfit={outfit} size={size ? Number(size) : undefined} pick={pick} />;
     // The cutscenes (owner, Nov 19): ?scene=arrival|party|official, ?shot=N starts at a shot.
+    // Modeled furniture (owner, Nov 20): every model in components/room/models.ts (?pick=a,b filters by id).
+    case "models":
+      return <ModelsPreview pick={pick} />;
     case "cutscene":
       return <Cutscene startShot={Number(shot ?? 0)} scene={scene} />;
     case "room":

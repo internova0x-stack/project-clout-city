@@ -44,7 +44,7 @@ export type FurnitureKind =
   // Campaign HQ (owner, Nov 20: "spacious floors, with great furniture"): the phone bank, the war room, the press room and
   // the rally roof
   | "phoneBank" | "warTable" | "pressBackdrop" | "campaignBanner" | "flagStand" | "pendantLamp" | "waterCooler" | "pollBoard"
-  | "rallyStage" | "stringLights" | "patioUmbrella";
+  | "rallyStage" | "stringLights" | "patioUmbrella" | "sectional" | "chandelier";
 
 export type ItemUse =
   | { kind: "action"; actionId: string }
@@ -88,6 +88,11 @@ export interface RoomItem {
   name?: string;
   /** Wall art: the painting's picture. */
   art?: string;
+  /**
+   * A modeled piece (owner, Nov 20: real 3D furniture): the id of a file in public/models/ (components/room/models.ts
+   * MODELS). The box-built piece shows until the model has loaded, and stays if it can't.
+   */
+  model?: string;
 }
 
 export interface RoomTemplate {
@@ -198,6 +203,8 @@ export const FURNITURE: Record<FurnitureKind, { w: number; d: number; walkable?:
   rallyStage: { w: 6.0, d: 2.8, label: "Rally stage" },
   stringLights: { w: 18.0, d: 0.2, walkable: true, label: "String lights" },
   patioUmbrella: { w: 1.6, d: 1.6, label: "Patio table" },
+  sectional: { w: 3.0, d: 2.0, label: "Sectional sofa" },
+  chandelier: { w: 1.0, d: 1.0, walkable: true, label: "Chandelier" },
   cubicle: { w: 1.6, d: 1.5, label: "Cubicle" },
   glassWall: { w: 3.0, d: 0.12, label: "Glass wall" },
   displayCase: { w: 0.9, d: 0.9, label: "Display case" },
@@ -1293,42 +1300,42 @@ export const PLACE_TEMPLATES: Record<PlaceTemplateId, RoomTemplate> = {
     walls: [[-3, -7, -3, -2.2], [-3, -0.6, -3, 3.2], [-3, 4.8, -3, 7], [-3, 1, 0.2, 1], [1.8, 1, 5, 1], [5, -7, 5, -3.6], [5, -2, 5, 2], [5, 2, 6.6, 2]],
     items: [
       // Reception: the front desk (Campaign HQ itself), a waiting corner, flags and the candidates' banner.
-      { id: "reception", kind: "storeCounter", x: 1.0, z: 4.0, rot: 0, color: "#F4F2EE", use: { kind: "campaign" }, label: "🗳️ Campaign HQ" },
+      { id: "reception", kind: "storeCounter", x: 1.0, z: 4.0, rot: 0, color: "#F4F2EE", use: { kind: "campaign" }, label: "🗳️ Campaign HQ", model: "receptionDesk" },
       { id: "banner-rec", kind: "campaignBanner", x: 1.0, z: 1.12, rot: 0 },
       { id: "flag-1", kind: "flagStand", x: -1.9, z: 1.6, rot: 0 },
       { id: "flag-2", kind: "flagStand", x: 3.9, z: 1.6, rot: 0 },
-      { id: "wait-1", kind: "armchair", x: -2.2, z: 3.8, rot: 1, color: "#2F4A7A" },
-      { id: "wait-2", kind: "armchair", x: -2.2, z: 5.0, rot: 1, color: "#2F4A7A" },
-      { id: "wait-table", kind: "coffeeTable", x: -1.1, z: 4.4, rot: 1 },
+      { id: "wait-1", kind: "armchair", x: -2.2, z: 3.8, rot: 1, color: "#2F4A7A", model: "k:loungeDesignChair" },
+      { id: "wait-2", kind: "armchair", x: -2.2, z: 5.0, rot: 1, color: "#2F4A7A", model: "k:loungeDesignChair" },
+      { id: "wait-table", kind: "coffeeTable", x: -1.1, z: 4.4, rot: 1, model: "k:tableCoffeeGlass" },
       { id: "rec-rug", kind: "rug", x: -1.3, z: 4.4, rot: 1, color: "#C62C3B" },
-      { id: "plant-door", kind: "plant", x: 4.4, z: 6.4, rot: 0 },
-      { id: "lamp-rec-1", kind: "pendantLamp", x: 1.0, z: 3.0, rot: 0 },
+      { id: "plant-door", kind: "plant", x: 4.4, z: 6.4, rot: 0, model: "k:plantSmall1" },
+      { id: "chandelier-rec", kind: "chandelier", x: 1.0, z: 3.0, rot: 0, model: "chandelier" },
       // The phone bank: four long tables of volunteers, a banner over them, a whiteboard of call targets.
       ...[-5.3, -2.8, -0.3, 2.2].flatMap((z, row) => [
         { id: `bank-${row}`, kind: "phoneBank" as const, x: -6.5, z, rot: 0, ...(row === 1 ? { use: MAIN(0), label: "*" } : {}) },
-        ...[-0.85, 0, 0.85].map((dx, i) => ({ id: `bank-chair-${row}-${i}`, kind: "chair" as const, x: -6.5 + dx, z: z + 0.75, rot: 2 })),
+        ...[-0.85, 0, 0.85].map((dx, i) => ({ id: `bank-chair-${row}-${i}`, kind: "chair" as const, x: -6.5 + dx, z: z + 0.75, rot: 2, model: "k:chairDesk" })),
       ]),
       { id: "banner-bank", kind: "campaignBanner", x: -6.5, z: -6.92, rot: 0 },
       { id: "board-bank", kind: "chalkboard", x: -9.85, z: 0.0, rot: 1 },
-      { id: "plant-bank-1", kind: "plant", x: -9.5, z: 6.4, rot: 0 },
-      { id: "plant-bank-2", kind: "plant", x: -3.6, z: -6.5, rot: 0 },
+      { id: "plant-bank-1", kind: "plant", x: -9.5, z: 6.4, rot: 0, model: "k:plantSmall2" },
+      { id: "plant-bank-2", kind: "plant", x: -3.6, z: -6.5, rot: 0, model: "k:plantSmall1" },
       { id: "lamp-bank-1", kind: "pendantLamp", x: -6.5, z: -4.0, rot: 0 },
       { id: "lamp-bank-2", kind: "pendantLamp", x: -6.5, z: 1.0, rot: 0 },
       // The volunteers' kitchen: cold pizza on the big table, coffee, the water cooler and a sofa for the night shift.
       { id: "kitchen", kind: "kitchen", x: 1.0, z: -6.62, rot: 0 },
-      { id: "fridge", kind: "fridge", x: 3.8, z: -6.55, rot: 0 },
+      { id: "fridge", kind: "fridge", x: 3.8, z: -6.55, rot: 0, model: "k:kitchenFridgeLarge" },
       { id: "cooler", kind: "waterCooler", x: -2.5, z: -6.5, rot: 0 },
       { id: "pizza-table", kind: "diningTable", x: 1.0, z: -3.6, rot: 0 },
       ...[[-0.5, -4.4, 0], [0.5, -4.4, 0], [1.5, -4.4, 0], [-0.5, -2.8, 2], [0.5, -2.8, 2], [1.5, -2.8, 2]].map(([x, z, rot], i) => ({ id: `pizza-chair-${i}`, kind: "chair" as const, x: x + 0.5 - 0.5, z, rot })),
-      { id: "kitchen-sofa", kind: "sofa", x: 3.6, z: -0.4, rot: 2, color: "#C62C3B" },
+      { id: "kitchen-sofa", kind: "sofa", x: 3.6, z: -0.4, rot: 2, color: "#C62C3B", model: "k:loungeSofa" },
       { id: "art-kitchen", kind: "painting", x: -1.6, z: -6.92, rot: 0, art: "/art/art-rent-is-due.webp" },
       { id: "lamp-kitchen", kind: "pendantLamp", x: 1.0, z: -3.6, rot: 0 },
       // The press room: the step-and-repeat, the podium, the cameras and rows of reporters' chairs.
       { id: "backdrop", kind: "pressBackdrop", x: 7.5, z: -6.82, rot: 0 },
-      { id: "podium", kind: "lectern", x: 7.5, z: -5.7, rot: 0, use: MAIN(1), label: "*" },
+      { id: "podium", kind: "lectern", x: 7.5, z: -5.7, rot: 0, use: MAIN(1), label: "*", model: "podium" },
       { id: "press-flag-1", kind: "flagStand", x: 5.7, z: -6.3, rot: 0 },
       { id: "press-flag-2", kind: "flagStand", x: 9.3, z: -6.3, rot: 0 },
-      ...[-3.6, -2.4, -1.2].flatMap((z, row) => [6.3, 7.5, 8.7].map((x, i) => ({ id: `press-chair-${row}-${i}`, kind: "chair" as const, x, z, rot: 2 }))),
+      ...[-3.6, -2.4, -1.2].flatMap((z, row) => [6.3, 7.5, 8.7].map((x, i) => ({ id: `press-chair-${row}-${i}`, kind: "chair" as const, x, z, rot: 2, model: "k:chairRounded" }))),
       { id: "press-cam", kind: "tvCamera", x: 9.3, z: 0.6, rot: 2 },
       { id: "press-light", kind: "ringLight", x: 5.8, z: 0.6, rot: 2 },
     ],
@@ -1355,44 +1362,44 @@ export const PLACE_TEMPLATES: Record<PlaceTemplateId, RoomTemplate> = {
       // The war room.
       { id: "war-table", kind: "warTable", x: -4.5, z: -3.6, rot: 0, use: { kind: "campaign" }, label: "🗺️ Plan the week" },
       ...[-5.8, -4.5, -3.2].flatMap((x, i) => [
-        { id: `war-chair-n-${i}`, kind: "chair" as const, x, z: -4.85, rot: 0 },
-        { id: `war-chair-s-${i}`, kind: "chair" as const, x, z: -2.35, rot: 2 },
+        { id: `war-chair-n-${i}`, kind: "chair" as const, x, z: -4.85, rot: 0, model: "k:chairDesk" },
+        { id: `war-chair-s-${i}`, kind: "chair" as const, x, z: -2.35, rot: 2, model: "k:chairDesk" },
       ]),
       { id: "war-chair-w", kind: "chair", x: -6.75, z: -3.6, rot: 1 },
       { id: "poll-board", kind: "pollBoard", x: -4.5, z: -6.85, rot: 0 },
       { id: "war-board", kind: "chalkboard", x: -9.85, z: -3.6, rot: 1 },
       { id: "war-lamp", kind: "pendantLamp", x: -4.5, z: -3.6, rot: 0 },
-      { id: "war-plant", kind: "plant", x: 0.4, z: -6.4, rot: 0 },
+      { id: "war-plant", kind: "plant", x: 0.4, z: -6.4, rot: 0, model: "k:plantSmall1" },
       // The candidate's office.
-      { id: "office-desk", kind: "desk", x: 5.6, z: -5.2, rot: 0, color: "#5A3E2B" },
-      { id: "office-chair", kind: "chair", x: 5.6, z: -6.0, rot: 0 },
+      { id: "office-desk", kind: "desk", x: 5.6, z: -5.2, rot: 0, color: "#5A3E2B", model: "execDesk" },
+      { id: "office-chair", kind: "chair", x: 5.6, z: -6.0, rot: 0, model: "k:chairDesk" },
       { id: "office-shelf-1", kind: "bookshelf", x: 2.4, z: -6.7, rot: 0 },
       { id: "office-shelf-2", kind: "bookshelf", x: 8.8, z: -6.7, rot: 0 },
       { id: "office-flag-1", kind: "flagStand", x: 4.0, z: -6.4, rot: 0 },
       { id: "office-flag-2", kind: "flagStand", x: 7.2, z: -6.4, rot: 0 },
       { id: "office-art", kind: "painting", x: 5.6, z: -6.92, rot: 0, art: "/art/art-self-made.webp" },
-      { id: "office-sofa", kind: "sofa", x: 5.6, z: -1.0, rot: 2, color: "#EDE6D6", use: { kind: "sit" }, label: "Sit" },
-      { id: "office-arm-1", kind: "armchair", x: 3.4, z: -2.6, rot: 1, color: "#2F4A7A" },
-      { id: "office-arm-2", kind: "armchair", x: 7.8, z: -2.6, rot: 3, color: "#2F4A7A" },
-      { id: "office-table", kind: "coffeeTable", x: 5.6, z: -2.4, rot: 0 },
+      { id: "office-sofa", kind: "sofa", x: 5.6, z: -1.0, rot: 2, color: "#EDE6D6", use: { kind: "sit" }, label: "Sit", model: "chesterfield" },
+      { id: "office-arm-1", kind: "armchair", x: 3.4, z: -2.6, rot: 1, color: "#2F4A7A", model: "k:loungeDesignChair" },
+      { id: "office-arm-2", kind: "armchair", x: 7.8, z: -2.6, rot: 3, color: "#2F4A7A", model: "k:loungeDesignChair" },
+      { id: "office-table", kind: "coffeeTable", x: 5.6, z: -2.4, rot: 0, model: "k:tableCoffeeGlass" },
       { id: "office-rug", kind: "rug", x: 5.6, z: -2.2, rot: 0, color: "#7A2E3A" },
       { id: "office-lamp", kind: "floorLamp", x: 9.4, z: -1.0, rot: 0 },
+      { id: "office-chandelier", kind: "chandelier", x: 5.6, z: -2.6, rot: 0, model: "chandelier" },
       // The staff lounge: a long sofa set, the coffee bar, the TV on the news, plants and art.
-      { id: "lounge-tv", kind: "tvStand", x: -9.6, z: 3.5, rot: 1 },
-      { id: "lounge-sofa-1", kind: "sofa", x: -6.6, z: 2.6, rot: 3, color: "#EDE6D6", use: { kind: "sit" }, label: "Sit" },
-      { id: "lounge-sofa-2", kind: "sofa", x: -6.6, z: 4.6, rot: 3, color: "#EDE6D6" },
-      { id: "lounge-table", kind: "coffeeTable", x: -8.0, z: 3.6, rot: 1 },
+      { id: "lounge-tv", kind: "tvStand", x: -9.6, z: 3.5, rot: 1, model: "k:televisionModern" },
+      { id: "lounge-sofa", kind: "sectional", x: -6.3, z: 3.6, rot: 3, color: "#EDE6D6", use: { kind: "sit" }, label: "Sit", model: "sectional" },
+      { id: "lounge-table", kind: "coffeeTable", x: -8.0, z: 3.6, rot: 1, model: "k:tableCoffeeGlass" },
       { id: "lounge-rug", kind: "rug", x: -8.0, z: 3.6, rot: 1, color: "#C9B79C" },
       { id: "coffee-bar", kind: "kitchenIsland", x: 2.0, z: 3.4, rot: 0, use: MAIN(0), label: "*" },
       ...[1.0, 2.0, 3.0].map((x, i) => ({ id: `bar-stool-${i}`, kind: "barStool" as const, x, z: 4.4, rot: 2 })),
       { id: "lounge-cooler", kind: "waterCooler", x: 9.5, z: 0.6, rot: 0 },
       { id: "lounge-art-1", kind: "painting", x: -9.92, z: 0.9, rot: 1, art: "/art/art-astoria-rooftops.webp" },
-      { id: "lounge-plant-1", kind: "plant", x: -9.4, z: 6.4, rot: 0 },
-      { id: "lounge-plant-2", kind: "plant", x: 7.6, z: 6.4, rot: 0 },
-      { id: "lounge-arm-1", kind: "armchair", x: 6.4, z: 3.0, rot: 2, color: "#C62C3B" },
-      { id: "lounge-arm-2", kind: "armchair", x: 7.6, z: 3.0, rot: 2, color: "#C62C3B" },
+      { id: "lounge-plant-1", kind: "plant", x: -9.4, z: 6.4, rot: 0, model: "k:plantSmall2" },
+      { id: "lounge-plant-2", kind: "plant", x: 7.6, z: 6.4, rot: 0, model: "k:plantSmall1" },
+      { id: "lounge-arm-1", kind: "armchair", x: 6.4, z: 3.0, rot: 2, color: "#C62C3B", model: "k:loungeChair" },
+      { id: "lounge-arm-2", kind: "armchair", x: 7.6, z: 3.0, rot: 2, color: "#C62C3B", model: "k:loungeChair" },
       { id: "lounge-lamp-1", kind: "pendantLamp", x: 2.0, z: 3.4, rot: 0 },
-      { id: "lounge-lamp-2", kind: "pendantLamp", x: -7.6, z: 3.6, rot: 0 },
+      { id: "lounge-chandelier", kind: "chandelier", x: -7.4, z: 3.6, rot: 0, model: "chandelier" },
     ],
     spawn: [8.4, 4.0],
     npcs: [
@@ -1411,7 +1418,7 @@ export const PLACE_TEMPLATES: Record<PlaceTemplateId, RoomTemplate> = {
       { id: "speaker-2", kind: "speaker", x: 3.8, z: -5.8, rot: 0 },
       { id: "flag-roof-1", kind: "flagStand", x: -5.0, z: -6.3, rot: 0 },
       { id: "flag-roof-2", kind: "flagStand", x: 5.0, z: -6.3, rot: 0 },
-      ...[-2.6, -1.4, -0.2, 1.0].flatMap((z, row) => [-3.0, -1.8, -0.6, 0.6, 1.8, 3.0].map((x, i) => ({ id: `rally-chair-${row}-${i}`, kind: "chair" as const, x, z, rot: 2 }))),
+      ...[-2.6, -1.4, -0.2, 1.0].flatMap((z, row) => [-3.0, -1.8, -0.6, 0.6, 1.8, 3.0].map((x, i) => ({ id: `rally-chair-${row}-${i}`, kind: "chair" as const, x, z, rot: 2, model: "k:chairRounded" }))),
       { id: "lights-1", kind: "stringLights", x: 0, z: -2.4, rot: 0 },
       { id: "lights-2", kind: "stringLights", x: 0, z: 2.2, rot: 0 },
       ...[[-7.6, 4.2], [-4.6, 5.4], [4.6, 5.4], [7.6, 4.2]].map(([x, z], i) => ({ id: `patio-${i}`, kind: "patioUmbrella" as const, x, z, rot: 0 })),

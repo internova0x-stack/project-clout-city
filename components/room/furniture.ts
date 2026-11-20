@@ -8,6 +8,7 @@ import {
   MeshStandardMaterial, SRGBColorSpace, SphereGeometry, TorusGeometry, type BufferGeometry, type Material, type Object3D,
 } from "three";
 import { FURNITURE, type RoomItem } from "@/lib/rooms";
+import { placedModel } from "./models";
 
 export interface Kit {
   mat(color: string, o?: { emissive?: string; emissiveIntensity?: number; roughness?: number; metalness?: number; opacity?: number; map?: CanvasTexture }): MeshStandardMaterial;
@@ -60,7 +61,28 @@ const WOOD_DARK = "#5A3E2B";
 const METAL = "#B9BEC6";
 const BLACK = "#1F1B26";
 
-export function buildFurniture(item: RoomItem, k: Kit, opts: { night: boolean }): Built {
+/**
+ * A piece, box-built at once; when the item names a model (components/room/models.ts) the model replaces it once loaded,
+ * in the same group, so the room's placement, taps and shadows carry on (low graphics keeps the box-built piece).
+ */
+export function buildFurniture(item: RoomItem, k: Kit, opts: { night: boolean; low?: boolean }): Built {
+  const built = buildBoxFurniture(item, k, opts);
+  if (item.model && !opts.low && typeof window !== "undefined") {
+    const { w, d } = FURNITURE[item.kind];
+    void placedModel(item.model, w, d).then((m) => {
+      if (!m) return;
+      const keep = built.group.children.slice();
+      for (const c of keep) built.group.remove(c);
+      // Taps read itemId from userData: copy it onto the model's meshes.
+      const id = keep[0]?.userData.itemId;
+      if (id !== undefined) m.traverse((o) => { o.userData.itemId = id; });
+      built.group.add(m);
+    });
+  }
+  return built;
+}
+
+function buildBoxFurniture(item: RoomItem, k: Kit, opts: { night: boolean }): Built {
   const g = new Group();
   const box = (w: number, h: number, d: number, color: string | Material, x = 0, y = 0, z = 0) => {
     const m = new Mesh(k.geo(new BoxGeometry(w, h, d)), typeof color === "string" ? k.mat(color) : color);
@@ -735,7 +757,27 @@ export function buildFurniture(item: RoomItem, k: Kit, opts: { night: boolean })
       return { group: g };
     }
     case "stairs": {
-      // v0.11 the exclusive venue: a short flight rising toward the back, with a rail on one side.
+      // Stairs down (owner, Nov 20: "all stairs look like they're going up"): a stairwell, an opening in the floor with the
+      // steps dropping away into the dark, railed on three sides and open where you step in.
+      const down = /^(↓|⬇)/.test(item.label ?? "") || /\bdown/i.test(item.name ?? "");
+      if (down) {
+        const steps = 6;
+        const base = new Color(color ?? WOOD_DARK);
+        box(w + 0.12, 0.01, d + 0.12, "#14111A", 0, 0, 0);
+        for (let i = 0; i < steps; i++) {
+          const shade = base.clone().multiplyScalar(1 - (i / steps) * 0.85).getStyle();
+          box(w - 0.08, 0.012, d / steps - 0.03, shade, 0, 0.004, d / 2 - (i + 0.5) * (d / steps));
+          box(w - 0.08, 0.01, 0.025, new Color("#000000").lerp(base, 0.25 * (1 - i / steps)).getStyle(), 0, 0.006, d / 2 - (i + 1) * (d / steps) + 0.012);
+        }
+        for (const sx of [-1, 1]) {
+          box(0.04, 0.9, d, METAL, sx * (w / 2 + 0.04), 0.02, 0);
+          box(0.05, 0.05, d, METAL, sx * (w / 2 + 0.04), 0.92, 0);
+        }
+        box(w + 0.12, 0.9, 0.04, METAL, 0, 0.02, -d / 2 - 0.04);
+        box(w + 0.12, 0.05, 0.05, METAL, 0, 0.92, -d / 2 - 0.04);
+        return { group: g };
+      }
+      // Stairs up (v0.11 the exclusive venue): a short flight rising toward the back, with a rail on one side.
       const steps = 6;
       for (let i = 0; i < steps; i++) box(w, 0.22 * (i + 1), d / steps, color ?? WOOD_DARK, 0, 0, d / 2 - (i + 0.5) * (d / steps));
       box(0.05, 0.9, d, METAL, w / 2 - 0.03, 0.22 * steps * 0.5, 0);
@@ -1086,6 +1128,27 @@ export function buildFurniture(item: RoomItem, k: Kit, opts: { night: boolean })
         seg.position.set(0, 2.3, 0); g.add(seg);
       }
       for (const sx of [-1, 1]) { box(0.4, 0.05, 0.4, "#F4F2EE", sx * 0.65, 0.45, 0); box(0.4, 0.4, 0.05, "#F4F2EE", sx * 0.65, 0.45, -0.18); legs4(0.4, 0.4, 0.45, METAL, 0.015); }
+      return { group: g };
+    }
+    case "sectional": {
+      // An L-shaped sofa (the box-built stand-in for the modeled one): a long seat and a chaise.
+      const c = color ?? "#EDE6D6";
+      box(w, 0.42, 0.9, c, 0, 0, -d / 2 + 0.45);
+      box(w, 0.5, 0.2, c, 0, 0.38, -d / 2 + 0.1);
+      box(0.95, 0.42, d - 0.9, c, w / 2 - 0.475, 0, 0.45);
+      return { group: g, seatY: 0.5 };
+    }
+    case "chandelier": {
+      // A brass ring of candle lights on a chain (the box-built stand-in).
+      const brass = k.mat("#C9A227", { metalness: 0.5, roughness: 0.35 });
+      cyl(0.008, 0.008, 0.5, BLACK, 0, 2.15, 0, 4);
+      const ring = new Mesh(k.geo(new TorusGeometry(0.38, 0.025, 6, 24)), brass);
+      ring.rotation.x = Math.PI / 2; ring.position.y = 2.1; g.add(ring);
+      for (let i = 0; i < 6; i++) {
+        const a2 = (i / 6) * Math.PI * 2;
+        const b = new Mesh(k.geo(new SphereGeometry(0.045, 8, 6)), glow("#FFE3B0", 1.6));
+        b.position.set(Math.cos(a2) * 0.38, 2.18, Math.sin(a2) * 0.38); g.add(b);
+      }
       return { group: g };
     }
     case "cat": {

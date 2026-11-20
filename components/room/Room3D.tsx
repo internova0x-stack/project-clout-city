@@ -20,7 +20,7 @@ import type { AvatarParts } from "../avatar/buildAvatar";
 import { buildModelAvatar } from "../avatar/modelAvatar";
 import { goldStatue } from "../avatar/goldStatue";
 import { buildFurniture, makeKit, STATUE_TOP, tagItem, type Built, type Kit } from "./furniture";
-import { frameWatch, renderQuality, setAutoLowGraphics } from "@/lib/graphics";
+import { frameWatch, lowGraphics, renderQuality, setAutoLowGraphics } from "@/lib/graphics";
 
 // A walkable low-poly room (Design guide update 7): an isometric cutaway with the
 // player's avatar, which walks where you tap, sits on seats, naps on the bed and
@@ -820,7 +820,7 @@ export default function Room3D(props: Room3DProps) {
       for (const it of cur) {
         let b = wld.built.get(it.id);
         if (!b) {
-          const made = buildFurniture(it, kit, { night });
+          const made = buildFurniture(it, kit, { night, low: lowGraphics() });
           const obj = new Group();
           obj.add(made.group);
           const statue = it.kind === "statue" ? goldStatue(lookRef.current.look, lookRef.current.outfit) : undefined;
