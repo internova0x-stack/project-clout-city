@@ -5,7 +5,7 @@
 
 import {
   BoxGeometry, CanvasTexture, Color, ConeGeometry, CylinderGeometry, DodecahedronGeometry, Group, Mesh,
-  MeshStandardMaterial, RepeatWrapping, SRGBColorSpace, SphereGeometry, TorusGeometry, type BufferGeometry, type Material, type Object3D,
+  MeshStandardMaterial, Plane, RepeatWrapping, SRGBColorSpace, Vector3, SphereGeometry, TorusGeometry, type BufferGeometry, type Material, type Object3D,
 } from "three";
 import { FURNITURE, type RoomItem } from "@/lib/rooms";
 import { placedModel } from "./models";
@@ -1260,9 +1260,10 @@ function buildBoxFurniture(item: RoomItem, k: Kit, opts: { night: boolean }): Bu
       return { group: g };
     }
     case "subwayTrack": {
-      // The elevated tracks behind the platform edge: the track bed and rails run on past the room in both directions, and a
-      // three-car train pulls in, opens its doors, waits and leaves, on a loop (36 s). The platform's yellow edge strip is here too.
-      const RUN = 90;
+      // The elevated tracks behind the platform edge, the room's width (owner, Nov 20: just the place itself), and a three-car
+      // train that pulls in, opens its doors, waits and leaves, on a loop (36 s), cut off at the room's edges as it comes and
+      // goes (clipping planes; Room3D turns local clipping on). The platform's yellow edge strip is here too.
+      const RUN = w;
       box(RUN, 0.25, d, "#3A3632", 0, -0.2, 0);
       for (let x = -RUN / 2; x < RUN / 2; x += 0.7) box(0.18, 0.06, d - 0.4, "#5A4A3A", x, 0.05, 0);
       for (const z of [-0.72, 0.72]) box(RUN, 0.09, 0.07, METAL, 0, 0.11, z);
@@ -1292,6 +1293,15 @@ function buildBoxFurniture(item: RoomItem, k: Kit, opts: { night: boolean }): Bu
       const bullet = new Mesh(k.geo(new CylinderGeometry(0.28, 0.28, 0.03, 20)), glow("#FFC21A", 1.2));
       bullet.rotation.x = Math.PI / 2; bullet.position.set(-(CAR + GAP) - CAR / 2 + 0.6, 2.35, 1.32); train.add(bullet);
       g.add(train);
+      // Its own copies of the materials (the kit's are shared with every other piece), clipped at the room's sides.
+      const clip = [new Plane(new Vector3(1, 0, 0), w / 2 - item.x), new Plane(new Vector3(-1, 0, 0), w / 2 + item.x)];
+      train.traverse((o) => {
+        const m = o as Mesh;
+        if (!m.isMesh) return;
+        const own = (m.material as Material).clone();
+        own.clippingPlanes = clip;
+        m.material = own;
+      });
       const ease = (x: number) => (x <= 0 ? 0 : x >= 1 ? 1 : x * x * (3 - 2 * x));
       return {
         group: g,

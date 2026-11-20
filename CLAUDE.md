@@ -453,12 +453,12 @@ components live in `app/globals.css`.
   wandered a meter).
   The rooftops (owner, Nov 20: "next the rooftops"): Altitude 718, Ditmars Heights and Up on Wythe are `rooftop` (24 × 16 m, open,
   `PLACE_GROUND`): the bar along the back, six round marble dining sets (`roundDining`, the dining action) under string lights and
-  heat lamps (`heatLamp`), planters (`planter`), a front lounge and sun loungers; `skyline` draws the roof's own building under the
-  deck and the city around it (lower roofs close by, taller towers farther off; windows lit at night). Signature pieces: the fire
-  pit, the cabana and the water tower.
+  heat lamps (`heatLamp`), planters (`planter`), a front lounge and sun loungers. Signature pieces: the fire pit, the cabana and the
+  water tower. `skyline` (rooftops and the station) gives a real sky behind (Room3D `skyBackdrop`: blue by day, navy at night), not one
+  from the walls' colors; nothing else around (owner, Nov 20: "Leave out the background buildings. Keep it at just the interior").
   The station (owner, Nov 20: "next the station"): Astoria Blvd station, a map label until then, can be entered: `station` (24 × 14 m,
-  open, skyline, `PLACE_GROUND`): the platform along `subwayTrack` (the track runs on past the room; a three-car train pulls in, opens
-  its doors and leaves every 36 s), benches facing the tracks (the platform action), green `stationColumn`s, a coffee cart, the fare
+  open, skyline, `PLACE_GROUND`): the platform along `subwayTrack` (the room's width; a three-car train pulls in, opens its doors and
+  leaves every 36 s, clipped at the room's edges: Room3D turns on local clipping), benches facing the tracks (the platform action), green `stationColumn`s, a coffee cart, the fare
   line (`turnstile`s and railings, the gate open in the middle), `fareMachine`s, the agent's `ticketBooth` and the street entrance
   (`stationEntrance`, the signature subwayEntrance model).
 - Rate limits (migration 0126, owner Oct 27): PostgREST's pre-request hook (`pgrst.db_pre_request` = `check_request()`) counts each

@@ -129,7 +129,8 @@ export interface RoomTemplate {
   open?: boolean;
   /** The big clubs: moving light beams from a rig over the floor and colored pools of light sweeping the floor. */
   clubLights?: boolean;
-  /** A rooftop: the city's towers all around beyond the parapet, their windows lit at night. */
+  /** Open to the sky: a real sky behind it (blue by day, navy at night) instead of one from the walls' colors. Nothing else
+   *  around it (owner, Nov 20: "Leave out the background buildings. Keep it at just the interior"). */
   skyline?: boolean;
   items: RoomItem[];
   /** Where the avatar enters. */
@@ -565,7 +566,7 @@ export const PLACE_TEMPLATES: Record<PlaceTemplateId, RoomTemplate> = {
     ],
   },
   // ---- The subway station (owner, Nov 20: "next the station") ----
-  // Astoria Blvd, an elevated station with the city around it (open, skyline): the platform at the back along the tracks, where a
+  // Astoria Blvd, an elevated station open to the sky: the platform at the back along the tracks, where a
   // train pulls in, opens its doors and leaves (subwayTrack); benches facing the tracks (people-watching, the station's action),
   // green columns with lamps and a coffee cart; the fare line of turnstiles and railings with the gate open in the middle; the
   // fare machines and the agent's booth; the street entrance (the signature piece) where you come up.
@@ -605,7 +606,7 @@ export const PLACE_TEMPLATES: Record<PlaceTemplateId, RoomTemplate> = {
     ],
   },
   // ---- The rooftops (owner, Nov 20: "next the rooftops") ----
-  // Altitude 718, Ditmars Heights and Up on Wythe: a 24 × 16 m roof terrace behind a parapet with the skyline all around. The
+  // Altitude 718, Ditmars Heights and Up on Wythe: a 24 × 16 m roof terrace behind a parapet, open to the sky. The
   // bar along the back, round marble tables under string lights and heat lamps (dining is the place's action), a lounge in the
   // front corner, planters along the edges; each roof's signature piece (PLACE_SIGNATURE) stands in the middle of the deck.
   rooftop: {
