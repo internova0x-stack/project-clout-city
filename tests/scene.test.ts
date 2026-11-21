@@ -133,9 +133,46 @@ test("fake it till you make it: below a move's rank you can try to sneak in; inv
   assert.equal(bribeOf(300), 150);
 });
 
-test("migration 0171 carries the same settings as lib/scene.ts", () => {
-  const sql = readFileSync(new URL("../supabase/migrations/0171_scene.sql", import.meta.url), "utf8");
+test("the newest migration carries the same settings as lib/scene.ts", () => {
+  const sql = readFileSync(new URL("../supabase/migrations/0172_scene_haters.sql", import.meta.url), "utf8");
   const m = /values \('scene', '(\{.*?\})'::jsonb\)/s.exec(sql);
   assert.ok(m, "settings row");
   assert.deepEqual(JSON.parse(m![1]), JSON.parse(JSON.stringify(sceneSettings(MOVES))));
+});
+
+// ---- Step 2: haters, rivals and pitfalls ----
+const HATERS = (JSON.parse(readFileSync(new URL("../content/scene/haters.json", import.meta.url), "utf8")) as { haters: import("../lib/scene.ts").Hater[] }).haters;
+
+test("haters: valid content, three or more at every rank, sharper with fame", async () => {
+  const { hatersFor } = await import("../lib/scene.ts");
+  const chars = new Set(CHARACTERS.map((c) => c.id));
+  const ids = new Set<string>();
+  for (const h of HATERS) {
+    assert.match(h.id, /^[a-z0-9-]{2,40}$/);
+    assert.ok(!ids.has(h.id), `repeated ${h.id}`); ids.add(h.id);
+    assert.ok(h.cut >= 0.1 && h.cut <= 0.5, `${h.id} cut`);
+    assert.ok(h.quote.length <= 90 && h.line.length <= 90, `${h.id} text`);
+    if (h.who) assert.ok(chars.has(h.who), `${h.id} unknown ${h.who}`);
+  }
+  for (let r = 1; r <= 10; r++) assert.ok(hatersFor(HATERS, r).length >= 3, `rank ${r}`);
+  const avg = (r: number) => { const p = hatersFor(HATERS, r); return p.reduce((n, h) => n + h.cut, 0) / p.length; };
+  assert.ok(avg(8) > avg(1), "famous players face sharper pitfalls");
+});
+
+test("haters: more likely with fame and when you snuck in; their cut comes off the pay unless dealt with", async () => {
+  const { haterChance, cutOf, payout, haterAt } = await import("../lib/scene.ts");
+  assert.equal(haterChance(1), 0.15);
+  assert.ok(haterChance(5) > haterChance(1));
+  assert.equal(haterChance(20), 0.6);
+  assert.ok(Math.abs(haterChance(1, "sneak") - 0.3) < 1e-9);
+  const t = Date.parse("2026-11-21T10:00:00Z");
+  assert.equal(haterAt(t, t + 4000, 0), t + 1000);
+  assert.equal(haterAt(t, t + 4000, 1), t + 3000);
+  const r: SceneRow = { id: "x", move: "night-out", place: "velvet-static", slot: 1, startedAt: "2026-11-21T10:00:00Z", readyAt: "2026-11-21T18:00:00Z",
+    staleAt: "2026-11-22T02:00:00Z", hypes: [], need: 2, hater: "reservation", haterAt: "2026-11-21T12:00:00Z", cut: 0.25 };
+  assert.equal(cutOf(r, Date.parse("2026-11-21T11:00:00Z")), 0, "not landed yet");
+  assert.equal(cutOf(r, Date.parse("2026-11-21T13:00:00Z")), 0.25);
+  assert.equal(cutOf({ ...r, dealt: "publicist" }, Date.parse("2026-11-21T13:00:00Z")), 0);
+  assert.equal(cutOf({ ...r, dealt: "rise" }, Date.parse("2026-11-21T13:00:00Z")), 0.25, "rising above it keeps the cut");
+  assert.deepEqual(payout(100, 2, 2, false, 0.25), { clout: 75, points: 15 });
 });

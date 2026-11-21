@@ -1,8 +1,8 @@
 "use server";
 
 import { randomInt } from "node:crypto";
-import { SNEAK, bribeOf, canSneak, costFor, fits, needsOk, sneakOdds, type SneakWay } from "@/lib/scene";
-import { SCENE_MOVES, sceneMove } from "@/lib/sceneContent";
+import { DEAL, SNEAK, bribeOf, canSneak, costFor, fits, haterAt, haterChance, hatersFor, needsOk, publicistCost, sneakOdds, teaCash, type DealWay, type SneakWay } from "@/lib/scene";
+import { SCENE_HATERS, SCENE_MOVES, sceneMove } from "@/lib/sceneContent";
 import { openPlace, sceneView, type CollectResult, type SceneRaw, type SceneView, type StartResult } from "@/lib/sceneView";
 import { memoryOf } from "@/lib/memoryServer";
 import { getAdminSupabase } from "@/lib/supabase/admin";
@@ -36,6 +36,11 @@ const ERRORS: Record<string, string> = {
   no_hype: "Nothing to hype right now.",
   too_soon: "You just hyped it. Give it an hour.",
   not_ready: "It's not ready yet.",
+  no_hater: "Nobody's coming for that one.",
+  dealt: "You already dealt with that.",
+  no_vouch: "No regular can vouch for you this week.",
+  not_crew: "Only your crew can hype that.",
+  hyped: "You already hyped that one.",
 };
 const codeOf = (m: string) => /^([a-z_]+)/.exec(m)?.[1] ?? "unknown";
 const err = (e: { message: string }, fn: string): string => {
@@ -64,7 +69,7 @@ async function raw(w: { id: string; admin: Admin }): Promise<SceneRaw | { error:
 async function view(w: { id: string; admin: Admin }): Promise<R<SceneView>> {
   const [r, memory] = await Promise.all([raw(w), memoryOf(w.admin, w.id)]);
   if ("error" in r) return { ok: false, error: r.error };
-  return { ok: true, data: sceneView(SCENE_MOVES, r, memory, w.id, Date.now()) };
+  return { ok: true, data: sceneView(SCENE_MOVES, SCENE_HATERS, r, memory, w.id, Date.now()) };
 }
 
 export async function sceneState(): Promise<R<SceneView>> {
@@ -97,7 +102,17 @@ export async function sceneStart(move: string, way?: SneakWay["id"]): Promise<R<
   if (error) return { ok: false, error: err(error, "scene_start") };
   const v = await view(w);
   if (!v.ok) return v;
-  const d = data as { bounced: boolean; banHours?: number };
+  const d = data as { bounced: boolean; banHours?: number; id?: string };
+  // Step 2 (migration 0172): fame draws haters. The server decides whether one comes, who, and when it lands.
+  if (!d.bounced && d.id && rng() < haterChance(r.rank, args.p_entry as "invited" | "sneak")) {
+    const pool = hatersFor(SCENE_HATERS, r.rank);
+    const h = pool[randomInt(0, pool.length)];
+    const start = Date.now(), ready = start + m.hours * 3_600_000;
+    if (h) {
+      const { error: e2 } = await w.admin.rpc("scene_set_hater", { p_player: w.id, p_id: d.id, p_hater: h.id, p_at: new Date(haterAt(start, ready, rng())).toISOString(), p_cut: h.cut });
+      if (e2 && !/scene_set_hater/.test(e2.message)) console.error("scene_set_hater failed", e2);
+    }
+  }
   return { ok: true, data: { bounced: d.bounced, banHours: d.banHours ?? 0, view: v.data } };
 }
 
@@ -117,4 +132,29 @@ export async function sceneCollect(id: string): Promise<R<CollectResult>> {
   const v = await view(w);
   if (!v.ok) return v;
   return { ok: true, data: { ...(data as Omit<CollectResult, "view">), view: v.data } };
+}
+
+/** Deals with a hater: the server sets the price or pay from the rank and checks the regular who vouches. */
+export async function sceneDeal(id: string, way: DealWay): Promise<R<SceneView>> {
+  const w = await who();
+  if ("error" in w) return { ok: false, error: w.error };
+  const d = DEAL.find((x) => x.id === way);
+  if (!d) return { ok: false, error: ERRORS.bad_entry };
+  const r = await raw(w);
+  if ("error" in r) return { ok: false, error: r.error };
+  const npc = way === "vouch" ? r.vouchers?.[0] ?? null : null;
+  if (way === "vouch" && (!npc || !r.vouchFree)) return { ok: false, error: ERRORS.no_vouch };
+  const cash = way === "publicist" ? -publicistCost(r.rank) : way === "spill" ? teaCash(r.rank) : 0;
+  const { error } = await w.admin.rpc("scene_deal", { p_player: w.id, p_id: id, p_way: way, p_npc: npc, p_cash: cash, p_integrity: d.integrity });
+  if (error) return { ok: false, error: err(error, "scene_deal") };
+  return view(w);
+}
+
+/** Hypes a crew member's (or partner's) move from anywhere. */
+export async function sceneCrewHype(id: string): Promise<R<SceneView>> {
+  const w = await who();
+  if ("error" in w) return { ok: false, error: w.error };
+  const { error } = await w.admin.rpc("scene_crew_hype", { p_player: w.id, p_id: id });
+  if (error) return { ok: false, error: err(error, "scene_crew_hype") };
+  return view(w);
 }

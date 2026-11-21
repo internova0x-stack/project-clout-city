@@ -93,11 +93,12 @@ export function nextSlotRank(rank: number): number | null {
 export const hypesFor = (hours: number) => SCENE.hypes[hours] ?? 0;
 export const staleAfterH = (hours: number) => SCENE.staleAfter[hours] ?? hours;
 
-/** What a move pays: clout and score points. */
-export function payout(clout: number, need: number, done: number, stale: boolean): { clout: number; points: number } {
+/** What a move pays: clout and score points. A hater left standing takes its cut on top (step 2). */
+export function payout(clout: number, need: number, done: number, stale: boolean, haterCut = 0): { clout: number; points: number } {
   const missing = Math.max(0, need - done);
   let f = Math.max(SCENE.stalePay, 1 - SCENE.missedHype * missing);
   if (stale) f = Math.min(f, SCENE.stalePay);
+  f *= 1 - haterCut;
   const c = Math.round(clout * f);
   return { clout: c, points: Math.round(c * SCENE.pointsPer) };
 }
@@ -152,6 +153,44 @@ export function costFor(m: SceneMove, rank: number): number {
   return Math.round(m.cost * (1 + 0.1 * Math.max(0, rank - base)) / 5) * 5;
 }
 
+// ---- Step 2 (owner, Nov 21): haters, rivals and pitfalls that grow with fame; dealing with them; the crew's hype ----
+
+/** Someone coming for a move (content/scene/haters.json). Nobodies get petty rumours, the rising get celebrities' shade,
+ *  the famous get real pitfalls; the cut (what it takes off the pay if left standing) grows with them. */
+export interface Hater {
+  id: string;
+  emoji: string;
+  /** What they're saying. */
+  quote: string;
+  line: string;
+  minRank: number;
+  maxRank?: number;
+  /** A cast member behind it (lib/characters.ts id). */
+  who?: string;
+  cut: number;
+}
+
+/** The chance a move draws a hater: 15% for a nobody, 5 points more a rank, at most 60%; sneaking in adds 15. */
+export function haterChance(rank: number, entry: "invited" | "sneak" = "invited"): number {
+  return Math.min(0.6, 0.15 + 0.05 * Math.max(0, rank - 1)) + (entry === "sneak" ? 0.15 : 0);
+}
+export const hatersFor = (haters: Hater[], rank: number) => haters.filter((h) => rank >= h.minRank && (h.maxRank === undefined || rank <= h.maxRank));
+/** When it lands: somewhere between a quarter and three quarters of the way through. */
+export const haterAt = (startedAt: number, readyAt: number, r: number) => Math.round(startedAt + (readyAt - startedAt) * (0.25 + 0.5 * r));
+
+export type DealWay = "vouch" | "publicist" | "spill" | "rise";
+/** Ways to deal with a hater (Moral Choices format: what you get, what it costs; never the meter). */
+export const DEAL: { id: DealWay; emoji: string; label: string; get: string; cost: string; integrity: number }[] = [
+  { id: "vouch", emoji: "🤝", label: "Get {regular} to vouch for you", get: "It's gone, and nobody argues with {regular}", cost: "{regular}'s favour (one a week)", integrity: 1 },
+  { id: "publicist", emoji: "📞", label: "Hire a publicist", get: "Gone by morning", cost: "C${publicist}", integrity: 0 },
+  { id: "spill", emoji: "🫖", label: "Spill tea about them first", get: "Gone, and C${tea} from the gossip site", cost: "You'll have to live with it", integrity: -4 },
+  { id: "rise", emoji: "😌", label: "Rise above it", get: "Your dignity", cost: "The move pays less", integrity: 3 },
+];
+export const publicistCost = (rank: number) => 100 + 75 * rank;
+export const teaCash = (rank: number) => 60 + 20 * rank;
+/** Helping a crew member's move pays the helper this, once per move. */
+export const CREW_HYPE_CLOUT = 5;
+
 /** A started move, as the database keeps it. */
 export interface SceneRow {
   id: string;
@@ -164,6 +203,16 @@ export interface SceneRow {
   hypes: string[];
   need: number;
   entry?: "invited" | "sneak";
+  /** Step 2: a hater on it (from haterAt), its cut, and how it was dealt with. */
+  hater?: string | null;
+  haterAt?: string | null;
+  cut?: number | null;
+  dealt?: DealWay | null;
+}
+/** The hater's cut in force: landed and not dealt with (rising above it keeps the cut). */
+export function cutOf(r: SceneRow, now: number): number {
+  if (!r.hater || !r.haterAt || now < Date.parse(r.haterAt)) return 0;
+  return r.dealt && r.dealt !== "rise" ? 0 : r.cut ?? 0;
 }
 
 export type MoveStatus = "building" | "hype" | "ready" | "stale";
@@ -248,7 +297,7 @@ export const whyText = (m: SceneMove, c: Pick<SceneCtx, "rank">) => m.why.replac
 export function sceneSettings(moves: SceneMove[]) {
   return {
     slots: SCENE.slots, hypes: SCENE.hypes, hypeGapMin: SCENE.hypeGapMin, staleAfter: SCENE.staleAfter,
-    stalePay: SCENE.stalePay, missedHype: SCENE.missedHype, pointsPer: SCENE.pointsPer, costPerRank: 0.1,
+    stalePay: SCENE.stalePay, missedHype: SCENE.missedHype, pointsPer: SCENE.pointsPer, costPerRank: 0.1, crewHypeClout: CREW_HYPE_CLOUT,
     sneak: Object.fromEntries(SNEAK.map((w) => [w.id, { integrity: w.integrity, banHours: w.banHours, extra: w.extra ?? 0 }])),
     moves: Object.fromEntries(moves.map((m) => [m.id, {
       places: m.places, hours: m.hours, cost: m.cost, energy: m.energy, clout: m.clout, score: m.score,

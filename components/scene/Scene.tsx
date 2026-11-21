@@ -5,8 +5,8 @@
 
 import { useEffect, useState } from "react";
 import { Sheet } from "../Sheet";
-import { SNEAK, sneakLabel, type SneakWay } from "@/lib/scene";
-import type { MoveCard, Offer, SceneView } from "@/lib/sceneView";
+import { DEAL, SNEAK, sneakLabel, type DealWay, type SneakWay } from "@/lib/scene";
+import type { CrewCard, MoveCard, Offer, SceneView } from "@/lib/sceneView";
 
 /** The view's clock, ticking: the preview's runs fast. */
 export function useSceneNow(view: SceneView | null): number {
@@ -39,9 +39,11 @@ function SlotTag({ n, muted }: { n: number; muted?: boolean }) {
   return <span className={`scene-slot-tag${muted ? " muted" : ""}`}>SLOT {n}</span>;
 }
 
-function MoveSlot({ m, now, at, busy, onHype, onCollect, onGo }: {
+const DEALT: Record<DealWay, string> = { vouch: "🤝 A regular vouched for you", publicist: "📞 Your publicist handled it", spill: "🫖 You spilled first", rise: "😌 You rose above it" };
+
+function MoveSlot({ m, now, at, busy, onHype, onCollect, onGo, onDeal }: {
   m: MoveCard; now: number; at: string | null; busy: boolean;
-  onHype: (m: MoveCard) => void; onCollect: (m: MoveCard) => void; onGo: (place: string) => void;
+  onHype: (m: MoveCard) => void; onCollect: (m: MoveCard) => void; onGo: (place: string) => void; onDeal: (m: MoveCard) => void;
 }) {
   const ready = now >= Date.parse(m.readyAt);
   const stale = now >= Date.parse(m.staleAt);
@@ -62,6 +64,13 @@ function MoveSlot({ m, now, at, busy, onHype, onCollect, onGo }: {
           : <span className="meta scene-left">{timeLeft(Date.parse(m.readyAt) - now)} left</span>}
       </div>
       <div className="scene-bar" aria-hidden="true"><span className={ready ? "done" : ""} style={{ width: `${pct}%` }} /></div>
+      {m.hater && !m.dealt && !stale && (
+        <button className="scene-hater" disabled={busy} onClick={() => onDeal(m)}>
+          {m.hater.who?.portrait ? <img src={m.hater.who.portrait} alt="" /> : <span aria-hidden="true">{m.hater.emoji}</span>}
+          <span className="scene-grow"><b>{m.hater.quote}</b><span className="meta">−{Math.round(m.hater.cut * 100)}% if you leave it · Deal with it ›</span></span>
+        </button>
+      )}
+      {m.hater && m.dealt && <span className="meta">{DEALT[m.dealt]}{m.dealt === "rise" ? ` (−${Math.round(m.hater.cut * 100)}%)` : ""}</span>}
       {!ready && m.need > 0 && (
         <div className="scene-chips">
           <span className="scene-chip">⚡ Hyped {m.hypes} / {m.need}</span>
@@ -105,9 +114,10 @@ function OfferCard({ o, at, busy, onStart, onGo, compact }: {
   );
 }
 
-export function SceneScreen({ view, busy, onStart, onHype, onCollect, onGo }: {
+export function SceneScreen({ view, busy, onStart, onHype, onCollect, onGo, onDeal, onCrewHype }: {
   view: SceneView; busy: boolean;
   onStart: (o: Offer) => void; onHype: (m: MoveCard) => void; onCollect: (m: MoveCard) => void; onGo: (place: string) => void;
+  onDeal: (m: MoveCard) => void; onCrewHype: (c: CrewCard) => void;
 }) {
   const now = useSceneNow(view);
   const free = view.slots - view.moves.length;
@@ -132,7 +142,7 @@ export function SceneScreen({ view, busy, onStart, onHype, onCollect, onGo }: {
         {free > 0 && forYou}
         <section className="scene-section" aria-label="Your moves">
           <div className="scene-label">YOUR MOVES</div>
-          {view.moves.map((m) => <MoveSlot key={m.id} m={m} now={now} at={view.at} busy={busy} onHype={onHype} onCollect={onCollect} onGo={onGo} />)}
+          {view.moves.map((m) => <MoveSlot key={m.id} m={m} now={now} at={view.at} busy={busy} onHype={onHype} onCollect={onCollect} onGo={onGo} onDeal={onDeal} />)}
           {freeSlots.map((s) => (
             <div key={s} className="scene-card free">
               <SlotTag n={s} />
@@ -148,6 +158,23 @@ export function SceneScreen({ view, busy, onStart, onHype, onCollect, onGo }: {
           )}
         </section>
         {free <= 0 && forYou}
+        {view.crew.length > 0 && (
+          <section className="scene-section" aria-label="Your crew's moves">
+            <div className="scene-label">YOUR CREW&apos;S MOVES</div>
+            {view.crew.map((c) => (
+              <div key={c.id} className="scene-offer">
+                <div className="scene-row">
+                  <span className="scene-ico" style={{ width: 44, height: 44 }} aria-hidden="true">{c.emoji}</span>
+                  <div className="scene-grow">
+                    <div className="scene-title">{c.owner}: {c.title}</div>
+                    <div className="meta">{c.placeName} · hyped {c.hypes}/{c.need} · {timeLeft(Date.parse(c.readyAt) - now)} left</div>
+                  </div>
+                  <button className="btn btn-taxi scene-btn" disabled={busy} onClick={() => onCrewHype(c)}>Hype ⚡</button>
+                </div>
+              </div>
+            ))}
+          </section>
+        )}
         <section className="scene-section" aria-label="Known for">
           <div className="scene-label">KNOWN FOR</div>
           <div className="scene-scores">
@@ -222,6 +249,37 @@ export function SceneStartSheet({ offer, busy, onClose, onGo }: { offer: Offer |
               <button className="btn btn-taxi" disabled={busy} onClick={() => onGo()}>Start it</button>
             </>
           )}
+        </div>
+      )}
+    </Sheet>
+  );
+}
+
+/** A hater on one of your moves: who's saying what, and the four ways to deal with it (You get / It costs). */
+export function HaterSheet({ move, view, busy, onClose, onPick }: { move: MoveCard | null; view: SceneView | null; busy: boolean; onClose: () => void; onPick: (way: DealWay) => void }) {
+  const h = move?.hater;
+  const vouch = view?.deal.vouch;
+  const fill = (t: string) => t.replace(/\{regular\}/g, vouch?.name ?? "a regular")
+    .replace("{publicist}", (view?.deal.publicist ?? 0).toLocaleString("en-US")).replace("{tea}", (view?.deal.tea ?? 0).toLocaleString("en-US"));
+  return (
+    <Sheet open={!!move && !!h} onClose={onClose} label="Someone's coming for you">
+      {move && h && (
+        <div className="stack-12">
+          <div className="scene-row">
+            {h.who?.portrait ? <img className="scene-face" src={h.who.portrait} alt="" style={{ width: 64, height: 64 }} /> : <span className="scene-ico" style={{ width: 64, height: 64, fontSize: 32 }} aria-hidden="true">{h.emoji}</span>}
+            <div className="scene-grow">
+              <div className="scene-label" style={{ margin: 0, color: "#A8102A" }}>ON YOUR {move.title.toUpperCase()}</div>
+              <div className="scene-title" style={{ fontSize: 19 }}>&ldquo;{h.quote}&rdquo;</div>
+            </div>
+          </div>
+          <p className="meta" style={{ margin: 0 }}>{h.line} Leave it and the move pays {Math.round(h.cut * 100)}% less.</p>
+          {DEAL.filter((d) => d.id !== "vouch" || vouch).map((d) => (
+            <button key={d.id} className="scene-way" disabled={busy} onClick={() => onPick(d.id)}>
+              <span className="scene-way-title">{d.emoji} {fill(d.label)}</span>
+              <span className="scene-get">You get: {fill(d.get)}</span>
+              <span className="meta">It costs: {fill(d.cost)}</span>
+            </button>
+          ))}
         </div>
       )}
     </Sheet>

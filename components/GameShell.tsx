@@ -111,8 +111,9 @@ import { DailyTasksHint, TourTooltip, TOUR } from "./game/Tutorial";
 import { openBoroughs, type BoroughGate } from "@/lib/boroughGates";
 import { boroughOf } from "@/lib/city";
 import { GameChrome, type ChromeAction, type QuestButton, type Tab } from "./hud/GameChrome";
-import { SceneHere, SceneScreen, SceneStartSheet, useSceneNow } from "./scene/Scene";
-import type { MoveCard, Offer, SceneApi, SceneView } from "@/lib/sceneView";
+import { HaterSheet, SceneHere, SceneScreen, SceneStartSheet, useSceneNow } from "./scene/Scene";
+import type { CrewCard, MoveCard, Offer, SceneApi, SceneView } from "@/lib/sceneView";
+import type { DealWay } from "@/lib/scene";
 import { scoreOf } from "@/lib/scene";
 import { nextRank } from "@/lib/ranks";
 import { handle } from "@/lib/validation";
@@ -2654,6 +2655,7 @@ export function GameShell({
   const [sceneV, setSceneV] = useState<SceneView | null>(null);
   const [sceneOffer, setSceneOffer] = useState<Offer | null>(null);
   const [sceneBusy, setSceneBusy] = useState(false);
+  const [sceneHater, setSceneHater] = useState<MoveCard | null>(null);
   const loadScene = useCallback(async () => {
     if (!scene) return;
     const r = await scene.state();
@@ -2663,7 +2665,7 @@ export function GameShell({
   useEffect(() => { if (cityOn) void loadScene(); }, [cityOn, loadScene, atPlace, sceneOpen]);
   useEffect(() => (cityOn && scene ? everyVisible(() => void loadScene(), 30_000) : undefined), [cityOn, scene, loadScene]);
   const sceneNow = useSceneNow(sceneV);
-  const sceneDot = !!sceneV && sceneV.moves.some((m) => sceneNow >= Date.parse(m.readyAt)
+  const sceneDot = !!sceneV && sceneV.moves.some((m) => sceneNow >= Date.parse(m.readyAt) || (!!m.hater && !m.dealt)
     || (m.hypes < m.need && sceneNow < Date.parse(m.readyAt) && (!m.hypeAt || sceneNow >= Date.parse(m.hypeAt))));
   const sceneGo = (placeId: string) => { setSceneOpen(false); openPlace(placeId); };
   const sceneStart = async (way?: "confidence" | "namedrop" | "bribe") => {
@@ -2705,6 +2707,29 @@ export function GameShell({
     celebrate({ rung: 2, emoji: m.emoji, tag: r.data.stale ? "Went stale" : "Collected", title: m.title,
       line: r.data.stale ? "Old news by the time you showed up. A quarter's better than nothing." : "The city noticed.",
       rewards: [{ tone: "clout", text: `+${r.data.clout} 🔥` }, { text: `${sc.emoji} +${r.data.points} ${sc.label}` }] });
+  };
+  const sceneDeal = async (way: DealWay) => {
+    if (!scene || !sceneHater || sceneBusy) return;
+    const m = sceneHater;
+    setSceneBusy(true);
+    const r = await scene.deal(m.id, way);
+    setSceneBusy(false);
+    if (!r.ok) return setToast(r.error);
+    setSceneHater(null);
+    setSceneV(r.data);
+    if (cityApi) void cityApi.refresh().then((x) => x.ok && applyCity(x));
+    setToast(way === "rise" ? "You rose above it. The move pays a little less." : "Handled. Back to being fabulous.");
+  };
+  const sceneCrewHype = async (c: CrewCard) => {
+    if (!scene || sceneBusy) return;
+    setSceneBusy(true);
+    const r = await scene.crewHype(c.id);
+    setSceneBusy(false);
+    if (!r.ok) return setToast(r.error);
+    setSceneV(r.data);
+    setGain({ clout: 5 });
+    setToast(`You hyped ${c.owner}'s ${c.title} ⚡`);
+    if (cityApi) void cityApi.refresh().then((x) => x.ok && applyCity(x));
   };
   const rankNext = nextRank(me.clout, myWorth);
   // ---- The Guide (migration 0170) ----
@@ -3691,8 +3716,10 @@ export function GameShell({
       )}
 
       {sceneOpen && sceneV && (
-        <SceneScreen view={sceneV} busy={sceneBusy} onStart={setSceneOffer} onHype={(m) => void sceneHype(m)} onCollect={(m) => void sceneCollect(m)} onGo={sceneGo} />
+        <SceneScreen view={sceneV} busy={sceneBusy} onStart={setSceneOffer} onHype={(m) => void sceneHype(m)} onCollect={(m) => void sceneCollect(m)} onGo={sceneGo}
+          onDeal={setSceneHater} onCrewHype={(c) => void sceneCrewHype(c)} />
       )}
+      <HaterSheet move={sceneHater} view={sceneV} busy={sceneBusy} onClose={() => setSceneHater(null)} onPick={(w) => void sceneDeal(w)} />
       <SceneStartSheet offer={sceneOffer} busy={sceneBusy} onClose={() => setSceneOffer(null)} onGo={(way) => void sceneStart(way)} />
       <GameChrome
         sceneOn={sceneOpen}

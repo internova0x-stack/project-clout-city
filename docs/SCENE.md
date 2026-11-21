@@ -52,10 +52,25 @@ Lux's birthday, Heir Ruckus's listening party, Lunaria's 3 AM drop, Duke Ledger'
 Every move is at places that exist; all but the car auction can happen in Queens (Brooklyn's venues wait for its borough).
 `npm test` checks places, hosts, ranges and that `when` is set where it should be.
 
+## Step 2: haters, rivals and pitfalls (migration 0172)
+
+Fame draws attention. When a move starts, the server rolls whether someone comes for it (`haterChance`: 15% for a nobody,
+5 points more a rank, at most 60%, 15 more when you snuck in), who (content/scene/haters.json by rank: petty rumours and the
+wannabes at first, celebrities' shade from Rank 3 (Chardonnay Shade, Heir Ruckus, Chase Clout), real pitfalls from Rank 6
+(Prince Nassim buys the venue, Peyton Pastel's apology video, a leaked guest list, paparazzi at the kitchen door)), and when it
+lands (a quarter to three quarters of the way through). It shows on the move's card in red; left standing it takes its cut off
+the pay (25% for nobodies, 30% rising, 40% famous). Dealing with it (the hater card, You get / It costs):
+
+- **Get a regular to vouch for you**: a regular at Friendly or better (Moral Choices favours), once a week; Halo-ward.
+- **Hire a publicist**: C$100 + 75 a rank: fame makes it pricier.
+- **Spill tea about them first**: the gossip site pays C$60 + 20 a rank; Hustler-ward.
+- **Rise above it**: Halo-ward, but the cut stays.
+
+**Your crew's moves**: the Scene screen lists your crew's (and partner's) building moves that want a hype. A hype from you
+counts as one of theirs, from anywhere, once per move, and pays you 5 clout.
+
 ## Next
 
-- Step 2: haters (a rumour on a move, dealt with through a Moral Choices card or a regular's favour), rivals and pitfalls that
-  grow with fame, the crew hyping each other's moves.
 - Step 3: plaques for doing a move 10/25/50 times, residencies, trending moves from the weekly content, the cast remembering
   you, Lola's Blotter for the big moves, pushes ("ready", "going stale"), Lola's morning pick and Clout Pass XP.
 

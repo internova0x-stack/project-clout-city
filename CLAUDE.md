@@ -922,6 +922,12 @@ components live in `app/globals.css`.
   full-screen tab; `SceneHere`, the place panel's row; `SceneStartSheet`, start or the door); game_settings 'scene' from
   `sceneSettings()` (tests/scene.test.ts compares). Start over clears it. `?scene=new|busy|student|rich` in the preview (lib/sceneSim.ts,
   an hour in 30 seconds).
+  Step 2 (migration 0172, owner Nov 21: "rising costs, rivalries and pitfalls"): haters (content/scene/haters.json, by rank: petty,
+  then the cast's shade from Rank 3, pitfalls from Rank 6; `haterChance`, `hatersFor`, `haterAt`; the server action sets one with
+  `scene_set_hater`) take their `cut` (0.25-0.4) at collect unless dealt with (`scene_deal`: a Friendly regular's vouch once a week,
+  `scene_vouches`; a publicist `publicistCost`; spilling tea `teaCash`, ledger 'scene_tea'; rising above it keeps the cut; meter
+  nudges); the crew's moves (`scene_crew`: crew either way or a partner) can be hyped from anywhere once each (`scene_crew_hype`,
+  `scene_crew_hypes`, 5 clout ledger 'scene_crew'). UI: the red hater strip on a move, `HaterSheet`, "Your crew's moves".
 - Players see "Crew" for their invited friends; code, types and database tables still say `clique`
   (renaming stored data isn't worth the risk). Keep player-facing copy on "crew".
 - Culture packs (docs/culture/, one at a time, only when the owner says "Build C<number>"): slang, invented stand-ins

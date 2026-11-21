@@ -1,7 +1,7 @@
 // Your Scene in the preview (/preview/home): migration 0171 in memory, on a fast clock (an hour passes in 30 seconds), with
 // the simulated city's bank, Energy and clout. ?scene=new|busy|student|rich sets who the player is and what's running.
-import { SNEAK, bribeOf, canSneak, costFor, fits, hypeOpen, hypesFor, needsOk, payout, slotsFor, sneakOdds, staleAfterH, SCENE, type SceneRow, type ScoreId } from "./scene.ts";
-import { SCENE_MOVES, sceneMove } from "./sceneContent.ts";
+import { DEAL, SNEAK, bribeOf, canSneak, costFor, cutOf, fits, haterAt, haterChance, hatersFor, hypeOpen, hypesFor, needsOk, payout, publicistCost, slotsFor, sneakOdds, staleAfterH, teaCash, CREW_HYPE_CLOUT, SCENE, type SceneRow, type ScoreId } from "./scene.ts";
+import { SCENE_HATERS, SCENE_MOVES, sceneMove } from "./sceneContent.ts";
 import { openPlace, sceneView, type SceneApi, type SceneRaw } from "./sceneView.ts";
 import { rankFor } from "./ranks.ts";
 import type { Memory } from "./memory.ts";
@@ -28,6 +28,12 @@ export function createSceneSim(city: SimCity, preset: string | null): SceneApi {
   const collected: { move: string; at: number; score: ScoreId; points: number }[] = [];
   const bounced = new Set<string>();
   let n = 0;
+  // The crew's moves that want a hype (step 2): two friends with something building.
+  const crew = [
+    { id: "crew-1", owner: "Mia", move: "night-out", place: "velvet-static", hypes: 0, need: 2, readyAt: iso(vnow() + 5 * H) },
+    { id: "crew-2", owner: "Dev", move: "panel-speak", place: "triborough-works", hypes: 1, need: 2, readyAt: iso(vnow() + 3 * H) },
+  ];
+  let vouchFree = true;
   const rank = () => (rich ? 6 : Math.max(rankFor(city.peek().clout, city.peek().cash).level, preset === "student" ? 2 : 1));
   const worth = () => (rich ? 2_400_000 : city.peek().cash);
   const add = (move: string, place: string, startedH: number, hypes: number) => {
@@ -39,6 +45,9 @@ export function createSceneSim(city: SimCity, preset: string | null): SceneApi {
   if (preset === "busy" || preset === "student" || rich) {
     add("brunch-be-seen", "grind-and-gossip", 2.1, 0);
     add(rich ? "rooftop-dinner" : "night-out", rich ? "ditmars-heights-rooftop" : "velvet-static", 3, 1);
+    // Step 2: a hater has landed on the second move (a celebrity's shade for the rich, a petty rumour otherwise).
+    const r2 = rows[1];
+    r2.hater = rich ? "nassim-buyout" : "reservation"; r2.haterAt = iso(vnow() - 0.5 * H); r2.cut = rich ? 0.4 : 0.25;
     if (rich) collected.push({ move: "panel-speak", at: vnow() - 30 * H, score: "status", points: 160 }, { move: "night-out", at: vnow() - 50 * H, score: "nightlife", points: 120 });
   }
   const raw = (): SceneRaw => {
@@ -48,10 +57,10 @@ export function createSceneSim(city: SimCity, preset: string | null): SceneApi {
     return {
       at: city.here(), rank: rank(), netWorth: worth(), bank: city.peek().cash, energy: 100, holding: false, today: new Date().toISOString().slice(0, 10),
       boroughs: ["queens"], skills: {}, moves: rows.slice(), rested: collected.filter((c) => now - c.at < SCENE.restDays * 24 * H).map((c) => c.move),
-      bounced: [...bounced], scores, collected: collected.length,
+      bounced: [...bounced], scores, collected: collected.length, vouchers: ["sal"], vouchFree, crew: crew.slice(),
     };
   };
-  const view = () => sceneView(SCENE_MOVES, raw(), memory, "preview", vnow(), SIM_SPEED);
+  const view = () => sceneView(SCENE_MOVES, SCENE_HATERS, raw(), memory, "preview", vnow(), SIM_SPEED);
   const fail = (error: string) => ({ ok: false as const, error });
   return {
     async state() { return { ok: true, data: view() }; },
@@ -81,10 +90,35 @@ export function createSceneSim(city: SimCity, preset: string | null): SceneApi {
       if (city.peek().cash < cost) return fail("Not enough in the bank.");
       city.choicePay({ cash: -cost, energy: -m.energy });
       const st = vnow();
-      rows.push({ id: `sim-${++n}`, move, place: at, slot: free, startedAt: iso(st), readyAt: iso(st + m.hours * H), staleAt: iso(st + (m.hours + staleAfterH(m.hours)) * H),
-        hypes: [], need: hypesFor(m.hours), entry: needsOk(m, ctx) ? "invited" : "sneak" });
+      const entry = needsOk(m, ctx) ? "invited" as const : "sneak" as const;
+      const row: SceneRow = { id: `sim-${++n}`, move, place: at, slot: free, startedAt: iso(st), readyAt: iso(st + m.hours * H), staleAt: iso(st + (m.hours + staleAfterH(m.hours)) * H),
+        hypes: [], need: hypesFor(m.hours), entry };
+      if (Math.random() < haterChance(rank(), entry)) {
+        const pool = hatersFor(SCENE_HATERS, rank());
+        const h = pool[Math.floor(Math.random() * pool.length)];
+        if (h) { row.hater = h.id; row.haterAt = iso(haterAt(st, st + m.hours * H, Math.random())); row.cut = h.cut; }
+      }
+      rows.push(row);
       rows.sort((a, b) => a.slot - b.slot);
       return { ok: true, data: { bounced: false, banHours: 0, view: view() } };
+    },
+    async deal(id, way) {
+      const r = rows.find((x) => x.id === id);
+      if (!r || !r.hater || !r.haterAt || vnow() < Date.parse(r.haterAt)) return fail("Nobody's coming for that one.");
+      if (r.dealt) return fail("You already dealt with that.");
+      if (way === "vouch") { if (!vouchFree) return fail("No regular can vouch for you this week."); vouchFree = false; }
+      if (way === "publicist") { const c = publicistCost(rank()); if (city.peek().cash < c) return fail("Not enough in the bank."); city.choicePay({ cash: -c }); }
+      if (way === "spill") city.choicePay({ cash: teaCash(rank()) });
+      if (!DEAL.some((d) => d.id === way)) return fail("Something went wrong. Try again.");
+      r.dealt = way;
+      return { ok: true, data: view() };
+    },
+    async crewHype(id) {
+      const i = crew.findIndex((c) => c.id === id);
+      if (i < 0) return fail("You already hyped that one.");
+      crew.splice(i, 1);
+      city.huntReward(0, CREW_HYPE_CLOUT);
+      return { ok: true, data: view() };
     },
     async hype(id) {
       const r = rows.find((x) => x.id === id);
@@ -101,7 +135,7 @@ export function createSceneSim(city: SimCity, preset: string | null): SceneApi {
       if (vnow() < Date.parse(r.readyAt)) return fail("It's not ready yet.");
       const m = sceneMove(r.move)!;
       const stale = vnow() >= Date.parse(r.staleAt);
-      const p = payout(m.clout, r.need, r.hypes.length, stale);
+      const p = payout(m.clout, r.need, r.hypes.length, stale, cutOf(r, vnow()));
       rows.splice(i, 1);
       collected.push({ move: r.move, at: vnow(), score: m.score, points: p.points });
       city.huntReward(0, p.clout);
