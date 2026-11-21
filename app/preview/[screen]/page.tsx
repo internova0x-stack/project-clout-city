@@ -35,7 +35,7 @@ import { previewStudioBigScreen, previewStudioBigScreenAction } from "../tvActio
 import { previewEconomy, previewEconomyFlag, previewEconomyFreeze, previewEconomySet } from "../economyActions";
 import { previewMarketRecent, previewMarketReverse } from "../marketActions";
 import { previewAssetReverse, previewAssetSales } from "../assetSalesActions";
-import { normalizeLook } from "@/lib/look";
+import { SKIN_TONES, normalizeLook } from "@/lib/look";
 import type { Player } from "@/lib/player";
 
 // Development-only previews of signed-in screens with sample data, so they can be
@@ -122,6 +122,8 @@ export default async function Preview({
   if (process.env.NODE_ENV === "production") notFound();
   const { screen } = await params;
   const { time, step, state, flow, city, room, mood, dev, story, live, tasks, dating, crew, party, hunt, lotto, gossip, rankup, biz, together, radio, tv, brooklyn, hint, campus, goals, push, member, via, skills, transit, rent, calendar, couture, mayor, skin, build, outfit, size, pick, restart, arc, still, at, couple, sublet, homescore, visit, starter, apps, campaign, school, crown, career, underworld, gala, choice, economy, assets, market, pass, pack, life, bonds, shot, scene } = await searchParams;
+  // Any preview screen can dress the sample player in one of the eight skin tones (?skin=0-7; /preview/moves reads it itself).
+  const sample: Player = skin !== undefined && SKIN_TONES[Number(skin)] ? { ...SAMPLE, look: { ...SAMPLE.look, skin: SKIN_TONES[Number(skin)] } } : SAMPLE;
   const daytimeOverride = time === "day" ? true : time === "night" ? false : undefined;
 
   switch (screen) {
@@ -134,7 +136,7 @@ export default async function Preview({
     case "welcome":
       return (
         <WelcomeBack preview
-          data={{ name: SAMPLE.display_name, style: SAMPLE.starting_style, look: SAMPLE.look, bank: SAMPLE.bank_cash, homeId: "jackson_heights_1br", houseSku: null, homeLayout: null,
+          data={{ name: sample.display_name, style: sample.starting_style, look: sample.look, bank: sample.bank_cash, homeId: "jackson_heights_1br", houseSku: null, homeLayout: null,
             items: [{ id: 1, sku: "fit-satin-bomber", category: "fashion", equipped: true }],
             restart: restart === "wait" ? { can: false, nextAt: new Date(Date.now() + 20 * 86_400_000).toISOString() } : { can: true, nextAt: null } }}
           onRestart={async () => {
@@ -148,9 +150,9 @@ export default async function Preview({
         <Creator
           needsAgeConfirm={false}
           initialStep={s}
-          initialLook={s > 0 ? normalizeLook(SAMPLE.look, SAMPLE.starting_style) : undefined}
-          initialName={s > 0 ? SAMPLE.display_name : undefined}
-          initialTraits={s > 1 ? SAMPLE.traits : []}
+          initialLook={s > 0 ? normalizeLook(sample.look, sample.starting_style) : undefined}
+          initialName={s > 0 ? sample.display_name : undefined}
+          initialTraits={s > 1 ? sample.traits : []}
           initialCash={s > 2 ? 4400 : null}
           actions={{
             createPlayer: async () => {
@@ -176,8 +178,8 @@ export default async function Preview({
     case "home": {
       const fresh = state === "new";
       const player: Player = fresh
-        ? { ...SAMPLE, onboarding_step: "home_done", tutorial_state: "pending", first_party_at: null, clout: 0, bank_cash: 5300, energy: 100, confidence: 40, home_id: "astoria_share" }
-        : SAMPLE;
+        ? { ...sample, onboarding_step: "home_done", tutorial_state: "pending", first_party_at: null, clout: 0, bank_cash: 5300, energy: 100, confidence: 40, home_id: "astoria_share" }
+        : sample;
       return (
         <PreviewHome
           player={player}
