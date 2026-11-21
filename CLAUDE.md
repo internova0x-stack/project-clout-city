@@ -949,6 +949,11 @@ components live in `app/globals.css`.
   the leaderboard's button; `fame_state()` for usage) and the rank-up reveal lists the perks. The goal ladder gained ten rungs for
   Ranks 6 to 10 (skill 7/9/10, savings C$100k to C$1B, the rooftop regular, the nightclub). SQL tests that sum a player's ledger
   include the fame kinds.
+  One Known for and Pass XP from everything (migration 0176, owner Nov 21: "build 3 and 4"): `KNOWN_FOR` (lib/fame.ts, in
+  game_settings 'fame'.knownFor) maps ledger kinds to a Scene score; the trigger `fame_known` adds points once per kind+ref to
+  `fame_points`, which scene_context adds to Scene's own points; Start over clears it. SEASON.xp gained career_pay, career_promo,
+  campaign_poll, business_buy, business_upgrade, date_night, visit_host, party, hunt, couple_anniv, home_score and scene_plaque
+  (merged into season_pass xp by 0176; tests/seasonPass.test.ts reads the merge).
 - Players see "Crew" for their invited friends; code, types and database tables still say `clique`
   (renaming stored data isn't worth the risk). Keep player-facing copy on "crew".
 - Culture packs (docs/culture/, one at a time, only when the owner says "Build C<number>"): slang, invented stand-ins

@@ -221,6 +221,8 @@ export function SceneScreen({ view, busy, onStart, onHype, onCollect, onGo, onDe
         )}
         <section className="scene-section" aria-label="Known for">
           <div className="scene-label">KNOWN FOR</div>
+          {/* Owner, Nov 21: one Known for for the whole game (migration 0176). */}
+          <p className="meta scene-known-note">Everything you do counts: promotions and businesses for Status, dates and your crew for Social, club nights for Nightlife, the campaign trail for Stage, the Shop for Style, hunts and gossip for Street cred.</p>
           <div className="scene-scores">
             {view.scores.map((s) => (
               <div key={s.id} className="scene-score">

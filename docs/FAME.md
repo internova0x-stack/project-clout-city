@@ -27,6 +27,20 @@ the first: ×1.2 at Rank 2, ×2 at Rank 6, ×2.8 at Rank 10 (ledger 'fame_scale'
 The goal ladder gets ten more rungs for Ranks 6 to 10: skill levels 7, 9 and 10, C$100k to a billion in the bank, a
 regular at Ditmars Heights Rooftop, and owning a nightclub (`lib/goals.ts`, rewards C$600 to 10,000).
 
+## 3. One "Known for" for the whole game (migration 0176)
+
+Your Scene's six scores used to count Scene moves only. Now everything feeds one (`KNOWN_FOR` in lib/fame.ts), once per
+thing: promotions, paydays, businesses and the Gala → 💼 Status; dates, the crew, hosting, the couple's milestones and
+inviting friends → 🤝 Social; club nights, parties, VIP and calendar events → 🎉 Nightlife; the campaign's polls, tasks and
+rewards → 🎤 Stage; the Shop and the Crib Rating → 👗 Style; hunts, gossip, place activities, visits, stories and streaks →
+🏙️ Street cred. Radio and TV pay nothing today, so they can't count yet.
+
+## 4. Clout Pass XP from everything (migration 0176)
+
+On top of daily tasks (5), all five (20), goals (50) and Scene moves (10): a payday 10, a promotion 40, a campaign week's
+poll 15, buying a business 25, upgrading one 20, a date night 15, hosting 10, a party 10, a hunt clue 10, an anniversary 15,
+a Crib Rating milestone 20, a plaque 30.
+
 ## How it's built
 
 A ledger trigger (`fame_on_ledger`, never raises) watches every payment and adds the perk or bonus as its own ledger row,

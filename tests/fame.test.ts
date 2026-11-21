@@ -6,8 +6,8 @@ import type { SceneMove } from "../lib/scene.ts";
 
 const MOVES = (JSON.parse(readFileSync(new URL("../content/scene/moves.json", import.meta.url), "utf8")) as { moves: SceneMove[] }).moves;
 
-test("migration 0175 carries lib/fame.ts's settings", () => {
-  const sql = readFileSync(new URL("../supabase/migrations/0175_fame_perks.sql", import.meta.url), "utf8");
+test("the newest migration carries lib/fame.ts's settings", () => {
+  const sql = readFileSync(new URL("../supabase/migrations/0176_known_for.sql", import.meta.url), "utf8");
   const m = /values \('fame', '(\{.*?\})'::jsonb\)/s.exec(sql);
   assert.ok(m);
   assert.deepEqual(JSON.parse(m![1]), JSON.parse(JSON.stringify(fameSettings(MOVES.filter((x) => x.host).map((x) => x.id)))));
@@ -27,4 +27,20 @@ test("a perk at every rank from 2; a Spotlight at every rank from 5; the own-nig
   assert.deepEqual(perksAt(1).have, []);
   assert.equal(perksAt(4).have.length, 3);
   assert.equal(MOVES.find((m) => m.id === "own-night")?.needs?.rank, 9);
+});
+
+test("Known for: everything feeds one of the six scores, and every score has sources beyond Scene", async () => {
+  const { KNOWN_FOR } = await import("../lib/fame.ts");
+  const { SCORES } = await import("../lib/scene.ts");
+  const ids = new Set(SCORES.map((s) => s.id));
+  for (const [k, v] of Object.entries(KNOWN_FOR)) { assert.ok(ids.has(v.score), k); assert.ok(v.points > 0 && v.points <= 100, k); }
+  for (const s of ids) assert.ok(Object.values(KNOWN_FOR).some((v) => v.score === s), `${s} has sources`);
+  for (const k of ["career_promo", "date_night", "party", "campaign_poll", "purchase", "hunt"]) assert.ok(KNOWN_FOR[k], k);
+});
+
+test("the Clout Pass earns XP from careers, campaigns, businesses, dates, hunts and plaques", async () => {
+  const { SEASON } = await import("../lib/seasonPass.ts");
+  for (const k of ["career_pay", "career_promo", "campaign_poll", "business_upgrade", "date_night", "hunt", "scene_plaque"]) {
+    assert.ok((SEASON.xp as Record<string, number>)[k] > 0, k);
+  }
 });

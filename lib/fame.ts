@@ -12,6 +12,7 @@
 // Pure: GameShell, the perks sheet, tests and the migration's settings (fameSettings) share it.
 
 import { RANKS } from "./ranks.ts";
+import type { ScoreId } from "./scene.ts";
 
 export const FAME = {
   /** Everyday rewards: +20% a rank above the first, at most ×2.8. */
@@ -57,11 +58,37 @@ export function perksAt(rank: number): { have: FamePerk[]; next: FamePerk[] } {
 }
 export const rankName = (rank: number) => RANKS[Math.max(0, Math.min(RANKS.length, rank) - 1)]?.title ?? "";
 
+// ---- 3. One "Known for" for the whole game (owner, Nov 21: "build 3 and 4"; migration 0176) ----
+// Your Scene's six scores used to count Scene moves only. Now everything a player does feeds one: a ledger row of these
+// kinds adds its points to that score, once per thing (fame_points). Radio and TV pay nothing today, so they can't count.
+export const KNOWN_FOR: Record<string, { score: ScoreId; points: number }> = {
+  // 🎉 Nightlife: club nights, parties, VIP, the city's calendar events
+  event: { score: "nightlife", points: 5 }, party: { score: "nightlife", points: 10 }, vip: { score: "nightlife", points: 8 },
+  vip_cover: { score: "nightlife", points: 8 }, calendar: { score: "nightlife", points: 8 },
+  // 👗 Style: the Shop and the Crib Rating
+  purchase: { score: "style", points: 5 }, home_score: { score: "style", points: 15 },
+  // 💼 Status: careers, businesses, the Gala
+  career_promo: { score: "status", points: 25 }, career_pay: { score: "status", points: 6 }, career_screen: { score: "status", points: 10 },
+  business_buy: { score: "status", points: 20 }, business_upgrade: { score: "status", points: 10 }, business_public: { score: "status", points: 60 },
+  gala: { score: "status", points: 15 },
+  // 🤝 Social: dates, the crew, hosting, the couple's milestones, inviting friends
+  date_night: { score: "social", points: 10 }, crew_friend: { score: "social", points: 6 }, crew_full: { score: "social", points: 12 },
+  together: { score: "social", points: 6 }, visit_host: { score: "social", points: 10 }, visit_guest: { score: "social", points: 6 },
+  couple_streak: { score: "social", points: 8 }, couple_anniv: { score: "social", points: 15 }, cohabit_home: { score: "social", points: 5 },
+  invite: { score: "social", points: 10 },
+  // 🎤 Stage: the campaign trail
+  campaign_poll: { score: "stage", points: 5 }, campaign_reward: { score: "stage", points: 10 }, campaign_task: { score: "stage", points: 6 },
+  // 🏙️ Street cred: hunts, gossip, being a regular, reading the city's stories, keeping a streak
+  hunt: { score: "street", points: 10 }, gossip: { score: "street", points: 4 }, gossip_restroom: { score: "street", points: 4 },
+  place_life: { score: "street", points: 4 }, visit: { score: "street", points: 2 }, story_read: { score: "street", points: 3 },
+  streak: { score: "street", points: 5 },
+};
+
 /** game_settings 'fame' (migration 0175): what the ledger trigger needs. `hosted`: the Scene moves the cast hosts. */
 export function fameSettings(hosted: string[]) {
   return {
     perRank: FAME.perRank, cap: FAME.cap, scaleKinds: [...FAME.scaleKinds], paparazzi: FAME.paparazzi,
     perks: { ticket: 2, comp: 3, invite: 4, spotlight: 5, match: 7, paparazzi: 8 },
-    spotlight: SPOTLIGHT, hosted: [...hosted].sort(),
+    spotlight: SPOTLIGHT, hosted: [...hosted].sort(), knownFor: KNOWN_FOR,
   };
 }

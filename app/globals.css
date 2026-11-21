@@ -3834,3 +3834,4 @@ button.camp-task.ticked { flex-direction:row; align-items:flex-start; gap:10px; 
 .fame-perk { display:block; font-size:12px; font-weight:600; color:var(--text-3); margin-top:3px; }
 .fame-perk.have { color:#1F7A57; }
 .fame-perk em { font-style:normal; font-weight:500; color:var(--text-3); }
+.scene-known-note { margin:4px 4px -8px; font-size:12px; color:var(--text-2); }
