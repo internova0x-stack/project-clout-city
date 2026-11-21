@@ -47,6 +47,12 @@ export interface SceneMove {
   line: string;
   /** Step 3: Lola's Blotter line when it's collected ({name} is the player). Big moves only. */
   headline?: string;
+  /** Weekly moves (migration 0174): the Monday of the week file it came from. */
+  week?: string;
+  /** Only on these ISO weekdays (1 Monday … 7 Sunday, New York). Hosted cast moves get theirs from the cast's week. */
+  days?: number[];
+  /** A weekly move past its week or vetoed after going live: still collectable if running, never offered. */
+  closed?: boolean;
 }
 
 export const SCORES: { id: ScoreId; label: string; emoji: string; titles: string[] }[] = [
@@ -230,6 +236,28 @@ export const HOST_KNOWS = 3;
 /** Clout Pass XP per collected move (migration 0173 adds it to the season's xp table). */
 export const SCENE_SEASON_XP = 10;
 
+// ---- The cast's week (owner, Nov 21): each celebrity hosts on set days, so there's a reason to show up that day ----
+
+export const WEEKDAY = ["", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as const;
+/** ISO weekday (1 Monday … 7 Sunday) of a New York date. */
+export const isoDay = (day: string) => ((new Date(`${day}T12:00:00Z`).getUTCDay() + 6) % 7) + 1;
+/** The days a hosted cast move runs this week: two, seeded by the week, never back to back. Others: every day. */
+export function daysFor(m: SceneMove, monday: string): number[] | null {
+  if (m.days?.length) return m.days;
+  if (m.area !== "cast" || !m.host) return null;
+  const a = (hash(`cast:${monday}:${m.id}`) % 7) + 1;
+  const b = ((a - 1 + 2 + (hash(`cast2:${monday}:${m.id}`) % 4)) % 7) + 1;
+  return [a, b].sort((x, y) => x - y);
+}
+/** Whether a move runs on a New York date. */
+export function onDay(m: SceneMove, day: string): boolean {
+  if (m.closed) return false;
+  if (m.week && mondayOf(day) !== m.week) return false;
+  const d = daysFor(m, mondayOf(day));
+  return !d || d.includes(isoDay(day));
+}
+export const daysText = (days: number[]) => days.map((d) => WEEKDAY[d]).join(" & ");
+
 /** A started move, as the database keeps it. */
 export interface SceneRow {
   id: string;
@@ -312,8 +340,9 @@ const dayBefore = (d: string) => new Date(Date.parse(`${d}T12:00:00Z`) - 86_400_
  */
 export function forYou(moves: SceneMove[], c: SceneCtx, player: string, skip: { active: Set<string>; rested: Set<string> }, depth = 0): SceneMove[] {
   const yesterday = depth === 0 ? new Set(forYou(moves, { ...c, today: dayBefore(c.today) }, player, skip, 1).map((m) => m.id)) : new Set<string>();
-  const ok = moves.filter((m) => needsOk(m, c) && fits(m, c) && m.places.some(c.open) && !skip.active.has(m.id) && !skip.rested.has(m.id));
-  const tier = (m: SceneMove) => (m.area === "everyday" ? 2 : m.area === "cast" || m.area === "status" ? 1 : 0);
+  const ok = moves.filter((m) => needsOk(m, c) && fits(m, c) && onDay(m, c.today) && m.places.some(c.open) && !skip.active.has(m.id) && !skip.rested.has(m.id));
+  // This week's moves (migration 0174) come first in their tier, then a cast member hosting today.
+  const tier = (m: SceneMove) => (m.area === "everyday" ? 2 : m.area === "cast" || m.area === "status" ? 1 : 0) - (m.week ? 0.5 : 0) - (daysFor(m, mondayOf(c.today)) ? 0.25 : 0);
   // Yesterday's suggestions go to the back of their tier: a different move in the same part of life comes first, but a
   // player's only dating or school move still shows when nothing else fits.
   const order = [...ok].sort((a, b) => tier(a) - tier(b) || Number(yesterday.has(a.id)) - Number(yesterday.has(b.id))

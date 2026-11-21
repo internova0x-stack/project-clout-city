@@ -3,7 +3,7 @@
 // Your Scene (owner, Nov 21; lib/scene.ts): the full-screen tab (SceneScreen), the "Start a move here" row on a place's
 // panel (SceneHere) and the door card for a move above your rank (SneakSheet).
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Sheet } from "../Sheet";
 import { DEAL, SNEAK, sneakLabel, type DealWay, type SneakWay } from "@/lib/scene";
 import type { CrewCard, MoveCard, Offer, SceneView } from "@/lib/sceneView";
@@ -108,6 +108,7 @@ function OfferCard({ o, at, busy, onStart, onGo, compact }: {
       </div>
       {o.knows && o.host && <div className="scene-knows">{o.host.name.split(" ")[0]}: &ldquo;{o.knows}&rdquo;</div>}
       <div className="meta">📍 {where?.name ?? "Somewhere new"} · {o.hours} h · +{o.clout} 🔥 · {money(o.cost)}{o.energy ? ` · ⚡${o.energy}` : ""}</div>
+      {(o.days || o.weekly) && <div className="scene-days">{o.weekly ? "🆕 This week only" : ""}{o.weekly && o.days ? " · " : ""}{o.days ? `🗓️ ${o.days}` : ""}</div>}
       {o.running ? <span className="meta">Already going ✓</span>
         : o.bounced ? <span className="meta">They know your face tonight. Tomorrow.</span>
         : here ? <button className="btn btn-taxi scene-btn" disabled={busy} onClick={() => onStart(o)}>{o.short ? "Try to get in" : "Start it"}</button>
@@ -141,6 +142,7 @@ export function SceneScreen({ view, busy, onStart, onHype, onCollect, onGo, onDe
           <span className="scene-count">{view.moves.length} / {view.slots} slots</span>
         </div>
         <p className="meta scene-sub">Start moves around the city. Hype them, collect them before they go stale.</p>
+        <CastWeek days={view.castWeek} />
         {free > 0 && forYou}
         <section className="scene-section" aria-label="Your moves">
           <div className="scene-label">YOUR MOVES</div>
@@ -334,5 +336,34 @@ export function HaterSheet({ move, view, busy, onClose, onPick }: { move: MoveCa
         </div>
       )}
     </Sheet>
+  );
+}
+
+/** This week on the scene: who hosts what, by day; today stands out. */
+function CastWeek({ days }: { days: SceneView["castWeek"] }) {
+  // The strip opens on today.
+  const row = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = row.current?.querySelector<HTMLElement>(".scene-week-day.today");
+    if (row.current && el) row.current.scrollLeft = Math.max(0, el.offsetLeft - 14);
+  }, []);
+  if (!days.some((d) => d.items.length)) return null;
+  return (
+    <section className="scene-section" aria-label="This week on the scene">
+      <div className="scene-label">THIS WEEK ON THE SCENE</div>
+      <div className="scene-week" ref={row}>
+        {days.map((d) => (
+          <div key={d.day} className={`scene-week-day${d.today ? " today" : ""}`}>
+            <span className="scene-week-label">{d.today ? "Today" : d.label}</span>
+            {d.items.length ? d.items.slice(0, 3).map((it) => (
+              <span key={it.move} className="scene-week-item" title={it.title}>
+                {it.host?.portrait ? <img src={it.host.portrait} alt="" /> : <span aria-hidden="true">{it.emoji}</span>}
+                <span className="scene-week-title">{it.title}</span>
+              </span>
+            )) : <span className="meta scene-week-none">Quiet</span>}
+          </div>
+        ))}
+      </div>
+    </section>
   );
 }

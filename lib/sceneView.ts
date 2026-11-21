@@ -6,7 +6,7 @@ import { characterById } from "./characters.ts";
 import type { Memory } from "./memory.ts";
 import {
   SCENE, SCORES, canSneak, costFor, cutOf, fits, forYou, hypeOpen, needsOk, needsText, nextSlotRank, payout, publicistCost, slotsFor, statusOf,
-  teaCash, titleFor, whyText, HOST_KNOWS, TREND, mondayOf, plaqueOf, residencyPay, trendingFor, RESIDENCY, type Area, type DealWay, type Hater, type MoveStatus, type SceneCtx, type SceneMove, type SceneRow, type ScoreId,
+  teaCash, titleFor, whyText, HOST_KNOWS, daysFor, daysText, isoDay, onDay, TREND, mondayOf, plaqueOf, residencyPay, trendingFor, RESIDENCY, type Area, type DealWay, type Hater, type MoveStatus, type SceneCtx, type SceneMove, type SceneRow, type ScoreId,
 } from "./scene.ts";
 
 /** What scene_context (migration 0171) returns. */
@@ -98,7 +98,13 @@ export interface Offer {
   /** Step 3: trending this week (pays ×1.5), and the host's line once they know you. */
   trending: boolean;
   knows: string | null;
+  /** The cast's week: "Sun & Wed" for a hosted move (null when it's on every day); this week's own moves. */
+  days: string | null;
+  weekly: boolean;
 }
+
+/** This week on the scene: who hosts what, on which days. */
+export interface CastDay { day: number; label: string; today: boolean; items: { move: string; title: string; emoji: string; host?: Host }[] }
 
 export interface ScoreView { id: ScoreId; label: string; emoji: string; points: number; title: string; next: number | null; nextTitle: string | null }
 
@@ -123,6 +129,7 @@ export interface SceneView {
   plaques: PlaqueLine[];
   residency: { move: string; title: string; emoji: string; places: { id: string; name: string }[]; until: string; paidToday: boolean; pay: number } | null;
   residencyOffers: { move: string; title: string; emoji: string; places: { id: string; name: string }[]; pay: number }[];
+  castWeek: CastDay[];
 }
 
 const placeName = (id: string) => PLACES.find((p) => p.id === id)?.name ?? id;
@@ -200,11 +207,12 @@ export function sceneView(moves: SceneMove[], haters: Hater[], raw: SceneRaw, me
     hours: m.hours, cost: costFor(m, raw.rank), energy: m.energy, clout: m.clout, score: m.score, host: hostOf(m.host),
     short: needsOk(m, ctx) ? null : needsText(m), running: running.has(m.id), bounced: bounced.has(m.id),
     trending: trending.has(m.id), knows: m.host && (hosted[m.host] ?? 0) >= HOST_KNOWS ? hostLines[m.host] ?? null : null,
+    days: ((d) => (d ? daysText(d) : null))(daysFor(m, mondayOf(raw.today))), weekly: !!m.week,
   });
 
   const picks = forYou(moves, ctx, player, { active: running, rested: new Set(raw.rested) }).map(offer);
   const here = raw.at && open(raw.at)
-    ? moves.filter((m) => m.places.includes(raw.at!) && fits(m, ctx) && (needsOk(m, ctx) || canSneak(m, ctx))).map(offer)
+    ? moves.filter((m) => m.places.includes(raw.at!) && fits(m, ctx) && onDay(m, raw.today) && (needsOk(m, ctx) || canSneak(m, ctx))).map(offer)
       .sort((a, b) => Number(!!a.short) - Number(!!b.short) || a.hours - b.hours)
     : [];
 
@@ -230,6 +238,16 @@ export function sceneView(moves: SceneMove[], haters: Hater[], raw: SceneRaw, me
       const m = byId.get(id);
       return m && n >= RESIDENCY.needs ? [{ move: id, title: m.title, emoji: m.emoji, places: m.places.filter(open).map((pid) => ({ id: pid, name: placeName(pid) })), pay: residencyPay(m) }] : [];
     }),
+    castWeek: ((monday) => {
+      const today = isoDay(raw.today);
+      const days: CastDay[] = [1, 2, 3, 4, 5, 6, 7].map((d) => ({ day: d, label: ["", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][d], today: d === today, items: [] }));
+      for (const m of moves) {
+        const ds = m.host || m.week ? daysFor(m, monday) : null;
+        if (!ds || !m.places.some(open)) continue;
+        for (const d of ds) days[d - 1].items.push({ move: m.id, title: m.title, emoji: m.emoji, host: hostOf(m.host) });
+      }
+      return days;
+    })(mondayOf(raw.today)),
     crew: (raw.crew ?? []).flatMap((c) => {
       const m = byId.get(c.move);
       return m ? [{ id: c.id, owner: c.owner, title: m.title, emoji: m.emoji, placeName: placeName(c.place), hypes: c.hypes, need: c.need, readyAt: c.readyAt }] : [];

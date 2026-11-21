@@ -1,8 +1,10 @@
 // Your Scene in the preview (/preview/home): migration 0171 in memory, on a fast clock (an hour passes in 30 seconds), with
 // the simulated city's bank, Energy and clout. ?scene=new|busy|student|rich sets who the player is and what's running.
 import { DEAL, SNEAK, bribeOf, canSneak, costFor, cutOf, fits, haterAt, haterChance, hatersFor, hypeOpen, hypesFor, needsOk, payout, publicistCost, slotsFor, sneakOdds, staleAfterH, teaCash, CREW_HYPE_CLOUT, SCENE, type SceneRow, type ScoreId } from "./scene.ts";
-import { SCENE_HATERS, SCENE_HOST_LINES, SCENE_MOVES, sceneMove } from "./sceneContent.ts";
-import { PLAQUES, RESIDENCY, TREND, mondayOf, residencyPay, trendingFor } from "./scene.ts";
+import { SCENE_HATERS, SCENE_HOST_LINES, SCENE_MOVES } from "./sceneContent.ts";
+import { PLAQUES, RESIDENCY, TREND, daysFor, daysText, mondayOf, onDay, residencyPay, trendingFor, type SceneMove } from "./scene.ts";
+// The preview plays the latest weekly moves file as this week (migration 0174 stores them in the game).
+import WEEK_FILE from "../content/scene-weeks/2026-11-23.json";
 import { openPlace, sceneView, type SceneApi, type SceneRaw } from "./sceneView.ts";
 import { rankFor } from "./ranks.ts";
 import type { Memory } from "./memory.ts";
@@ -19,6 +21,9 @@ const snapshot = (s: Partial<Memory["snapshot"]>): Memory => ({
 
 export function createSceneSim(city: SimCity, preset: string | null): SceneApi {
   const t0 = Date.now();
+  const thisWeek = mondayOf(new Date().toISOString().slice(0, 10));
+  const catalog: SceneMove[] = [...SCENE_MOVES, ...(WEEK_FILE as unknown as { moves: SceneMove[] }).moves.map((m) => ({ ...m, week: thisWeek }))];
+  const moveOf = (id: string) => catalog.find((m) => m.id === id);
   const vnow = () => t0 + (Date.now() - t0) * SIM_SPEED;
   const iso = (t: number) => new Date(t).toISOString();
   const rich = preset === "rich";
@@ -41,7 +46,7 @@ export function createSceneSim(city: SimCity, preset: string | null): SceneApi {
   const rank = () => (rich ? 6 : Math.max(rankFor(city.peek().clout, city.peek().cash).level, preset === "student" ? 2 : 1));
   const worth = () => (rich ? 2_400_000 : city.peek().cash);
   const add = (move: string, place: string, startedH: number, hypes: number) => {
-    const m = sceneMove(move)!;
+    const m = moveOf(move)!;
     const st = vnow() - startedH * H;
     rows.push({ id: `sim-${++n}`, move, place, slot: rows.length + 1, startedAt: iso(st), readyAt: iso(st + m.hours * H),
       staleAt: iso(st + (m.hours + staleAfterH(m.hours)) * H), hypes: Array.from({ length: hypes }, (_, i) => iso(st + (i + 1) * 1.2 * H)), need: hypesFor(m.hours), entry: "invited" });
@@ -65,17 +70,18 @@ export function createSceneSim(city: SimCity, preset: string | null): SceneApi {
       residency: residency ? { move: residency.move, until: iso(residency.until), paidToday: residency.paid === new Date().toISOString().slice(0, 10) } : null,
     };
   };
-  const view = () => sceneView(SCENE_MOVES, SCENE_HATERS, raw(), memory, "preview", vnow(), SIM_SPEED, SCENE_HOST_LINES);
+  const view = () => sceneView(catalog, SCENE_HATERS, raw(), memory, "preview", vnow(), SIM_SPEED, SCENE_HOST_LINES);
   const fail = (error: string) => ({ ok: false as const, error });
   return {
     async state() { return { ok: true, data: view() }; },
     async start(move, way) {
-      const m = sceneMove(move);
+      const m = moveOf(move);
       const at = city.here();
       if (!m) return fail("That move isn't on any more.");
       if (!at || !m.places.includes(at)) return fail("You have to be there to do that.");
       const ctx = { rank: rank(), netWorth: worth(), memory, today: raw().today, open: openPlace(["queens"]) };
       if (!fits(m, ctx)) return fail("That one isn't for you right now.");
+      if (!onDay(m, ctx.today)) { const d = daysFor(m, mondayOf(ctx.today)); return fail(`Not today. ${m.title} is on ${d ? daysText(d) : "another day"}.`); }
       if (rows.some((r) => r.move === move)) return fail("You've already got that one going.");
       if (bounced.has(move)) return fail("They know your face tonight. Try again tomorrow.");
       const free = Array.from({ length: slotsFor(rank()) }, (_, i) => i + 1).find((s) => !rows.some((r) => r.slot === s));
@@ -103,7 +109,7 @@ export function createSceneSim(city: SimCity, preset: string | null): SceneApi {
         const h = pool[Math.floor(Math.random() * pool.length)];
         if (h) { row.hater = h.id; row.haterAt = iso(haterAt(st, st + m.hours * H, Math.random())); row.cut = h.cut; }
       }
-      if (trendingFor(SCENE_MOVES, mondayOf(raw().today)).includes(move)) row.boost = TREND.boost;
+      if (trendingFor(catalog, mondayOf(raw().today)).includes(move)) row.boost = TREND.boost;
       rows.push(row);
       rows.sort((a, b) => a.slot - b.slot);
       return { ok: true, data: { bounced: false, banHours: 0, view: view() } };
@@ -139,7 +145,7 @@ export function createSceneSim(city: SimCity, preset: string | null): SceneApi {
       const r = rows[i];
       if (!r) return fail("That move's gone.");
       if (vnow() < Date.parse(r.readyAt)) return fail("It's not ready yet.");
-      const m = sceneMove(r.move)!;
+      const m = moveOf(r.move)!;
       const stale = vnow() >= Date.parse(r.staleAt);
       const base = payout(m.clout, r.need, r.hypes.length, stale, cutOf(r, vnow()));
       const p = { clout: Math.round(base.clout * (r.boost ?? 1)), points: Math.round(Math.round(base.clout * (r.boost ?? 1)) * SCENE.pointsPer) };
@@ -152,7 +158,7 @@ export function createSceneSim(city: SimCity, preset: string | null): SceneApi {
         plaque: plaque ? { at: plaque.at, clout: plaque.clout } : null, view: view() } };
     },
     async residencyTake(move) {
-      const m = sceneMove(move);
+      const m = moveOf(move);
       if (!m || (counts[move] ?? 0) < RESIDENCY.needs) return fail("Collect it ten times first.");
       if (residency && residency.until > vnow()) return fail("You've already got a residency going.");
       if (!m.places.includes(city.here() ?? "")) return fail("You have to be there to do that.");
@@ -161,7 +167,7 @@ export function createSceneSim(city: SimCity, preset: string | null): SceneApi {
     },
     async residencyCheckin() {
       if (!residency || residency.until <= vnow()) return fail("No residency right now.");
-      const m = sceneMove(residency.move)!;
+      const m = moveOf(residency.move)!;
       if (!m.places.includes(city.here() ?? "")) return fail("You have to be there to do that.");
       const today = new Date().toISOString().slice(0, 10);
       if (residency.paid === today) return fail("Already checked in today.");

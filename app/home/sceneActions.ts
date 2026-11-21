@@ -1,8 +1,9 @@
 "use server";
 
 import { randomInt } from "node:crypto";
-import { DEAL, SNEAK, TREND, bribeOf, canSneak, costFor, fits, haterAt, haterChance, hatersFor, mondayOf, needsOk, publicistCost, sneakOdds, teaCash, trendingFor, type DealWay, type SneakWay } from "@/lib/scene";
-import { SCENE_HATERS, SCENE_HOST_LINES, SCENE_MOVES, sceneMove } from "@/lib/sceneContent";
+import { DEAL, SNEAK, TREND, bribeOf, canSneak, costFor, daysFor, daysText, fits, haterAt, onDay, type SceneMove, haterChance, hatersFor, mondayOf, needsOk, publicistCost, sneakOdds, teaCash, trendingFor, type DealWay, type SneakWay } from "@/lib/scene";
+import { SCENE_HATERS, SCENE_HOST_LINES, SCENE_MOVES } from "@/lib/sceneContent";
+import type { LiveSceneMove } from "@/lib/sceneWeeks";
 import { openPlace, sceneView, type CollectResult, type SceneRaw, type SceneView, type StartResult } from "@/lib/sceneView";
 import { memoryOf } from "@/lib/memoryServer";
 import { getAdminSupabase } from "@/lib/supabase/admin";
@@ -63,6 +64,18 @@ async function who(): Promise<{ id: string; admin: Admin } | { error: string }> 
   return { id: user.id, admin };
 }
 
+// This week's moves (migration 0174): read every five minutes, like storylets. A move past its week or vetoed after it
+// went live stays in the list as closed, so a running one can still be collected.
+let weekCache: { at: number; moves: SceneMove[] } | null = null;
+async function catalog(admin: Admin): Promise<SceneMove[]> {
+  if (!weekCache || Date.now() - weekCache.at > 5 * 60_000) {
+    const { data, error } = await admin.rpc("scene_weeks_live");
+    const live = error ? [] : ((data ?? []) as LiveSceneMove[]).map((x) => ({ ...x.move, closed: !x.offer }));
+    weekCache = { at: Date.now(), moves: live };
+  }
+  return [...SCENE_MOVES, ...weekCache.moves];
+}
+
 async function raw(w: { id: string; admin: Admin }): Promise<SceneRaw | { error: string }> {
   const { data, error } = await w.admin.rpc("scene_context", { p_player: w.id });
   if (error) return { error: err(error, "scene_context") };
@@ -71,9 +84,9 @@ async function raw(w: { id: string; admin: Admin }): Promise<SceneRaw | { error:
 }
 
 async function view(w: { id: string; admin: Admin }): Promise<R<SceneView>> {
-  const [r, memory] = await Promise.all([raw(w), memoryOf(w.admin, w.id)]);
+  const [r, memory, moves] = await Promise.all([raw(w), memoryOf(w.admin, w.id), catalog(w.admin)]);
   if ("error" in r) return { ok: false, error: r.error };
-  return { ok: true, data: sceneView(SCENE_MOVES, SCENE_HATERS, r, memory, w.id, Date.now(), 1, SCENE_HOST_LINES) };
+  return { ok: true, data: sceneView(moves, SCENE_HATERS, r, memory, w.id, Date.now(), 1, SCENE_HOST_LINES) };
 }
 
 export async function sceneState(): Promise<R<SceneView>> {
@@ -86,10 +99,16 @@ export async function sceneState(): Promise<R<SceneView>> {
 export async function sceneStart(move: string, way?: SneakWay["id"]): Promise<R<StartResult>> {
   const w = await who();
   if ("error" in w) return { ok: false, error: w.error };
-  const m = sceneMove(move);
+  const all = await catalog(w.admin);
+  const m = all.find((x) => x.id === move);
   if (!m) return { ok: false, error: ERRORS.bad_move };
   const [r, memory] = await Promise.all([raw(w), memoryOf(w.admin, w.id)]);
   if ("error" in r) return { ok: false, error: r.error };
+  // The cast's week: a hosted move runs on its days only; a weekly move only in its week.
+  if (!onDay(m, r.today)) {
+    const d = daysFor(m, mondayOf(r.today));
+    return { ok: false, error: m.closed || (m.week && !d) ? "That one's over for this week." : `Not today. ${m.title} is on ${d ? daysText(d) : "another day"}.` };
+  }
   const ctx = { rank: r.rank, netWorth: r.netWorth, memory, today: r.today, open: openPlace(r.boroughs) };
   if (!fits(m, ctx)) return { ok: false, error: "That one isn't for you right now." };
   let args = { p_entry: "invited", p_bounced: false, p_extra: 0, p_integrity: 0, p_ban_hours: 0 };

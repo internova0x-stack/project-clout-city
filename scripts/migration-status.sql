@@ -187,6 +187,7 @@ from (values
   ('0170_guide.sql', to_regprocedure('public.guide_claim(text)') is not null),
   ('0171_scene.sql', to_regprocedure('public.scene_collect(uuid, uuid)') is not null),
   ('0172_scene_haters.sql', to_regprocedure('public.scene_deal(uuid, uuid, text, text, integer, integer)') is not null),
-  ('0173_scene_plaques.sql', to_regprocedure('public.scene_residency_checkin(uuid)') is not null)
+  ('0173_scene_plaques.sql', to_regprocedure('public.scene_residency_checkin(uuid)') is not null),
+  ('0174_scene_weeks.sql', to_regprocedure('public.content_import_scene(date, jsonb)') is not null)
 ) as m(file, ran)
 order by (m.ran is distinct from false), m.file;

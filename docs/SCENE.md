@@ -86,7 +86,18 @@ counts as one of theirs, from anywhere, once per move, and pays you 5 clout.
 - **Lola's morning pick**: a ready move is the pick after rewards to collect ("Night out is ready"; why: one goes stale soon).
 - **The Clout Pass**: a collected move earns 10 season XP.
 
+## Fresh every week (migration 0174; owner, Nov 21: "Do the scenes update daily?")
+
+- **The cast's week**: every celebrity-hosted move runs on two days a week, never back to back, different each week
+  (`daysFor`, seeded by the week, so everyone sees the same schedule). The Scene screen opens with "This week on the scene":
+  the seven days, who hosts what, today outlined. Offers say "🗓️ Thu & Sat"; starting one on another day says when it's on.
+- **Weekly moves**: the weekly routine writes content/scene-weeks/<Monday>.json (step 6e in docs/WEEKLY-CONTENT.md): 6 to 10
+  new moves tied to the week's news and cast, some on set days (the first week: Prince Nassim's "small" Thanksgiving, the
+  Turkey Trot, Lunaria's surprise pop-up, Heir Ruckus's mixtape party). They arrive scheduled, go live 24 hours later unless
+  vetoed in Studio → Storylets → Scene moves, run only in their week ("🆕 This week only"), and come first in For you today.
+  A move vetoed after someone started it can still be collected.
+
 ## Preview
 
-`/preview/home?scene=new|busy|student|rich` (an hour passes in 30 seconds). Go inside a place (`&at=velvet-static`) for the
+`/preview/home?scene=new|busy|student|rich` (an hour passes in 30 seconds; the latest weekly file plays as this week). Go inside a place (`&at=velvet-static`) for the
 "Start a move here" row; Saffron's birthday there shows the door at Rank 3.

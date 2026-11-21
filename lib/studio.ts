@@ -7,6 +7,7 @@ import type { MarketAdmin } from "./marketplace.ts";
 import type { LetterStatus, MailbagFilter, StudioMailbag } from "./mayor.ts";
 import type { Autopilot, AutopilotKind } from "./autopilot.ts";
 import type { StoryletAction, StudioStorylets } from "./storyletWeeks.ts";
+import type { StudioSceneMove } from "./sceneWeeks.ts";
 import type { StudioCondition } from "./cityConditions.ts";
 import type { StudioUnderworldJob } from "./underworldWeeks.ts";
 import type { StudioLearning } from "./cardLearning.ts";
@@ -238,6 +239,9 @@ export interface StudioApi {
   /** The underworld, part 2 (migration 0150): each week's new jobs for Pablo and their veto window. */
   underworldJobs?(): Promise<Admin<StudioUnderworldJob[]>>;
   underworldJobSet?(id: string, action: StoryletAction): Promise<Admin<StudioUnderworldJob[]>>;
+  /** Your Scene's weekly moves (migration 0174) and their veto window. */
+  sceneMoves?(): Promise<Admin<StudioSceneMove[]>>;
+  sceneMoveSet?(id: string, action: StoryletAction): Promise<Admin<StudioSceneMove[]>>;
   /** Content Engine step 6 (migration 0141): what works: every card's numbers and weight, and the owner's override. */
   learning?(): Promise<Admin<StudioLearning>>;
   learningSet?(card: string, set: { weight: number; retired: boolean } | "auto"): Promise<Admin<StudioLearning>>;

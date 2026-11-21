@@ -218,3 +218,45 @@ test("the view: residency offered after a first plaque, the host remembers you a
   assert.equal(crab?.knows, hosts["prince-nassim"]);
   assert.equal(v.plaques.find((p) => p.move === "night-out")?.have, "Regular");
 });
+
+// ---- Weekly moves and the cast's week (migration 0174) ----
+test("the cast's week: hosted moves run two set days a week, never back to back; others every day", async () => {
+  const { daysFor, onDay, isoDay } = await import("../lib/scene.ts");
+  assert.equal(isoDay("2026-11-23"), 1);
+  assert.equal(isoDay("2026-11-29"), 7);
+  const hosted = MOVES.filter((m) => m.area === "cast" && m.host);
+  assert.ok(hosted.length >= 10);
+  for (const m of hosted) {
+    const d = daysFor(m, "2026-11-23")!;
+    assert.equal(d.length, 2, m.id);
+    assert.ok(d[1] - d[0] >= 2 && d[1] - d[0] <= 5, `${m.id} ${d}`);
+  }
+  assert.equal(daysFor(MOVES.find((m) => m.id === "night-out")!, "2026-11-23"), null);
+  const crab = MOVES.find((m) => m.id === "crab-breakfast")!;
+  const [a] = daysFor(crab, "2026-11-23")!;
+  const date = (d: number) => `2026-11-${String(22 + d).padStart(2, "0")}`;
+  assert.equal(onDay(crab, date(a)), true);
+  assert.equal([1, 2, 3, 4, 5, 6, 7].filter((d) => onDay(crab, date(d))).length, 2);
+  // Every day of the week has someone hosting.
+  for (let d = 1; d <= 7; d++) assert.ok(hosted.some((m) => onDay(m, date(d))), `day ${d}`);
+});
+
+test("weekly moves: the week file is valid; a move runs only in its own week, on its days", async () => {
+  const { validateSceneWeek } = await import("../lib/sceneWeeks.ts");
+  const { onDay } = await import("../lib/scene.ts");
+  const raw = JSON.parse(readFileSync(new URL("../content/scene-weeks/2026-11-23.json", import.meta.url), "utf8"));
+  const ctx = { base: MOVES, places: placeIds, characters: new Set(CHARACTERS.map((c) => c.id)) };
+  const r = validateSceneWeek(raw, ctx);
+  assert.ok(r.ok, r.ok ? "" : r.problems.join("; "));
+  if (!r.ok) return;
+  const trot = r.week.moves.find((m) => m.id === "w1123-turkey-trot")!;
+  assert.equal(trot.week, "2026-11-23");
+  assert.equal(onDay(trot, "2026-11-26"), true, "Thursday of its week");
+  assert.equal(onDay(trot, "2026-11-25"), false, "not Wednesday");
+  assert.equal(onDay(trot, "2026-12-03"), false, "not the next week");
+  assert.equal(onDay({ ...trot, closed: true }, "2026-11-26"), false, "vetoed after going live");
+  assert.ok(!validateSceneWeek({ ...raw, week: "2026-11-24" }, ctx).ok, "a Monday");
+  assert.ok(!validateSceneWeek({ ...raw, moves: [...raw.moves, { ...raw.moves[0] }] }, ctx).ok, "no repeated ids");
+  assert.ok(!validateSceneWeek({ ...raw, moves: [{ ...raw.moves[0], id: "night-out" }, ...raw.moves.slice(1)] }, ctx).ok, "never a game move's id");
+  assert.ok(!validateSceneWeek({ ...raw, moves: raw.moves.slice(0, 3) }, ctx).ok, "6 to 10");
+});

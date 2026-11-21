@@ -934,6 +934,11 @@ components live in `app/globals.css`.
   (content/scene/hosts.json, `HOST_KNOWS`); big moves' `headline` posts a Blotter 'win' line; pushes scene_ready/scene_stale
   (`push_scan_scene`, run by the sender); Lola's welcome rung 'scene' (`WelcomeSituation.scene`); 10 Clout Pass XP a move (xp.scene).
   The welcome and choice cards wait while the Scene screen is open.
+  Fresh every week (migration 0174, owner Nov 21): the cast's week (`daysFor`: hosted cast moves on two seeded days a week, `onDay`;
+  "This week on the scene", `castWeek`); weekly moves in content/scene-weeks/<Monday>.json (`validateSceneWeek`, lib/sceneWeeks.ts;
+  routine step 6e) imported by `content_import_scene` (24-hour veto window like storylets, Studio → Storylets → Scene moves,
+  `admin_scene_moves`/`admin_scene_move_set`), offered only in their week (`scene_move_open`), read by every scene function through
+  `scene_move_def`; the server merges `scene_weeks_live()` into its catalog (5-minute cache; past or vetoed ones `closed`).
 - Players see "Crew" for their invited friends; code, types and database tables still say `clique`
   (renaming stored data isn't worth the risk). Keep player-facing copy on "crew".
 - Culture packs (docs/culture/, one at a time, only when the owner says "Build C<number>"): slang, invented stand-ins
