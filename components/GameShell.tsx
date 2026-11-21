@@ -2688,11 +2688,11 @@ export function GameShell({
   };
   useEffect(() => {
     const o = scenePending.current;
-    if (!o || trip || !atPlace || !o.places.some((p) => p.id === atPlace)) return;
-    scenePending.current = null;
-    const t = setTimeout(() => setSceneOffer(o), 1200);
+    if (!o || trip || travelPlan || !atPlace || !o.places.some((p) => p.id === atPlace)) return;
+    // Cleared only when it opens: a trip starting right after (the at_place can change first) cancels and re-arms it.
+    const t = setTimeout(() => { scenePending.current = null; setPlace(null); setPanel(null); setSceneOffer(o); }, 1500);
     return () => clearTimeout(t);
-  }, [atPlace, trip]);
+  }, [atPlace, trip, travelPlan]);
   const sceneStart = async (way?: "confidence" | "namedrop" | "bribe") => {
     if (!scene || !sceneOffer || sceneBusy) return;
     const o = sceneOffer;
