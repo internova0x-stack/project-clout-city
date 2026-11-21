@@ -2678,7 +2678,21 @@ export function GameShell({
   const sceneNow = useSceneNow(sceneV);
   const sceneDot = !!sceneV && sceneV.moves.some((m) => sceneNow >= Date.parse(m.readyAt) || (!!m.hater && !m.dealt)
     || (m.hypes < m.need && sceneNow < Date.parse(m.readyAt) && (!m.hypeAt || sceneNow >= Date.parse(m.hypeAt))));
-  const sceneGo = (placeId: string) => { setSceneOpen(false); openPlace(placeId); };
+  // A move picked away from its place (owner, Nov 21: "shouldn't the button be something to select/pick"): head there, and
+  // its start card opens on arrival.
+  const scenePending = useRef<Offer | null>(null);
+  const sceneGo = (placeId: string, offer?: Offer) => {
+    scenePending.current = offer && offer.places.some((p) => p.id === placeId) ? offer : null;
+    setSceneOpen(false);
+    openPlace(placeId);
+  };
+  useEffect(() => {
+    const o = scenePending.current;
+    if (!o || trip || !atPlace || !o.places.some((p) => p.id === atPlace)) return;
+    scenePending.current = null;
+    const t = setTimeout(() => setSceneOffer(o), 1200);
+    return () => clearTimeout(t);
+  }, [atPlace, trip]);
   const sceneStart = async (way?: "confidence" | "namedrop" | "bribe") => {
     if (!scene || !sceneOffer || sceneBusy) return;
     const o = sceneOffer;
