@@ -56,7 +56,9 @@ export type FurnitureKind =
   // The precinct (owner, Nov 20): a holding cell's bars
   | "cellBars"
   // The firehouse, the hospital and the parks (owner, Nov 20)
-  | "dog" | "fireTruck" | "gearLocker" | "firePole" | "curtain" | "runTrack" | "fountain";
+  | "dog" | "fireTruck" | "gearLocker" | "firePole" | "curtain" | "runTrack" | "fountain"
+  // Build mode's garden (owner, Nov 20: "landscapes"): hedges, a picket fence, flower beds, a grill and a sun lounger
+  | "hedge" | "picketFence" | "flowerBed" | "grill" | "sunLounger";
 
 export type ItemUse =
   | { kind: "action"; actionId: string }
@@ -258,6 +260,11 @@ export const FURNITURE: Record<FurnitureKind, { w: number; d: number; walkable?:
   kitchenIsland: { w: 1.8, d: 0.9, label: "Kitchen island", movable: true },
   nightstand: { w: 0.5, d: 0.45, label: "Nightstand", movable: true },
   hotTub: { w: 1.8, d: 1.8, label: "Hot tub" },
+  hedge: { w: 1.6, d: 0.5, label: "Hedge" },
+  picketFence: { w: 2.0, d: 0.12, label: "Picket fence" },
+  flowerBed: { w: 1.6, d: 0.8, label: "Flower bed" },
+  grill: { w: 0.9, d: 0.6, label: "Grill" },
+  sunLounger: { w: 0.75, d: 1.9, label: "Sun lounger" },
   stall: { w: 1.0, d: 1.2, label: "Stall" },
 };
 

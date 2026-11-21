@@ -73,6 +73,10 @@ export interface Room3DProps {
   /** Which of npcNames is the place's regular: their name gets the pink pill, so they're easy to find. */
   npcHost?: number;
   onSaveLayout?: (layout: LayoutEntry[]) => Promise<boolean>;
+  /** Build mode (migration 0169): opens the plan editor; shows the 🔨 button under the arrange one. */
+  onBuild?: () => void;
+  /** Build mode's Outside floor: the button that goes out to the garden and back in. */
+  outside?: { label: string; go: () => void };
   label: string;
   /** Screen space kept clear for the HUD (top) and panels (bottom), in px. */
   insetTop?: number;
@@ -1257,6 +1261,16 @@ export default function Room3D(props: Room3DProps) {
         <button className="room-storage glass-hud" style={{ top: `calc(${insetTop - 44}px + var(--safe-top))` }} onClick={() => { setEditing(true); setSelected(null); setNote(null); }}
           aria-label={stored.length ? `Arrange your home, ${stored.length} in storage` : "Arrange your home"}>
           🛋️{stored.length > 0 ? ` 📦 ${stored.length}` : ""}
+        </button>
+      )}
+      {editable && !editing && props.onBuild && (
+        <button className="room-storage room-build glass-hud" style={{ top: `calc(${insetTop}px + var(--safe-top))` }} onClick={props.onBuild} aria-label="Build mode: walls, rooms, paint and garden">
+          🔨
+        </button>
+      )}
+      {!editing && props.outside && (
+        <button className="room-storage room-outside glass-hud" style={{ top: `calc(${insetTop + 44}px + var(--safe-top))` }} onClick={props.outside.go}>
+          {props.outside.label}
         </button>
       )}
       {(editable || trial) && editing && (

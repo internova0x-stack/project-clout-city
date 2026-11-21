@@ -13,6 +13,7 @@ import { calendarLive, calendarReward, dressedUp, type CalendarData } from "./ca
 import { onceADay, DOOR_CLOUT, HOME_NEEDS_CLOUT, REWARD_KEEP, REWARD_ONLY, VIP_ALREADY, VIP_LOCKED, clubDoor, OUTFIT_NEEDS_CLOUT, SHIFT_LIMIT, activeGig, cityError, gigCloutReq, hasBar, isSupermarket, type CityApi, type CityResult, type CityState, type DailyTask, type Gain, type GigOffer } from "./cityState.ts";
 import { cardCells, isLottoPlace, lottoGame, prizeFor, type LottoCell } from "./lotto.ts";
 import { LEVEL_AT, PERK_ERRORS, SKILL_PERKS, perkOn, type PerksState, type SkillId, type SkillState } from "./skills.ts";
+import { homeFloorsFor, homeKeyOf, planCost, planFor, planProblems } from "./homeBuild.ts";
 import { placeStory, storyItemOpen, type StoryFeed } from "./storyFeed.ts";
 import type { StoryEvent } from "./stories.ts";
 import { STYLE, fullLooks, styleCounts, venueLine } from "./style.ts";
@@ -528,7 +529,7 @@ export function createSimApi(
         s.items.push({ id: nextId++, sku, category: item.category, value: item.price, acquired: "bought", equipped: false });
       }
       if (item.category === "cars") { p().car_sku = sku; p().car_mode = mode === "rent" ? "rented" : "owned"; p().next_car_due = addDays(s.today, mode === "rent" ? 7 : 30); }
-      if (item.category === "houses") { p().house_sku = sku; p().next_rent_due = null; }
+      if (item.category === "houses") { p().house_sku = sku; p().next_rent_due = null; s.homePlan = null; }
       return ok({ cash: -price, clout });
     },
     sellItem(itemId) {
@@ -540,7 +541,7 @@ export function createSimApi(
       s.items = s.items.filter((i) => i.id !== itemId);
       p().bank_cash += amount;
       if (it.category === "cars") { p().car_sku = null; p().car_mode = null; p().next_car_due = null; }
-      if (it.category === "houses") { p().house_sku = null; p().next_rent_due = addDays(s.today, 30); }
+      if (it.category === "houses") { p().house_sku = null; p().next_rent_due = addDays(s.today, 30); s.homePlan = null; }
       return ok({ cash: amount });
     },
     equipItem(itemId, on) {
@@ -583,6 +584,17 @@ export function createSimApi(
     },
     saveHomeLayout(layout) {
       s.homeLayout = layout;
+      return ok();
+    },
+    saveHomePlan(plan) {
+      // Build mode (migration 0169's home_build_save, priced by lib/homeBuild.ts like the server).
+      const floors = homeFloorsFor(p().home_id, p().house_sku);
+      const key = homeKeyOf(p().home_id, p().house_sku);
+      if (planProblems(plan, key, floors).length) return fail("That plan doesn't fit your home. Move things around and try again.");
+      const cost = planCost(planFor(s.homePlan, key), plan, floors).total;
+      if (p().bank_cash < cost) return fail("That's more than you've got in the bank. Contractors take C$ only.");
+      p().bank_cash -= cost;
+      s.homePlan = JSON.parse(JSON.stringify(plan));
       return ok();
     },
     enterVip(placeId, pay) {
@@ -628,6 +640,7 @@ export function createSimApi(
       const before = ECONOMY.homes.find((h) => h.id === p().home_id)?.rent ?? 0;
       p().bank_cash -= cost;
       p().home_id = homeId;
+      s.homePlan = null;
       p().next_rent_due = addDays(s.today, 7);
       p().moved_up = !!p().moved_up || home.rent > before;
       return ok({ cash: -cost });
