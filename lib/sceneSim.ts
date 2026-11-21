@@ -1,7 +1,8 @@
 // Your Scene in the preview (/preview/home): migration 0171 in memory, on a fast clock (an hour passes in 30 seconds), with
 // the simulated city's bank, Energy and clout. ?scene=new|busy|student|rich sets who the player is and what's running.
 import { DEAL, SNEAK, bribeOf, canSneak, costFor, cutOf, fits, haterAt, haterChance, hatersFor, hypeOpen, hypesFor, needsOk, payout, publicistCost, slotsFor, sneakOdds, staleAfterH, teaCash, CREW_HYPE_CLOUT, SCENE, type SceneRow, type ScoreId } from "./scene.ts";
-import { SCENE_HATERS, SCENE_MOVES, sceneMove } from "./sceneContent.ts";
+import { SCENE_HATERS, SCENE_HOST_LINES, SCENE_MOVES, sceneMove } from "./sceneContent.ts";
+import { PLAQUES, RESIDENCY, TREND, mondayOf, residencyPay, trendingFor } from "./scene.ts";
 import { openPlace, sceneView, type SceneApi, type SceneRaw } from "./sceneView.ts";
 import { rankFor } from "./ranks.ts";
 import type { Memory } from "./memory.ts";
@@ -34,6 +35,9 @@ export function createSceneSim(city: SimCity, preset: string | null): SceneApi {
     { id: "crew-2", owner: "Dev", move: "panel-speak", place: "triborough-works", hypes: 1, need: 2, readyAt: iso(vnow() + 3 * H) },
   ];
   let vouchFree = true;
+  // Step 3: how often each move was collected (the rich player is near plaques and has a residency to take).
+  const counts: Record<string, number> = rich ? { "brunch-be-seen": 9, "night-out": 12, "panel-speak": 4, "crab-breakfast": 3 } : preset === "busy" ? { "brunch-be-seen": 9 } : {};
+  let residency: { move: string; until: number; paid: string | null } | null = null;
   const rank = () => (rich ? 6 : Math.max(rankFor(city.peek().clout, city.peek().cash).level, preset === "student" ? 2 : 1));
   const worth = () => (rich ? 2_400_000 : city.peek().cash);
   const add = (move: string, place: string, startedH: number, hypes: number) => {
@@ -57,10 +61,11 @@ export function createSceneSim(city: SimCity, preset: string | null): SceneApi {
     return {
       at: city.here(), rank: rank(), netWorth: worth(), bank: city.peek().cash, energy: 100, holding: false, today: new Date().toISOString().slice(0, 10),
       boroughs: ["queens"], skills: {}, moves: rows.slice(), rested: collected.filter((c) => now - c.at < SCENE.restDays * 24 * H).map((c) => c.move),
-      bounced: [...bounced], scores, collected: collected.length, vouchers: ["sal"], vouchFree, crew: crew.slice(),
+      bounced: [...bounced], scores, collected: collected.length, vouchers: ["sal"], vouchFree, crew: crew.slice(), counts: { ...counts },
+      residency: residency ? { move: residency.move, until: iso(residency.until), paidToday: residency.paid === new Date().toISOString().slice(0, 10) } : null,
     };
   };
-  const view = () => sceneView(SCENE_MOVES, SCENE_HATERS, raw(), memory, "preview", vnow(), SIM_SPEED);
+  const view = () => sceneView(SCENE_MOVES, SCENE_HATERS, raw(), memory, "preview", vnow(), SIM_SPEED, SCENE_HOST_LINES);
   const fail = (error: string) => ({ ok: false as const, error });
   return {
     async state() { return { ok: true, data: view() }; },
@@ -98,6 +103,7 @@ export function createSceneSim(city: SimCity, preset: string | null): SceneApi {
         const h = pool[Math.floor(Math.random() * pool.length)];
         if (h) { row.hater = h.id; row.haterAt = iso(haterAt(st, st + m.hours * H, Math.random())); row.cut = h.cut; }
       }
+      if (trendingFor(SCENE_MOVES, mondayOf(raw().today)).includes(move)) row.boost = TREND.boost;
       rows.push(row);
       rows.sort((a, b) => a.slot - b.slot);
       return { ok: true, data: { bounced: false, banHours: 0, view: view() } };
@@ -135,11 +141,34 @@ export function createSceneSim(city: SimCity, preset: string | null): SceneApi {
       if (vnow() < Date.parse(r.readyAt)) return fail("It's not ready yet.");
       const m = sceneMove(r.move)!;
       const stale = vnow() >= Date.parse(r.staleAt);
-      const p = payout(m.clout, r.need, r.hypes.length, stale, cutOf(r, vnow()));
+      const base = payout(m.clout, r.need, r.hypes.length, stale, cutOf(r, vnow()));
+      const p = { clout: Math.round(base.clout * (r.boost ?? 1)), points: Math.round(Math.round(base.clout * (r.boost ?? 1)) * SCENE.pointsPer) };
+      counts[r.move] = (counts[r.move] ?? 0) + 1;
+      const plaque = PLAQUES.find((x) => x.at === counts[r.move]) ?? null;
       rows.splice(i, 1);
       collected.push({ move: r.move, at: vnow(), score: m.score, points: p.points });
-      city.huntReward(0, p.clout);
-      return { ok: true, data: { clout: p.clout, points: p.points, score: m.score, stale, move: r.move, view: view() } };
+      city.huntReward(0, p.clout + (plaque?.clout ?? 0));
+      return { ok: true, data: { clout: p.clout, points: p.points, score: m.score, stale, move: r.move, boost: r.boost ?? 1, count: counts[r.move],
+        plaque: plaque ? { at: plaque.at, clout: plaque.clout } : null, view: view() } };
+    },
+    async residencyTake(move) {
+      const m = sceneMove(move);
+      if (!m || (counts[move] ?? 0) < RESIDENCY.needs) return fail("Collect it ten times first.");
+      if (residency && residency.until > vnow()) return fail("You've already got a residency going.");
+      if (!m.places.includes(city.here() ?? "")) return fail("You have to be there to do that.");
+      residency = { move, until: vnow() + RESIDENCY.days * 24 * H, paid: null };
+      return { ok: true, data: view() };
+    },
+    async residencyCheckin() {
+      if (!residency || residency.until <= vnow()) return fail("No residency right now.");
+      const m = sceneMove(residency.move)!;
+      if (!m.places.includes(city.here() ?? "")) return fail("You have to be there to do that.");
+      const today = new Date().toISOString().slice(0, 10);
+      if (residency.paid === today) return fail("Already checked in today.");
+      residency.paid = today;
+      const c = residencyPay(m);
+      city.huntReward(0, c);
+      return { ok: true, data: { clout: c, view: view() } };
     },
   };
 }

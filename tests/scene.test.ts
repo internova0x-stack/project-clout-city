@@ -134,7 +134,7 @@ test("fake it till you make it: below a move's rank you can try to sneak in; inv
 });
 
 test("the newest migration carries the same settings as lib/scene.ts", () => {
-  const sql = readFileSync(new URL("../supabase/migrations/0172_scene_haters.sql", import.meta.url), "utf8");
+  const sql = readFileSync(new URL("../supabase/migrations/0173_scene_plaques.sql", import.meta.url), "utf8");
   const m = /values \('scene', '(\{.*?\})'::jsonb\)/s.exec(sql);
   assert.ok(m, "settings row");
   assert.deepEqual(JSON.parse(m![1]), JSON.parse(JSON.stringify(sceneSettings(MOVES))));
@@ -175,4 +175,46 @@ test("haters: more likely with fame and when you snuck in; their cut comes off t
   assert.equal(cutOf({ ...r, dealt: "publicist" }, Date.parse("2026-11-21T13:00:00Z")), 0);
   assert.equal(cutOf({ ...r, dealt: "rise" }, Date.parse("2026-11-21T13:00:00Z")), 0.25, "rising above it keeps the cut");
   assert.deepEqual(payout(100, 2, 2, false, 0.25), { clout: 75, points: 15 });
+});
+
+// ---- Step 3: plaques, residencies, trending, the cast remembering you ----
+test("plaques at 10, 25 and 50; the next one shown", async () => {
+  const { plaqueOf } = await import("../lib/scene.ts");
+  assert.deepEqual([plaqueOf(0).have, plaqueOf(0).next?.at], [null, 10]);
+  assert.equal(plaqueOf(10).have?.name, "Regular");
+  assert.equal(plaqueOf(30).have?.name, "Fixture");
+  assert.equal(plaqueOf(30).next?.at, 50);
+  assert.equal(plaqueOf(60).next, null);
+});
+
+test("trending: three moves anyone can do, the same for everyone all week, new the next", async () => {
+  const { trendingFor, mondayOf } = await import("../lib/scene.ts");
+  assert.equal(mondayOf("2026-11-21"), "2026-11-16");
+  assert.equal(mondayOf("2026-11-16"), "2026-11-16");
+  assert.equal(mondayOf("2026-11-22"), "2026-11-16");
+  const a = trendingFor(MOVES, "2026-11-16"), b = trendingFor(MOVES, "2026-11-23");
+  assert.equal(a.length, 3);
+  for (const id of a) assert.ok(!MOVES.find((m) => m.id === id)!.when, `${id} is for everyone`);
+  assert.notDeepEqual(a, b);
+  assert.deepEqual(a, trendingFor(MOVES, "2026-11-16"));
+});
+
+test("hosts who remember you are real cast members with a line each; big moves have Blotter lines", () => {
+  const hosts = (JSON.parse(readFileSync(new URL("../content/scene/hosts.json", import.meta.url), "utf8")) as { hosts: Record<string, string> }).hosts;
+  const chars = new Set(CHARACTERS.map((c) => c.id));
+  for (const [id, line] of Object.entries(hosts)) { assert.ok(chars.has(id), id); assert.ok(line.length <= 100, id); }
+  for (const m of MOVES) if (m.host) assert.ok(hosts[m.host], `${m.host} needs a remembered line`);
+  assert.ok(MOVES.filter((m) => m.headline).length >= 10);
+});
+
+test("the view: residency offered after a first plaque, the host remembers you after three", async () => {
+  const { sceneView } = await import("../lib/sceneView.ts");
+  const hosts = (JSON.parse(readFileSync(new URL("../content/scene/hosts.json", import.meta.url), "utf8")) as { hosts: Record<string, string> }).hosts;
+  const raw = { at: "ditmars-heights-rooftop", rank: 4, netWorth: 0, bank: 5000, energy: 100, holding: false, today: "2026-11-21", boroughs: ["queens"],
+    skills: {}, moves: [], rested: [], bounced: [], scores: {}, collected: 13, counts: { "night-out": 10, "crab-breakfast": 3 }, residency: null };
+  const v = sceneView(MOVES, HATERS, raw, mem({ rank: 4 }), "p", Date.parse("2026-11-21T15:00:00Z"), 1, hosts);
+  assert.deepEqual(v.residencyOffers.map((o) => o.move), ["night-out"]);
+  const crab = v.here.find((o) => o.move === "crab-breakfast");
+  assert.equal(crab?.knows, hosts["prince-nassim"]);
+  assert.equal(v.plaques.find((p) => p.move === "night-out")?.have, "Regular");
 });

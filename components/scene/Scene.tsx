@@ -35,8 +35,8 @@ function Face({ host, emoji, size = 48 }: { host?: Offer["host"]; emoji: string;
     : <span className="scene-ico" style={{ width: size, height: size }} aria-hidden="true">{emoji}</span>;
 }
 
-function SlotTag({ n, muted }: { n: number; muted?: boolean }) {
-  return <span className={`scene-slot-tag${muted ? " muted" : ""}`}>SLOT {n}</span>;
+function SlotTag({ n, muted, label }: { n: number; muted?: boolean; label?: string }) {
+  return <span className={`scene-slot-tag${muted ? " muted" : ""}`}>{label ?? `SLOT ${n}`}</span>;
 }
 
 const DEALT: Record<DealWay, string> = { vouch: "🤝 A regular vouched for you", publicist: "📞 Your publicist handled it", spill: "🫖 You spilled first", rise: "😌 You rose above it" };
@@ -57,7 +57,8 @@ function MoveSlot({ m, now, at, busy, onHype, onCollect, onGo, onDeal }: {
         <Face host={m.host} emoji={m.emoji} />
         <div className="scene-grow">
           <div className="scene-title">{m.title}</div>
-          <div className="meta">{m.placeName}{m.entry === "sneak" ? " · snuck in 🤫" : ""}</div>
+          <div className="meta">{m.placeName}{m.entry === "sneak" ? " · snuck in 🤫" : ""}{m.boost > 1 ? " · 📈 trending ×1.5" : ""}</div>
+          {m.nextPlaque && m.count > 0 && <div className="meta scene-plaque-line">🏅 {m.count}/{m.nextPlaque.at} to the {m.nextPlaque.name} plaque</div>}
         </div>
         {stale ? <span className="scene-chip grey">STALE</span>
           : ready ? <span className="scene-chip green">READY</span>
@@ -102,9 +103,10 @@ function OfferCard({ o, at, busy, onStart, onGo, compact }: {
         <Face host={o.host} emoji={o.emoji} size={44} />
         <div className="scene-grow">
           <div className="scene-title">{o.title}</div>
-          <div className="scene-why">{o.short ? `Not on the list yet (${o.short})` : o.why}</div>
+          <div className="scene-why">{o.short ? `Not on the list yet (${o.short})` : o.trending ? "📈 Trending this week: pays ×1.5" : o.why}</div>
         </div>
       </div>
+      {o.knows && o.host && <div className="scene-knows">{o.host.name.split(" ")[0]}: &ldquo;{o.knows}&rdquo;</div>}
       <div className="meta">📍 {where?.name ?? "Somewhere new"} · {o.hours} h · +{o.clout} 🔥 · {money(o.cost)}{o.energy ? ` · ⚡${o.energy}` : ""}</div>
       {o.running ? <span className="meta">Already going ✓</span>
         : o.bounced ? <span className="meta">They know your face tonight. Tomorrow.</span>
@@ -114,10 +116,10 @@ function OfferCard({ o, at, busy, onStart, onGo, compact }: {
   );
 }
 
-export function SceneScreen({ view, busy, onStart, onHype, onCollect, onGo, onDeal, onCrewHype }: {
+export function SceneScreen({ view, busy, onStart, onHype, onCollect, onGo, onDeal, onCrewHype, onResidencyTake, onResidencyCheckin }: {
   view: SceneView; busy: boolean;
   onStart: (o: Offer) => void; onHype: (m: MoveCard) => void; onCollect: (m: MoveCard) => void; onGo: (place: string) => void;
-  onDeal: (m: MoveCard) => void; onCrewHype: (c: CrewCard) => void;
+  onDeal: (m: MoveCard) => void; onCrewHype: (c: CrewCard) => void; onResidencyTake: (move: string) => void; onResidencyCheckin: () => void;
 }) {
   const now = useSceneNow(view);
   const free = view.slots - view.moves.length;
@@ -158,6 +160,46 @@ export function SceneScreen({ view, busy, onStart, onHype, onCollect, onGo, onDe
           )}
         </section>
         {free <= 0 && forYou}
+        {(view.residency || view.residencyOffers.length > 0) && (
+          <section className="scene-section" aria-label="Residency">
+            <div className="scene-label">YOUR RESIDENCY</div>
+            {view.residency ? (() => {
+              const r = view.residency;
+              const here = !!view.at && r.places.some((p) => p.id === view.at);
+              const days = Math.max(1, Math.ceil((Date.parse(r.until) - now) / 86_400_000));
+              return (
+                <div className="scene-card residency">
+                  <SlotTag n={0} label="RESIDENT" />
+                  <div className="scene-row">
+                    <span className="scene-ico" style={{ width: 48, height: 48 }} aria-hidden="true">{r.emoji}</span>
+                    <div className="scene-grow">
+                      <div className="scene-title">{r.title}</div>
+                      <div className="meta">{r.places.map((p) => p.name).join(" or ")} · {days} {days === 1 ? "day" : "days"} left</div>
+                    </div>
+                  </div>
+                  {r.paidToday ? <span className="meta">✓ Checked in today. Back tomorrow for +{r.pay} 🔥</span>
+                    : here ? <button className="btn btn-taxi" disabled={busy} onClick={onResidencyCheckin}>Check in · +{r.pay} 🔥</button>
+                    : <button className="btn btn-secondary" onClick={() => onGo(r.places[0].id)}>Go check in · +{r.pay} 🔥</button>}
+                </div>
+              );
+            })() : view.residencyOffers.map((o) => {
+              const here = !!view.at && o.places.some((p) => p.id === view.at);
+              return (
+                <div key={o.move} className="scene-offer">
+                  <div className="scene-row">
+                    <span className="scene-ico" style={{ width: 44, height: 44 }} aria-hidden="true">{o.emoji}</span>
+                    <div className="scene-grow">
+                      <div className="scene-title">Take a residency: {o.title}</div>
+                      <div className="meta">A week of daily check-ins at {o.places.map((p) => p.name).join(" or ")} · +{o.pay} 🔥 a day</div>
+                    </div>
+                  </div>
+                  {here ? <button className="btn btn-taxi" disabled={busy} onClick={() => onResidencyTake(o.move)}>Take it</button>
+                    : o.places[0] && <button className="btn btn-secondary" onClick={() => onGo(o.places[0].id)}>Go to {o.places[0].name}</button>}
+                </div>
+              );
+            })}
+          </section>
+        )}
         {view.crew.length > 0 && (
           <section className="scene-section" aria-label="Your crew's moves">
             <div className="scene-label">YOUR CREW&apos;S MOVES</div>
@@ -186,6 +228,15 @@ export function SceneScreen({ view, busy, onStart, onHype, onCollect, onGo, onDe
               </div>
             ))}
           </div>
+          {view.plaques.length > 0 && (
+            <div className="scene-plaques">
+              {view.plaques.map((p) => (
+                <span key={p.move} className={`scene-plaque${p.have ? " have" : ""}`}>
+                  {p.emoji} {p.have ? `${p.have}: ` : ""}{p.title} · {p.count}{p.next ? `/${p.next.at}` : ""}
+                </span>
+              ))}
+            </div>
+          )}
         </section>
       </div>
     </div>

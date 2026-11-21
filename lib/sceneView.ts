@@ -6,7 +6,7 @@ import { characterById } from "./characters.ts";
 import type { Memory } from "./memory.ts";
 import {
   SCENE, SCORES, canSneak, costFor, cutOf, fits, forYou, hypeOpen, needsOk, needsText, nextSlotRank, payout, publicistCost, slotsFor, statusOf,
-  teaCash, titleFor, whyText, type Area, type DealWay, type Hater, type MoveStatus, type SceneCtx, type SceneMove, type SceneRow, type ScoreId,
+  teaCash, titleFor, whyText, HOST_KNOWS, TREND, mondayOf, plaqueOf, residencyPay, trendingFor, RESIDENCY, type Area, type DealWay, type Hater, type MoveStatus, type SceneCtx, type SceneMove, type SceneRow, type ScoreId,
 } from "./scene.ts";
 
 /** What scene_context (migration 0171) returns. */
@@ -29,7 +29,13 @@ export interface SceneRaw {
   vouchers?: string[];
   vouchFree?: boolean;
   crew?: { id: string; owner: string; move: string; place: string; hypes: number; need: number; readyAt: string }[];
+  /** Step 3 (migration 0173): how often each move was collected, and the residency. */
+  counts?: Record<string, number>;
+  residency?: { move: string; until: string; paidToday: boolean } | null;
 }
+
+/** A plaque earned, or the next one. */
+export interface PlaqueLine { move: string; title: string; emoji: string; count: number; have: string | null; next: { at: number; name: string } | null }
 
 /** A hater on a move, as the screen shows it. */
 export interface HaterCard { id: string; emoji: string; quote: string; line: string; who?: Host; cut: number }
@@ -63,6 +69,10 @@ export interface MoveCard {
   /** Step 2: a hater that has landed, and how it was dealt with. */
   hater: HaterCard | null;
   dealt: DealWay | null;
+  /** Step 3: trending pays more; how often you've collected it and the next plaque. */
+  boost: number;
+  count: number;
+  nextPlaque: { at: number; name: string } | null;
   score: ScoreId;
 }
 
@@ -85,6 +95,9 @@ export interface Offer {
   short: string | null;
   running: boolean;
   bounced: boolean;
+  /** Step 3: trending this week (pays ×1.5), and the host's line once they know you. */
+  trending: boolean;
+  knows: string | null;
 }
 
 export interface ScoreView { id: ScoreId; label: string; emoji: string; points: number; title: string; next: number | null; nextTitle: string | null }
@@ -106,6 +119,10 @@ export interface SceneView {
   /** Dealing with a hater: the regular who'd vouch this week (null when none or used), the publicist's price, the tea's pay. */
   deal: { vouch: Host | null; publicist: number; tea: number };
   crew: CrewCard[];
+  /** Step 3: plaques earned or in reach, the residency running (or the moves that can take one). */
+  plaques: PlaqueLine[];
+  residency: { move: string; title: string; emoji: string; places: { id: string; name: string }[]; until: string; paidToday: boolean; pay: number } | null;
+  residencyOffers: { move: string; title: string; emoji: string; places: { id: string; name: string }[]; pay: number }[];
 }
 
 const placeName = (id: string) => PLACES.find((p) => p.id === id)?.name ?? id;
@@ -117,11 +134,17 @@ const hostOf = (id?: string): Host | undefined => {
 
 export type SceneR<T> = { ok: true; data: T } | { ok: false; error: string };
 export interface StartResult { bounced: boolean; banHours: number; view: SceneView }
-export interface CollectResult { clout: number; points: number; score: ScoreId; stale: boolean; move: string; view: SceneView }
+export interface CollectResult {
+  clout: number; points: number; score: ScoreId; stale: boolean; move: string; view: SceneView;
+  /** Step 3: trending's boost, how often collected now, and a plaque earned with it. */
+  boost?: number; count?: number; plaque?: { at: number; clout: number } | null;
+}
 /** What the game calls (app/home/sceneActions.ts in the game, lib/sceneSim.ts in the preview). */
 export interface SceneApi {
   state(): Promise<SceneR<SceneView>>;
   deal(id: string, way: DealWay): Promise<SceneR<SceneView>>;
+  residencyTake(move: string): Promise<SceneR<SceneView>>;
+  residencyCheckin(): Promise<SceneR<{ clout: number; view: SceneView }>>;
   crewHype(id: string): Promise<SceneR<SceneView>>;
   start(move: string, way?: "confidence" | "namedrop" | "bribe"): Promise<SceneR<StartResult>>;
   hype(id: string): Promise<SceneR<SceneView>>;
@@ -136,8 +159,14 @@ export function openPlace(boroughs: string[]): (id: string) => boolean {
   };
 }
 
-export function sceneView(moves: SceneMove[], haters: Hater[], raw: SceneRaw, memory: Memory | null, player: string, now: number, speed = 1): SceneView {
+export function sceneView(moves: SceneMove[], haters: Hater[], raw: SceneRaw, memory: Memory | null, player: string, now: number, speed = 1,
+  hostLines: Record<string, string> = {}): SceneView {
   const byId = new Map(moves.map((m) => [m.id, m]));
+  const counts = raw.counts ?? {};
+  const trending = new Set(trendingFor(moves, mondayOf(raw.today)));
+  // A host knows you after a few of their moves.
+  const hosted: Record<string, number> = {};
+  for (const m of moves) if (m.host) hosted[m.host] = (hosted[m.host] ?? 0) + (counts[m.id] ?? 0);
   const haterOf = (r: SceneRow): HaterCard | null => {
     const h = r.hater && r.haterAt && now >= Date.parse(r.haterAt) ? haters.find((x) => x.id === r.hater) : undefined;
     return h ? { id: h.id, emoji: h.emoji, quote: h.quote, line: h.line, who: hostOf(h.who), cut: r.cut ?? h.cut } : null;
@@ -161,6 +190,7 @@ export function sceneView(moves: SceneMove[], haters: Hater[], raw: SceneRaw, me
       pay: payout(m.clout, r.need, status === "ready" || status === "stale" ? r.hypes.length : r.need, false, cutOf(r, now)),
       stalePay: payout(m.clout, r.need, r.hypes.length, true, cutOf(r, now)), score: m.score,
       hater: haterOf(r), dealt: r.dealt ?? null,
+      boost: r.boost ?? 1, count: counts[r.move] ?? 0, nextPlaque: ((p) => (p ? { at: p.at, name: p.name } : null))(plaqueOf(counts[r.move] ?? 0).next),
     }];
   });
 
@@ -169,6 +199,7 @@ export function sceneView(moves: SceneMove[], haters: Hater[], raw: SceneRaw, me
     places: m.places.filter(open).map((id) => ({ id, name: placeName(id) })),
     hours: m.hours, cost: costFor(m, raw.rank), energy: m.energy, clout: m.clout, score: m.score, host: hostOf(m.host),
     short: needsOk(m, ctx) ? null : needsText(m), running: running.has(m.id), bounced: bounced.has(m.id),
+    trending: trending.has(m.id), knows: m.host && (hosted[m.host] ?? 0) >= HOST_KNOWS ? hostLines[m.host] ?? null : null,
   });
 
   const picks = forYou(moves, ctx, player, { active: running, rested: new Set(raw.rested) }).map(offer);
@@ -185,6 +216,20 @@ export function sceneView(moves: SceneMove[], haters: Hater[], raw: SceneRaw, me
 
   return { at: raw.at, rank: raw.rank, slots: slotsFor(raw.rank), nextSlotRank: nextSlotRank(raw.rank), moves: cards, forYou: picks, here, scores, collected: raw.collected, now, speed,
     deal: { vouch: raw.vouchFree && raw.vouchers?.length ? hostOf(raw.vouchers[0]) ?? null : null, publicist: publicistCost(raw.rank), tea: teaCash(raw.rank) },
+    plaques: Object.entries(counts).flatMap(([id, n]) => {
+      const m = byId.get(id);
+      if (!m) return [];
+      const p = plaqueOf(n);
+      return [{ move: id, title: m.title, emoji: m.emoji, count: n, have: p.have?.name ?? null, next: p.next ? { at: p.next.at, name: p.next.name } : null }];
+    }).sort((a, b) => b.count - a.count).slice(0, 6),
+    residency: ((r) => {
+      const m = r && byId.get(r.move);
+      return r && m ? { move: m.id, title: m.title, emoji: m.emoji, places: m.places.filter(open).map((id) => ({ id, name: placeName(id) })), until: r.until, paidToday: r.paidToday, pay: residencyPay(m) } : null;
+    })(raw.residency && Date.parse(raw.residency.until) > now ? raw.residency : null),
+    residencyOffers: raw.residency && Date.parse(raw.residency.until) > now ? [] : Object.entries(counts).flatMap(([id, n]) => {
+      const m = byId.get(id);
+      return m && n >= RESIDENCY.needs ? [{ move: id, title: m.title, emoji: m.emoji, places: m.places.filter(open).map((pid) => ({ id: pid, name: placeName(pid) })), pay: residencyPay(m) }] : [];
+    }),
     crew: (raw.crew ?? []).flatMap((c) => {
       const m = byId.get(c.move);
       return m ? [{ id: c.id, owner: c.owner, title: m.title, emoji: m.emoji, placeName: placeName(c.place), hypes: c.hypes, need: c.need, readyAt: c.readyAt }] : [];

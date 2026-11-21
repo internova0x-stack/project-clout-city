@@ -69,10 +69,22 @@ the pay (25% for nobodies, 30% rising, 40% famous). Dealing with it (the hater c
 **Your crew's moves**: the Scene screen lists your crew's (and partner's) building moves that want a hype. A hype from you
 counts as one of theirs, from anywhere, once per move, and pays you 5 clout.
 
-## Next
+## Step 3: mastery, residencies, trending, the cast remembering you (migration 0173)
 
-- Step 3: plaques for doing a move 10/25/50 times, residencies, trending moves from the weekly content, the cast remembering
-  you, Lola's Blotter for the big moves, pushes ("ready", "going stale"), Lola's morning pick and Clout Pass XP.
+- **Plaques**: collecting the same move 10, 25 and 50 times earns the Regular, Fixture and Legend plaques: 50, 150 and 400
+  clout and a badge (`scene-<move>-<n>`); the 10th is a takeover. Each running move shows "🏅 9/10 to the Regular plaque";
+  Known for lists plaques earned and in reach.
+- **Residencies** (FarmVille's animals): a move's first plaque opens a week's residency at its places, one at a time.
+  Checking in there once a New York day pays half the move's clout.
+- **Trending**: three moves anyone can do pay 1.5× each week (`trendingFor`, the same three for everyone, new every Monday).
+- **The cast remembers you**: after three of a host's moves, their offers carry a line of theirs (content/scene/hosts.json:
+  Prince Nassim's "Your shoes are… very you.", Saffron's "Remind me how we know each other?").
+- **Lola's Blotter**: big moves (a `headline` in moves.json: the talk show, the car auction, Saffron's birthday…) post a 'win'
+  line when collected on time, never for News opt-outs.
+- **Pushes**: "🎬 A move is ready to collect" and "⏳ Going stale in under an hour" (`push_scan_scene`, kinds scene_ready and
+  scene_stale).
+- **Lola's morning pick**: a ready move is the pick after rewards to collect ("Night out is ready"; why: one goes stale soon).
+- **The Clout Pass**: a collected move earns 10 season XP.
 
 ## Preview
 

@@ -70,6 +70,9 @@ export const PUSH_KINDS: Record<string, PushKind> = {
   bill_overdue: { tier: 1, category: "money", ttlMin: 1440 },
   eviction_warning: { tier: 1, category: "money", ttlMin: 1440 },
   rent_short: { tier: 1, category: "money", ttlMin: 1440 },
+  // Your Scene (migration 0173): a move ready to collect; one about to go stale.
+  scene_ready: { tier: 2, category: "rewards", ttlMin: 480 },
+  scene_stale: { tier: 1, category: "reminders", ttlMin: 60 },
   gig_ready: { tier: 1, category: "money", ttlMin: 720 },
   till_full: { tier: 1, category: "money", ttlMin: 1440 },
   job_taken: { tier: 1, category: "money", ttlMin: 720 },

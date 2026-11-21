@@ -123,7 +123,8 @@ export const SEASON: Season = {
   claimDays: 14,
   // Owner, Nov 16: challenges carry most of the XP now (migration 0167; it was 160 a level, 10 a task, 30 for all five).
   xpPerTier: 200,
-  xp: { daily_task: 5, daily_bonus: 20, goal: 50 },
+  // Migration 0173 (Your Scene, step 3): a collected move earns 10 XP.
+  xp: { daily_task: 5, daily_bonus: 20, goal: 50, scene: 10 },
   badge: { id: "pass-s1", emoji: "💘", name: "Cuffing Season '26" },
   title: { id: "cuffed-26", emoji: "💘", name: "Cuffed '26" },
   tiers: FREE.map((free, i) => ({

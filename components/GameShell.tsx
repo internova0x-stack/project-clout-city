@@ -114,7 +114,7 @@ import { GameChrome, type ChromeAction, type QuestButton, type Tab } from "./hud
 import { HaterSheet, SceneHere, SceneScreen, SceneStartSheet, useSceneNow } from "./scene/Scene";
 import type { CrewCard, MoveCard, Offer, SceneApi, SceneView } from "@/lib/sceneView";
 import type { DealWay } from "@/lib/scene";
-import { scoreOf } from "@/lib/scene";
+import { PLAQUES, scoreOf } from "@/lib/scene";
 import { nextRank } from "@/lib/ranks";
 import { handle } from "@/lib/validation";
 import { rankCelebration } from "./game/Ranks";
@@ -1793,9 +1793,11 @@ export function GameShell({
     if (!cityOn || todayP.current || !life?.today) return;
     todayP.current = life.today().then((r) => (r.ok ? r.data : null)).catch(() => null);
   }, [cityOn, life]);
+  // Your Scene's full screen is open (migration 0171): the welcome and choice cards wait while it is.
+  const [sceneOpen, setSceneOpen] = useState(false);
   useEffect(() => {
     // One decision at a time (owner, Nov 3): never over a choice card, a consequence coming back or the holding bench.
-    if (!cityOn || pickAsked.current || flow !== "none" || panel || phone.open || lifeCard || travelPlan || trip || choiceCard || choiceBack.length || holdingOpen) return;
+    if (!cityOn || pickAsked.current || flow !== "none" || panel || phone.open || lifeCard || travelPlan || trip || choiceCard || choiceBack.length || holdingOpen || sceneOpen) return;
     const force = process.env.NODE_ENV !== "production" && new URLSearchParams(window.location.search).get("daily") === "pick";
     const key = `cc-daily-pick:${new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York" }).format(new Date())}`;
     try { if (!force && localStorage.getItem(key)) return; } catch { /* show it */ }
@@ -1813,7 +1815,7 @@ export function GameShell({
     }, force ? 1200 : 1500);
     // Once shown, it stays shown for the visit (the preview's ?daily=pick used to bring it back after every sheet).
     return () => { clearTimeout(t); if (!pickShown.current) pickAsked.current = false; };
-  }, [life, cityOn, flow, panel, phone.open, lifeCard, travelPlan, trip, choiceCard, choiceBack.length, holdingOpen]);
+  }, [life, cityOn, flow, panel, phone.open, lifeCard, travelPlan, trip, choiceCard, choiceBack.length, holdingOpen, sceneOpen]);
   const goToPick = () => {
     const p = dailyPick ? placeById(dailyPick.place) : undefined;
     setWelcomeOpen(false);
@@ -2308,7 +2310,7 @@ export function GameShell({
   };
   // One card at a time (owner, Nov 4: the Halo ↔ Hustler card "pops up sometimes when another modal is loaded"): a choice,
   // a consequence or the bench waits while another sheet is open, and shows when it closes.
-  const choiceWaits = welcomeOpen || !!cutscene || !!place || !!panel || phone.open || careersOpen || campaignOpen || crownOpen || !!rivalMeet || backRoomOpen || !!lifeCard || !!travelPlan || !!trip;
+  const choiceWaits = welcomeOpen || sceneOpen || !!cutscene || !!place || !!panel || phone.open || careersOpen || campaignOpen || crownOpen || !!rivalMeet || backRoomOpen || !!lifeCard || !!travelPlan || !!trip;
   // The Homecoming race: the first walk onto a campus's Quad (its ground floor) for an enrolled student without a race
   // brings on the reigning royal, once per device (cc-seen:crown-rival); "Run against" opens Crown HQ's Declare screen.
   const onQuad = !!school && !!inside && isCampusPlace(inside) && insideFloor === 1 ? inside.id : null;
@@ -2651,7 +2653,6 @@ export function GameShell({
   const myWorth = Math.max(0, otherWorth + (biz ? businessesValue(biz.owned, me.clout) : 0) - (econ?.uncounted ?? 0));
   const myRank = rankFor(me.clout, myWorth);
   // ---- Your Scene (migration 0171; owner, Nov 21) ----
-  const [sceneOpen, setSceneOpen] = useState(false);
   const [sceneV, setSceneV] = useState<SceneView | null>(null);
   const [sceneOffer, setSceneOffer] = useState<Offer | null>(null);
   const [sceneBusy, setSceneBusy] = useState(false);
@@ -2704,9 +2705,17 @@ export function GameShell({
     setSceneV(r.data.view);
     if (cityApi) void cityApi.refresh().then((x) => x.ok && applyCity(x));
     const sc = scoreOf(r.data.score);
-    celebrate({ rung: 2, emoji: m.emoji, tag: r.data.stale ? "Went stale" : "Collected", title: m.title,
-      line: r.data.stale ? "Old news by the time you showed up. A quarter's better than nothing." : "The city noticed.",
-      rewards: [{ tone: "clout", text: `+${r.data.clout} 🔥` }, { text: `${sc.emoji} +${r.data.points} ${sc.label}` }] });
+    const rewards = [{ tone: "clout" as const, text: `+${r.data.clout} 🔥` }, { text: `${sc.emoji} +${r.data.points} ${sc.label}` }];
+    const pl = r.data.plaque ? PLAQUES.find((x) => x.at === r.data.plaque!.at) : undefined;
+    if (pl) {
+      // A plaque (migration 0173): the 10th, 25th or 50th time is a takeover.
+      celebrate({ rung: 3, emoji: "🏅", art: "stage", tag: `${pl.name} plaque`, title: m.title,
+        line: `${pl.at} times. They know your face here now.${pl.at === 10 ? " You can take a residency." : ""}`,
+        rewards: [...rewards, { tone: "clout", text: `+${pl.clout} 🔥 plaque bonus` }], cta: "Nice" });
+    } else {
+      celebrate({ rung: 2, emoji: m.emoji, tag: r.data.stale ? "Went stale" : (r.data.boost ?? 1) > 1 ? "Collected · trending" : "Collected", title: m.title,
+        line: r.data.stale ? "Old news by the time you showed up. A quarter's better than nothing." : "The city noticed.", rewards });
+    }
   };
   const sceneDeal = async (way: DealWay) => {
     if (!scene || !sceneHater || sceneBusy) return;
@@ -2729,6 +2738,25 @@ export function GameShell({
     setSceneV(r.data);
     setGain({ clout: 5 });
     setToast(`You hyped ${c.owner}'s ${c.title} ⚡`);
+    if (cityApi) void cityApi.refresh().then((x) => x.ok && applyCity(x));
+  };
+  const sceneResidencyTake = async (move: string) => {
+    if (!scene || sceneBusy) return;
+    setSceneBusy(true);
+    const r = await scene.residencyTake(move);
+    setSceneBusy(false);
+    if (!r.ok) return setToast(r.error);
+    setSceneV(r.data);
+    celebrate({ rung: 2, emoji: "🎟️", tag: "Residency", title: "You're a resident now", line: "Check in here once a day this week.", rewards: [] });
+  };
+  const sceneResidencyCheckin = async () => {
+    if (!scene || sceneBusy) return;
+    setSceneBusy(true);
+    const r = await scene.residencyCheckin();
+    setSceneBusy(false);
+    if (!r.ok) return setToast(r.error);
+    setSceneV(r.data.view);
+    setGain({ clout: r.data.clout });
     if (cityApi) void cityApi.refresh().then((x) => x.ok && applyCity(x));
   };
   const rankNext = nextRank(me.clout, myWorth);
@@ -3346,6 +3374,8 @@ export function GameShell({
       rent: rentAlarm ? { title: rentAlarm.title, line: rentAlarm.line, canPay: rentAlarm.canPay } : null,
       repair: repairOffer && !repairOffer.earnPending ? { streak: repairOffer.streak } : null,
       passReady,
+      scene: sceneV ? ((rd) => (rd.length ? { ready: rd.length, title: rd[0].title, staleSoon: rd.some((m) => Date.parse(m.staleAt) - sceneNow < 2 * 3_600_000) } : null))(
+        sceneV.moves.filter((m) => sceneNow >= Date.parse(m.readyAt) && sceneNow < Date.parse(m.staleAt))) : null,
       streak: goalsNow ? { current: goalsNow.streak.current, doneToday: goalsNow.streak.today } : null,
       nyHour,
       tasks: { done: city ? tasksDone(city) : 0, total: city?.tasks.length ?? 0, next: undone[0] ? { title: taskTitle(undone[0]), place: undone[0].place_id } : null, undonePlaces: undone.map((t) => t.place_id) },
@@ -3367,6 +3397,7 @@ export function GameShell({
       case "bills": return setPanel("bills");
       case "gigs": return setPhone({ open: true, app: "gigs" });
       case "pass": setTasksTab("pass"); return setPanel("tasks");
+      case "scene": return setSceneOpen(true);
       case "tasks": setTasksTab("daily"); return setPanel("tasks");
       case "goals": setTasksTab("goals"); return setPanel("tasks");
       case "skills": return setPanel("skills");
@@ -3717,7 +3748,8 @@ export function GameShell({
 
       {sceneOpen && sceneV && (
         <SceneScreen view={sceneV} busy={sceneBusy} onStart={setSceneOffer} onHype={(m) => void sceneHype(m)} onCollect={(m) => void sceneCollect(m)} onGo={sceneGo}
-          onDeal={setSceneHater} onCrewHype={(c) => void sceneCrewHype(c)} />
+          onDeal={setSceneHater} onCrewHype={(c) => void sceneCrewHype(c)}
+          onResidencyTake={(mv) => void sceneResidencyTake(mv)} onResidencyCheckin={() => void sceneResidencyCheckin()} />
       )}
       <HaterSheet move={sceneHater} view={sceneV} busy={sceneBusy} onClose={() => setSceneHater(null)} onPick={(w) => void sceneDeal(w)} />
       <SceneStartSheet offer={sceneOffer} busy={sceneBusy} onClose={() => setSceneOffer(null)} onGo={(way) => void sceneStart(way)} />
@@ -4380,7 +4412,7 @@ export function GameShell({
           {gala && <GalaSheet open={galaOpen} onClose={() => setGalaOpen(false)} api={gala} onToast={setToast}
             here={city?.player.at_place === GALA.place}
             onChanged={() => { if (cityApi) void cityApi.refresh().then((c) => c.ok && applyCity(c)); void loadChoices(); }} />}
-          <DailyWelcome open={welcomeOpen} name={me.display_name} hello={welcomeHello} streak={(process.env.NODE_ENV !== "production" && typeof window !== "undefined" && Number(new URLSearchParams(window.location.search).get("streakdays"))) || (goalsNow?.streak.current ?? 0)} streakNext={goalsNow?.streak.next.day}
+          <DailyWelcome open={welcomeOpen && !sceneOpen} name={me.display_name} hello={welcomeHello} streak={(process.env.NODE_ENV !== "production" && typeof window !== "undefined" && Number(new URLSearchParams(window.location.search).get("streakdays"))) || (goalsNow?.streak.current ?? 0)} streakNext={goalsNow?.streak.next.day}
             action={welcomeAction} onGo={welcomeGo} onLater={welcomeLater}
             variant={process.env.NODE_ENV !== "production" && typeof window !== "undefined" ? ((v) => (WELCOME_VARIANTS as readonly string[]).includes(v ?? "") ? v as WelcomeVariant : undefined)(new URLSearchParams(window.location.search).get("welcome")) : undefined} />
           <LifeSheet card={lifeCard?.card ?? null} who={lifeCard?.who ?? null} result={lifeResult} busy={busy === "life"}

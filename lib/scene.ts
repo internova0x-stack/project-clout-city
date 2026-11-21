@@ -45,6 +45,8 @@ export interface SceneMove {
   why: string;
   /** One line of flavour on the card. */
   line: string;
+  /** Step 3: Lola's Blotter line when it's collected ({name} is the player). Big moves only. */
+  headline?: string;
 }
 
 export const SCORES: { id: ScoreId; label: string; emoji: string; titles: string[] }[] = [
@@ -191,6 +193,43 @@ export const teaCash = (rank: number) => 60 + 20 * rank;
 /** Helping a crew member's move pays the helper this, once per move. */
 export const CREW_HYPE_CLOUT = 5;
 
+// ---- Step 3 (owner, Nov 21): plaques, residencies, trending moves, the cast remembering you ----
+
+/** Plaques for doing the same move again and again (FarmVille's mastery): a badge and a clout bonus, once each. */
+export const PLAQUES = [
+  { at: 10, name: "Regular", clout: 50 },
+  { at: 25, name: "Fixture", clout: 150 },
+  { at: 50, name: "Legend", clout: 400 },
+] as const;
+export function plaqueOf(count: number): { have: (typeof PLAQUES)[number] | null; next: (typeof PLAQUES)[number] | null } {
+  let have: (typeof PLAQUES)[number] | null = null;
+  for (const p of PLAQUES) if (count >= p.at) have = p;
+  return { have, next: PLAQUES.find((p) => count < p.at) ?? null };
+}
+export const plaqueBadge = (move: string, at: number) => `scene-${move}-${at}`;
+
+/** A residency (FarmVille's animals: pays every day without replanting): a move's first plaque opens it at that move's
+ *  places, for a week; checking in there once a New York day pays half the move's clout. One at a time. */
+export const RESIDENCY = { needs: 10, days: 7, pay: 0.5 } as const;
+export const residencyPay = (m: SceneMove) => Math.round(m.clout * RESIDENCY.pay);
+
+/** Trending this week: three moves anyone can do pay 1.5× (seeded by the week, so everyone sees the same three). */
+export const TREND = { count: 3, boost: 1.5 } as const;
+export function trendingFor(moves: SceneMove[], monday: string): string[] {
+  const pool = moves.filter((m) => !m.when && (m.area === "everyday" || m.area === "cast" || m.area === "status"));
+  return [...pool].sort((a, b) => hash(`trend:${monday}:${a.id}`) - hash(`trend:${monday}:${b.id}`)).slice(0, TREND.count).map((m) => m.id);
+}
+/** The Monday of a New York date's week. */
+export function mondayOf(day: string): string {
+  const d = new Date(`${day}T12:00:00Z`);
+  const back = (d.getUTCDay() + 6) % 7;
+  return new Date(d.getTime() - back * 86_400_000).toISOString().slice(0, 10);
+}
+/** Collected moves a host needs before they remember you. */
+export const HOST_KNOWS = 3;
+/** Clout Pass XP per collected move (migration 0173 adds it to the season's xp table). */
+export const SCENE_SEASON_XP = 10;
+
 /** A started move, as the database keeps it. */
 export interface SceneRow {
   id: string;
@@ -208,6 +247,8 @@ export interface SceneRow {
   haterAt?: string | null;
   cut?: number | null;
   dealt?: DealWay | null;
+  /** Step 3: trending pays more (1 to 1.5). */
+  boost?: number | null;
 }
 /** The hater's cut in force: landed and not dealt with (rising above it keeps the cut). */
 export function cutOf(r: SceneRow, now: number): number {
@@ -298,10 +339,11 @@ export function sceneSettings(moves: SceneMove[]) {
   return {
     slots: SCENE.slots, hypes: SCENE.hypes, hypeGapMin: SCENE.hypeGapMin, staleAfter: SCENE.staleAfter,
     stalePay: SCENE.stalePay, missedHype: SCENE.missedHype, pointsPer: SCENE.pointsPer, costPerRank: 0.1, crewHypeClout: CREW_HYPE_CLOUT,
+    plaques: PLAQUES.map((p) => ({ at: p.at, clout: p.clout })), residency: { needs: RESIDENCY.needs, days: RESIDENCY.days, pay: RESIDENCY.pay },
     sneak: Object.fromEntries(SNEAK.map((w) => [w.id, { integrity: w.integrity, banHours: w.banHours, extra: w.extra ?? 0 }])),
     moves: Object.fromEntries(moves.map((m) => [m.id, {
       places: m.places, hours: m.hours, cost: m.cost, energy: m.energy, clout: m.clout, score: m.score,
-      ...(m.skill ? { skill: m.skill } : {}), ...(m.needs ? { needs: m.needs } : {}), gated: !!m.when,
+      ...(m.skill ? { skill: m.skill } : {}), ...(m.needs ? { needs: m.needs } : {}), gated: !!m.when, ...(m.headline ? { headline: m.headline } : {}),
     }])),
   };
 }
@@ -325,6 +367,7 @@ export function moveProblems(moves: SceneMove[], placeIds: Set<string>, characte
     if (!m.why || m.why.length > 70) out.push(`${at}: why missing or over 70 characters`);
     if (!m.line || m.line.length > 120) out.push(`${at}: line missing or over 120 characters`);
     if (m.area === "everyday" && (m.when || m.needs)) out.push(`${at}: everyday moves are for everyone`);
+    if (m.headline !== undefined && (!m.headline.includes("{name}") || m.headline.length > 200 || m.headline.includes("'"))) out.push(`${at}: a headline names {name}, under 200 characters, no straight apostrophes`);
     if (["dating", "school", "work", "business", "campaign", "money", "city", "halo", "hustler"].includes(m.area) && !m.when) out.push(`${at}: a ${m.area} move needs a when`);
   }
   return out;

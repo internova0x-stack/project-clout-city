@@ -928,6 +928,12 @@ components live in `app/globals.css`.
   `scene_vouches`; a publicist `publicistCost`; spilling tea `teaCash`, ledger 'scene_tea'; rising above it keeps the cut; meter
   nudges); the crew's moves (`scene_crew`: crew either way or a partner) can be hyped from anywhere once each (`scene_crew_hype`,
   `scene_crew_hypes`, 5 clout ledger 'scene_crew'). UI: the red hater strip on a move, `HaterSheet`, "Your crew's moves".
+  Step 3 (migration 0173): plaques at 10/25/50 collects (`PLAQUES`, ledger 'scene_plaque', badge `scene-<move>-<n>`, the 10th a takeover);
+  a week's residency once a move has its first plaque (`scene_residency_take`/`_checkin`, half the move's clout once a New York day,
+  ledger 'scene_residency', `scene_residencies`); trending (`trendingFor`, 3 a week ×1.5, `scene_set_boost`); hosts remember you after 3
+  (content/scene/hosts.json, `HOST_KNOWS`); big moves' `headline` posts a Blotter 'win' line; pushes scene_ready/scene_stale
+  (`push_scan_scene`, run by the sender); Lola's welcome rung 'scene' (`WelcomeSituation.scene`); 10 Clout Pass XP a move (xp.scene).
+  The welcome and choice cards wait while the Scene screen is open.
 - Players see "Crew" for their invited friends; code, types and database tables still say `clique`
   (renaming stored data isn't worth the risk). Keep player-facing copy on "crew".
 - Culture packs (docs/culture/, one at a time, only when the owner says "Build C<number>"): slang, invented stand-ins

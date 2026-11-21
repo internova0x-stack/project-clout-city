@@ -13,9 +13,9 @@
 // Ties inside a rung go to the one that also clears a daily task (the "why" line says so). A kind the player put off with
 // Later yesterday is skipped today, rent excepted.
 
-export type WelcomeKind = "rent" | "repair" | "reward" | "streak" | "happening" | "stamp" | "skill" | "goal" | "messages" | "story" | "task" | "new";
+export type WelcomeKind = "rent" | "repair" | "reward" | "scene" | "streak" | "happening" | "stamp" | "skill" | "goal" | "messages" | "story" | "task" | "new";
 
-export type WelcomeTarget = "bills" | "gigs" | "pass" | "tasks" | "goals" | "skills" | "messages" | "story" | "pick";
+export type WelcomeTarget = "bills" | "gigs" | "pass" | "scene" | "tasks" | "goals" | "skills" | "messages" | "story" | "pick";
 
 export interface WelcomeAction {
   kind: WelcomeKind;
@@ -38,6 +38,7 @@ export const LOLA_SAYS: Record<WelcomeKind, string> = {
   rent: "Babe. The landlord called. Twice. Handle it.",
   repair: "Your streak broke. I can fix it, just this once.",
   reward: "You have presents waiting. Open them before I do.",
+  scene: "Your moves are ready, babe. Collect before the city forgets.",
   streak: "Don't you dare break that streak tonight.",
   happening: "Drop everything. This is only on for a bit.",
   stamp: "One more visit and you're officially a regular.",
@@ -54,6 +55,8 @@ export interface WelcomeSituation {
   /** A broken streak that can be repaired today (migration 0158). */
   repair?: { streak: number } | null;
   passReady: number;
+  /** Your Scene (migration 0173): moves ready to collect, the first one's title, and whether one goes stale within two hours. */
+  scene?: { ready: number; title: string; staleSoon: boolean } | null;
   streak: { current: number; doneToday: boolean } | null;
   /** The New York hour, 0-23. */
   nyHour: number;
@@ -88,6 +91,10 @@ export function welcomeLadder(s: WelcomeSituation): WelcomeAction[] {
   if (s.passReady > 0) {
     out.push({ kind: "reward", emoji: "🎁", title: `${plural(s.passReady, "Clout Pass reward")} to collect`, sub: null,
       detail: "Yours already. One tap and they're in your pocket.", why: null, cta: "Collect", target: "pass" });
+  }
+  if (s.scene && s.scene.ready > 0) {
+    out.push({ kind: "scene", emoji: "🎬", title: s.scene.ready === 1 ? `${s.scene.title} is ready` : `${plural(s.scene.ready, "move")} ready to collect`, sub: "Your Scene",
+      detail: "Clout and score points, one tap each.", why: s.scene.staleSoon ? "One goes stale soon and pays a quarter." : null, cta: "Collect", target: "scene" });
   }
   const left = s.tasks.total - s.tasks.done;
   if (s.streak && s.streak.current >= WELCOME.streakMin && !s.streak.doneToday && left > 0 && s.nyHour >= WELCOME.streakLateHour) {

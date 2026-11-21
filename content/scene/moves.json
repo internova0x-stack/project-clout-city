@@ -262,7 +262,8 @@
    "line": "Say \"synergy\" once. Say \"disrupt\" twice.",
    "needs": {
     "rank": 4
-   }
+   },
+   "headline": "{name} said “synergy” on a panel and nobody laughed. Growth."
   },
   {
    "id": "guest-lecture",
@@ -284,7 +285,8 @@
    "line": "Thirty rows of students pretending to take notes.",
    "needs": {
     "rank": 5
-   }
+   },
+   "headline": "{name} gave a guest lecture. Thirty rows of students pretended to take notes."
   },
   {
    "id": "fundraiser",
@@ -305,7 +307,8 @@
    "needs": {
     "rank": 4,
     "netWorth": 50000
-   }
+   },
+   "headline": "{name} wrote a very large cheque at the fundraiser, where everyone could see it. Generous. Visible."
   },
   {
    "id": "talk-show",
@@ -325,7 +328,8 @@
    "line": "Charming, savage or humble. Pick before the lights come on.",
    "needs": {
     "rank": 5
-   }
+   },
+   "headline": "{name} went on the talk show and said something unforgettable. Nobody can agree what."
   },
   {
    "id": "rooftop-dinner",
@@ -368,7 +372,8 @@
    "host": "prince-nassim",
    "needs": {
     "rank": 3
-   }
+   },
+   "headline": "{name} survived Prince Nassim’s golden crab breakfast. The crabs did not."
   },
   {
    "id": "car-auction",
@@ -389,7 +394,8 @@
    "host": "prince-nassim",
    "needs": {
     "netWorth": 100000
-   }
+   },
+   "headline": "{name} outbid Prince Nassim at the car auction. Sources say he bought the auction house out of spite."
   },
   {
    "id": "saffron-bday",
@@ -411,7 +417,8 @@
    "host": "saffron-lux",
    "needs": {
     "rank": 4
-   }
+   },
+   "headline": "{name} crashed Saffron Lux’s birthday. She called them “angel” nine times and their name zero."
   },
   {
    "id": "vale-front-row",
@@ -432,7 +439,8 @@
    "host": "vale-sartorio",
    "needs": {
     "rank": 4
-   }
+   },
+   "headline": "{name} sat front row at Vale Sartorio. Vale did not clap. {name} did not clap. A connection."
   },
   {
    "id": "ruckus-listening",
@@ -497,7 +505,8 @@
    "host": "lunaria",
    "needs": {
     "rank": 5
-   }
+   },
+   "headline": "{name} was first to Lunaria’s 3 AM drop. Insiders call it “vaguely iconic”."
   },
   {
    "id": "brock-premiere",
@@ -519,7 +528,8 @@
    "host": "brock-squarejaw",
    "needs": {
     "rank": 4
-   }
+   },
+   "headline": "{name} walked the red carpet at Brock Squarejaw’s premiere. Brock insists he is 35."
   },
   {
    "id": "dunk-box",
@@ -540,7 +550,8 @@
    "host": "dunk-daniels",
    "needs": {
     "rank": 5
-   }
+   },
+   "headline": "{name} sat with Dunk Daniels at the Meteors. Dunk arrived in the seventh inning, in new sneakers."
   },
   {
    "id": "skyler-panel",
@@ -583,7 +594,8 @@
    "host": "chardonnay-shade",
    "needs": {
     "rank": 4
-   }
+   },
+   "headline": "{name} survived Chardonnay Shade’s reunion taping. Barely. Sit near the exit next time."
   },
   {
    "id": "peyton-apology",
@@ -647,7 +659,8 @@
    "host": "duke-ledger",
    "needs": {
     "netWorth": 250000
-   }
+   },
+   "headline": "{name} viewed Duke Ledger’s watches in private. Nobody asked the price, or his age."
   },
   {
    "id": "mayor-ribbon",
@@ -910,7 +923,8 @@
       "min": 1
      }
     ]
-   }
+   },
+   "headline": "{name} threw a launch party with a sign that spelled their name right. A first for Queens."
   },
   {
    "id": "trading-pitch",
@@ -962,7 +976,8 @@
       "has": "business.went_public"
      }
     ]
-   }
+   },
+   "headline": "{name} rang the opening bell. The market did something. Their business posed for twenty minutes."
   },
   {
    "id": "demo-day",
