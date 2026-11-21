@@ -1,0 +1,141 @@
+import { test } from "node:test";
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { PLACES } from "../lib/city.ts";
+import { CHARACTERS } from "../lib/characters.ts";
+import type { Memory } from "../lib/memory.ts";
+import {
+  SCENE, forYou, hypeOpen, moveProblems, needsOk, nextSlotRank, payout, sceneSettings, slotsFor, statusOf, titleFor,
+  type SceneCtx, type SceneMove, type SceneRow,
+} from "../lib/scene.ts";
+
+const MOVES = (JSON.parse(readFileSync(new URL("../content/scene/moves.json", import.meta.url), "utf8")) as { moves: SceneMove[] }).moves;
+const placeIds = new Set(PLACES.map((p) => p.id));
+const storyOnly = new Set(PLACES.filter((p) => p.story).map((p) => p.id));
+const queens = new Set(PLACES.filter((p) => !p.borough || p.borough === "queens").map((p) => p.id));
+
+test("scene moves: the content is valid", () => {
+  assert.deepEqual(moveProblems(MOVES, placeIds, new Set(CHARACTERS.map((c) => c.id))), []);
+});
+
+test("scene moves: never at a story-only place, and every move except the car auction can happen in Queens", () => {
+  for (const m of MOVES) {
+    for (const p of m.places) assert.ok(!storyOnly.has(p), `${m.id} at story place ${p}`);
+    if (m.id !== "car-auction") assert.ok(m.places.some((p) => queens.has(p)), `${m.id} has no Queens place`);
+  }
+});
+
+test("scene: slots grow with rank", () => {
+  assert.equal(slotsFor(1), 2);
+  assert.equal(slotsFor(3), 3);
+  assert.equal(slotsFor(6), 4);
+  assert.equal(slotsFor(10), 5);
+  assert.equal(nextSlotRank(1), 3);
+  assert.equal(nextSlotRank(7), null);
+});
+
+test("scene: payout takes a quarter per missed hype and pays a quarter when stale", () => {
+  assert.deepEqual(payout(100, 2, 2, false), { clout: 100, points: 20 });
+  assert.deepEqual(payout(100, 2, 1, false), { clout: 75, points: 15 });
+  assert.deepEqual(payout(100, 3, 0, false), { clout: 25, points: 5 });
+  assert.deepEqual(payout(100, 0, 0, true), { clout: 25, points: 5 });
+});
+
+test("scene: titles by points", () => {
+  assert.equal(titleFor(0).tier, 0);
+  assert.equal(titleFor(30).tier, 1);
+  assert.equal(titleFor(30).title("style"), "Fit Checker");
+  assert.equal(titleFor(900).next, null);
+});
+
+test("scene: a move's status and when it can be hyped", () => {
+  const t0 = Date.parse("2026-11-21T10:00:00Z");
+  const r: SceneRow = { id: "x", move: "night-out", place: "velvet-static", slot: 1, startedAt: new Date(t0).toISOString(),
+    readyAt: new Date(t0 + 8 * 3600e3).toISOString(), staleAt: new Date(t0 + 16 * 3600e3).toISOString(), hypes: [], need: 2 };
+  assert.equal(statusOf(r, t0 + 30 * 60e3), "building");
+  assert.equal(hypeOpen(r, t0 + 30 * 60e3), false);
+  assert.equal(statusOf(r, t0 + 2 * 3600e3), "hype");
+  const hyped = { ...r, hypes: [new Date(t0 + 2 * 3600e3).toISOString()] };
+  assert.equal(hypeOpen(hyped, t0 + 2.5 * 3600e3), false);
+  assert.equal(hypeOpen(hyped, t0 + 3.5 * 3600e3), true);
+  assert.equal(statusOf(r, t0 + 9 * 3600e3), "ready");
+  assert.equal(hypeOpen(r, t0 + 9 * 3600e3), false);
+  assert.equal(statusOf(r, t0 + 17 * 3600e3), "stale");
+});
+
+test("scene: needs are rank or net worth", () => {
+  const fund = MOVES.find((m) => m.id === "fundraiser")!;
+  assert.equal(needsOk(fund, { rank: 1, netWorth: 0 }), false);
+  assert.equal(needsOk(fund, { rank: 4, netWorth: 0 }), true);
+  assert.equal(needsOk(fund, { rank: 1, netWorth: 60_000 }), true);
+});
+
+const mem = (s: Partial<Memory["snapshot"]>, facts: Memory["facts"] = []): Memory => ({
+  snapshot: { rank: 1, clout: 0, bank: 2000, meter: 50, band: "middle", home: "h", at: null, job: null, businesses: [], partner: null,
+    campus: null, campaign: null, marks: [], crew: 0, skills: {}, conditions: [], ...s }, facts,
+});
+const ctx = (m: Memory, rank = m.snapshot.rank, netWorth = 0, today = "2026-11-21"): SceneCtx => ({ rank, netWorth, memory: m, today, open: (p) => queens.has(p) && !storyOnly.has(p) });
+const none = { active: new Set<string>(), rested: new Set<string>() };
+
+test("for you: four moves from different parts of life, at least one everyday", () => {
+  const student = mem({ rank: 2, partner: "p1", campus: "st-johnsons", conditions: ["heatwave"] });
+  const picks = forYou(MOVES, ctx(student), "maya", none);
+  assert.equal(picks.length, SCENE.forYou);
+  assert.ok(picks.some((m) => m.area === "everyday"));
+  const areas = picks.filter((m) => m.area !== "everyday").map((m) => m.area);
+  assert.equal(new Set(areas).size, areas.length);
+  assert.ok(picks.some((m) => m.area === "dating"));
+  assert.ok(picks.some((m) => m.area === "school"));
+});
+
+test("for you: it fits the player (a rich business owner gets business moves, a single player no couple moves)", () => {
+  const dre = mem({ rank: 6, businesses: ["cafe"], job: { track: "tech", level: 4, workMood: 70 } });
+  const picks = forYou(MOVES, ctx(dre, 6, 2_400_000), "dre", none);
+  assert.ok(picks.some((m) => m.area === "business"));
+  assert.ok(picks.some((m) => m.area === "work"));
+  assert.ok(!picks.some((m) => m.id === "brunch-date"));
+  for (const m of picks) assert.ok(needsOk(m, { rank: 6, netWorth: 2_400_000 }));
+});
+
+test("for you: never a running or resting move, and yesterday's only when nothing else fits", () => {
+  const p = mem({ rank: 3 });
+  const today = forYou(MOVES, ctx(p), "x", none);
+  const skip = { active: new Set([today[0].id]), rested: new Set([today[1].id]) };
+  const again = forYou(MOVES, ctx(p), "x", skip);
+  assert.ok(!again.some((m) => skip.active.has(m.id) || skip.rested.has(m.id)));
+  // Tomorrow brings different moves wherever there are others to pick (a single Rank 3 player has one dating and one
+  // status move: those may come back).
+  const tomorrow = forYou(MOVES, ctx(p, 3, 0, "2026-11-22"), "x", none);
+  assert.ok(!tomorrow.some((m) => (m.area === "cast" || m.area === "everyday") && today.some((t) => t.id === m.id)));
+});
+
+test("scene settings: every move is there with its numbers", () => {
+  const s = sceneSettings(MOVES);
+  assert.equal(Object.keys(s.moves).length, MOVES.length);
+  assert.equal(s.moves["night-out"].hours, 8);
+  assert.equal(s.moves["brunch-date"].gated, true);
+});
+
+test("fake it till you make it: below a move's rank you can try to sneak in; invited players pay more as they rise", async () => {
+  const { canSneak, costFor, sneakOdds, SNEAK, bribeOf } = await import("../lib/scene.ts");
+  const show = MOVES.find((m) => m.id === "talk-show")!;
+  assert.equal(canSneak(show, { rank: 2, netWorth: 0 }), true);
+  assert.equal(canSneak(show, { rank: 5, netWorth: 0 }), false);
+  assert.equal(canSneak(MOVES.find((m) => m.id === "night-out")!, { rank: 1, netWorth: 0 }), false);
+  const dinner = MOVES.find((m) => m.id === "rooftop-dinner")!;
+  assert.equal(costFor(dinner, 2), 200);
+  assert.equal(costFor(dinner, 7), 300);
+  const conf = SNEAK.find((w) => w.id === "confidence")!;
+  assert.equal(sneakOdds(conf, {}), 0.4);
+  assert.ok(Math.abs(sneakOdds(conf, { charisma: 4 }) - 0.6) < 1e-9);
+  assert.equal(sneakOdds(conf, { charisma: 20 }), 0.95);
+  assert.equal(bribeOf(0), 50);
+  assert.equal(bribeOf(300), 150);
+});
+
+test("migration 0171 carries the same settings as lib/scene.ts", () => {
+  const sql = readFileSync(new URL("../supabase/migrations/0171_scene.sql", import.meta.url), "utf8");
+  const m = /values \('scene', '(\{.*?\})'::jsonb\)/s.exec(sql);
+  assert.ok(m, "settings row");
+  assert.deepEqual(JSON.parse(m![1]), JSON.parse(JSON.stringify(sceneSettings(MOVES))));
+});

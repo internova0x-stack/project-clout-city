@@ -1,0 +1,1327 @@
+{
+ "moves": [
+  {
+   "id": "brunch-be-seen",
+   "title": "Be seen at brunch",
+   "emoji": "🥯",
+   "area": "everyday",
+   "places": [
+    "grind-and-gossip",
+    "ditmars-deli",
+    "feta-compli",
+    "schlep-and-schmear"
+   ],
+   "hours": 2,
+   "cost": 40,
+   "energy": 10,
+   "clout": 45,
+   "score": "style",
+   "skill": "charisma",
+   "why": "Something anyone can do",
+   "line": "Order something photogenic. Eat none of it."
+  },
+  {
+   "id": "open-mic",
+   "title": "Open mic set",
+   "emoji": "🎤",
+   "area": "everyday",
+   "places": [
+    "velvet-static",
+    "low-light-lounge",
+    "brownstone-sessions"
+   ],
+   "hours": 2,
+   "cost": 0,
+   "energy": 15,
+   "clout": 50,
+   "score": "stage",
+   "skill": "music",
+   "why": "Something anyone can do",
+   "line": "Two minutes, one spotlight, forty strangers."
+  },
+  {
+   "id": "night-out",
+   "title": "Night out",
+   "emoji": "🪩",
+   "area": "everyday",
+   "places": [
+    "velvet-static",
+    "hellgate-hall",
+    "the-sticky-floor",
+    "discount-disco"
+   ],
+   "hours": 8,
+   "cost": 120,
+   "energy": 20,
+   "clout": 130,
+   "score": "nightlife",
+   "skill": "dance",
+   "why": "Something anyone can do",
+   "line": "Arrive late. Leave later. Post it tomorrow."
+  },
+  {
+   "id": "photo-walk",
+   "title": "Golden-hour photo walk",
+   "emoji": "📸",
+   "area": "everyday",
+   "places": [
+    "gantry-plaza",
+    "unisphere",
+    "hell-gate-park"
+   ],
+   "hours": 2,
+   "cost": 0,
+   "energy": 10,
+   "clout": 40,
+   "score": "street",
+   "skill": "photography",
+   "why": "Something anyone can do",
+   "line": "The skyline does the heavy lifting."
+  },
+  {
+   "id": "run-club",
+   "title": "Run club in the park",
+   "emoji": "🏃",
+   "area": "everyday",
+   "places": [
+    "hell-gate-park",
+    "flushing-meadows"
+   ],
+   "hours": 2,
+   "cost": 0,
+   "energy": 20,
+   "clout": 35,
+   "score": "social",
+   "skill": "fitness",
+   "why": "Something anyone can do",
+   "line": "Nobody runs. Everybody networks."
+  },
+  {
+   "id": "window-shop",
+   "title": "Window-shop the new collection",
+   "emoji": "👗",
+   "area": "everyday",
+   "places": [
+    "atelier-vernon",
+    "thread-count"
+   ],
+   "hours": 2,
+   "cost": 0,
+   "energy": 5,
+   "clout": 35,
+   "score": "style",
+   "skill": "photography",
+   "why": "Something anyone can do",
+   "line": "Touch nothing. Photograph everything."
+  },
+  {
+   "id": "jazz-table",
+   "title": "A table at the jazz club",
+   "emoji": "🎷",
+   "area": "everyday",
+   "places": [
+    "low-light-lounge",
+    "brownstone-sessions"
+   ],
+   "hours": 8,
+   "cost": 90,
+   "energy": 10,
+   "clout": 110,
+   "score": "nightlife",
+   "skill": "music",
+   "why": "Something anyone can do",
+   "line": "Snap, don't clap. Nod like you know the song."
+  },
+  {
+   "id": "meteors-game",
+   "title": "Nosebleeds at a Meteors game",
+   "emoji": "⚾",
+   "area": "everyday",
+   "places": [
+    "meteor-park"
+   ],
+   "hours": 8,
+   "cost": 60,
+   "energy": 15,
+   "clout": 100,
+   "score": "street",
+   "skill": "charisma",
+   "why": "Something anyone can do",
+   "line": "Get on the kiss cam. Or at least the hot-dog cam."
+  },
+  {
+   "id": "diner-court",
+   "title": "Hold court in a late-night booth",
+   "emoji": "🥞",
+   "area": "everyday",
+   "places": [
+    "neon-spoon",
+    "still-a-dollar-slice"
+   ],
+   "hours": 2,
+   "cost": 25,
+   "energy": 5,
+   "clout": 35,
+   "score": "social",
+   "skill": "gossip",
+   "why": "Something anyone can do",
+   "line": "Everyone ends up here eventually. Be here first."
+  },
+  {
+   "id": "chad-launch",
+   "title": "Chad Kensington's \"launch\"",
+   "emoji": "🚀",
+   "area": "everyday",
+   "places": [
+    "triborough-works",
+    "grind-and-gossip"
+   ],
+   "hours": 2,
+   "cost": 0,
+   "energy": 10,
+   "clout": 40,
+   "score": "status",
+   "skill": "hustle",
+   "why": "Something anyone can do",
+   "line": "It's a domain name. He's very excited.",
+   "host": "chad-kensington"
+  },
+  {
+   "id": "tiff-collab",
+   "title": "Be in Tiff's \"collab\"",
+   "emoji": "🤳",
+   "area": "everyday",
+   "places": [
+    "gantry-plaza",
+    "grind-and-gossip"
+   ],
+   "hours": 2,
+   "cost": 0,
+   "energy": 5,
+   "clout": 35,
+   "score": "social",
+   "skill": "photography",
+   "why": "Something anyone can do",
+   "line": "312 followers. Mostly bots. All of them watching.",
+   "host": "tiff"
+  },
+  {
+   "id": "dj-polaroid",
+   "title": "Be DJ Polaroid's whole crowd",
+   "emoji": "🎧",
+   "area": "everyday",
+   "places": [
+    "velvet-static",
+    "hellgate-hall"
+   ],
+   "hours": 2,
+   "cost": 15,
+   "energy": 10,
+   "clout": 40,
+   "score": "nightlife",
+   "skill": "dance",
+   "why": "Something anyone can do",
+   "line": "The 7 PM slot. It's you and the bartender.",
+   "host": "dj-polaroid"
+  },
+  {
+   "id": "barksley-bday",
+   "title": "Sir Barksley's birthday party",
+   "emoji": "🐕",
+   "area": "everyday",
+   "places": [
+    "hell-gate-park"
+   ],
+   "hours": 2,
+   "cost": 30,
+   "energy": 5,
+   "clout": 50,
+   "score": "social",
+   "skill": "charisma",
+   "why": "Something anyone can do",
+   "line": "He's still sad. Bring a party hat anyway.",
+   "host": "sir-barksley"
+  },
+  {
+   "id": "panel-speak",
+   "title": "Speak on a panel",
+   "emoji": "🎙️",
+   "area": "status",
+   "places": [
+    "triborough-works",
+    "queensboro-capital",
+    "skybridge-tower"
+   ],
+   "hours": 8,
+   "cost": 0,
+   "energy": 15,
+   "clout": 160,
+   "score": "status",
+   "skill": "smarts",
+   "why": "Because you're Rank {rank} now",
+   "line": "Say \"synergy\" once. Say \"disrupt\" twice.",
+   "needs": {
+    "rank": 4
+   }
+  },
+  {
+   "id": "guest-lecture",
+   "title": "Give a guest lecture",
+   "emoji": "🎓",
+   "area": "status",
+   "places": [
+    "st-johnsons",
+    "queensborough-u",
+    "astoria-cc"
+   ],
+   "hours": 8,
+   "cost": 0,
+   "energy": 15,
+   "clout": 150,
+   "score": "stage",
+   "skill": "smarts",
+   "why": "Because you're Rank {rank} now",
+   "line": "Thirty rows of students pretending to take notes.",
+   "needs": {
+    "rank": 5
+   }
+  },
+  {
+   "id": "fundraiser",
+   "title": "Attend a charity fundraiser",
+   "emoji": "🥂",
+   "area": "status",
+   "places": [
+    "ditmars-heights-rooftop"
+   ],
+   "hours": 24,
+   "cost": 800,
+   "energy": 15,
+   "clout": 280,
+   "score": "status",
+   "skill": "charisma",
+   "why": "Because you're in the right circles now",
+   "line": "Write a big cheque where people can see it.",
+   "needs": {
+    "rank": 4,
+    "netWorth": 50000
+   }
+  },
+  {
+   "id": "talk-show",
+   "title": "Talk-show guest",
+   "emoji": "📺",
+   "area": "status",
+   "places": [
+    "clout-tower"
+   ],
+   "hours": 24,
+   "cost": 0,
+   "energy": 20,
+   "clout": 350,
+   "score": "stage",
+   "skill": "charisma",
+   "why": "Because you're Rank {rank} now",
+   "line": "Charming, savage or humble. Pick before the lights come on.",
+   "needs": {
+    "rank": 5
+   }
+  },
+  {
+   "id": "rooftop-dinner",
+   "title": "Rooftop dinner",
+   "emoji": "🌆",
+   "area": "status",
+   "places": [
+    "ditmars-heights-rooftop",
+    "altitude-718",
+    "up-on-thirty"
+   ],
+   "hours": 8,
+   "cost": 200,
+   "energy": 10,
+   "clout": 140,
+   "score": "nightlife",
+   "skill": "charisma",
+   "why": "Because you're Rank {rank} now",
+   "line": "Order the thing with the sparkler.",
+   "needs": {
+    "rank": 2
+   }
+  },
+  {
+   "id": "crab-breakfast",
+   "title": "Prince Nassim's golden crab breakfast",
+   "emoji": "🦀",
+   "area": "cast",
+   "places": [
+    "ditmars-heights-rooftop"
+   ],
+   "hours": 8,
+   "cost": 300,
+   "energy": 10,
+   "clout": 200,
+   "score": "status",
+   "skill": "charisma",
+   "why": "Prince Nassim wants an audience",
+   "line": "He'll call your outfit \"brave\". Smile anyway.",
+   "host": "prince-nassim",
+   "needs": {
+    "rank": 3
+   }
+  },
+  {
+   "id": "car-auction",
+   "title": "Outbid Prince Nassim at the car auction",
+   "emoji": "🚘",
+   "area": "cast",
+   "places": [
+    "boulevard-motors"
+   ],
+   "hours": 24,
+   "cost": 1500,
+   "energy": 10,
+   "clout": 320,
+   "score": "status",
+   "skill": "hustle",
+   "why": "Prince Nassim is bidding on everything",
+   "line": "He bought the last auction house. Out of spite.",
+   "host": "prince-nassim",
+   "needs": {
+    "netWorth": 100000
+   }
+  },
+  {
+   "id": "saffron-bday",
+   "title": "Crash Saffron Lux's birthday (her third this year)",
+   "emoji": "🎂",
+   "area": "cast",
+   "places": [
+    "velvet-static",
+    "ultraviolet-society"
+   ],
+   "hours": 8,
+   "cost": 200,
+   "energy": 25,
+   "clout": 190,
+   "score": "nightlife",
+   "skill": "dance",
+   "why": "Saffron Lux is turning 25 again",
+   "line": "\"Time is just a calendar, angel.\"",
+   "host": "saffron-lux",
+   "needs": {
+    "rank": 4
+   }
+  },
+  {
+   "id": "vale-front-row",
+   "title": "Front row at Vale Sartorio's show",
+   "emoji": "👠",
+   "area": "cast",
+   "places": [
+    "atelier-vernon"
+   ],
+   "hours": 8,
+   "cost": 250,
+   "energy": 10,
+   "clout": 210,
+   "score": "style",
+   "skill": "photography",
+   "why": "Saffron Lux is walking for Vale Sartorio",
+   "line": "Don't clap. Vale hates clapping.",
+   "host": "vale-sartorio",
+   "needs": {
+    "rank": 4
+   }
+  },
+  {
+   "id": "ruckus-listening",
+   "title": "Heir Ruckus's listening party",
+   "emoji": "💿",
+   "area": "cast",
+   "places": [
+    "velvet-static",
+    "hellgate-hall",
+    "real-clout-fm"
+   ],
+   "hours": 8,
+   "cost": 80,
+   "energy": 15,
+   "clout": 150,
+   "score": "nightlife",
+   "skill": "music",
+   "why": "Big Ruckus paid for the whole thing",
+   "line": "The first single samples his baby monitor.",
+   "host": "heir-ruckus",
+   "needs": {
+    "rank": 2
+   }
+  },
+  {
+   "id": "ruckus-radio",
+   "title": "Sit in on Heir Ruckus's first radio interview",
+   "emoji": "📻",
+   "area": "cast",
+   "places": [
+    "real-clout-fm"
+   ],
+   "hours": 2,
+   "cost": 0,
+   "energy": 10,
+   "clout": 70,
+   "score": "stage",
+   "skill": "gossip",
+   "why": "DJ Sharm Almight has questions",
+   "line": "\"So, your dad.\" \"Next question.\"",
+   "host": "heir-ruckus",
+   "needs": {
+    "rank": 3
+   }
+  },
+  {
+   "id": "lunaria-drop",
+   "title": "Lunaria's 3 AM album drop",
+   "emoji": "🌙",
+   "area": "cast",
+   "places": [
+    "real-clout-fm"
+   ],
+   "hours": 8,
+   "cost": 0,
+   "energy": 20,
+   "clout": 170,
+   "score": "stage",
+   "skill": "music",
+   "why": "Lunaria drops tonight. Nobody knows when",
+   "line": "Be awake. Be first. Be vague about it.",
+   "host": "lunaria",
+   "needs": {
+    "rank": 5
+   }
+  },
+  {
+   "id": "brock-premiere",
+   "title": "Brock Squarejaw's premiere",
+   "emoji": "🎬",
+   "area": "cast",
+   "places": [
+    "clout-tower",
+    "reel-queens"
+   ],
+   "hours": 8,
+   "cost": 150,
+   "energy": 10,
+   "clout": 180,
+   "score": "style",
+   "skill": "photography",
+   "why": "Brock Squarejaw is 35 again",
+   "line": "He did his own stunts. You can tell.",
+   "host": "brock-squarejaw",
+   "needs": {
+    "rank": 4
+   }
+  },
+  {
+   "id": "dunk-box",
+   "title": "Box seats with Dunk Daniels",
+   "emoji": "🏀",
+   "area": "cast",
+   "places": [
+    "meteor-park"
+   ],
+   "hours": 8,
+   "cost": 400,
+   "energy": 10,
+   "clout": 200,
+   "score": "status",
+   "skill": "charisma",
+   "why": "Dunk Daniels has a spare seat",
+   "line": "He'll arrive in the seventh inning. In new sneakers.",
+   "host": "dunk-daniels",
+   "needs": {
+    "rank": 5
+   }
+  },
+  {
+   "id": "skyler-panel",
+   "title": "Skyler Beta's panel on the everything app, v11",
+   "emoji": "📱",
+   "area": "cast",
+   "places": [
+    "triborough-works",
+    "skybridge-tower"
+   ],
+   "hours": 2,
+   "cost": 0,
+   "energy": 10,
+   "clout": 70,
+   "score": "status",
+   "skill": "smarts",
+   "why": "Skyler Beta pivoted again",
+   "line": "None of the apps work. The panel is great.",
+   "host": "skyler-beta",
+   "needs": {
+    "rank": 2
+   }
+  },
+  {
+   "id": "chardonnay-reunion",
+   "title": "Chardonnay Shade's reunion taping",
+   "emoji": "🍷",
+   "area": "cast",
+   "places": [
+    "clout-tower"
+   ],
+   "hours": 8,
+   "cost": 0,
+   "energy": 15,
+   "clout": 170,
+   "score": "stage",
+   "skill": "gossip",
+   "why": "Chardonnay Shade needs a witness",
+   "line": "Sit near the exit. Trust us.",
+   "host": "chardonnay-shade",
+   "needs": {
+    "rank": 4
+   }
+  },
+  {
+   "id": "peyton-apology",
+   "title": "Peyton Pastel's apology-video brunch",
+   "emoji": "🥞",
+   "area": "cast",
+   "places": [
+    "grind-and-gossip",
+    "feta-compli"
+   ],
+   "hours": 2,
+   "cost": 50,
+   "energy": 10,
+   "clout": 60,
+   "score": "social",
+   "skill": "photography",
+   "why": "Peyton Pastel is sorry again",
+   "line": "Look sad in the background. It's a whole look.",
+   "host": "peyton-pastel",
+   "needs": {
+    "rank": 2
+   }
+  },
+  {
+   "id": "chase-stream",
+   "title": "Guest spot on Chase Clout's 14-hour stream",
+   "emoji": "🎮",
+   "area": "cast",
+   "places": [
+    "glow-up-house"
+   ],
+   "hours": 8,
+   "cost": 0,
+   "energy": 25,
+   "clout": 150,
+   "score": "stage",
+   "skill": "charisma",
+   "why": "Chase Clout needs a co-host",
+   "line": "Chat, chat, CHAT.",
+   "host": "chase-clout",
+   "needs": {
+    "rank": 3
+   }
+  },
+  {
+   "id": "duke-watches",
+   "title": "Duke Ledger's private watch viewing",
+   "emoji": "⌚",
+   "area": "cast",
+   "places": [
+    "queensboro-capital"
+   ],
+   "hours": 24,
+   "cost": 0,
+   "energy": 5,
+   "clout": 300,
+   "score": "status",
+   "skill": "photography",
+   "why": "Duke Ledger's people noticed your wrist",
+   "line": "Don't ask the price. Don't ask his age.",
+   "host": "duke-ledger",
+   "needs": {
+    "netWorth": 250000
+   }
+  },
+  {
+   "id": "mayor-ribbon",
+   "title": "Ribbon cutting with Mayor Papa-Dani",
+   "emoji": "✂️",
+   "area": "cast",
+   "places": [
+    "city-hall-annex"
+   ],
+   "hours": 2,
+   "cost": 0,
+   "energy": 10,
+   "clout": 80,
+   "score": "street",
+   "skill": "charisma",
+   "why": "Mayor Papa-Dani needs someone on camera",
+   "line": "He's never met a ribbon he wouldn't cut.",
+   "host": "mayor-papa-dani",
+   "needs": {
+    "rank": 3
+   }
+  },
+  {
+   "id": "brick-reading",
+   "title": "Brick Tackleton's dramatic reading",
+   "emoji": "🏈",
+   "area": "cast",
+   "places": [
+    "clout-tower",
+    "ditmars-library"
+   ],
+   "hours": 2,
+   "cost": 0,
+   "energy": 5,
+   "clout": 60,
+   "score": "stage",
+   "skill": "smarts",
+   "why": "Brick Tackleton is a serious actor now",
+   "line": "Hamlet, but he keeps spiking the skull.",
+   "host": "brick-tackleton",
+   "needs": {
+    "rank": 2
+   }
+  },
+  {
+   "id": "brunch-date",
+   "title": "Brunch date, be seen together",
+   "emoji": "💞",
+   "area": "dating",
+   "places": [
+    "grind-and-gossip",
+    "feta-compli",
+    "ditmars-deli"
+   ],
+   "hours": 2,
+   "cost": 60,
+   "energy": 10,
+   "clout": 80,
+   "score": "social",
+   "skill": "charisma",
+   "why": "Because you're seeing someone",
+   "line": "Share a plate. Post one photo. Make it look accidental.",
+   "when": {
+    "all": [
+     {
+      "snap": "partner",
+      "exists": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "speed-dating",
+   "title": "Speed-dating night",
+   "emoji": "💘",
+   "area": "dating",
+   "places": [
+    "low-light-lounge",
+    "velvet-static"
+   ],
+   "hours": 2,
+   "cost": 30,
+   "energy": 10,
+   "clout": 50,
+   "score": "social",
+   "skill": "charisma",
+   "why": "Because you're single",
+   "line": "Eight minutes each. Three of them are actors.",
+   "when": {
+    "none": [
+     {
+      "snap": "partner",
+      "exists": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "revenge-glowup",
+   "title": "Revenge glow-up night out",
+   "emoji": "💅",
+   "area": "dating",
+   "places": [
+    "velvet-static",
+    "ditmars-heights-rooftop"
+   ],
+   "hours": 8,
+   "cost": 120,
+   "energy": 20,
+   "clout": 160,
+   "score": "nightlife",
+   "skill": "dance",
+   "why": "Because you just went through a breakup",
+   "line": "Wear the thing they said was too much.",
+   "when": {
+    "all": [
+     {
+      "has": "dating.breakup",
+      "withinDays": 14
+     }
+    ],
+    "none": [
+     {
+      "snap": "partner",
+      "exists": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "study-gram",
+   "title": "Study-gram at the library",
+   "emoji": "📚",
+   "area": "school",
+   "places": [
+    "st-johnsons",
+    "queensborough-u",
+    "astoria-cc",
+    "ditmars-library"
+   ],
+   "hours": 2,
+   "cost": 0,
+   "energy": 10,
+   "clout": 45,
+   "score": "social",
+   "skill": "smarts",
+   "why": "Because you're enrolled",
+   "line": "Open a book. Angle it. Never read it.",
+   "when": {
+    "all": [
+     {
+      "snap": "campus",
+      "exists": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "greek-row",
+   "title": "Greek Row party night",
+   "emoji": "🎉",
+   "area": "school",
+   "places": [
+    "st-johnsons",
+    "queensborough-u",
+    "astoria-cc"
+   ],
+   "hours": 8,
+   "cost": 20,
+   "energy": 25,
+   "clout": 120,
+   "score": "nightlife",
+   "skill": "dance",
+   "why": "Because you're enrolled",
+   "line": "Somebody's dad is a congressman. Find out whose.",
+   "when": {
+    "all": [
+     {
+      "snap": "campus",
+      "exists": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "work-the-quad",
+   "title": "Work the Quad for votes",
+   "emoji": "👑",
+   "area": "school",
+   "places": [
+    "st-johnsons",
+    "queensborough-u",
+    "astoria-cc"
+   ],
+   "hours": 2,
+   "cost": 0,
+   "energy": 15,
+   "clout": 60,
+   "score": "social",
+   "skill": "charisma",
+   "why": "Because you're running for Homecoming",
+   "line": "Remember names. Forget grudges. Until Friday.",
+   "when": {
+    "all": [
+     {
+      "has": "school.declared",
+      "withinDays": 30
+     }
+    ]
+   }
+  },
+  {
+   "id": "investor-brunch",
+   "title": "Brunch with an investor",
+   "emoji": "💼",
+   "area": "business",
+   "places": [
+    "feta-compli",
+    "grind-and-gossip",
+    "queensboro-capital"
+   ],
+   "hours": 8,
+   "cost": 150,
+   "energy": 10,
+   "clout": 170,
+   "score": "status",
+   "skill": "hustle",
+   "why": "Because you own a business",
+   "line": "Let them pay. Let them think it was their idea.",
+   "when": {
+    "all": [
+     {
+      "snap": "businesses",
+      "min": 1
+     }
+    ]
+   }
+  },
+  {
+   "id": "launch-party",
+   "title": "Host a launch party for your business",
+   "emoji": "🎊",
+   "area": "business",
+   "places": [
+    "ditmars-heights-rooftop",
+    "velvet-static"
+   ],
+   "hours": 24,
+   "cost": 1200,
+   "energy": 20,
+   "clout": 320,
+   "score": "status",
+   "skill": "hustle",
+   "why": "Because you own a business",
+   "line": "Balloons, a DJ and a sign with your name spelled right.",
+   "when": {
+    "all": [
+     {
+      "snap": "businesses",
+      "min": 1
+     }
+    ]
+   }
+  },
+  {
+   "id": "trading-pitch",
+   "title": "Pitch on the trading floor",
+   "emoji": "📈",
+   "area": "business",
+   "places": [
+    "queensboro-capital"
+   ],
+   "hours": 24,
+   "cost": 0,
+   "energy": 20,
+   "clout": 260,
+   "score": "status",
+   "skill": "hustle",
+   "why": "Because you own a business",
+   "line": "Point at a chart. Say \"hockey stick\".",
+   "needs": {
+    "rank": 3
+   },
+   "when": {
+    "all": [
+     {
+      "snap": "businesses",
+      "min": 1
+     }
+    ]
+   }
+  },
+  {
+   "id": "opening-bell",
+   "title": "Ring the opening bell",
+   "emoji": "🔔",
+   "area": "business",
+   "places": [
+    "queensboro-capital"
+   ],
+   "hours": 24,
+   "cost": 0,
+   "energy": 10,
+   "clout": 400,
+   "score": "status",
+   "skill": "hustle",
+   "why": "Because your business went public",
+   "line": "Ring it once. Pose for twenty minutes.",
+   "when": {
+    "all": [
+     {
+      "has": "business.went_public"
+     }
+    ]
+   }
+  },
+  {
+   "id": "demo-day",
+   "title": "Demo day at Triborough Works",
+   "emoji": "💻",
+   "area": "work",
+   "places": [
+    "triborough-works"
+   ],
+   "hours": 8,
+   "cost": 0,
+   "energy": 15,
+   "clout": 140,
+   "score": "status",
+   "skill": "smarts",
+   "why": "Because you work in tech",
+   "line": "The demo works. Mostly. Keep talking.",
+   "when": {
+    "all": [
+     {
+      "snap": "job.track",
+      "is": "tech"
+     }
+    ]
+   }
+  },
+  {
+   "id": "tv-cameo",
+   "title": "Cameo on the Clout TV set",
+   "emoji": "🎥",
+   "area": "work",
+   "places": [
+    "clout-tower"
+   ],
+   "hours": 2,
+   "cost": 0,
+   "energy": 10,
+   "clout": 70,
+   "score": "stage",
+   "skill": "charisma",
+   "why": "Because you work in media",
+   "line": "Walk through the back of the shot. Twice.",
+   "when": {
+    "all": [
+     {
+      "snap": "job.track",
+      "is": "media"
+     }
+    ]
+   }
+  },
+  {
+   "id": "latte-art",
+   "title": "Viral latte art",
+   "emoji": "☕",
+   "area": "work",
+   "places": [
+    "grind-and-gossip"
+   ],
+   "hours": 2,
+   "cost": 0,
+   "energy": 10,
+   "clout": 55,
+   "score": "stage",
+   "skill": "cooking",
+   "why": "Because you work at Grind & Gossip",
+   "line": "It's a swan. Or the Mayor. People are arguing.",
+   "when": {
+    "all": [
+     {
+      "snap": "job.track",
+      "is": "hospitality"
+     }
+    ]
+   }
+  },
+  {
+   "id": "front-row-intern",
+   "title": "Run the front row at Atelier Vernon",
+   "emoji": "🪡",
+   "area": "work",
+   "places": [
+    "atelier-vernon"
+   ],
+   "hours": 8,
+   "cost": 0,
+   "energy": 15,
+   "clout": 140,
+   "score": "style",
+   "skill": "photography",
+   "why": "Because you work in fashion",
+   "line": "Seat the critics far from each other.",
+   "when": {
+    "all": [
+     {
+      "snap": "job.track",
+      "is": "fashion"
+     }
+    ]
+   }
+  },
+  {
+   "id": "promotion-drinks",
+   "title": "Promotion drinks",
+   "emoji": "🍾",
+   "area": "work",
+   "places": [
+    "low-light-lounge",
+    "ditmars-heights-rooftop"
+   ],
+   "hours": 8,
+   "cost": 100,
+   "energy": 10,
+   "clout": 140,
+   "score": "social",
+   "skill": "charisma",
+   "why": "Because you just got promoted",
+   "line": "Buy one round. Talk about it for a year.",
+   "when": {
+    "all": [
+     {
+      "has": "career.promoted",
+      "withinDays": 7
+     }
+    ]
+   }
+  },
+  {
+   "id": "kiss-babies",
+   "title": "Kiss babies in the park",
+   "emoji": "👶",
+   "area": "campaign",
+   "places": [
+    "hell-gate-park",
+    "flushing-meadows"
+   ],
+   "hours": 2,
+   "cost": 0,
+   "energy": 15,
+   "clout": 70,
+   "score": "street",
+   "skill": "charisma",
+   "why": "Because you're running a campaign",
+   "line": "Ask permission first. It's a whole thing now.",
+   "when": {
+    "all": [
+     {
+      "snap": "campaign",
+      "exists": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "spin-room",
+   "title": "Work the spin room",
+   "emoji": "🗳️",
+   "area": "campaign",
+   "places": [
+    "campaign-hq",
+    "city-hall-annex"
+   ],
+   "hours": 8,
+   "cost": 0,
+   "energy": 15,
+   "clout": 150,
+   "score": "stage",
+   "skill": "gossip",
+   "why": "Because you're running a campaign",
+   "line": "Whatever happened, your side won it.",
+   "when": {
+    "all": [
+     {
+      "snap": "campaign",
+      "exists": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "free-gallery",
+   "title": "Free gallery opening",
+   "emoji": "🖼️",
+   "area": "money",
+   "places": [
+    "atelier-vernon",
+    "gantry-plaza"
+   ],
+   "hours": 2,
+   "cost": 0,
+   "energy": 5,
+   "clout": 45,
+   "score": "style",
+   "skill": "photography",
+   "why": "Because it's free (and so is the wine)",
+   "line": "Say \"it's giving\" twice. Leave with a tote bag.",
+   "when": {
+    "all": [
+     {
+      "snap": "bank",
+      "max": 500
+     }
+    ]
+   }
+  },
+  {
+   "id": "sample-sale",
+   "title": "Sample-sale line at dawn",
+   "emoji": "🛍️",
+   "area": "city",
+   "places": [
+    "atelier-vernon"
+   ],
+   "hours": 2,
+   "cost": 0,
+   "energy": 15,
+   "clout": 60,
+   "score": "style",
+   "skill": "hustle",
+   "why": "Because there's a sample sale on",
+   "line": "Elbows out. It's a sport now.",
+   "when": {
+    "all": [
+     {
+      "snap": "conditions",
+      "is": "sample_sale"
+     }
+    ]
+   }
+  },
+  {
+   "id": "pool-party",
+   "title": "Rooftop pool party",
+   "emoji": "🏊",
+   "area": "city",
+   "places": [
+    "ditmars-heights-rooftop",
+    "altitude-718"
+   ],
+   "hours": 8,
+   "cost": 60,
+   "energy": 15,
+   "clout": 150,
+   "score": "nightlife",
+   "skill": "fitness",
+   "why": "Because there's a heatwave on today",
+   "line": "Nobody swims. Everybody poses.",
+   "when": {
+    "all": [
+     {
+      "snap": "conditions",
+      "is": "heatwave"
+     }
+    ]
+   }
+  },
+  {
+   "id": "candle-mic",
+   "title": "Candlelit open mic",
+   "emoji": "🕯️",
+   "area": "city",
+   "places": [
+    "low-light-lounge",
+    "brownstone-sessions"
+   ],
+   "hours": 2,
+   "cost": 0,
+   "energy": 10,
+   "clout": 70,
+   "score": "stage",
+   "skill": "music",
+   "why": "Because the power's out tonight",
+   "line": "No mic, no lights. Just vibes and a flashlight.",
+   "when": {
+    "all": [
+     {
+      "snap": "conditions",
+      "is": "brownout"
+     }
+    ]
+   }
+  },
+  {
+   "id": "festival-front",
+   "title": "Front of the crowd at the festival",
+   "emoji": "🎪",
+   "area": "city",
+   "places": [
+    "flushing-meadows",
+    "hell-gate-park"
+   ],
+   "hours": 8,
+   "cost": 40,
+   "energy": 20,
+   "clout": 140,
+   "score": "street",
+   "skill": "dance",
+   "why": "Because there's a festival on",
+   "line": "Get there before the people who got there early.",
+   "when": {
+    "all": [
+     {
+      "snap": "conditions",
+      "is": "festival"
+     }
+    ]
+   }
+  },
+  {
+   "id": "charity-5k",
+   "title": "Charity 5K",
+   "emoji": "🎗️",
+   "area": "halo",
+   "places": [
+    "hell-gate-park",
+    "flushing-meadows"
+   ],
+   "hours": 2,
+   "cost": 20,
+   "energy": 25,
+   "clout": 70,
+   "score": "social",
+   "skill": "fitness",
+   "why": "Because you've got a good reputation",
+   "line": "Run for a cause. Walk for the photos.",
+   "when": {
+    "all": [
+     {
+      "snap": "band",
+      "is": "halo"
+     }
+    ]
+   }
+  },
+  {
+   "id": "publicity-stunt",
+   "title": "A publicity stunt that's a bit much",
+   "emoji": "😈",
+   "area": "hustler",
+   "places": [
+    "gantry-plaza",
+    "unisphere"
+   ],
+   "hours": 2,
+   "cost": 0,
+   "energy": 15,
+   "clout": 70,
+   "score": "street",
+   "skill": "hustle",
+   "why": "Because you'll do anything for attention",
+   "line": "Nobody gets hurt. Somebody gets a citation.",
+   "when": {
+    "all": [
+     {
+      "snap": "band",
+      "is": "hustler"
+     }
+    ]
+   }
+  }
+ ]
+}

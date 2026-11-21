@@ -184,6 +184,7 @@ from (values
   ('0167_season_pass_stakes.sql', to_regprocedure('public.season_titled()') is not null),
   ('0168_trip_skip_price.sql', coalesce((select (value -> 'economy' -> 'travel' -> 'skip' ->> 'min')::int = 20 from public.game_settings where key = 'city'), false)),
   ('0169_home_build.sql', to_regprocedure('public.home_build_save(uuid, jsonb, integer, text)') is not null),
-  ('0170_guide.sql', to_regprocedure('public.guide_claim(text)') is not null)
+  ('0170_guide.sql', to_regprocedure('public.guide_claim(text)') is not null),
+  ('0171_scene.sql', to_regprocedure('public.scene_collect(uuid, uuid)') is not null)
 ) as m(file, ran)
 order by (m.ran is distinct from false), m.file;
