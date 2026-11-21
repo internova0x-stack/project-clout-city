@@ -1,6 +1,8 @@
 "use client";
 
 import { createGuideSim } from "@/lib/guideSim";
+import { surpriseFor, type SurpriseKind } from "@/lib/rewards";
+import type { RewardsApi } from "@/components/game/rewardsCelebrations";
 import { createSceneSim } from "@/lib/sceneSim";
 import { previewCoutureMap, previewPlazaBook, previewPlazaWeeks } from "@/app/preview/coutureActions";
 import type { CoutureApi } from "@/lib/coutureMap";
@@ -491,6 +493,17 @@ export function PreviewHome({
     return { ...g, async claim(step: string) { const r = await g.claim(step); if (r) sim.huntReward(r.cash, r.clout); return r; } };
   }, [sim]);
   // Your Scene (migration 0171) in memory on a fast clock: ?scene=new|busy|student|rich.
+  // Credit for small progress and surprises (migration 0177): ?rewards=recap|halfway|freebie|selfie|drink|invite.
+  const rewardsSim = useMemo<RewardsApi | undefined>(() => {
+    const k = typeof window === "undefined" ? null : new URLSearchParams(window.location.search).get("rewards");
+    if (!k) return undefined;
+    const invite = { move: "crab-breakfast", title: "Prince Nassim's golden crab breakfast", place: "ditmars-heights-rooftop", placeName: "Ditmars Heights Rooftop", host: "Prince Nassim of Qamaria", face: "/cast/celeb-prince-nassim.webp" };
+    return {
+      halfway: async () => (k === "halfway" ? [{ id: "save_15k", clout: 18 }] : []),
+      recap: async () => (k === "recap" ? { week: "2026-11-16", clout: 1240, cash: 3850, fullDays: 5, moves: 7, plaques: 1, scores: { nightlife: 96, status: 42, social: 30 }, best: { kind: "career_promo", clout: 160 } } : null),
+      surprise: async () => (["freebie", "selfie", "drink", "invite"].includes(k) ? surpriseFor(k as SurpriseKind, 4, k === "invite" ? invite : null) : null),
+    };
+  }, []);
   const sceneSim = useMemo(() => createSceneSim(sim, typeof window === "undefined" ? null : new URLSearchParams(window.location.search).get("scene")), [sim]);
   const starterSim = useMemo(() => createStarterSim(starterPreset ?? 0, (cash, clout) => sim.huntReward(cash, clout)), [starterPreset, sim]);
   const mark = starterSim.mark;
@@ -722,6 +735,7 @@ export function PreviewHome({
       starter={cityOff || starterPreset === undefined ? undefined : starterSim.api}
       guide={cityOff ? undefined : guideSim}
       scene={cityOff ? undefined : sceneSim}
+      rewards={cityOff ? undefined : rewardsSim}
       fame={cityOff ? undefined : async () => ({ ticketUsed: true, compUsed: false, inviteUsed: false })}
       lockAppsPreview={appsPreset === "locked"}
       // Delete my account: the preview says what would happen and deletes nothing.

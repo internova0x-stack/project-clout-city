@@ -123,9 +123,16 @@ export async function sceneStart(move: string, way?: SneakWay["id"]): Promise<R<
   }
   const { data, error } = await w.admin.rpc("scene_start", { p_player: w.id, p_move: move, ...args });
   if (error) return { ok: false, error: err(error, "scene_start") };
+  const d = data as { bounced: boolean; banHours?: number; id?: string };
+  // A celebrity's invite today (migration 0177's surprises): starting their move gives its price back.
+  let refund = 0;
+  if (!d.bounced && d.id) {
+    const { data: rf, error: e4 } = await w.admin.rpc("surprise_invite_redeem", { p_player: w.id, p_scene_id: d.id });
+    if (e4 && !/surprise_/.test(e4.message)) console.error("surprise_invite_redeem failed", e4);
+    refund = (rf as number | null) ?? 0;
+  }
   const v = await view(w);
   if (!v.ok) return v;
-  const d = data as { bounced: boolean; banHours?: number; id?: string };
   // Step 3 (migration 0173): trending moves pay 1.5×.
   if (!d.bounced && d.id && trendingFor(SCENE_MOVES, mondayOf(r.today)).includes(move)) {
     const { error: e3 } = await w.admin.rpc("scene_set_boost", { p_player: w.id, p_id: d.id, p_boost: TREND.boost });
@@ -141,7 +148,7 @@ export async function sceneStart(move: string, way?: SneakWay["id"]): Promise<R<
       if (e2 && !/scene_set_hater/.test(e2.message)) console.error("scene_set_hater failed", e2);
     }
   }
-  return { ok: true, data: { bounced: d.bounced, banHours: d.banHours ?? 0, view: v.data } };
+  return { ok: true, data: { bounced: d.bounced, banHours: d.banHours ?? 0, refund, view: v.data } };
 }
 
 export async function sceneHype(id: string): Promise<R<SceneView>> {

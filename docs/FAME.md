@@ -46,3 +46,19 @@ a Crib Rating milestone 20, a plaque 30.
 A ledger trigger (`fame_on_ledger`, never raises) watches every payment and adds the perk or bonus as its own ledger row,
 so no payment code changed. The rank is the best reached, or what clout and the bank give now. A players trigger
 (`fame_on_rank`) posts the Spotlights. `game_settings 'fame'` comes from `fameSettings()` (tests/fame.test.ts compares).
+
+## 5. Credit for small progress (migration 0177, `lib/rewards.ts`)
+
+- **Halfway there:** a goal with an amount to reach (savings, days at a place, a skill level…) that's half done pays a
+  quarter of its reward early, once (ledger 'goal_half', a banner). The full reward still comes when it's done. Yes/no
+  goals and goals above your clout don't count.
+- **Last week:** every Monday, the first time the game opens, a results card shows last New York week: clout gained, C$
+  earned, full days, Scene moves and plaques, what you were most known for and the best moment (`week_recap()`).
+
+## 6. Surprises (migration 0177)
+
+About half of New York days, once, a little after the game opens: Lola sends a freebie (C$50 + 25 a rank), a fan asks for
+a selfie (10 clout a rank, from Rank 3), a stranger buys your drink at a bar or club (+15 Energy, +5 Mood), or a celebrity
+texts an invite to their Scene move hosted today (from Rank 2): start it today and its price comes back (ledger
+'surprise_invite'; not twice with Rank 4's own free celebrity move). The server rolls with a crypto random source
+(app/home/rewardActions.ts) and `surprise_give` pays once a day. `?rewards=recap|halfway|freebie|selfie|drink|invite` in the preview.

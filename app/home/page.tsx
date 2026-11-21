@@ -39,6 +39,7 @@ import { characterRemembered } from "./characterActions";
 import { saveHomePlan } from "./buildActions";
 import { guideClaim, guideSeen, guideState } from "./guideActions";
 import { fameState } from "./fameActions";
+import { goalsHalfway, surpriseCheck, weekRecap } from "./rewardActions";
 import { sceneCollect, sceneCrewHype, sceneDeal, sceneHype, sceneResidencyCheckin, sceneResidencyTake, sceneStart, sceneState } from "./sceneActions";
 import { choiceBail, choiceBlotter, choiceConditions, choiceChoose, choiceOffer, choiceSeen, choiceSkip, choiceState, favorOpen, favorPeek, npcBigFavor, npcBonds, npcPerk } from "./choiceActions";
 import { underworldDeclineHire, underworldHire, underworldHires, underworldJob, underworldLawyer, underworldRunHire, underworldRunners, underworldScreen, underworldSeen, underworldTable } from "./underworldActions";
@@ -262,6 +263,7 @@ export default async function HomePage() {
       // Migration 0170 switches on the Guide (guide_state answers null before it runs, which keeps the pill away).
       guide={city ? { state: guideState, seen: guideSeen, claim: guideClaim } : undefined}
       fame={city ? fameState : undefined}
+      rewards={city ? { halfway: goalsHalfway, recap: weekRecap, surprise: surpriseCheck } : undefined}
       scene={city ? { state: sceneState, start: sceneStart, hype: sceneHype, collect: sceneCollect, deal: sceneDeal, crewHype: sceneCrewHype, residencyTake: sceneResidencyTake, residencyCheckin: sceneResidencyCheckin } : undefined}
       // Migration 0124 switches on Delete my account (account_delete_prepare fails before it runs, and nothing is deleted).
       deleteAccount={deleteAccount}

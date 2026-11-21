@@ -954,6 +954,13 @@ components live in `app/globals.css`.
   `fame_points`, which scene_context adds to Scene's own points; Start over clears it. SEASON.xp gained career_pay, career_promo,
   campaign_poll, business_buy, business_upgrade, date_night, visit_host, party, hunt, couple_anniv, home_score and scene_plaque
   (merged into season_pass xp by 0176; tests/seasonPass.test.ts reads the merge).
+  Small progress and surprises (migration 0177, owner Nov 21: "build 5 and 6"; lib/rewards.ts, app/home/rewardActions.ts,
+  components/game/rewardsCelebrations.ts): `goals_halfway()` pays a quarter of a half-done goal's reward once (ledger 'goal_half',
+  run with the goals; yes/no goals and locked ones never), `week_recap()` is last New York week for the Monday results card
+  (`firstTime('recap', week)`), and `surprises` (one roll a New York day, ~half get one: freebie, selfie, drink, a celebrity's
+  invite) paid by `surprise_give` (service role, ledger 'surprise'); an invite refunds that move's start once
+  (`surprise_invite_redeem`, 'surprise_invite', not on top of Rank 4's fame_invite). GameShell's `rewards` prop.
+  `?rewards=recap|halfway|freebie|selfie|drink|invite` in the preview.
 - Players see "Crew" for their invited friends; code, types and database tables still say `clique`
   (renaming stored data isn't worth the risk). Keep player-facing copy on "crew".
 - Culture packs (docs/culture/, one at a time, only when the owner says "Build C<number>"): slang, invented stand-ins

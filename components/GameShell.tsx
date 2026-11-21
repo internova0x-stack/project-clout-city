@@ -116,6 +116,7 @@ import type { CrewCard, MoveCard, Offer, SceneApi, SceneView } from "@/lib/scene
 import type { DealWay } from "@/lib/scene";
 import { PLAQUES, scoreOf } from "@/lib/scene";
 import { RanksSheet, type FameUse } from "./game/Ranks";
+import { halfwayCelebration, recapCelebration, surpriseCelebration, type RewardsApi } from "./game/rewardsCelebrations";
 import { nextRank } from "@/lib/ranks";
 import { handle } from "@/lib/validation";
 import { rankCelebration } from "./game/Ranks";
@@ -313,6 +314,7 @@ export function GameShell({
   guide,
   scene,
   fame,
+  rewards,
   deleteAccount,
   lockAppsPreview,
   demo,
@@ -398,6 +400,8 @@ export function GameShell({
   scene?: SceneApi;
   /** Fame perks (migration 0175, lib/fame.ts): which repeating perks are used this week or today. */
   fame?: () => Promise<FameUse | null>;
+  /** Credit for small progress and surprises (migration 0177, lib/rewards.ts): halfway goals, the Monday recap, a surprise a day. */
+  rewards?: RewardsApi;
   /** Preview: lock the apps that open at a rank, whatever the player's rank. */
   lockAppsPreview?: boolean;
   /** Demo mode (owner, Oct 27; components/demo): inviting and the end of the first session ask the guest to sign up. */
@@ -1417,10 +1421,12 @@ export function GameShell({
     goalsPrev.current = r.data;
     setGoalsNow(r.data);
     if (reveal) setGoalsReveal(reveal);
+    // Halfway there (migration 0177): a quarter of a goal's reward when it's half done, once.
+    if (rewards) void rewards.halfway().then((paid) => { for (const p of paid) celebrate(halfwayCelebration(p, () => { setTasksTab("goals"); setPanel("tasks"); })); }).catch(() => {});
     // Streak repair (migration 0158): the offer rides along with the goals.
     if (goals.repairState) void goals.repairState().then((x) => { if (x.ok) { setRepairOffer(x.data.offer); streakRead(r.data, x.data.offer, badCtx.current); } }).catch(() => {});
     else streakRead(r.data, undefined, badCtx.current);
-  }, [goals]);
+  }, [goals, rewards]);
   const [repairOffer, setRepairOffer] = useState<RepairOffer | null>(null);
   const repairStreak = async (method: RepairMethod) => {
     if (!goals?.repair) return;
@@ -2688,7 +2694,8 @@ export function GameShell({
         line: r.data.banHours ? `Banned from here for ${r.data.banHours} hours. Worth a try.` : "Not tonight. Try again tomorrow.", rewards: [] });
     } else {
       celebrate({ rung: 2, emoji: o.emoji, tag: o.short ? "You're in 🤫" : "Move started", title: o.title,
-        line: `Ready in ${o.hours} h. It's in Your Scene.`, rewards: [], cta: "Your Scene", onCta: () => setSceneOpen(true) });
+        line: r.data.refund ? `On the house: C$${r.data.refund.toLocaleString("en-US")} back. Ready in ${o.hours} h.` : `Ready in ${o.hours} h. It's in Your Scene.`,
+        rewards: r.data.refund ? [{ tone: "cash", text: `+C$${r.data.refund.toLocaleString("en-US")}` }] : [], cta: "Your Scene", onCta: () => setSceneOpen(true) });
     }
   };
   const sceneHype = async (m: MoveCard) => {
@@ -2766,6 +2773,25 @@ export function GameShell({
   // Fame perks (migration 0175): the Ranks & fame perks list, opened from the leaderboard, with this week's usage.
   const [ranksOpen, setRanksOpen] = useState(false);
   const [fameUse, setFameUse] = useState<FameUse | null>(null);
+  // Last week's recap (Mondays, once per week per device) and today's surprise (rolled once a New York day on the server),
+  // asked a little after the city is on. The celebration host holds them while a choice card, a trip or the welcome is up.
+  const rewardsAsked = useRef(false);
+  useEffect(() => {
+    if (!rewards || !cityOn || rewardsAsked.current || flow !== "none") return;
+    const t = setTimeout(() => {
+      if (rewardsAsked.current) return;
+      rewardsAsked.current = true;
+      void rewards.recap().then((r) => {
+        if (r && firstTime("recap", r.week)) celebrate(recapCelebration(r, () => setSceneOpen(true)));
+      }).catch(() => {});
+      void rewards.surprise().then((x) => {
+        if (!x) return;
+        celebrate(surpriseCelebration(x, x.invite ? () => { setSceneOpen(true); } : undefined));
+        void cityApi?.refresh().then((r) => { if (r.ok) setCity(r.state); });
+      }).catch(() => {});
+    }, 9000);
+    return () => clearTimeout(t);
+  }, [rewards, cityOn, flow, cityApi]);
   useEffect(() => { if (ranksOpen && fame) void fame().then(setFameUse); }, [ranksOpen, fame]);
   const rankNext = nextRank(me.clout, myWorth);
   // ---- The Guide (migration 0170) ----

@@ -140,7 +140,7 @@ const hostOf = (id?: string): Host | undefined => {
 };
 
 export type SceneR<T> = { ok: true; data: T } | { ok: false; error: string };
-export interface StartResult { bounced: boolean; banHours: number; view: SceneView }
+export interface StartResult { bounced: boolean; banHours: number; view: SceneView; /** A celebrity's invite paid the move back (migration 0177). */ refund?: number }
 export interface CollectResult {
   clout: number; points: number; score: ScoreId; stale: boolean; move: string; view: SceneView;
   /** Step 3: trending's boost, how often collected now, and a plaque earned with it. */
