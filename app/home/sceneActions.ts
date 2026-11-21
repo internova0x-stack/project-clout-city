@@ -3,7 +3,7 @@
 import { randomInt } from "node:crypto";
 import { SNEAK, bribeOf, canSneak, costFor, fits, needsOk, sneakOdds, type SneakWay } from "@/lib/scene";
 import { SCENE_MOVES, sceneMove } from "@/lib/sceneContent";
-import { openPlace, sceneView, type SceneRaw, type SceneView } from "@/lib/sceneView";
+import { openPlace, sceneView, type CollectResult, type SceneRaw, type SceneView, type StartResult } from "@/lib/sceneView";
 import { memoryOf } from "@/lib/memoryServer";
 import { getAdminSupabase } from "@/lib/supabase/admin";
 import { getServerSupabase } from "@/lib/supabase/server";
@@ -73,8 +73,6 @@ export async function sceneState(): Promise<R<SceneView>> {
   return view(w);
 }
 
-export interface StartResult { bounced: boolean; banHours: number; view: SceneView }
-
 /** Starts a move where the player is: invited when they have the rank or money, else `way` tries to get them in. */
 export async function sceneStart(move: string, way?: SneakWay["id"]): Promise<R<StartResult>> {
   const w = await who();
@@ -110,8 +108,6 @@ export async function sceneHype(id: string): Promise<R<SceneView>> {
   if (error) return { ok: false, error: err(error, "scene_hype") };
   return view(w);
 }
-
-export interface CollectResult { clout: number; points: number; score: string; stale: boolean; move: string; view: SceneView }
 
 export async function sceneCollect(id: string): Promise<R<CollectResult>> {
   const w = await who();

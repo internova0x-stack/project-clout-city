@@ -146,7 +146,7 @@ export const STEPS: GuideStep[] = [
     id: "1.6", chapter: 1, tag: "Clout", tip: "Five tasks a day keeps obscurity away.",
     cards: [
       { art: "✅", t: "Five tasks, every New York day.", b: "One gossip task, two for your current goal, one for a skill, one wild card. Each pays C$ and clout." },
-      { art: "🎁", t: "Finish all five for the bonus.", b: "All five also keeps your streak alive and fills the Clout Pass. The counter at the top shows how many are done." },
+      { art: "🎁", t: "Finish all five for the bonus.", b: "All five also keeps your streak alive and fills the Clout Pass. The Tasks ring on the right shows how many are done." },
     ],
     hint: "Your tasks live here", targets: ['button[aria-label^="Tasks and goals"]'],
     check: { ledger: ["daily_bonus"] }, reward: { cash: 150 }, done: "All five done. The city noticed.",

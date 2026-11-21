@@ -188,6 +188,9 @@ components live in `app/globals.css`.
 - HUD entry points (owner, Oct 23): the task counter (1/5) is the way into Tasks (Daily, Goals, Hunt); its pin is gone (owner,
   Nov 3: it collided with the 🔥 streak badge), the streak badge stays; the side column's Tasks button is Skills (`SkillsSheet`, components/game/Skills.tsx:
   today's skill task on top, then every skill; pinned when a perk is ready). The skill task links back ("See skills ›").
+  Owner, Nov 21: the task counter moved to the top of the side column (the ring with 1/5, the 🔥 streak on its corner, "✓ 3/5"
+  pops there), above Skills, Events, Places, Bills and Look; the top bar's freed space is clout with the way to the next rank
+  under it (`rankBar`, `nextRank`). The bottom bar has five tabs: Home · Map · Scene · Phone · Shop.
 - Loading (owner, Oct 23-24): the launch splash `AppLoading` is `/`'s Suspense fallback only (no loading.tsx, so Continue
   keeps the welcome screen and its spinner up until the game is ready); it shows at once and `SplashHold` keeps it up
   until the screen behind it has drawn (owner, Nov 1: lib/splash.ts `screenReady`: the welcome screen's Room3D onReady, the map's
@@ -905,6 +908,20 @@ components live in `app/globals.css`.
   pieces). app/home/buildActions.ts checks a plan (`planProblems`) and prices it against the last (`planCost`: walls by the metre,
   floors by the m², paint, garden pieces; game_settings 'home_build'), then `home_build_save` (service role) charges and stores it.
   components/home/BuildMode.tsx is the plan editor (the 🔨 under 🛋️); GameShell draws the home through `builtTemplate`.
+- Your Scene (migration 0171, owner Nov 21: "daily grooming of clout", FarmVille's loop; docs/SCENE.md): slots by rank
+  (`slotsFor`: 2, 3 at Rank 3, 4 at Rank 5, 5 at Rank 7); a move (content/scene/moves.json, 58: everyday, status, hosted by the
+  cast, situational with a storylet `when`) is started at one of its places (`scene_start`, service role: place, hours,
+  holding, bans, rank or net worth, a free slot, Energy, bank; ledger cash 'scene_cost'), builds in real time (2/8/24/72 h),
+  wants hypes (`scene_hype`, at its place, an hour apart) and is collected (`scene_collect`: clout ledger 'scene', a quarter off
+  per missed hype, a quarter when stale, score points, `skill_practice`). Six scores with five titles each (`SCORES`), worked
+  out from collected rows. For you today (`forYou`, lib/scene.ts): four moves from different areas of life read from
+  `player_memory` (app/home/sceneActions.ts checks `when`), at least one everyday, none running or rested (3 days), yesterday's
+  last. Fake it till you make it (owner, Nov 21): short of a move's rank or money, `SNEAK` (confidence, name-drop, bribe; the
+  server rolls with crypto random; bounced spends the Energy, a name-drop's 24 h ban, `scene_bounces` blocks a retry that day,
+  meter nudges); invited players pay +10% a rank above the move's (`costFor`). UI: components/scene/Scene.tsx (`SceneScreen`, the
+  full-screen tab; `SceneHere`, the place panel's row; `SceneStartSheet`, start or the door); game_settings 'scene' from
+  `sceneSettings()` (tests/scene.test.ts compares). Start over clears it. `?scene=new|busy|student|rich` in the preview (lib/sceneSim.ts,
+  an hour in 30 seconds).
 - Players see "Crew" for their invited friends; code, types and database tables still say `clique`
   (renaming stored data isn't worth the risk). Keep player-facing copy on "crew".
 - Culture packs (docs/culture/, one at a time, only when the owner says "Build C<number>"): slang, invented stand-ins

@@ -48,8 +48,9 @@ export interface MoveCard {
   staleAt: string;
   /** When the next hype opens (while building and one is wanted). */
   hypeAt: string | null;
-  /** What collecting now would pay (the full pay once hyped). */
+  /** What collecting pays: on time (with the hypes done by then), and once stale. */
   pay: { clout: number; points: number };
+  stalePay: { clout: number; points: number };
   score: ScoreId;
 }
 
@@ -86,6 +87,10 @@ export interface SceneView {
   here: Offer[];
   scores: ScoreView[];
   collected: number;
+  /** The clock the view was made at, and how fast it runs (1 in the game; the preview runs hours in seconds). The screen
+   *  counts down from these: its now = now + (Date.now() − when it arrived) × speed. */
+  now: number;
+  speed: number;
 }
 
 const placeName = (id: string) => PLACES.find((p) => p.id === id)?.name ?? id;
@@ -95,6 +100,17 @@ const hostOf = (id?: string): Host | undefined => {
   return c ? { id, name: c.name, portrait: c.portrait } : undefined;
 };
 
+export type SceneR<T> = { ok: true; data: T } | { ok: false; error: string };
+export interface StartResult { bounced: boolean; banHours: number; view: SceneView }
+export interface CollectResult { clout: number; points: number; score: ScoreId; stale: boolean; move: string; view: SceneView }
+/** What the game calls (app/home/sceneActions.ts in the game, lib/sceneSim.ts in the preview). */
+export interface SceneApi {
+  state(): Promise<SceneR<SceneView>>;
+  start(move: string, way?: "confidence" | "namedrop" | "bribe"): Promise<SceneR<StartResult>>;
+  hype(id: string): Promise<SceneR<SceneView>>;
+  collect(id: string): Promise<SceneR<CollectResult>>;
+}
+
 export function openPlace(boroughs: string[]): (id: string) => boolean {
   const open = new Set(boroughs);
   return (id) => {
@@ -103,7 +119,7 @@ export function openPlace(boroughs: string[]): (id: string) => boolean {
   };
 }
 
-export function sceneView(moves: SceneMove[], raw: SceneRaw, memory: Memory | null, player: string, now: number): SceneView {
+export function sceneView(moves: SceneMove[], raw: SceneRaw, memory: Memory | null, player: string, now: number, speed = 1): SceneView {
   const byId = new Map(moves.map((m) => [m.id, m]));
   const open = openPlace(raw.boroughs);
   const ctx: SceneCtx = { rank: raw.rank, netWorth: raw.netWorth, memory, today: raw.today, open };
@@ -121,7 +137,8 @@ export function sceneView(moves: SceneMove[], raw: SceneRaw, memory: Memory | nu
       id: r.id, move: r.move, slot: r.slot, title: m.title, emoji: m.emoji, place: r.place, placeName: placeName(r.place), host: hostOf(m.host),
       status, entry: r.entry ?? "invited", hypes: r.hypes.length, need: r.need,
       startedAt: r.startedAt, readyAt: r.readyAt, staleAt: r.staleAt, hypeAt,
-      pay: payout(m.clout, r.need, status === "ready" || status === "stale" ? r.hypes.length : r.need, status === "stale"), score: m.score,
+      pay: payout(m.clout, r.need, status === "ready" || status === "stale" ? r.hypes.length : r.need, false),
+      stalePay: payout(m.clout, r.need, r.hypes.length, true), score: m.score,
     }];
   });
 
@@ -144,5 +161,5 @@ export function sceneView(moves: SceneMove[], raw: SceneRaw, memory: Memory | nu
     return { id: s.id, label: s.label, emoji: s.emoji, points: pts, title: t.title(s.id), next: t.next, nextTitle: t.next !== null ? s.titles[t.tier + 1] : null };
   });
 
-  return { at: raw.at, rank: raw.rank, slots: slotsFor(raw.rank), nextSlotRank: nextSlotRank(raw.rank), moves: cards, forYou: picks, here, scores, collected: raw.collected };
+  return { at: raw.at, rank: raw.rank, slots: slotsFor(raw.rank), nextSlotRank: nextSlotRank(raw.rank), moves: cards, forYou: picks, here, scores, collected: raw.collected, now, speed };
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { createGuideSim } from "@/lib/guideSim";
+import { createSceneSim } from "@/lib/sceneSim";
 import { previewCoutureMap, previewPlazaBook, previewPlazaWeeks } from "@/app/preview/coutureActions";
 import type { CoutureApi } from "@/lib/coutureMap";
 import { previewRadioReport, previewRadioRequest, previewRadioState } from "@/app/preview/radioActions";
@@ -489,6 +490,8 @@ export function PreviewHome({
     const g = createGuideSim(preset === "mid" || preset === "done" ? preset : "new");
     return { ...g, async claim(step: string) { const r = await g.claim(step); if (r) sim.huntReward(r.cash, r.clout); return r; } };
   }, [sim]);
+  // Your Scene (migration 0171) in memory on a fast clock: ?scene=new|busy|student|rich.
+  const sceneSim = useMemo(() => createSceneSim(sim, typeof window === "undefined" ? null : new URLSearchParams(window.location.search).get("scene")), [sim]);
   const starterSim = useMemo(() => createStarterSim(starterPreset ?? 0, (cash, clout) => sim.huntReward(cash, clout)), [starterPreset, sim]);
   const mark = starterSim.mark;
   // Migration 0163's new missions: a workday, a choice made, people over.
@@ -718,6 +721,7 @@ export function PreviewHome({
       visits={cityOff ? undefined : starterVisits}
       starter={cityOff || starterPreset === undefined ? undefined : starterSim.api}
       guide={cityOff ? undefined : guideSim}
+      scene={cityOff ? undefined : sceneSim}
       lockAppsPreview={appsPreset === "locked"}
       // Delete my account: the preview says what would happen and deletes nothing.
       deleteAccount={async () => { await new Promise((r) => setTimeout(r, 600)); return { ok: false, error: "Preview: nothing is deleted here. In the game this deletes the account and lands on the welcome page." }; }}

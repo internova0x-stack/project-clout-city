@@ -111,6 +111,10 @@ import { DailyTasksHint, TourTooltip, TOUR } from "./game/Tutorial";
 import { openBoroughs, type BoroughGate } from "@/lib/boroughGates";
 import { boroughOf } from "@/lib/city";
 import { GameChrome, type ChromeAction, type QuestButton, type Tab } from "./hud/GameChrome";
+import { SceneHere, SceneScreen, SceneStartSheet, useSceneNow } from "./scene/Scene";
+import type { MoveCard, Offer, SceneApi, SceneView } from "@/lib/sceneView";
+import { scoreOf } from "@/lib/scene";
+import { nextRank } from "@/lib/ranks";
 import { handle } from "@/lib/validation";
 import { rankCelebration } from "./game/Ranks";
 import { CelebrationHost, celebrate } from "./Celebrate";
@@ -305,6 +309,7 @@ export function GameShell({
   visits,
   starter: starterIn,
   guide,
+  scene,
   deleteAccount,
   lockAppsPreview,
   demo,
@@ -386,6 +391,8 @@ export function GameShell({
   starter?: StarterApi;
   /** The Guide (migration 0170, lib/guide.ts): the one recommended next step, played through and paid once. */
   guide?: GuideApi;
+  /** Your Scene (migration 0171, lib/scene.ts): the daily clout loop, the bottom bar's middle tab. */
+  scene?: SceneApi;
   /** Preview: lock the apps that open at a rank, whatever the player's rank. */
   lockAppsPreview?: boolean;
   /** Demo mode (owner, Oct 27; components/demo): inviting and the end of the first session ask the guest to sign up. */
@@ -1581,6 +1588,7 @@ export function GameShell({
     window.history.replaceState(null, "", url.toString());
     if (open === "messages" || open === "gigs" || open === "businesses" || open === "apartments" || open === "guide") setPhone({ open: true, app: open });
     else if (open === "bills" || open === "tasks" || open === "events" || open === "us") setPanel(open);
+    else if (open === "scene" && scene) setSceneOpen(true);
     // A visit invite (migration 0121).
     else if (open === "plans") setPanel("visits");
     // The Player Economy (migration 0151): a gift arrived; a job was taken or paid.
@@ -2641,6 +2649,64 @@ export function GameShell({
   // Migration 0151: C$ from other players over the weekly cap doesn't count (the server's net_worth agrees).
   const myWorth = Math.max(0, otherWorth + (biz ? businessesValue(biz.owned, me.clout) : 0) - (econ?.uncounted ?? 0));
   const myRank = rankFor(me.clout, myWorth);
+  // ---- Your Scene (migration 0171; owner, Nov 21) ----
+  const [sceneOpen, setSceneOpen] = useState(false);
+  const [sceneV, setSceneV] = useState<SceneView | null>(null);
+  const [sceneOffer, setSceneOffer] = useState<Offer | null>(null);
+  const [sceneBusy, setSceneBusy] = useState(false);
+  const loadScene = useCallback(async () => {
+    if (!scene) return;
+    const r = await scene.state();
+    if (r.ok) setSceneV(r.data);
+  }, [scene]);
+  // The view on opening, on arriving somewhere (the place's moves) and every half minute (a move turns ready).
+  useEffect(() => { if (cityOn) void loadScene(); }, [cityOn, loadScene, atPlace, sceneOpen]);
+  useEffect(() => (cityOn && scene ? everyVisible(() => void loadScene(), 30_000) : undefined), [cityOn, scene, loadScene]);
+  const sceneNow = useSceneNow(sceneV);
+  const sceneDot = !!sceneV && sceneV.moves.some((m) => sceneNow >= Date.parse(m.readyAt)
+    || (m.hypes < m.need && sceneNow < Date.parse(m.readyAt) && (!m.hypeAt || sceneNow >= Date.parse(m.hypeAt))));
+  const sceneGo = (placeId: string) => { setSceneOpen(false); openPlace(placeId); };
+  const sceneStart = async (way?: "confidence" | "namedrop" | "bribe") => {
+    if (!scene || !sceneOffer || sceneBusy) return;
+    const o = sceneOffer;
+    setSceneBusy(true);
+    const r = await scene.start(o.move, way);
+    setSceneBusy(false);
+    if (!r.ok) return setToast(r.error);
+    setSceneOffer(null);
+    setSceneV(r.data.view);
+    if (cityApi) void cityApi.refresh().then((x) => x.ok && applyCity(x));
+    if (r.data.bounced) {
+      celebrate({ rung: 2, emoji: "🚫", tag: "Bounced", title: "They checked the list.",
+        line: r.data.banHours ? `Banned from here for ${r.data.banHours} hours. Worth a try.` : "Not tonight. Try again tomorrow.", rewards: [] });
+    } else {
+      celebrate({ rung: 2, emoji: o.emoji, tag: o.short ? "You're in 🤫" : "Move started", title: o.title,
+        line: `Ready in ${o.hours} h. It's in Your Scene.`, rewards: [], cta: "Your Scene", onCta: () => setSceneOpen(true) });
+    }
+  };
+  const sceneHype = async (m: MoveCard) => {
+    if (!scene || sceneBusy) return;
+    setSceneBusy(true);
+    const r = await scene.hype(m.id);
+    setSceneBusy(false);
+    if (!r.ok) return setToast(r.error);
+    setSceneV(r.data);
+    setToast(`Hyped ${m.title} ⚡`);
+  };
+  const sceneCollect = async (m: MoveCard) => {
+    if (!scene || sceneBusy) return;
+    setSceneBusy(true);
+    const r = await scene.collect(m.id);
+    setSceneBusy(false);
+    if (!r.ok) return setToast(r.error);
+    setSceneV(r.data.view);
+    if (cityApi) void cityApi.refresh().then((x) => x.ok && applyCity(x));
+    const sc = scoreOf(r.data.score);
+    celebrate({ rung: 2, emoji: m.emoji, tag: r.data.stale ? "Went stale" : "Collected", title: m.title,
+      line: r.data.stale ? "Old news by the time you showed up. A quarter's better than nothing." : "The city noticed.",
+      rewards: [{ tone: "clout", text: `+${r.data.clout} 🔥` }, { text: `${sc.emoji} +${r.data.points} ${sc.label}` }] });
+  };
+  const rankNext = nextRank(me.clout, myWorth);
   // ---- The Guide (migration 0170) ----
   // Optional steps the player skipped ("Not for me"), kept on this device.
   const [guideSkipped, setGuideSkipped] = useState<string[]>([]);
@@ -2969,8 +3035,9 @@ export function GameShell({
 
   const onAction = useCallback(
     (a: ChromeAction) => {
-      if (a === "tab:home") return setTab("home");
-      if (a === "tab:map") return setTab("map");
+      if (a === "tab:home") { setSceneOpen(false); return setTab("home"); }
+      if (a === "tab:map") { setSceneOpen(false); return setTab("map"); }
+      if (a === "scene") { if (!scene) return setSoon({ key: "places" }); setPanel(null); setInside(null); setPlace(null); return setSceneOpen(true); }
       if (a === "invite") {
         if (demo) return demo.signUp("invite");
         markPin("invite");
@@ -3001,7 +3068,7 @@ export function GameShell({
       setSoon({ key: a });
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [flow, cityOn, markTasksSeen, endDailyHint, demo],
+    [flow, cityOn, markTasksSeen, endDailyHint, demo, scene],
   );
 
   const onPinTap = useCallback(
@@ -3341,7 +3408,13 @@ export function GameShell({
               onDone={() => setSign(null)}
             />
           ) : null}
-          life={lifeV ? <LifeStrip view={lifeV} busy={busy !== null} onOpen={(a) => { setLifeResult(null); setLifeCard({ card: a, kind: "activity" }); }} onStamp={(d) => void claimStampLife(d)} /> : null}
+          life={lifeV || (sceneV && sceneV.at === inside.id && sceneV.here.length) ? (
+            <>
+              {/* Your Scene (owner, Nov 21): the moves you can start here, above the place's own things to do. */}
+              {sceneV && sceneV.at === inside.id && <SceneHere view={sceneV} busy={sceneBusy} onPick={setSceneOffer} />}
+              {lifeV && <LifeStrip view={lifeV} busy={busy !== null} onOpen={(a) => { setLifeResult(null); setLifeCard({ card: a, kind: "activity" }); }} onStamp={(d) => void claimStampLife(d)} />}
+            </>
+          ) : null}
           here={chat?.presence ? { people: here, count: Math.max(hereCount, here.length), inView: inView.map((p) => p.id), floor: insideFloor, onOpen: openPlayer } : undefined}
           room={
             <Room3D
@@ -3617,7 +3690,14 @@ export function GameShell({
         </>
       )}
 
+      {sceneOpen && sceneV && (
+        <SceneScreen view={sceneV} busy={sceneBusy} onStart={setSceneOffer} onHype={(m) => void sceneHype(m)} onCollect={(m) => void sceneCollect(m)} onGo={sceneGo} />
+      )}
+      <SceneStartSheet offer={sceneOffer} busy={sceneBusy} onClose={() => setSceneOffer(null)} onGo={(way) => void sceneStart(way)} />
       <GameChrome
+        sceneOn={sceneOpen}
+        sceneDot={sceneDot}
+        rankBar={{ label: rankNext ? `Rank ${rankNext.rank.level} at ${rankNext.rank.clout.toLocaleString("en-US")}` : null, progress: rankNext?.progress ?? 1 }}
         me={{ head: <AvatarHead look={look} outfit={outfit} />, rank: myCard?.rank ?? null, onOpen: () => setPanel("profile") }}
         tips={statSuggestions}
         onTip={(id) => {

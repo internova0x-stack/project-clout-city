@@ -11,7 +11,7 @@ import {
   HouseIcon, LocateIcon, MapPinIcon, PersonIcon, PhoneIcon, ReceiptIcon, SpeakerIcon, SpeakerOffIcon, StoreIcon, TargetIcon,
 } from "../icons";
 
-export type ChromeAction = ComingSoonKey | "invite" | "tab:home" | "tab:map" | "leaderboard" | "skills";
+export type ChromeAction = ComingSoonKey | "invite" | "tab:home" | "tab:map" | "leaderboard" | "skills" | "scene";
 
 export interface ChromeValues {
   clout: number;
@@ -51,7 +51,7 @@ export interface QuestButton { id: string; emoji: string; aria: string; dot: boo
 export function GameChrome({
   quests = [],
   time,
-  tab,
+  tab, sceneOn = false, sceneDot = false, rankBar,
   onAction,
   invitePin = false,
   netWorthPin = false,
@@ -69,6 +69,12 @@ export function GameChrome({
 }: {
   time: string;
   tab: Tab;
+  /** Your Scene is open (the Scene tab shows as current). */
+  sceneOn?: boolean;
+  /** Something in Your Scene needs you: a move ready, a hype due, one about to go stale. */
+  sceneDot?: boolean;
+  /** The way to the next rank under the clout number ("Rank 4 at 1,000"), 0 to 1. */
+  rankBar?: { label: string | null; progress: number };
   onAction: (a: ChromeAction) => void;
   invitePin?: boolean;
   netWorthPin?: boolean;
@@ -156,12 +162,6 @@ export function GameChrome({
           <span className="hud-time hud-number" aria-label="City time">
             {time ? <>{time.split(" ")[0]}{time.includes(" ") && <small className="hud-ampm">{time.split(" ").slice(1).join(" ")}</small>}</> : "\u00a0"}
           </span>
-          <button ref={tasksRef} className="hud-btn" data-tour="tasks" onClick={() => onAction("daily")} aria-label={values ? `Tasks and goals, ${values.dailyDone} of ${values.dailyTotal} daily tasks done` : "Tasks and goals"}>
-            <DailyRing done={values?.dailyDone ?? 0} total={values?.dailyTotal ?? 5} />
-            <span className="hud-number">{values ? `${values.dailyDone}/${values.dailyTotal}` : "—/5"}</span>
-            {!!values?.streak && <span className="hud-streak" aria-label={`${values.streak}-day streak`}>🔥{values.streak}</span>}
-            {taskPop && <span className="hud-task-pop" aria-hidden="true">{taskPop}</span>}
-          </button>
           <button
             className="hud-icon-btn"
             onClick={() => (onToggleSound ? onToggleSound() : onAction("sound"))}
@@ -174,7 +174,14 @@ export function GameChrome({
         <div className="hud-cluster">
           <button ref={cloutRef} className="hud-btn hud-clout" data-tour="clout" onClick={() => onAction(values ? "leaderboard" : "clout")} aria-label="Clout score">
             <FlameFilled size={20} />
-            <span className="hud-number">{values ? formatShort(shownClout ?? values.clout) : "—"}</span>
+            {/* Owner, Nov 21: the freed space goes to clout, with the way to the next rank under it. */}
+            <span className="hud-clout-col">
+              <span className="hud-clout-line">
+                <span className="hud-number">{values ? formatShort(shownClout ?? values.clout) : "—"}</span>
+                {rankBar?.label && <span className="hud-rank-next">{rankBar.label}</span>}
+              </span>
+              {rankBar && <span className="hud-rank-bar" aria-hidden="true"><span style={{ width: `${Math.round(rankBar.progress * 100)}%` }} /></span>}
+            </span>
           </button>
           <button className="hud-icon-btn" data-tour="money" onClick={() => onAction("networth")} aria-label="Net worth">
             <span className="circle"><DiamondIcon size={18} /></span>
@@ -226,10 +233,22 @@ export function GameChrome({
         )}
       {/* v0.11 (owner, Oct 14): stacked just above the bottom bar, TikTok-style: a round button and a label for each. */}
       <nav className="side-col" aria-label="Quick actions">
+        {/* Owner, Nov 21: the task counter moves here from the top bar (Scene took a tab in the bottom bar). */}
+        <button ref={tasksRef} className="side-btn" data-tour="tasks" onClick={() => onAction("daily")}
+          aria-label={values ? `Tasks and goals, ${values.dailyDone} of ${values.dailyTotal} daily tasks done` : "Tasks and goals"}>
+          <span className="side-ico glass-hud side-tasks">
+            <DailyRing done={values?.dailyDone ?? 0} total={values?.dailyTotal ?? 5} size={40} />
+            {!(values && values.dailyTotal > 0 && values.dailyDone >= values.dailyTotal) && <span className="side-tasks-n">{values ? `${values.dailyDone}/${values.dailyTotal}` : "—"}</span>}
+            {!!values?.streak && <span className="side-streak" aria-label={`${values.streak}-day streak`}>🔥{values.streak}</span>}
+            {values?.tasksBadge && <span className="pin-dot" style={{ top: 2, right: 2 }} />}
+          </span>
+          <span className="side-lbl" aria-hidden="true">Tasks</span>
+          {taskPop && <span className="hud-task-pop" aria-hidden="true">{taskPop}</span>}
+        </button>
         {/* Owner, Oct 23: the counter up top is the way into Tasks; this button is Skills, one tap from home. */}
         {values?.skillsOn
           ? <SideBtn label="Skills" aria={values.skillsBadge ? "Skills, a perk is ready" : "Skills"} dot={values.skillsBadge} tour="skills" onClick={() => onAction("skills")}><TargetIcon /></SideBtn>
-          : <SideBtn label="Tasks" aria={values?.tasksBadge ? "Tasks and goals, new today" : "Tasks and goals"} dot={values?.tasksBadge} onClick={() => onAction("tasks")}><ChecklistIcon /></SideBtn>}
+          : null}
         <SideBtn label="Events" aria="Events" dot={values?.eventsBadge} tour="events" onClick={() => onAction("events")}><ChampagneIcon /></SideBtn>
         <SideBtn label="Places" aria="Places" onClick={() => onAction("places")}><BuildingIcon /></SideBtn>
         <SideBtn label="Bills" aria={values?.cashAlert ? "Bills: not enough in the bank" : "Bills"} dot={values?.billsBadge} alert={values?.cashAlert} onClick={() => onAction("bills")}><ReceiptIcon /></SideBtn>
@@ -288,11 +307,19 @@ export function GameChrome({
       </section>
 
       <nav className="nav glass-hud" aria-label="Main">
-        <button className="nav-tab" aria-current={tab === "home" ? "page" : undefined} onClick={() => onAction("tab:home")}>
+        <button className="nav-tab" aria-current={!sceneOn && tab === "home" ? "page" : undefined} onClick={() => onAction("tab:home")}>
           <HouseIcon /> Home
         </button>
-        <button className="nav-tab" data-tour="map" aria-current={tab === "map" ? "page" : undefined} onClick={() => onAction("tab:map")}>
+        <button className="nav-tab" data-tour="map" aria-current={!sceneOn && tab === "map" ? "page" : undefined} onClick={() => onAction("tab:map")}>
           <MapPinIcon /> Map
+        </button>
+        {/* Your Scene (owner, Nov 21): the daily clout loop, in the middle of the bar. */}
+        <button className="nav-tab" data-tour="scene" aria-current={sceneOn ? "page" : undefined} onClick={() => onAction("scene")}>
+          <span style={{ position: "relative", display: "inline-flex" }}>
+            <ClapperIcon />
+            {sceneDot && <span className="pin-dot" style={{ top: -2, right: -4 }} />}
+          </span>
+          Scene
         </button>
         <button className="nav-tab" data-tour="phone" onClick={() => onAction("phone")}>
           <span style={{ position: "relative", display: "inline-flex" }}>
@@ -361,5 +388,16 @@ function SideBtn({ label, aria, dot, alert, tour, onClick, children }: { label: 
       </span>
       <span className="side-lbl" aria-hidden="true">{label}</span>
     </button>
+  );
+}
+
+/** The Scene tab: a clapperboard. */
+function ClapperIcon({ size = 24 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M4 10h16v9a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z" />
+      <path d="m4 10-.6-3.2a1 1 0 0 1 .8-1.2L17.6 3a1 1 0 0 1 1.2.8l.4 2.2L4 10z" />
+      <path d="m8.5 4.6 2.6 3.6M13.4 3.8l2.6 3.5" />
+    </svg>
   );
 }

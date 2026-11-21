@@ -127,7 +127,7 @@ export interface SneakWay {
   banHours: number;
 }
 export const SNEAK: SneakWay[] = [
-  { id: "confidence", emoji: "😎", label: "Walk in like you own the place", get: "In for free, if nobody asks", cost: "The night, if they do", odds: 0.4, skill: "charisma", perLevel: 0.05, integrity: 0, banHours: 0 },
+  { id: "confidence", emoji: "😎", label: "Walk in like you own the place", get: "Through the door, if nobody asks", cost: "The night, if they do", odds: 0.4, skill: "charisma", perLevel: 0.05, integrity: 0, banHours: 0 },
   { id: "namedrop", emoji: "🗣️", label: "Say you're on {host}'s list", get: "Waved straight in", cost: "A day's ban if they check the list", odds: 0.6, skill: "gossip", perLevel: 0.03, integrity: -3, banHours: 24 },
   { id: "bribe", emoji: "💵", label: "Slip the door C${extra}", get: "In, no questions", cost: "C${extra} on top of the price", odds: 0.8, extra: 0.5, integrity: -2, banHours: 0 },
 ];
@@ -136,7 +136,7 @@ export const bribeOf = (cost: number) => Math.max(50, Math.round(cost * 0.5 / 10
 export function sneakOdds(w: SneakWay, skills: Partial<Record<SkillId, number>>): number {
   return Math.min(0.95, w.odds + (w.skill && w.perLevel ? (skills[w.skill] ?? 0) * w.perLevel : 0));
 }
-export function sneakLabel(w: SneakWay, m: SceneMove, hostName: string | null, cost: number): { label: string; cost: string } {
+export function sneakLabel(w: SneakWay, hostName: string | null, cost: number): { label: string; cost: string } {
   const extra = bribeOf(cost).toLocaleString("en-US");
   return {
     label: w.label.replace("{host}", hostName ?? "the DJ").replace("{extra}", extra),
