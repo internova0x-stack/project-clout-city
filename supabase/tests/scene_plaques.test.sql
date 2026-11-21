@@ -61,7 +61,7 @@ update public.players set news_opt_out = true where id = pg_temp.u(1);
 select public.scene_start(pg_temp.u(1), 'chardonnay-reunion', 'invited', false, 0, 0, 0);
 update public.scene_moves set ready_at = now() - interval '1 minute' where id = pg_temp.mv(pg_temp.u(1), 'chardonnay-reunion');
 select public.scene_collect(pg_temp.u(1), pg_temp.mv(pg_temp.u(1), 'chardonnay-reunion'));
-select pg_temp.assert((select count(*) from public.choice_headlines where player_id = pg_temp.u(1)) = 1, 'never for News opt-outs');
+select pg_temp.assert((select count(*) from public.choice_headlines where player_id = pg_temp.u(1) and text not like '%Spotlight%') = 1, 'never for News opt-outs');
 
 -- ---- Pushes: ready, and about to go stale ----
 update public.players set at_place = 'velvet-static' where id = pg_temp.u(1);

@@ -3827,3 +3827,10 @@ button.camp-task.ticked { flex-direction:row; align-items:flex-start; gap:10px; 
 .scene-week-item > span[aria-hidden] { font-size:18px; width:26px; text-align:center; flex:none; }
 .scene-week-title { display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
 .scene-week-none { font-size:12px; }
+
+/* Fame perks (owner, Nov 21; lib/fame.ts) */
+.fame-mult { display:flex; gap:10px; align-items:center; padding:10px 12px; margin-bottom:12px; border-radius:var(--r-md); background:#FFF1D6; font-size:13px; color:#5C4422; }
+.fame-mult b { font-family:var(--font-label); font-size:24px; color:#7E5932; }
+.fame-perk { display:block; font-size:12px; font-weight:600; color:var(--text-3); margin-top:3px; }
+.fame-perk.have { color:#1F7A57; }
+.fame-perk em { font-style:normal; font-weight:500; color:var(--text-3); }

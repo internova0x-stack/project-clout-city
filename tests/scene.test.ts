@@ -134,7 +134,7 @@ test("fake it till you make it: below a move's rank you can try to sneak in; inv
 });
 
 test("the newest migration carries the same settings as lib/scene.ts", () => {
-  const sql = readFileSync(new URL("../supabase/migrations/0173_scene_plaques.sql", import.meta.url), "utf8");
+  const sql = readFileSync(new URL("../supabase/migrations/0175_fame_perks.sql", import.meta.url), "utf8");
   const m = /values \('scene', '(\{.*?\})'::jsonb\)/s.exec(sql);
   assert.ok(m, "settings row");
   assert.deepEqual(JSON.parse(m![1]), JSON.parse(JSON.stringify(sceneSettings(MOVES))));

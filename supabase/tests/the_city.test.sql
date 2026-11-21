@@ -86,7 +86,7 @@ end $$;
 select pg_temp.assert(
   (select bank_cash from public.players where display_name = 'Gus')
     = 5000 - 16 - 16 - 140 + 120 - 210 + coalesce((select sum(amount) from public.ledger l join public.players p on p.id = l.player_id
-                                                 where p.display_name = 'Gus' and l.kind in ('daily_task', 'daily_bonus')), 0),
+                                                 where p.display_name = 'Gus' and l.currency = 'cash' and l.kind in ('daily_task', 'daily_bonus', 'fame_scale', 'fame_ticket', 'fame_comp')), 0),
   'cash after actions matches the ledger');
 
 -- Gigs: one at a time, cash after the wait, no clout.

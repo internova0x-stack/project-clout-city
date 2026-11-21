@@ -939,6 +939,16 @@ components live in `app/globals.css`.
   routine step 6e) imported by `content_import_scene` (24-hour veto window like storylets, Studio → Storylets → Scene moves,
   `admin_scene_moves`/`admin_scene_move_set`), offered only in their week (`scene_move_open`), read by every scene function through
   `scene_move_def`; the server merges `scene_weeks_live()` into its catalog (5-minute cache; past or vetoed ones `closed`).
+- Fame perks and rewards that grow (migration 0175, owner Nov 21: "build 1 and 2" after the reward review; docs/FAME.md, lib/fame.ts):
+  a perk at every rank (`FAME_PERKS`: the week's first event ticket back at 2, the day's first meal comped at 3, a celebrity-hosted
+  Scene move a day free at 4, Lola's Spotlight in the News at every rank from 5 (`SPOTLIGHT`, a players trigger `fame_on_rank`,
+  never for News opt-outs), the Gala match at 7, +10% on Scene moves at 8, the Rank 9 Scene move `own-night`, the Mayor's day and
+  badge 'mayor-day' at 10) and everyday rewards ×(1 + 0.2 a rank above 1, max 2.8) on daily_task, daily_bonus, visit, event and
+  place_life (`rewardMult`). All paid by the ledger trigger `fame_on_ledger` as rows 'fame_scale', 'fame_ticket', 'fame_comp',
+  'fame_invite', 'fame_match', 'fame_paparazzi' (no payment code changed; never raises). UI: Ranks & fame perks (`RanksSheet`, from
+  the leaderboard's button; `fame_state()` for usage) and the rank-up reveal lists the perks. The goal ladder gained ten rungs for
+  Ranks 6 to 10 (skill 7/9/10, savings C$100k to C$1B, the rooftop regular, the nightclub). SQL tests that sum a player's ledger
+  include the fame kinds.
 - Players see "Crew" for their invited friends; code, types and database tables still say `clique`
   (renaming stored data isn't worth the risk). Keep player-facing copy on "crew".
 - Culture packs (docs/culture/, one at a time, only when the owner says "Build C<number>"): slang, invented stand-ins

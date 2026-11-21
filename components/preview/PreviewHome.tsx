@@ -722,6 +722,7 @@ export function PreviewHome({
       starter={cityOff || starterPreset === undefined ? undefined : starterSim.api}
       guide={cityOff ? undefined : guideSim}
       scene={cityOff ? undefined : sceneSim}
+      fame={cityOff ? undefined : async () => ({ ticketUsed: true, compUsed: false, inviteUsed: false })}
       lockAppsPreview={appsPreset === "locked"}
       // Delete my account: the preview says what would happen and deletes nothing.
       deleteAccount={async () => { await new Promise((r) => setTimeout(r, 600)); return { ok: false, error: "Preview: nothing is deleted here. In the game this deletes the account and lands on the welcome page." }; }}

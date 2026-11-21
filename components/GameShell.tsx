@@ -115,6 +115,7 @@ import { HaterSheet, SceneHere, SceneScreen, SceneStartSheet, useSceneNow } from
 import type { CrewCard, MoveCard, Offer, SceneApi, SceneView } from "@/lib/sceneView";
 import type { DealWay } from "@/lib/scene";
 import { PLAQUES, scoreOf } from "@/lib/scene";
+import { RanksSheet, type FameUse } from "./game/Ranks";
 import { nextRank } from "@/lib/ranks";
 import { handle } from "@/lib/validation";
 import { rankCelebration } from "./game/Ranks";
@@ -311,6 +312,7 @@ export function GameShell({
   starter: starterIn,
   guide,
   scene,
+  fame,
   deleteAccount,
   lockAppsPreview,
   demo,
@@ -394,6 +396,8 @@ export function GameShell({
   guide?: GuideApi;
   /** Your Scene (migration 0171, lib/scene.ts): the daily clout loop, the bottom bar's middle tab. */
   scene?: SceneApi;
+  /** Fame perks (migration 0175, lib/fame.ts): which repeating perks are used this week or today. */
+  fame?: () => Promise<FameUse | null>;
   /** Preview: lock the apps that open at a rank, whatever the player's rank. */
   lockAppsPreview?: boolean;
   /** Demo mode (owner, Oct 27; components/demo): inviting and the end of the first session ask the guest to sign up. */
@@ -2759,6 +2763,10 @@ export function GameShell({
     setGain({ clout: r.data.clout });
     if (cityApi) void cityApi.refresh().then((x) => x.ok && applyCity(x));
   };
+  // Fame perks (migration 0175): the Ranks & fame perks list, opened from the leaderboard, with this week's usage.
+  const [ranksOpen, setRanksOpen] = useState(false);
+  const [fameUse, setFameUse] = useState<FameUse | null>(null);
+  useEffect(() => { if (ranksOpen && fame) void fame().then(setFameUse); }, [ranksOpen, fame]);
   const rankNext = nextRank(me.clout, myWorth);
   // ---- The Guide (migration 0170) ----
   // Optional steps the player skipped ("Not for me"), kept on this device.
@@ -3879,7 +3887,9 @@ export function GameShell({
         fetchRows={leaderboardRows}
         fetchCrowned={chat?.crowned ? () => chat.crowned!().then((r) => (r.ok ? r.data : [])) : undefined}
         fetchTitled={chat?.titled ? () => chat.titled!().then((r) => (r.ok ? r.data : [])) : undefined}
+        onPerks={flow === "leaderboard" ? undefined : () => setRanksOpen(true)}
       />
+      <RanksSheet open={ranksOpen} onClose={() => setRanksOpen(false)} clout={me.clout} netWorth={myWorth} use={fameUse} />
       {chat && (
         <PlayerCardSheet
           playerId={cardId}

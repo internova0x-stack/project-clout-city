@@ -1337,6 +1337,29 @@
      }
     ]
    }
+  },
+  {
+   "id": "own-night",
+   "title": "Throw your own night",
+   "emoji": "🪩",
+   "area": "status",
+   "places": [
+    "velvet-static",
+    "hellgate-hall",
+    "ultraviolet-society"
+   ],
+   "hours": 24,
+   "cost": 2000,
+   "energy": 25,
+   "clout": 600,
+   "score": "nightlife",
+   "skill": "dance",
+   "needs": {
+    "rank": 9
+   },
+   "why": "Because your name sells out a club now",
+   "line": "Your name on the door. Your playlist. Your rules.",
+   "headline": "{name} threw their own night and the line went round the block. Prince Nassim tried to buy the club. Again."
   }
  ]
 }
