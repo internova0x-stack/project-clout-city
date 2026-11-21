@@ -152,8 +152,9 @@ select public.ledger_once(pg_temp.pid(2), 'clout', 20, 'date_night', 'dn2');
 set role authenticated;
 select pg_temp.as_player(2);
 select pg_temp.assert((public.season_state() -> 'week' -> 'challenges' -> 0 ->> 'done')::boolean, 'two date nights: done');
-select pg_temp.assert((public.season_state() ->> 'xp')::int - (select xp from xp2) = 120, 'paid 120 XP');
-select pg_temp.assert((public.season_state() ->> 'xp')::int - (select xp from xp2) = 120, 'and only once');
+-- Migration 0176: each date night also earns its own XP (two dates), on top of the challenge's 120.
+select pg_temp.assert((public.season_state() ->> 'xp')::int - (select xp from xp2) = 120 + 2 * coalesce((select (value -> 'xp' ->> 'date_night')::int from public.game_settings where key = 'season_pass'), 0), 'paid 120 XP');
+select pg_temp.assert((public.season_state() ->> 'xp')::int - (select xp from xp2) = 120 + 2 * coalesce((select (value -> 'xp' ->> 'date_night')::int from public.game_settings where key = 'season_pass'), 0), 'and only once');
 
 -- ---- Level 18's title (migration 0167): a badge row, and season_titled() lists who holds it ----
 reset role;
