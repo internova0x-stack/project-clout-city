@@ -4,7 +4,7 @@
 // (dance, run, wave, sit, sleep, walk) plus the dog that walks at your heels.
 // Pure: GameShell picks the moment, Room3D plays it, tests check the mapping.
 
-export type MomentKind = "dance" | "run" | "dogwalk" | "wave" | "sit" | "sleep" | "work";
+export type MomentKind = "dance" | "run" | "dogwalk" | "wave" | "sit" | "sleep" | "work" | "date" | "together" | "crew";
 
 export const MOMENTS: Record<MomentKind, { emoji: string; verb: string; seconds: number }> = {
   dance: { emoji: "💃", verb: "On the floor", seconds: 5 },
@@ -14,6 +14,10 @@ export const MOMENTS: Record<MomentKind, { emoji: string; verb: string; seconds:
   sit: { emoji: "🍽️", verb: "Taking a seat", seconds: 5.5 },
   sleep: { emoji: "😴", verb: "Lights out", seconds: 4 },
   work: { emoji: "💼", verb: "On the clock", seconds: 4.5 },
+  // Phase 2: someone beside you.
+  date: { emoji: "🌹", verb: "Date night", seconds: 6 },
+  together: { emoji: "🛋️", verb: "Home together", seconds: 6 },
+  crew: { emoji: "👯", verb: "Out with the crew", seconds: 6 },
 };
 
 /** A repeat the same New York day plays quickly: enough to see it, not enough to wait for it. */

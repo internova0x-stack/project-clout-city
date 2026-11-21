@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import {
   ACESFilmicToneMapping, AmbientLight, BoxGeometry, CanvasTexture, CircleGeometry, Color, ConeGeometry, DoubleSide, MeshBasicMaterial, DirectionalLight, Fog, Group, HemisphereLight, Mesh,
   MeshStandardMaterial, OrthographicCamera, PCFSoftShadowMap, Plane, PlaneGeometry, PointLight, Raycaster, RepeatWrapping,
-  RingGeometry, SRGBColorSpace, Scene, Sprite, SpriteMaterial, AdditiveBlending, Vector2, Vector3, WebGLRenderer, type Object3D,
+  RingGeometry, SphereGeometry, CylinderGeometry, SRGBColorSpace, Scene, Sprite, SpriteMaterial, AdditiveBlending, Vector2, Vector3, WebGLRenderer, type Object3D,
 } from "three";
 import { randomLook, type Look } from "@/lib/look";
 import type { CrowdMember } from "@/lib/partyRoom";
@@ -137,7 +137,10 @@ export interface Room3DProps {
  * dance on the dance floor, run laps, walk the dog, wave.
  */
 export type RoomAct = {
-  use: "sit" | "sleep" | "cook" | { action: string; index?: number; kind?: string; seconds?: number } | { moment: "dance" | "run" | "dogwalk" | "wave" | "sit"; seconds: number };
+  use: "sit" | "sleep" | "cook" | { action: string; index?: number; kind?: string; seconds?: number }
+    | { moment: "dance" | "run" | "dogwalk" | "wave" | "sit"; seconds: number; dog?: "pom" }
+    /** Phase 2 (owner, Nov 21): someone beside you: your date across the table, your partner on the sofa, the crew dancing. */
+    | { moment: "date" | "together" | "crew"; seconds: number; with: { key: string; look: Look }[] };
   key: number;
 };
 
@@ -179,6 +182,8 @@ export default function Room3D(props: Room3DProps) {
     goUse: (it: RoomItem, silent?: boolean) => void; talk: (i: number) => void; floorStep: (screen: number) => [number, number];
     sitNear: (near: RoomItem | null) => boolean; stroll: (seconds: number, dog: boolean, run?: boolean) => void;
     danceFor: (seconds: number) => void; wave: () => void; closeUp: (seconds: number) => void;
+    company: (kind: "date" | "together" | "crew", people: { key: string; look: Look }[], seconds: number) => void;
+    dogKind: (k: "pom" | null) => void;
   } | null>(null);
 
   // Re-apply when the room or saved layout changes (not while arranging).
@@ -540,6 +545,9 @@ export default function Room3D(props: Room3DProps) {
     let zoomDirty = false;
     // Moments (owner, Nov 21): the camera eases in on you while you act something out, then back to where it was.
     let closeUntil = 0, closeBase = zoom;
+    // Companions' step, set once they're defined below (phase 2 moments).
+    let stepMates: (dt: number, t: number, now: number) => void = () => {};
+    let clearMatesRef: (() => void) | null = null;
     const closeUp = (seconds: number) => {
       if (!closeUntil) closeBase = zoom;
       closeUntil = performance.now() + seconds * 1000;
@@ -789,6 +797,7 @@ export default function Room3D(props: Room3DProps) {
         if (!moving && now > dogUntil) { scene.remove(dog); dog = null; }
       }
       for (const n of npcs) stepActor(n, dt, t, reduceMotion);
+      stepMates(dt, t, now);
       let gone = false;
       for (const c of crowdRef.current) {
         stepActor(c.actor, dt, t, reduceMotion);
@@ -946,6 +955,7 @@ export default function Room3D(props: Room3DProps) {
     // seconds, with a dog at your heels for a dog walk.
     let dog: Group | null = null;
     let dogUntil = 0;
+    let nextDog: "pom" | null = null;
     const stroll = (seconds: number, withDog: boolean, run = false) => {
       const grid = makeGrid(template, itemsRef.current);
       const hw = template.w * 0.32, hd = template.d * 0.32;
@@ -967,7 +977,7 @@ export default function Room3D(props: Room3DProps) {
       me.run = run && !!me.parts?.play;
       me.mode = "walk";
       if (withDog && !dog) {
-        dog = buildDog();
+        dog = buildDog(nextDog);
         dog.position.set(me.x - 0.6, 0, me.z - 0.6);
         scene.add(dog);
       }
@@ -990,7 +1000,88 @@ export default function Room3D(props: Room3DProps) {
       if (me.mode === "sit" || me.mode === "sleep" || me.mode === "dance") standUp(me);
       me.parts?.play?.("wave", true);
     };
-    actionsRef.current = { goUse, talk, floorStep, sitNear, stroll, danceFor, wave, closeUp };
+    // Phase 2 (owner, Nov 21): people who appear beside you for a moment, dressed in their own style.
+    type Mate = { actor: Actor; seat: RoomItem | null };
+    let mates: Mate[] = [];
+    let matesUntil = 0;
+    const clearMates = () => { for (const m of mates) { scene.remove(m.actor.rig); m.actor.parts?.dispose(); } mates = []; matesUntil = 0; };
+    const SOFAS = ["sofa", "loveseat", "armchair", "bench"];
+    /** Free seats near you, nearest first (sofas first for a night in). */
+    const freeSeats = (sofas: boolean) => {
+      const taken = (it: RoomItem) => npcs.some((n) => n.mode === "sit" && Math.hypot(n.x - it.x, n.z - it.z) < 0.6);
+      const all = itemsRef.current.filter((i) => (SEATS.has(i.kind) || i.use?.kind === "sit") && !taken(i));
+      const rank = (i: RoomItem) => (sofas && SOFAS.includes(i.kind) ? 0 : 1);
+      return all.sort((a, b) => rank(a) - rank(b) || Math.hypot(a.x - me.x, a.z - me.z) - Math.hypot(b.x - me.x, b.z - me.z));
+    };
+    const company = (kind: "date" | "together" | "crew", people: { key: string; look: Look }[], seconds: number) => {
+      clearMates();
+      const grid = makeGrid(template, itemsRef.current);
+      // Where you'll be: your seat (date, night in) or the dance floor.
+      let mySeat: RoomItem | null = null;
+      const seats = kind === "crew" ? [] : freeSeats(kind === "together");
+      if (seats.length) mySeat = seats[0];
+      const spots: [number, number][] = [];
+      people.slice(0, kind === "crew" ? 4 : 1).forEach((p, i) => {
+        const parts = buildModelAvatar(p.look, { pedestal: false });
+        castShadows(parts.root);
+        // They walk in from a step or two away, so they arrive with you rather than pop up on top of you.
+        const ang = (i / Math.max(1, people.length)) * Math.PI * 2 + 0.6;
+        const sx = me.x + Math.cos(ang) * 1.6, sz = me.z + Math.sin(ang) * 1.6;
+        const actor: Actor = { rig: new Group(), parts, x: sx, z: sz, heading: Math.atan2(me.x - sx, me.z - sz), mode: "idle", path: [], pending: null, phase: i * 1.37 + 0.4 };
+        actor.rig.add(parts.root);
+        actor.rig.position.set(sx, 0, sz);
+        scene.add(actor.rig);
+        let seat: RoomItem | null = null;
+        if (kind !== "crew" && mySeat) {
+          // The seat nearest yours that isn't yours: across the table, or beside you on the sofa.
+          seat = seats.slice(1).sort((a, b) => Math.hypot(a.x - mySeat!.x, a.z - mySeat!.z) - Math.hypot(b.x - mySeat!.x, b.z - mySeat!.z))[0] ?? null;
+        }
+        if (seat) {
+          actor.path = findPath(grid, [sx, sz], useSpot(seat)).slice(1);
+          actor.mode = actor.path.length ? "walk" : "idle";
+        } else if (kind === "crew") {
+          spots.push([sx, sz]);
+          actor.mode = "dance";
+        } else {
+          actor.parts?.play?.("wave", true);
+        }
+        mates.push({ actor, seat });
+      });
+      if (kind === "crew") danceFor(seconds);
+      else if (mySeat) goUse({ ...mySeat, use: { kind: "sit" } }, true);
+      else wave();
+      matesUntil = performance.now() + (seconds + 4) * 1000;
+    };
+    /** A companion reached their seat: sit like you do. */
+    const mateArrive = (m: Mate) => {
+      const it = m.seat, a = m.actor;
+      if (!it || !a.parts) return;
+      const [fx, fz] = FACING[it.rot % 4];
+      const b = world.current?.built.get(it.id);
+      a.x = it.x - fx * 0.05;
+      a.z = it.z - fz * 0.05;
+      a.heading = (it.rot * Math.PI) / 2;
+      a.mode = "sit";
+      poseSit(a.parts, b?.seatY ?? 0.48);
+    };
+    stepMates = (dt: number, t: number, now: number) => {
+      for (const m of mates) {
+        stepActor(m.actor, dt, t, reduceMotion, () => mateArrive(m));
+        // Crew dancers drift onto the floor with you.
+        if (m.actor.mode === "dance") {
+          const k = Math.min(1, dt * 1.5), tx = me.x + Math.cos(m.actor.phase) * 1.1, tz = me.z + Math.sin(m.actor.phase) * 1.1;
+          m.actor.x += (tx - m.actor.x) * k; m.actor.z += (tz - m.actor.z) * k;
+          m.actor.heading = Math.atan2(me.x - m.actor.x, me.z - m.actor.z);
+        }
+      }
+      if (mates.length && now > matesUntil) clearMates();
+    };
+    clearMatesRef = clearMates;
+    const dogKind = (k: "pom" | null) => {
+      nextDog = k;
+      if (dog) { scene.remove(dog); dog = null; }
+    };
+    actionsRef.current = { goUse, talk, floorStep, sitNear, stroll, danceFor, wave, closeUp, company, dogKind };
 
     function walkTo(goal: [number, number], use: RoomItem | null) {
       const grid = makeGrid(template, itemsRef.current);
@@ -1056,6 +1147,7 @@ export default function Room3D(props: Room3DProps) {
       renderer.domElement.removeEventListener("wheel", onWheel);
       me.parts?.dispose();
       npcs.forEach((n) => n.parts?.dispose());
+      clearMatesRef?.();
       kit.dispose();
       floorTex.dispose();
       roomTexes.forEach((t) => t.dispose());
@@ -1181,6 +1273,8 @@ export default function Room3D(props: Room3DProps) {
     actionsRef.current?.closeUp(typeof want === "string" ? 4 : "moment" in want ? want.seconds : Math.min(6, want.seconds ?? 5));
     if (typeof want !== "string" && "moment" in want) {
       const a = actionsRef.current;
+      if ("with" in want) { a?.company(want.moment, want.with, want.seconds); return; }
+      if (want.moment === "dogwalk") a?.dogKind(want.dog ?? null);
       if (want.moment === "dance") a?.danceFor(want.seconds);
       else if (want.moment === "run") a?.stroll(want.seconds, false, true);
       else if (want.moment === "dogwalk") a?.stroll(want.seconds, true);
@@ -1777,7 +1871,8 @@ export function derivedBackdrop(t: RoomTemplate, daytime: boolean): { css: strin
 }
 
 /** A small dog for the dog-walking stroll: boxes in a warm brown, a darker snout and a wagging-ready tail. */
-function buildDog(): Group {
+function buildDog(kind: "pom" | null = null): Group {
+  if (kind === "pom") return buildPom();
   const g = new Group();
   const coat = new MeshStandardMaterial({ color: "#B07A4A", roughness: 0.8 });
   const dark = new MeshStandardMaterial({ color: "#4A2E1E", roughness: 0.8 });
@@ -1794,5 +1889,40 @@ function buildDog(): Group {
   box(0.05, 0.08, 0.04, 0.06, 0.43, 0.23, dark);
   for (const [x, z] of [[-0.07, 0.15], [0.07, 0.15], [-0.07, -0.15], [0.07, -0.15]]) box(0.05, 0.13, 0.05, x, 0.065, z);
   box(0.04, 0.04, 0.16, 0, 0.27, -0.26);
+  return g;
+}
+
+/** Sir Barksley (owner, Nov 21): a fluffy orange Pomeranian, round puffs of fur, a cream ruff and a curled-up plume of a tail. */
+function buildPom(): Group {
+  const g = new Group();
+  const fur = new MeshStandardMaterial({ color: "#E08A2E", roughness: 0.95 });
+  const ruff = new MeshStandardMaterial({ color: "#F5D2A0", roughness: 0.95 });
+  const dark = new MeshStandardMaterial({ color: "#2A1A12", roughness: 0.6 });
+  const ball = (r: number, x: number, y: number, z: number, m = fur, sy = 1) => {
+    const b = new Mesh(new SphereGeometry(r, 14, 10), m);
+    b.position.set(x, y, z);
+    b.scale.y = sy;
+    b.castShadow = true;
+    g.add(b);
+  };
+  ball(0.19, 0, 0.24, -0.02, fur, 0.9);       // body
+  ball(0.15, 0, 0.3, 0.12, ruff);              // chest ruff
+  ball(0.13, 0, 0.4, 0.17);                    // head
+  ball(0.045, 0, 0.37, 0.29, ruff);            // muzzle
+  ball(0.018, 0, 0.38, 0.33, dark);            // nose
+  ball(0.016, -0.045, 0.43, 0.28, dark);       // eyes
+  ball(0.016, 0.045, 0.43, 0.28, dark);
+  for (const x of [-0.07, 0.07]) {             // ears
+    const e = new Mesh(new ConeGeometry(0.04, 0.08, 8), fur);
+    e.position.set(x, 0.53, 0.15);
+    e.castShadow = true;
+    g.add(e);
+  }
+  ball(0.12, 0, 0.36, -0.17, fur, 0.8);        // the plume of a tail, curled over the back
+  for (const [x, z] of [[-0.08, 0.08], [0.08, 0.08], [-0.08, -0.1], [0.08, -0.1]]) {
+    const leg = new Mesh(new CylinderGeometry(0.03, 0.03, 0.1, 8), fur);
+    leg.position.set(x, 0.05, z);
+    g.add(leg);
+  }
   return g;
 }

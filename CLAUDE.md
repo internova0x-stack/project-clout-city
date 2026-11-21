@@ -969,8 +969,13 @@ components live in `app/globals.css`.
   sheet steps aside (`lifeAway`) until it ends; full length once a New York day per kind (`firstTime('moment', …)`), then 1.6 s; none
   for "reduce motion" or outside a room; celebrations and choice cards wait (`!!moment`). Wired: Living places activities, place
   actions (dance/run moves; others keep walking to their piece), a club event, starting a Scene move where you are. `?moment=dance|run|
-  dogwalk|wave|sit|sleep|work` plays one 4.5 s after you're inside (with `?at=`). Phase 2 (a second character: the dog for Sir Barksley,
-  your date, partner and crew) and phase 3 (hand-holding, hug, toast, selfie, cheer) are next.
+  dogwalk|wave|sit|sleep|work` plays one 4.5 s after you're inside (with `?at=`).
+  Phase 2 (owner, Nov 21: "phase 2"): companions (Room3D `company`, RoomAct `{ moment: "date"|"together"|"crew", with }`): people known
+  only by id and style are dressed in that style, the same every time (GameShell `lookOfPerson`, seeded `randomLook`), walk in from a
+  step away and sit at the seat nearest yours (a date at your spot when `dateNightsRead` reports it paid; "Home together" takes you home
+  and onto the sofa together) or dance around you (crew outings when the crew bonus lands where you are); they leave 4 s after the
+  moment. Sir Barksley walks as an orange Pomeranian (`buildPom`, RoomAct `dog: "pom"`). `?moment=date|crew|together` (together at home).
+  Phase 3 (hand-holding, hug, toast, selfie, cheer) is next.
 - Players see "Crew" for their invited friends; code, types and database tables still say `clique`
   (renaming stored data isn't worth the risk). Keep player-facing copy on "crew".
 - Culture packs (docs/culture/, one at a time, only when the owner says "Build C<number>"): slang, invented stand-ins

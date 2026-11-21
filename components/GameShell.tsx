@@ -23,7 +23,7 @@ import type { CutsceneRequest } from "./cutscene/CutsceneHost";
 import type { PlayerUpdate } from "@/app/home/actions";
 import { ECONOMY, formatCash } from "@/lib/economy";
 import { inviteUrl } from "@/lib/invite";
-import { normalizeLook } from "@/lib/look";
+import { normalizeLook, randomLook } from "@/lib/look";
 import { music, readLocalMuted, writeLocalMuted } from "@/lib/music";
 import { musicFor } from "@/lib/musicMap";
 import { checkBuild, isStaleBuild, reloadForNewBuild } from "@/lib/freshBuild";
@@ -32,7 +32,7 @@ import { SkillsSheet } from "./game/Skills";
 import { LOOK_LABEL, STYLE, lookBadge } from "@/lib/style";
 import type { CliqueMember, Player } from "@/lib/player";
 import { ASTORIA_CENTER, ASTORIA_ZOOM, DEFAULT_PLAYER_LOCATION, WAVE_1_PINS, type PlacePin } from "@/lib/places";
-import { defaultFit, getStyle, STYLE_FITS, starterOutfit } from "@/lib/styles";
+import { defaultFit, getStyle, STARTING_STYLES, STYLE_FITS, starterOutfit } from "@/lib/styles";
 import { CATALOG_FURNITURE, CITY_ECONOMY, shopBase, CLUB_EVENTS, PLACES, eventDaysLine, eventOpen, eventToday, isHub, itemBySku, placeById, realMinutesUntilOpen, type Place, type ShopItem } from "@/lib/city";
 import { cityMinutes } from "@/lib/cityClock";
 import { GAME_CONFIG } from "@/lib/config";
@@ -688,6 +688,9 @@ export function GameShell({
   }, []);
   const [place, setPlace] = useState<Place | null>(null);
   const [inside, setInside] = useState<Place | null>(null);
+  /** For readers that run from older callbacks (date nights, crew outings). */
+  const insideRef = useRef(inside);
+  insideRef.current = inside;
   // The station sign (owner, Nov 3, the motion kit): walking into a place flips its sign down once; not when the game
   // reopens inside a place (the resume) and not when only the floor changes.
   const [sign, setSign] = useState<Place | null>(null);
@@ -964,6 +967,7 @@ export function GameShell({
     setInbox(r.data);
     // The night's results card (components/nightResults.ts) replaces the old toast.
     const paid = dateNightsRead(prev, r.data, nightCtx.current);
+    if (paid && insideRef.current?.id === paid.placeId) playMomentRef.current("date", `Date night with ${paid.with.name}`, undefined, { with: [paid.with] });
     if (paid) {
       setGain({ clout: r.data.bonus.clout, mood: r.data.bonus.mood });
       resync.current();
@@ -1070,6 +1074,9 @@ export function GameShell({
       const arrived = r.data.outings.flatMap((o) => o.members.filter((m) => m.went && m.id !== player.id
         && prev.outings.find((p) => p.id === o.id)?.members.some((pm) => pm.id === m.id && !pm.went)));
       setGain({ clout: gained });
+      const here = r.data.outings.find((o) => o.placeId === insideRef.current?.id && o.iWent);
+      if (here) playMomentRef.current("crew", `Out with the crew at ${placeById(here.placeId)?.name ?? "the spot"}`, undefined,
+        { with: [here.host, ...here.members].filter((m, i, all) => m.id !== player.id && all.findIndex((x) => x.id === m.id) === i && ("went" in m ? m.went : true)) });
       if (!full) setToast(arrived.length ? `${arrived.map((m) => m.name).join(", ")} pulled up. Crew bonus!` : "Crew bonus!");
       resync.current();
     }
@@ -1775,13 +1782,16 @@ export function GameShell({
     then?.();
   }, []);
   /** Plays a moment in the room you're in (false when it can't: not in a room, or "reduce motion"; then runs `then` now). */
-  const playMoment = (kind: MomentKind, label: string, then?: () => void, opts: { act?: boolean } = {}): boolean => {
+  const playMoment = (kind: MomentKind, label: string, then?: () => void,
+    opts: { act?: boolean; with?: { id: string; style: string }[]; dog?: "pom"; home?: boolean } = {}): boolean => {
     const reduce = typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-    if (reduce || !inside) { then?.(); return false; }
+    if (reduce || (!inside && !opts.home)) { then?.(); return false; }
     const today = new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York" }).format(new Date());
     const secs = momentSeconds(kind, firstTime("moment", `${kind}:${today}`));
     if (opts.act !== false) {
-      const use: RoomAct["use"] | null = kind === "dance" || kind === "run" || kind === "dogwalk" || kind === "wave" ? { moment: kind, seconds: secs + 0.6 }
+      const use: RoomAct["use"] | null = kind === "date" || kind === "together" || kind === "crew"
+        ? { moment: kind, seconds: secs, with: (opts.with ?? []).map((p) => ({ key: p.id, look: lookOfPerson(p) })) }
+        : kind === "dance" || kind === "run" || kind === "dogwalk" || kind === "wave" ? { moment: kind, seconds: secs + 0.6, dog: opts.dog }
         : kind === "sit" ? { moment: "sit", seconds: secs } : kind === "sleep" ? "sleep" : kind === "work" ? { action: "work", kind: "shift", seconds: secs } : null;
       if (use) setRoomAct({ use, key: Date.now() });
     }
@@ -1793,18 +1803,35 @@ export function GameShell({
     return true;
   };
   useEffect(() => () => { if (momentTimer.current) clearTimeout(momentTimer.current); }, []);
+  /** Someone we only know by id and style (a date, a partner, the crew), dressed in that style, the same every time. */
+  const lookOfPerson = (p: { id: string; style: string }) => {
+    let seed = [...p.id].reduce((n, c) => (n * 31 + c.charCodeAt(0)) % 2147483647, 7) || 7;
+    const rand = () => ((seed = (seed * 48271) % 2147483647) / 2147483647);
+    const styles = STARTING_STYLES.map((x) => x.id);
+    return randomLook(rand, styles.includes(p.style as (typeof styles)[number]) ? [p.style as (typeof styles)[number]] : styles);
+  };
   useEffect(() => { if (moment) endMoment(); /* leaving the room ends it */ }, [inside?.id]); // eslint-disable-line react-hooks/exhaustive-deps
   const momentPreview = useRef(false);
   useEffect(() => {
-    if (process.env.NODE_ENV === "production" || momentPreview.current || !inside) return;
+    if (process.env.NODE_ENV === "production" || momentPreview.current) return;
     const k = new URLSearchParams(window.location.search).get("moment") as MomentKind | null;
     if (!k || !MOMENTS[k]) return;
+    if (!inside && k === "together" && tab === "home") {
+      momentPreview.current = true;
+      setTimeout(() => playMomentRef.current("together", "Home together with tasha.b", undefined, { with: [{ id: "tasha-b", style: "pilates_princess" }], home: true }), 6000);
+      return;
+    }
+    if (!inside) return;
     momentPreview.current = true;
-    const t = setTimeout(() => playMoment(k, `${MOMENTS[k].verb} at ${inside.name}`), 4500);
+    const sample = [{ id: "tasha-b", style: "pilates_princess" }, { id: "kai-beats", style: "bodega_drip" }, { id: "nina-nyc", style: "night_owl_goth" }];
+    const t = setTimeout(() => playMoment(k, `${MOMENTS[k].verb} at ${inside.name}`, undefined,
+      { with: k === "crew" ? sample : sample.slice(0, 1), dog: inside.id === "hell-gate-park" && k === "dogwalk" ? "pom" : undefined }), 4500);
     return () => clearTimeout(t);
-  }, [inside?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [inside?.id, tab]); // eslint-disable-line react-hooks/exhaustive-deps
   /** The activity sheet steps aside while its moment plays. */
   const [lifeAway, setLifeAway] = useState(false);
+  const playMomentRef = useRef(playMoment);
+  playMomentRef.current = playMoment;
   const chooseLife = async (option: string) => {
     if (!life || !lifeCard) return;
     setBusy("life");
@@ -1818,7 +1845,7 @@ export function GameShell({
     lifePaid(r.result);
     // Act it out first (walk Sir Barksley, step into the circle, run the sprinklers), then the receipt.
     const kind = momentFor({ id: lifeCard.card.id, title: lifeCard.card.title });
-    if (kind && playMoment(kind, lifeCard.card.title, () => setLifeAway(false))) setLifeAway(true);
+    if (kind && playMoment(kind, lifeCard.card.title, () => setLifeAway(false), { dog: /barksley/i.test(lifeCard.card.id) ? "pom" : undefined })) setLifeAway(true);
   };
   const claimStampLife = async (days: number) => {
     if (!life || !insideId) return;
@@ -3702,6 +3729,12 @@ export function GameShell({
         </>
       ) : tab === "home" ? (
         <div className="layer">
+          {moment && (
+            <button key={moment.key} className="moment-cap home pill-glass glass-hud" onClick={endMoment} aria-label={`${MOMENTS[moment.kind].verb}: ${moment.label}. Tap to skip`}>
+              <span className="moment-cap-emoji" aria-hidden="true">{MOMENTS[moment.kind].emoji}</span>
+              <span className="moment-cap-text"><b>{moment.label}</b><span>Tap to skip</span></span>
+            </button>
+          )}
           <Room3D
             act={viewing || decor ? null : roomAct}
             template={viewing ?? decorHome ?? visitView?.template ?? sharedHome?.template ?? myHome}
@@ -4577,6 +4610,11 @@ export function GameShell({
                     const r = await couple.moveIn!.hang();
                     const h = r.ok ? r.data.home : undefined;
                     if (h?.live?.homeToday && h.live.homeOther) {
+                      const partner = coupleS?.partner;
+                      if (partner) {
+                        setPanel(null); setPhone({ open: false, app: null }); setInside(null); setPlace(null); setTab("home"); setHomeFloor(1);
+                        setTimeout(() => playMomentRef.current("together", `Home together with ${partner.name}`, undefined, { with: [partner], home: true }), 900);
+                      }
                       setGain({ clout: h.rules.homeClout, mood: h.rules.homeMood });
                       setToast(`🛋️ Home together. 🙂 +${h.rules.homeMood}, 🔥 +${h.rules.homeClout}.`);
                     } else if (r.ok) setToast("Tapped in. Your partner gets a nudge.");
