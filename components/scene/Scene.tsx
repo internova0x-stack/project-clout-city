@@ -92,8 +92,13 @@ function MoveSlot({ m, now, at, busy, onHype, onCollect, onGo, onDeal }: {
   );
 }
 
-function OfferCard({ o, at, busy, onStart, onGo, compact }: {
-  o: Offer; at: string | null; busy: boolean; onStart: (o: Offer) => void; onGo: (place: string) => void; compact?: boolean;
+function OfferCard({ o, at, busy, onStart, onGo, compact, later, onPick, picked }: {
+  o: Offer; at: string | null; busy: boolean; onStart: (o: Offer) => void; onGo: (place: string, offer?: Offer) => void; compact?: boolean;
+  /** A free slot's list (owner, Nov 21: "pick it should fill the slot"): puts the move in the slot. */
+  onPick?: (o: Offer) => void;
+  picked?: boolean;
+  /** A move on another day this week: "Come back Tuesday" instead of a button. */
+  later?: string;
 }) {
   const here = !!at && o.places.some((p) => p.id === at);
   const where = here ? o.places.find((p) => p.id === at)! : o.places[0];
@@ -109,22 +114,53 @@ function OfferCard({ o, at, busy, onStart, onGo, compact }: {
       {o.knows && o.host && <div className="scene-knows">{o.host.name.split(" ")[0]}: &ldquo;{o.knows}&rdquo;</div>}
       <div className="meta">📍 {where?.name ?? "Somewhere new"} · {o.hours} h · +{o.clout} 🔥 · {money(o.cost)}{o.energy ? ` · ⚡${o.energy}` : ""}</div>
       {(o.days || o.weekly) && <div className="scene-days">{o.weekly ? "🆕 This week only" : ""}{o.weekly && o.days ? " · " : ""}{o.days ? `🗓️ ${o.days}` : ""}</div>}
-      {o.running ? <span className="meta">Already going ✓</span>
+      {later ? <span className="meta scene-later">🗓️ Come back {later} to start it</span>
+        : o.running ? <span className="meta">Already going ✓</span>
         : o.bounced ? <span className="meta">They know your face tonight. Tomorrow.</span>
         : here ? <button className="btn btn-taxi scene-btn" disabled={busy} onClick={() => onStart(o)}>{o.short ? "Try to get in" : "Start it"}</button>
-        : where ? <button className="btn btn-secondary scene-btn" onClick={() => onGo(where.id)}>Go to {where.name}</button> : null}
+        : picked ? <span className="meta">Picked for another slot ✓</span>
+        : onPick ? <button className="btn btn-taxi scene-btn" onClick={() => onPick(o)}>Pick it</button>
+        : where ? <button className="btn btn-secondary scene-btn" onClick={() => onGo(where.id, o)}>Go to {where.name}</button> : null}
     </div>
   );
 }
 
 export function SceneScreen({ view, busy, onStart, onHype, onCollect, onGo, onDeal, onCrewHype, onResidencyTake, onResidencyCheckin }: {
   view: SceneView; busy: boolean;
-  onStart: (o: Offer) => void; onHype: (m: MoveCard) => void; onCollect: (m: MoveCard) => void; onGo: (place: string) => void;
+  onStart: (o: Offer) => void; onHype: (m: MoveCard) => void; onCollect: (m: MoveCard) => void; onGo: (place: string, offer?: Offer) => void;
   onDeal: (m: MoveCard) => void; onCrewHype: (c: CrewCard) => void; onResidencyTake: (move: string) => void; onResidencyCheckin: () => void;
 }) {
   const now = useSceneNow(view);
+  // Owner, Nov 21: the week strip and the free slots weren't tappable. A day opens its moves; a free slot opens today's.
+  const [list, setList] = useState<{ title: string; sub: string; offers: Offer[]; later?: string; slot?: number } | null>(null);
+  const pickFor = (slot: number) => setList({ title: `Pick a move for slot ${slot}`, sub: "Everything you can start today. Pick one for this slot, then go there to start it.", offers: view.today, slot });
+  // Picked moves wait in their slot until started (kept on this device for today: moves run on set days).
+  const [plans, setPlans] = useState<Record<number, string>>(() => readPlans());
+  const savePlans = (p: Record<number, string>) => { setPlans(p); writePlans(p); };
+  const pick = (slot: number, o: Offer) => { savePlans({ ...plans, [slot]: o.move }); setList(null); };
+  const unpick = (slot: number) => { const p = { ...plans }; delete p[slot]; savePlans(p); };
+  const openDay = (d: SceneView["castWeek"][number]) => setList({
+    title: d.today ? "Today on the scene" : `${DAY_NAMES[d.day]} on the scene`,
+    sub: d.today ? "Hosted today. Go there and start it." : `Hosted on ${DAY_NAMES[d.day]}. Come back then to start it.`,
+    offers: d.items.map((it) => it.offer), later: d.today ? undefined : DAY_NAMES[d.day],
+  });
+  const go = (o: Offer) => { setList(null); onStart(o); };
+  const goTo = (place: string, o?: Offer) => { setList(null); onGo(place, o); };
   const free = view.slots - view.moves.length;
   const freeSlots = Array.from({ length: view.slots }, (_, i) => i + 1).filter((s) => !view.moves.some((m) => m.slot === s));
+  // A plan keeps its slot while it's free; if a move took that slot, it moves to the next free one (or drops off).
+  const planned = new Map<number, Offer>();
+  {
+    const offers = new Map(view.today.filter((o) => !o.running).map((o) => [o.move, o]));
+    const want = Object.entries(plans).map(([s, m]) => [Number(s), offers.get(m)] as const).filter((x): x is readonly [number, Offer] => !!x[1]);
+    const left = freeSlots.filter((s) => !want.some(([w]) => w === s));
+    for (const [s, o] of want) {
+      if ([...planned.values()].some((x) => x.move === o.move)) continue;
+      if (freeSlots.includes(s) && !planned.has(s)) planned.set(s, o);
+      else if (left.length) planned.set(left.shift()!, o);
+    }
+  }
+  const pickedMoves = new Set([...planned.values()].map((o) => o.move));
   const forYou = (
     <section className="scene-section" aria-label="For you today">
       <div className="scene-label">FOR YOU TODAY</div>
@@ -136,23 +172,28 @@ export function SceneScreen({ view, busy, onStart, onHype, onCollect, onGo, onDe
   );
   return (
     <div className="scene-screen" role="region" aria-label="Your Scene">
+      <MovesSheet list={list} view={view} busy={busy} onClose={() => setList(null)} onStart={go} onGo={goTo}
+        onPick={list?.slot ? (o) => pick(list.slot!, o) : undefined} picked={pickedMoves} />
       <div className="scene-inner">
         <div className="scene-head">
           <h1>Your Scene</h1>
           <span className="scene-count">{view.moves.length} / {view.slots} slots</span>
         </div>
         <p className="meta scene-sub">Start moves around the city. Hype them, collect them before they go stale.</p>
-        <CastWeek days={view.castWeek} />
+        <CastWeek days={view.castWeek} onDay={openDay} />
         {free > 0 && forYou}
         <section className="scene-section" aria-label="Your moves">
           <div className="scene-label">YOUR MOVES</div>
           {view.moves.map((m) => <MoveSlot key={m.id} m={m} now={now} at={view.at} busy={busy} onHype={onHype} onCollect={onCollect} onGo={onGo} onDeal={onDeal} />)}
-          {freeSlots.map((s) => (
-            <div key={s} className="scene-card free">
+          {freeSlots.map((s) => planned.has(s) ? (
+            <PlannedSlot key={s} n={s} o={planned.get(s)!} at={view.at} busy={busy} onStart={onStart} onGo={onGo} onRemove={() => unpick(s)} />
+          ) : (
+            <button key={s} type="button" className="scene-card free scene-free-btn" onClick={() => pickFor(s)}>
               <SlotTag n={s} />
               <div className="scene-title">Free slot</div>
-              <div className="meta">Pick one from For you today, or start one wherever you are.</div>
-            </div>
+              <div className="meta">Tap to pick a move ({view.today.filter((o) => !o.running).length} on today).</div>
+              <span className="scene-free-plus" aria-hidden="true">＋</span>
+            </button>
           ))}
           {view.nextSlotRank && (
             <div className="scene-card locked">
@@ -342,20 +383,90 @@ export function HaterSheet({ move, view, busy, onClose, onPick }: { move: MoveCa
 }
 
 /** This week on the scene: who hosts what, by day; today stands out. */
-function CastWeek({ days }: { days: SceneView["castWeek"] }) {
+const PLANS_KEY = "cc-scene-plans";
+const nyDate = () => new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York" }).format(new Date());
+function readPlans(): Record<number, string> {
+  try {
+    const raw = JSON.parse(localStorage.getItem(PLANS_KEY) ?? "null") as { day: string; plans: Record<number, string> } | null;
+    return raw && raw.day === nyDate() ? raw.plans : {};
+  } catch { return {}; }
+}
+function writePlans(plans: Record<number, string>) {
+  try { localStorage.setItem(PLANS_KEY, JSON.stringify({ day: nyDate(), plans })); } catch { /* private mode: the plan lasts this visit */ }
+}
+
+/** A picked move waiting in its slot: Go there, or Start it once you're there. */
+function PlannedSlot({ n, o, at, busy, onStart, onGo, onRemove }: {
+  n: number; o: Offer; at: string | null; busy: boolean; onStart: (o: Offer) => void; onGo: (place: string, offer?: Offer) => void; onRemove: () => void;
+}) {
+  const here = !!at && o.places.some((p) => p.id === at);
+  const where = here ? o.places.find((p) => p.id === at)! : o.places[0];
+  return (
+    <div className="scene-card planned">
+      <SlotTag n={n} />
+      <button type="button" className="scene-plan-x" onClick={onRemove} aria-label={`Remove ${o.title} from slot ${n}`}>✕</button>
+      <div className="scene-row">
+        <Face host={o.host} emoji={o.emoji} size={44} />
+        <div className="scene-grow">
+          <div className="scene-title">{o.title}</div>
+          <div className="scene-plan-tag">{here ? "📍 You're here" : "Picked · not started yet"}</div>
+        </div>
+      </div>
+      <div className="meta">📍 {where?.name} · {o.hours} h · +{o.clout} 🔥 · {money(o.cost)}{o.energy ? ` · ⚡${o.energy}` : ""}</div>
+      {here
+        ? <button className="btn btn-taxi scene-btn" disabled={busy} onClick={() => onStart(o)}>{o.short ? "Try to get in" : "Start it"}</button>
+        : where && <button className="btn btn-taxi scene-btn" onClick={() => onGo(where.id, o)}>Go to {where.name}</button>}
+    </div>
+  );
+}
+
+const DAY_NAMES = ["", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+
+/** A day's moves, or a free slot's pick: the same cards as For you today, full width. */
+function MovesSheet({ list, view, busy, onClose, onStart, onGo, onPick, picked }: {
+  list: { title: string; sub: string; offers: Offer[]; later?: string; slot?: number } | null; view: SceneView; busy: boolean;
+  onClose: () => void; onStart: (o: Offer) => void; onGo: (place: string, offer?: Offer) => void;
+  onPick?: (o: Offer) => void; picked: Set<string>;
+}) {
+  return (
+    <Sheet open={!!list} onClose={onClose} label={list?.title ?? "Moves"}>
+      {list && (
+        <div className="stack-12">
+          <div>
+            <h2 style={{ margin: 0, fontSize: 20 }}>{list.title}</h2>
+            <p className="meta" style={{ margin: "4px 0 0" }}>{list.sub}</p>
+          </div>
+          {list.offers.map((o) => <OfferCard key={o.move} o={o} at={view.at} busy={busy} onStart={onStart} onGo={onGo} later={list.later} onPick={onPick} picked={!!onPick && picked.has(o.move)} />)}
+          {!list.offers.length && <p className="meta">Nothing on right now. Check back tomorrow.</p>}
+        </div>
+      )}
+    </Sheet>
+  );
+}
+
+function CastWeek({ days, onDay }: { days: SceneView["castWeek"]; onDay: (d: SceneView["castWeek"][number]) => void }) {
   // The strip opens on today.
   const row = useRef<HTMLDivElement>(null);
+  const shown = days.some((d) => d.items.length);
+  const scrolled = useRef(false);
   useEffect(() => {
-    const el = row.current?.querySelector<HTMLElement>(".scene-week-day.today");
-    if (row.current && el) row.current.scrollLeft = Math.max(0, el.offsetLeft - 14);
-  }, []);
-  if (!days.some((d) => d.items.length)) return null;
+    // The strip appears once the week loads: scroll to today then, once.
+    if (!shown || scrolled.current) return;
+    const id = requestAnimationFrame(() => {
+      const r = row.current, el = r?.querySelector<HTMLElement>(".scene-week-day.today");
+      if (!r || !el) return;
+      scrolled.current = true;
+      r.scrollLeft = Math.max(0, r.scrollLeft + el.getBoundingClientRect().left - r.getBoundingClientRect().left - 14);
+    });
+    return () => cancelAnimationFrame(id);
+  }, [shown]);
+  if (!shown) return null;
   return (
     <section className="scene-section" aria-label="This week on the scene">
       <div className="scene-label">THIS WEEK ON THE SCENE</div>
       <div className="scene-week" ref={row}>
         {days.map((d) => (
-          <div key={d.day} className={`scene-week-day${d.today ? " today" : ""}`}>
+          <button key={d.day} type="button" className={`scene-week-day${d.today ? " today" : ""}`} onClick={() => onDay(d)} disabled={!d.items.length}>
             <span className="scene-week-label">{d.today ? "Today" : d.label}</span>
             {d.items.length ? d.items.slice(0, 3).map((it) => (
               <span key={it.move} className="scene-week-item" title={it.title}>
@@ -363,7 +474,9 @@ function CastWeek({ days }: { days: SceneView["castWeek"] }) {
                 <span className="scene-week-title">{it.title}</span>
               </span>
             )) : <span className="meta scene-week-none">Quiet</span>}
-          </div>
+            {d.items.length > 3 && <span className="scene-week-more">+{d.items.length - 3} more</span>}
+            {d.items.length > 0 && <span className="scene-week-see">See {d.today ? "today" : d.label} ›</span>}
+          </button>
         ))}
       </div>
     </section>

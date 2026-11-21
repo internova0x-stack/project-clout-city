@@ -3835,3 +3835,16 @@ button.camp-task.ticked { flex-direction:row; align-items:flex-start; gap:10px; 
 .fame-perk.have { color:#1F7A57; }
 .fame-perk em { font-style:normal; font-weight:500; color:var(--text-3); }
 .scene-known-note { margin:4px 4px -8px; font-size:12px; color:var(--text-2); }
+/* Owner, Nov 21: the week strip and the free slots open lists. */
+button.scene-week-day { border:0; text-align:left; font:inherit; color:inherit; cursor:pointer; }
+button.scene-week-day:disabled { cursor:default; }
+.scene-week-more { font-size:12px; color:var(--text-2); font-weight:600; }
+.scene-week-see { margin-top:auto; font-size:12px; font-weight:700; color:var(--primary-bottom); }
+.scene-free-btn { position:relative; width:100%; text-align:left; font:inherit; color:inherit; cursor:pointer; }
+.scene-free-btn:active { transform:scale(.98); }
+.scene-free-plus { position:absolute; right:14px; top:50%; transform:translateY(-50%); width:34px; height:34px; border-radius:50%; display:grid; place-items:center; background:#fff; color:var(--primary-bottom); font-size:20px; font-weight:800; box-shadow:var(--elev-1); }
+.scene-free-btn .meta { padding-right:44px; }
+.scene-later { color:var(--primary-bottom); font-weight:600; }
+.scene-card.planned { position:relative; gap:8px; border:2px solid var(--primary-top); }
+.scene-plan-tag { font-size:13px; font-weight:700; color:var(--primary-bottom); }
+.scene-plan-x { position:absolute; top:10px; right:10px; width:30px; height:30px; border-radius:50%; border:0; background:rgba(23,20,28,.06); color:var(--text-2); font-size:14px; cursor:pointer; }
