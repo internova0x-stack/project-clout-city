@@ -129,8 +129,17 @@ export interface Room3DProps {
    * without calling onUse again. `key` changes for each new one. `use` is a piece's use kind ("sit", "sleep", "cook")
    * or a place action's id.
    */
-  act?: { use: "sit" | "sleep" | "cook" | { action: string; index?: number; kind?: string; seconds?: number }; key: number } | null;
+  act?: RoomAct | null;
 }
+
+/**
+ * What the room acts out (props.act). A piece's use kind, a place action, or a moment (lib/moments.ts, owner Nov 21):
+ * dance on the dance floor, run laps, walk the dog, wave.
+ */
+export type RoomAct = {
+  use: "sit" | "sleep" | "cook" | { action: string; index?: number; kind?: string; seconds?: number } | { moment: "dance" | "run" | "dogwalk" | "wave" | "sit"; seconds: number };
+  key: number;
+};
 
 export default function Room3D(props: Room3DProps) {
   const { template, layout, look, outfit, sign, editable, label, insetTop = 120, insetBottom = 96, mood = "dream" } = props;
@@ -168,7 +177,8 @@ export default function Room3D(props: Room3DProps) {
   useEffect(() => { propsRef.current.onEditingChange?.(editing); }, [editing]);
   const actionsRef = useRef<{
     goUse: (it: RoomItem, silent?: boolean) => void; talk: (i: number) => void; floorStep: (screen: number) => [number, number];
-    sitNear: (near: RoomItem | null) => boolean; stroll: (seconds: number, dog: boolean) => void;
+    sitNear: (near: RoomItem | null) => boolean; stroll: (seconds: number, dog: boolean, run?: boolean) => void;
+    danceFor: (seconds: number) => void; wave: () => void; closeUp: (seconds: number) => void;
   } | null>(null);
 
   // Re-apply when the room or saved layout changes (not while arranging).
@@ -528,6 +538,12 @@ export default function Room3D(props: Room3DProps) {
     // Big public floors (owner, Nov 20) open a little zoomed in on the player; a pinch out shows the whole floor.
     let zoom = template.w * template.d >= 200 ? 1.6 : 1;
     let zoomDirty = false;
+    // Moments (owner, Nov 21): the camera eases in on you while you act something out, then back to where it was.
+    let closeUntil = 0, closeBase = zoom;
+    const closeUp = (seconds: number) => {
+      if (!closeUntil) closeBase = zoom;
+      closeUntil = performance.now() + seconds * 1000;
+    };
     const playerAt = new Vector3();
     // Outdoor plazas start the camera over the player.
     const camTarget = new Vector3(template.outdoor ? template.spawn[0] : 0, 0, template.outdoor ? template.spawn[1] : 0);
@@ -824,6 +840,11 @@ export default function Room3D(props: Room3DProps) {
       } else ring.visible = false;
       // Rotatable rooms: ease toward the chosen quarter turn.
       const goal = turnRef.current * (Math.PI / 2);
+      if (closeUntil) {
+        const want = performance.now() < closeUntil ? Math.max(closeBase, 2.3) : closeBase;
+        if (Math.abs(want - zoom) > 0.01) { zoom += (want - zoom) * (reduceMotion ? 1 : Math.min(1, dt * 2.5)); zoomDirty = true; }
+        else if (performance.now() >= closeUntil) { zoom = closeBase; closeUntil = 0; zoomDirty = true; }
+      }
       if (zoom > 1 || zoomDirty) { zoomDirty = false; fit(); }
       if (slide) aim(goal + slide); // following the finger
       else if (Math.abs(goal - angle) > 1e-3) aim(reduceMotion ? goal : angle + (goal - angle) * Math.min(1, dt * 9));
@@ -925,7 +946,7 @@ export default function Room3D(props: Room3DProps) {
     // seconds, with a dog at your heels for a dog walk.
     let dog: Group | null = null;
     let dogUntil = 0;
-    const stroll = (seconds: number, withDog: boolean) => {
+    const stroll = (seconds: number, withDog: boolean, run = false) => {
       const grid = makeGrid(template, itemsRef.current);
       const hw = template.w * 0.32, hd = template.d * 0.32;
       const corners: [number, number][] = [[-hw, -hd], [hw, -hd], [hw, hd], [-hw, hd]];
@@ -933,7 +954,7 @@ export default function Room3D(props: Room3DProps) {
       const start = corners.reduce((b, c, i) => (Math.hypot(c[0] - at[0], c[1] - at[1]) < Math.hypot(corners[b][0] - at[0], corners[b][1] - at[1]) ? i : b), 0);
       const path: [number, number][] = [];
       let length = 0;
-      const want = Math.max(4, seconds) * WALK_SPEED;
+      const want = Math.max(4, seconds) * (run ? RUN_SPEED : WALK_SPEED);
       for (let i = 0; i < 16 && length < want; i++) {
         const goal = corners[(start + i) % 4];
         const leg = findPath(grid, at, goal).slice(1);
@@ -943,7 +964,7 @@ export default function Room3D(props: Room3DProps) {
       if (me.mode === "sit" || me.mode === "sleep" || me.mode === "dance") standUp(me);
       me.pending = null;
       me.path = path;
-      me.run = false;
+      me.run = run && !!me.parts?.play;
       me.mode = "walk";
       if (withDog && !dog) {
         dog = buildDog();
@@ -952,7 +973,24 @@ export default function Room3D(props: Room3DProps) {
       }
       dogUntil = performance.now() + seconds * 1000;
     };
-    actionsRef.current = { goUse, talk, floorStep, sitNear, stroll };
+    // Moments (owner, Nov 21): onto the nearest dance floor (or right here) for a few seconds, then back to standing.
+    let danceTimer: ReturnType<typeof setTimeout> | null = null;
+    const danceFor = (seconds: number) => {
+      if (danceTimer) clearTimeout(danceTimer);
+      const floors = itemsRef.current.filter((i) => i.kind === "danceFloor");
+      const stop = () => { danceTimer = setTimeout(() => { if (me.mode === "dance") standUp(me); }, seconds * 1000); };
+      if (!floors.length) { if (me.mode === "sit" || me.mode === "sleep") standUp(me); me.mode = "dance"; stop(); return; }
+      const f = floors.sort((a, b) => Math.hypot(a.x - me.x, a.z - me.z) - Math.hypot(b.x - me.x, b.z - me.z))[0];
+      const spot: RoomItem = { ...f, id: "_dance", x: f.x + (Math.random() - 0.5) * 1.6, z: f.z + (Math.random() - 0.5) * 1.6, use: { kind: "events" } };
+      silent = spot;
+      walkTo([spot.x, spot.z], spot);
+      stop();
+    };
+    const wave = () => {
+      if (me.mode === "sit" || me.mode === "sleep" || me.mode === "dance") standUp(me);
+      me.parts?.play?.("wave", true);
+    };
+    actionsRef.current = { goUse, talk, floorStep, sitNear, stroll, danceFor, wave, closeUp };
 
     function walkTo(goal: [number, number], use: RoomItem | null) {
       const grid = makeGrid(template, itemsRef.current);
@@ -1140,6 +1178,16 @@ export default function Room3D(props: Room3DProps) {
     const act = props.act;
     if (!act) return;
     const want = act.use;
+    actionsRef.current?.closeUp(typeof want === "string" ? 4 : "moment" in want ? want.seconds : Math.min(6, want.seconds ?? 5));
+    if (typeof want !== "string" && "moment" in want) {
+      const a = actionsRef.current;
+      if (want.moment === "dance") a?.danceFor(want.seconds);
+      else if (want.moment === "run") a?.stroll(want.seconds, false, true);
+      else if (want.moment === "dogwalk") a?.stroll(want.seconds, true);
+      else if (want.moment === "sit") { if (!a?.sitNear(null)) { const seat = itemsRef.current.find((i) => i.use?.kind === "sit"); if (seat) a?.goUse(seat, true); } }
+      else a?.wave();
+      return;
+    }
     if (typeof want !== "string") {
       const strolls = /dog|lap|walk|run|jog/.test(want.action);
       const exact = itemsRef.current.find((i) => i.use?.kind === "action" && (i.use.actionId === want.action || (want.index !== undefined && i.use.actionId === `*${want.index}`))) ?? null;
@@ -1158,6 +1206,7 @@ export default function Room3D(props: Room3DProps) {
       const u = i.use;
       if (!u) return false;
       if (typeof want === "string") return u.kind === want;
+      if ("moment" in want) return false;
       return u.kind === "action" && (u.actionId === want.action || (want.index !== undefined && u.actionId === `*${want.index}`));
     });
     // Sit on the sofa (then an armchair) rather than a stool; sleep in the bed.

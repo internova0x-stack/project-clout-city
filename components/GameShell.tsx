@@ -177,6 +177,8 @@ import { campusById, type CampusApi, type CampusId } from "@/lib/campus";
 import type { SchoolApi, SchoolRival } from "@/lib/schoolApi";
 import type { Crown } from "@/lib/schoolRace";
 import { firstTime } from "./seenOnce";
+import { MOMENTS, momentFor, momentSeconds, type MomentKind } from "@/lib/moments";
+import type { RoomAct } from "./room/Room3D";
 
 /** Culture pack C1: a regular's everyday lines plus their profile's catchphrases. */
 const EVERYDAY_LINES = withCatchphrases(CAST_LINES, NPC_PROFILES.profiles as NpcProfile[]);
@@ -1318,7 +1320,7 @@ export function GameShell({
   const [trip, setTrip] = useState<Trip | null>(null);
   const [restKind, setRestKind] = useState<RestKind | null>(null);
   // Owner, Nov 6: an action started from a list plays out in the room (the avatar walks to the sofa, the bed, the counter).
-  const [roomAct, setRoomAct] = useState<{ use: "sit" | "sleep" | "cook" | { action: string; index?: number; kind?: string; seconds?: number }; key: number } | null>(null);
+  const [roomAct, setRoomAct] = useState<RoomAct | null>(null);
   useEffect(() => { setRoomAct(null); }, [inside?.id, tab, insideFloor]);
   const [kitchenOpen, setKitchenOpen] = useState(false);
   // v0.10 Lucky Star Lotto (migration 0032): lotto state is missing until it runs.
@@ -1760,6 +1762,49 @@ export function GameShell({
     if (r.cash || r.clout || r.mood) setGain({ cash: r.cash || undefined, clout: r.clout || undefined, mood: r.mood || undefined });
     if (cityApi) void cityApi.refresh().then((x) => x.ok && applyCity(x));
   };
+  // ---- Moments (owner, Nov 21; lib/moments.ts): your avatar acts out what you just did, the cards step aside ----
+  const [moment, setMoment] = useState<{ kind: MomentKind; label: string; key: number } | null>(null);
+  const momentDone = useRef<(() => void) | null>(null);
+  const momentTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const endMoment = useCallback(() => {
+    if (momentTimer.current) clearTimeout(momentTimer.current);
+    momentTimer.current = null;
+    setMoment(null);
+    const then = momentDone.current;
+    momentDone.current = null;
+    then?.();
+  }, []);
+  /** Plays a moment in the room you're in (false when it can't: not in a room, or "reduce motion"; then runs `then` now). */
+  const playMoment = (kind: MomentKind, label: string, then?: () => void, opts: { act?: boolean } = {}): boolean => {
+    const reduce = typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    if (reduce || !inside) { then?.(); return false; }
+    const today = new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York" }).format(new Date());
+    const secs = momentSeconds(kind, firstTime("moment", `${kind}:${today}`));
+    if (opts.act !== false) {
+      const use: RoomAct["use"] | null = kind === "dance" || kind === "run" || kind === "dogwalk" || kind === "wave" ? { moment: kind, seconds: secs + 0.6 }
+        : kind === "sit" ? { moment: "sit", seconds: secs } : kind === "sleep" ? "sleep" : kind === "work" ? { action: "work", kind: "shift", seconds: secs } : null;
+      if (use) setRoomAct({ use, key: Date.now() });
+    }
+    if (momentTimer.current) clearTimeout(momentTimer.current);
+    momentDone.current?.();
+    momentDone.current = then ?? null;
+    setMoment({ kind, label, key: Date.now() });
+    momentTimer.current = setTimeout(endMoment, secs * 1000);
+    return true;
+  };
+  useEffect(() => () => { if (momentTimer.current) clearTimeout(momentTimer.current); }, []);
+  useEffect(() => { if (moment) endMoment(); /* leaving the room ends it */ }, [inside?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  const momentPreview = useRef(false);
+  useEffect(() => {
+    if (process.env.NODE_ENV === "production" || momentPreview.current || !inside) return;
+    const k = new URLSearchParams(window.location.search).get("moment") as MomentKind | null;
+    if (!k || !MOMENTS[k]) return;
+    momentPreview.current = true;
+    const t = setTimeout(() => playMoment(k, `${MOMENTS[k].verb} at ${inside.name}`), 4500);
+    return () => clearTimeout(t);
+  }, [inside?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  /** The activity sheet steps aside while its moment plays. */
+  const [lifeAway, setLifeAway] = useState(false);
   const chooseLife = async (option: string) => {
     if (!life || !lifeCard) return;
     setBusy("life");
@@ -1771,6 +1816,9 @@ export function GameShell({
     setLifeResult(r.result);
     if (r.view) setLifeV(r.view);
     lifePaid(r.result);
+    // Act it out first (walk Sir Barksley, step into the circle, run the sprinklers), then the receipt.
+    const kind = momentFor({ id: lifeCard.card.id, title: lifeCard.card.title });
+    if (kind && playMoment(kind, lifeCard.card.title, () => setLifeAway(false))) setLifeAway(true);
   };
   const claimStampLife = async (days: number) => {
     if (!life || !insideId) return;
@@ -2320,7 +2368,7 @@ export function GameShell({
   };
   // One card at a time (owner, Nov 4: the Halo ↔ Hustler card "pops up sometimes when another modal is loaded"): a choice,
   // a consequence or the bench waits while another sheet is open, and shows when it closes.
-  const choiceWaits = welcomeOpen || sceneOpen || !!cutscene || !!place || !!panel || phone.open || careersOpen || campaignOpen || crownOpen || !!rivalMeet || backRoomOpen || !!lifeCard || !!travelPlan || !!trip;
+  const choiceWaits = welcomeOpen || sceneOpen || !!moment || !!cutscene || !!place || !!panel || phone.open || careersOpen || campaignOpen || crownOpen || !!rivalMeet || backRoomOpen || !!lifeCard || !!travelPlan || !!trip;
   // The Homecoming race: the first walk onto a campus's Quad (its ground floor) for an enrolled student without a race
   // brings on the reigning royal, once per device (cc-seen:crown-rival); "Run against" opens Crown HQ's Declare screen.
   const onQuad = !!school && !!inside && isCampusPlace(inside) && insideFloor === 1 ? inside.id : null;
@@ -2487,7 +2535,16 @@ export function GameShell({
       if (!cityApi) return;
       const act = placeById(pl)?.actions.find((x) => x.id === a);
       const v = act ? actionVerb(act) : { emoji: "✨", label: "On it" };
-      if (act && inside?.id === pl) setRoomAct({ use: { action: a, index: placeById(pl)!.actions.indexOf(act), kind: act.kind, seconds: actionSeconds(act) }, key: Date.now() });
+      if (act && inside?.id === pl) {
+        // Moments: dancing and running play their own move; everything else walks to its piece as before, with the
+        // place card stepping aside so you see it.
+        const mk = momentFor({ id: act.id, label: act.label, kind: act.kind });
+        if (mk === "dance" || mk === "run") playMoment(mk, act.label);
+        else {
+          setRoomAct({ use: { action: a, index: placeById(pl)!.actions.indexOf(act), kind: act.kind, seconds: actionSeconds(act) }, key: Date.now() });
+          if (mk) playMoment(mk, act.label, undefined, { act: false });
+        }
+      }
       // v0.13: a together plan for this activity pays its bonus once both have done it.
       void cityThenStory(`${pl}:${a}`, timed(v.emoji, v.label, act ? actionSeconds(act) : 0, () => cityApi.doAction(pl, a))).then((ok) => {
         void claimTogether(pl, a);
@@ -2508,7 +2565,7 @@ export function GameShell({
       }),
       busy,
     } : undefined,
-    onAttendEvent: (id) => cityApi && void cityThenStory(`event:${id}`, timed("🪩", `At ${CLUB_EVENTS.find((e) => e.id === id)?.name ?? "the event"}`, OTHER_SECONDS.event, () => cityApi.attendEvent(id))),
+    onAttendEvent: (id) => cityApi && (inside?.category === "nightlife" && playMoment("dance", CLUB_EVENTS.find((e) => e.id === id)?.name ?? "The party"), true) && void cityThenStory(`event:${id}`, timed("🪩", `At ${CLUB_EVENTS.find((e) => e.id === id)?.name ?? "the event"}`, OTHER_SECONDS.event, () => cityApi.attendEvent(id))),
     onOpenGigs: () => { setPlace(null); setPhone({ open: true, app: "gigs" }); },
     onBarksley: () => setBarksley({ first: !barksleyMet() }),
     onBuyGroceries: kitchenOn && cityApi?.buyGroceries ? (pl, b) => void run(`groceries:${b}`, timed("🛒", "Shopping", OTHER_SECONDS.groceries, () => cityApi.buyGroceries!(pl, b))) : undefined,
@@ -2707,6 +2764,7 @@ export function GameShell({
       celebrate({ rung: 2, emoji: "🚫", tag: "Bounced", title: "They checked the list.",
         line: r.data.banHours ? `Banned from here for ${r.data.banHours} hours. Worth a try.` : "Not tonight. Try again tomorrow.", rewards: [] });
     } else {
+      if (inside && o.places.some((pp) => pp.id === inside.id)) playMoment("wave", o.title);
       celebrate({ rung: 2, emoji: o.emoji, tag: o.short ? "You're in 🤫" : "Move started", title: o.title,
         line: r.data.refund ? `On the house: C$${r.data.refund.toLocaleString("en-US")} back. Ready in ${o.hours} h.` : `Ready in ${o.hours} h. It's in Your Scene.`,
         rewards: r.data.refund ? [{ tone: "cash", text: `+C$${r.data.refund.toLocaleString("en-US")}` }] : [], cta: "Your Scene", onCta: () => setSceneOpen(true) });
@@ -3503,6 +3561,12 @@ export function GameShell({
           handlers={handlers}
           onBack={() => setInside(null)}
           floor={insideFloor}
+          away={moment ? (
+            <button key={moment.key} className="moment-cap pill-glass glass-hud" onClick={endMoment} aria-label={`${MOMENTS[moment.kind].verb}: ${moment.label}. Tap to skip`}>
+              <span className="moment-cap-emoji" aria-hidden="true">{MOMENTS[moment.kind].emoji}</span>
+              <span className="moment-cap-text"><b>{moment.label}</b><span>Tap to skip</span></span>
+            </button>
+          ) : undefined}
           talkNonce={talkNonce}
           sign={sign && sign.id === inside.id ? (
             <StationSign
@@ -4465,8 +4529,8 @@ export function GameShell({
           <DailyWelcome open={welcomeOpen && !sceneOpen} name={me.display_name} hello={welcomeHello} streak={(process.env.NODE_ENV !== "production" && typeof window !== "undefined" && Number(new URLSearchParams(window.location.search).get("streakdays"))) || (goalsNow?.streak.current ?? 0)} streakNext={goalsNow?.streak.next.day}
             action={welcomeAction} onGo={welcomeGo} onLater={welcomeLater}
             variant={process.env.NODE_ENV !== "production" && typeof window !== "undefined" ? ((v) => (WELCOME_VARIANTS as readonly string[]).includes(v ?? "") ? v as WelcomeVariant : undefined)(new URLSearchParams(window.location.search).get("welcome")) : undefined} />
-          <LifeSheet card={lifeCard?.card ?? null} who={lifeCard?.who ?? null} result={lifeResult} busy={busy === "life"}
-            onChoose={(o) => void chooseLife(o)} onClose={() => { setLifeCard(null); setLifeResult(null); }} />
+          <LifeSheet card={lifeAway ? null : lifeCard?.card ?? null} who={lifeCard?.who ?? null} result={lifeResult} busy={busy === "life"}
+            onChoose={(o) => void chooseLife(o)} onClose={() => { setLifeCard(null); setLifeResult(null); setLifeAway(false); }} />
           <ChoiceSheet card={choiceWaits && !choiceMade ? null : choiceCard} made={choiceMade} busy={choiceBusy} onChoose={(o) => void chooseChoice(o)} onSkip={closeChoice} onClose={closeChoice} />
           <ChoiceBackSheet entry={!choiceCard && !choiceWaits && choicesReady ? choiceBack[0] ?? null : null} onClose={closeBack} />
           <HoldingSheet open={holdingOpen && !choiceCard && !choiceBack.length && !choiceWaits} until={holdingUntil} busy={choiceBusy || favorBusy}
@@ -4614,7 +4678,7 @@ export function GameShell({
           onPhase={(ph) => setGuidePlay({ id: guidePlay.id, phase: ph })} onClose={() => setGuidePlay(null)}
           onSkip={() => skipGuideStep(guidePlay.id)} />
       )}
-      <CelebrationHost hold={!!choiceCard || !!trip || flow !== "none" || welcomeOpen || !!cutscene} />
+      <CelebrationHost hold={!!choiceCard || !!trip || flow !== "none" || welcomeOpen || !!cutscene || !!moment} />
       <ProfileSheet
         open={panel === "profile"}
         onClose={() => setPanel(null)}
