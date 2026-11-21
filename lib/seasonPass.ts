@@ -123,7 +123,14 @@ export const SEASON: Season = {
   claimDays: 14,
   // Owner, Nov 16: challenges carry most of the XP now (migration 0167; it was 160 a level, 10 a task, 30 for all five).
   xpPerTier: 200,
-  xp: { daily_task: 5, daily_bonus: 20, goal: 50 },
+  // Migration 0173 (Your Scene, step 3): a collected move earns 10 XP. Migration 0176 (owner, Nov 21: "Clout Pass XP from
+  // everything"): paydays, promotions, the campaign's weekly poll, buying and upgrading a business, dates, hosting, parties,
+  // hunt clues, anniversaries, the Crib Rating and plaques too.
+  xp: {
+    daily_task: 5, daily_bonus: 20, goal: 50, scene: 10,
+    career_pay: 10, career_promo: 40, campaign_poll: 15, business_buy: 25, business_upgrade: 20, date_night: 15, visit_host: 10,
+    party: 10, hunt: 10, couple_anniv: 15, home_score: 20, scene_plaque: 30,
+  },
   badge: { id: "pass-s1", emoji: "💘", name: "Cuffing Season '26" },
   title: { id: "cuffed-26", emoji: "💘", name: "Cuffed '26" },
   tiers: FREE.map((free, i) => ({

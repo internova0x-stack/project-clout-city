@@ -65,7 +65,7 @@ it isn't in your working directory). Work from the main branch.
 1. Find the week: the Monday after today, New York time (YYYY-MM-DD), and the hunt's Saturday: the
    Saturday after today (owner, Oct 31: hunts run Saturday to Friday). If content/hunts/<Saturday>.json,
    content/news/<Monday>.json, content/gossip/<Monday>.json, content/exams/<Monday>.json and
-   content/storylets/<Monday>.json and content/conditions/<Monday>.json all exist on main already, stop and say so (write only the missing ones otherwise).
+   content/storylets/<Monday>.json, content/conditions/<Monday>.json and content/scene-weeks/<Monday>.json all exist on main already, stop and say so (write only the missing ones otherwise).
 2. Read first: CLAUDE.md, docs/HUNTS.md, docs/CAST.md, docs/08-new-features-spec.md (sections 1, 3,
    4 and 8), lib/city.ts (places and what each costs), lib/cast.ts (the regulars and where they
    stand), lib/gossip.ts (the gossip rules), and the last three weeks in content/hunts/,
@@ -147,6 +147,14 @@ it isn't in your working directory). Work from the main branch.
    each with a riskier, better-paying way and a cleaner one, the bust, the "Remember the…?" caught line and a Blotter headline
    with {name}. Never violence, drugs or weapons; only invented people; police are the 114½, played for laughs. Ids start with
    "w<MMDD>-" and never repeat. Each job goes live 24 hours after it arrives unless vetoed in Studio → Storylets → Pablo's jobs.
+6e. Write content/scene-weeks/<Monday>.json (Your Scene's weekly moves, migration 0174; lib/sceneWeeks.ts, docs/SCENE.md):
+   {"week": "<Monday>", "moves": [...]}, 6 to 10 new moves in the format of content/scene/moves.json, tied to this week's
+   news, story, season and cast: at least three hosted by the celebrity cast ("host": a lib/characters.ts id; Prince Nassim,
+   Saffron Lux, Heir Ruckus, Lunaria…) on one or two "days" (ISO weekdays 1 Monday … 7 Sunday) that match when the news says
+   it happens, and two or more everyday moves anyone can do. Big ones get a "headline" with {name} (no straight
+   apostrophes: use ’). Only places that exist and are open in Queens; status moves carry "needs" ({"rank"} or
+   {"netWorth"}); a move for some players only needs a "when" (lib/storylets.ts). Ids start with "w<MMDD>-" and never
+   repeat. Each goes live 24 hours after it arrives unless vetoed in Studio → Storylets → Scene moves, and runs only that week.
 7. Run npm ci (if needed), npm run validate:content and npm test. Fix anything they report (validate:content
    also fails on any real brand, team or trademarked name).
 8. Commit only those files on a new branch content/week-<Monday>, push it, and open a pull

@@ -196,7 +196,7 @@ function HowItWorks({ season: s, price }: { season: PassState["season"]; price: 
   }, []);
   const steps: [string, string, React.ReactNode][] = [
     ["📅", "Do the weekly challenges", <>Three new ones every Monday, worth most of the XP. They&apos;re gone on Sunday night.</>],
-    ["🎯", "Play like you already do", <>Daily tasks <b>+{s.xp.daily_task} XP</b>, all five in a day <b>+{s.xp.daily_bonus}</b>, each goal <b>+{s.xp.goal}</b>.</>],
+    ["🎯", "Play like you already do", <>Daily tasks <b>+{s.xp.daily_task} XP</b>, all five in a day <b>+{s.xp.daily_bonus}</b>, each goal <b>+{s.xp.goal}</b>. Almost everything else counts too: a payday <b>+{s.xp.career_pay}</b>, a promotion <b>+{s.xp.career_promo}</b>, a campaign week <b>+{s.xp.campaign_poll}</b>, a date <b>+{s.xp.date_night}</b>, a hunt clue <b>+{s.xp.hunt}</b>, a Scene move <b>+{s.xp.scene}</b>, a plaque <b>+{s.xp.scene_plaque}</b>.</>],
     ["🪜", "Climb the levels", <>Every {s.xpPerTier} XP is a new level with a free reward. Level {s.tiers.length} gives the {s.title.emoji} &ldquo;{s.title.name}&rdquo; title by your name, never given again.</>],
     ["✨", "The Clout Pass adds the good stuff", <>One payment for the season{price ? ` (${price})` : ""}, or free with VIP: an exclusive outfit or furniture piece on every level. Looks only. XP you already have counts.</>],
     ["⏳", "It's a season", <>Ends {new Date(s.ends + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })}. You get {s.claimDays} more days to claim, then a new season starts.</>],

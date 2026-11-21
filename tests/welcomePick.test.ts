@@ -78,3 +78,12 @@ test("a broken streak to repair comes right after rent", () => {
   assert.equal(pickWelcome(s)?.title, "Repair your 21-day streak");
   assert.equal(pickWelcome({ ...s, rent: { title: "🧾 C$600", line: "x", canPay: true } })?.kind, "rent");
 });
+
+test("Your Scene (migration 0173): a ready move is the pick after rewards, before the streak", () => {
+  const a = pickWelcome(base({ scene: { ready: 1, title: "Night out", staleSoon: true }, streak: { current: 6, doneToday: false }, nyHour: 20 }));
+  assert.equal(a?.kind, "scene");
+  assert.equal(a?.title, "Night out is ready");
+  assert.match(a?.why ?? "", /stale/);
+  assert.equal(pickWelcome(base({ scene: { ready: 2, title: "x", staleSoon: false }, passReady: 1 }))?.kind, "reward");
+  assert.equal(pickWelcome(base({ scene: { ready: 2, title: "x", staleSoon: false } }))?.title, "2 moves ready to collect");
+});

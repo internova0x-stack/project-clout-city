@@ -9,6 +9,7 @@ import { storyPlaceIds, validateHunt } from "@/lib/hunts";
 import { readContentDrafts } from "@/lib/contentDrafts";
 import { checkGossipFiles, syncGossipWeeks } from "@/lib/gossipImport";
 import { storyImportTrouble, syncWeeklyContent } from "@/lib/contentImport";
+import type { StudioSceneMove } from "@/lib/sceneWeeks";
 import { getServerSupabase } from "@/lib/supabase/server";
 import { runSetupCheck } from "@/lib/setupCheck";
 import type { PlayerFilter, PlayerList, PlayerProfile, PlayerSort } from "@/lib/adminPlayers";
@@ -262,6 +263,12 @@ export async function studioUnderworldJobs() {
 }
 export async function studioUnderworldJobSet(id: string, action: StoryletAction) {
   return admin<StudioUnderworldJob[]>("admin_underworld_job_set", { p_id: id, p_action: action });
+}
+export async function studioSceneMoves() {
+  return admin<StudioSceneMove[]>("admin_scene_moves");
+}
+export async function studioSceneMoveSet(id: string, action: StoryletAction) {
+  return admin<StudioSceneMove[]>("admin_scene_move_set", { p_id: id, p_action: action });
 }
 type LearningRaw = { stats: CardStats[]; weights: { card: string; weight: number; retired: boolean; set_by: "auto" | "admin" }[]; last_run: string | null };
 /** Every card's title: the game's cards and every weekly storylet file (Studio admins only; titles, no outcomes). */

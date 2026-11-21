@@ -22,6 +22,8 @@ export interface Character {
   place?: string;
   /** "the owner", "Pivotly · your rival": shown after the name. */
   title: string;
+  /** Profile picture (public/), when they have one. */
+  portrait?: string;
 }
 
 /** A career person's id: "<track>-manager", "<track>-friend", "<track>-rival". */
@@ -29,8 +31,8 @@ export const careerPersonId = (track: string, who: "manager" | "friend" | "rival
 
 export const CHARACTERS: Character[] = [
   ...REGULARS.map((r): Character => ({ id: r.id, name: r.name, kind: "regular", emoji: r.emoji, place: r.placeId, title: r.title })),
-  ...OFFICIALS.map((o): Character => ({ id: o.id, name: o.name, kind: "official", emoji: "🏛️", title: o.title })),
-  ...CELEBRITIES.map((c): Character => ({ id: c.id, name: c.name, kind: "celebrity", emoji: "⭐", title: c.type })),
+  ...OFFICIALS.map((o): Character => ({ id: o.id, name: o.name, kind: "official", emoji: "🏛️", title: o.title, portrait: o.portrait })),
+  ...CELEBRITIES.map((c): Character => ({ id: c.id, name: c.name, kind: "celebrity", emoji: "⭐", title: c.type, portrait: c.portrait })),
   ...WANNABES.map((w): Character => ({ id: w.id, name: w.name, kind: "wannabe", emoji: "🤳", title: "wannabe" })),
   ...TRACKS.flatMap((t): Character[] => [
     { id: careerPersonId(t.id, "manager"), name: t.manager.name, kind: "boss", emoji: t.manager.emoji, place: t.place, title: `${t.employer} · the boss` },

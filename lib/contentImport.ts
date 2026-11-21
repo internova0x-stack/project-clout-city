@@ -15,6 +15,10 @@ import { getAdminSupabase } from "./supabase/admin";
 import { readAutopilot } from "./autopilot";
 import { validateStoryletWeek } from "./storyletWeeks";
 import { validateUnderworldWeek } from "./underworldWeeks";
+import { validateSceneWeek } from "./sceneWeeks";
+import { SCENE_MOVES } from "./sceneContent";
+import { CHARACTERS } from "./characters";
+import type { SceneMove } from "./scene";
 import { UNDERWORLD_CONTENT } from "./underworldContent";
 import type { Job } from "./underworld";
 import { validateConditionWeek, validateReactions, type ReactionRule } from "./cityConditions";
@@ -27,7 +31,7 @@ import { learnWeights, LEARNING, type CardStats } from "./cardLearning";
 const EVERY_MS = 10 * 60_000;
 let lastRun = 0;
 
-async function weekFiles(kind: "hunts" | "news" | "exams" | "storylets" | "conditions" | "underworld-weeks"): Promise<{ file: string; raw: unknown }[]> {
+async function weekFiles(kind: "hunts" | "news" | "exams" | "storylets" | "conditions" | "underworld-weeks" | "scene-weeks"): Promise<{ file: string; raw: unknown }[]> {
   const dir = path.join(process.cwd(), "content", kind);
   const files = (await readdir(dir).catch(() => [] as string[])).filter((f) => /^\d{4}-\d{2}-\d{2}\.json$/.test(f)).sort();
   const out: { file: string; raw: unknown }[] = [];
@@ -102,6 +106,20 @@ export async function syncWeeklyContent(opts: { force?: boolean } = {}): Promise
       const { data, error } = await admin.rpc("content_import_underworld", { p_week: r.week.week, p_jobs: r.week.jobs });
       if (error) { if (missing(error.message)) { out.push({ file, result: "waiting for its migration" }); break; } out.push({ file, result: `error: ${error.message}` }); continue; }
       out.push({ file, result: `${data} new jobs for Pablo` });
+    }
+  }
+  // Your Scene's weekly moves (migration 0174): live 24 hours later unless vetoed in Studio → Storylets → Scene moves
+  // (held while the storylets autopilot is off), and only in their own week.
+  {
+    let sceneSeen: SceneMove[] = [];
+    const places = new Set(PLACES.map((p) => p.id)), characters = new Set(CHARACTERS.map((c) => c.id));
+    for (const { file, raw } of await weekFiles("scene-weeks")) {
+      const r = validateSceneWeek(raw, { base: SCENE_MOVES, others: sceneSeen, places, characters });
+      if (!r.ok) { out.push({ file, result: `skipped: ${r.problems[0]}` }); continue; }
+      sceneSeen = [...sceneSeen, ...r.week.moves];
+      const { data, error } = await admin.rpc("content_import_scene", { p_week: r.week.week, p_moves: r.week.moves });
+      if (error) { if (missing(error.message)) { out.push({ file, result: "waiting for its migration" }); break; } out.push({ file, result: `error: ${error.message}` }); continue; }
+      out.push({ file, result: `${data} new scene moves` });
     }
   }
   // Content Engine step 4 (migration 0140): the week's city conditions arrive like storylets (live 24 hours later unless

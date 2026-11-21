@@ -9,6 +9,10 @@ import { RANKS, money, nextRank, nextRankLine, rankFor, type Rank } from "@/lib/
 import { Sheet } from "../Sheet";
 import { SheetTitle } from "../city/Common";
 import type { Celebration } from "../Celebrate";
+import { FAME_PERKS, rewardMult } from "@/lib/fame";
+
+/** What fame_state() returns (migration 0175): which repeating perks are used this week or today. */
+export interface FameUse { ticketUsed: boolean; compUsed: boolean; inviteUsed: boolean }
 
 export function RankChip({ rank, onClick }: { rank: Rank; onClick?: () => void }) {
   const cls = `rank-chip${rank.level === 10 ? " god" : rank.level >= 8 ? " rich" : ""}`;
@@ -41,12 +45,19 @@ export function RankClimb({ clout, netWorth, best }: { clout: number; netWorth: 
 }
 
 /** Every rank, and how to get there either way. */
-export function RanksSheet({ open, onClose, clout, netWorth }: { open: boolean; onClose: () => void; clout: number; netWorth: number }) {
+export function RanksSheet({ open, onClose, clout, netWorth, use }: { open: boolean; onClose: () => void; clout: number; netWorth: number; use?: FameUse | null }) {
   const mine = rankFor(clout, netWorth).level;
+  const used = (id: string) => (id === "ticket" ? use?.ticketUsed ? "used this week" : "ready this week"
+    : id === "comp" ? use?.compUsed ? "used today" : "ready today" : id === "invite" ? use?.inviteUsed ? "used today" : "ready today" : null);
   return (
-    <Sheet open={open} onClose={onClose} label="Ranks">
-      <SheetTitle>Ranks</SheetTitle>
-      <p className="meta" style={{ margin: "4px 0 12px" }}>Climb with clout or with money. Whichever gets you higher counts.</p>
+    <Sheet open={open} onClose={onClose} label="Ranks and fame perks">
+      <SheetTitle>Ranks &amp; fame perks</SheetTitle>
+      <p className="meta" style={{ margin: "4px 0 8px" }}>Climb with clout or with money. Whichever gets you higher counts. Every rank brings perks.</p>
+      {/* Owner, Nov 21: rewards that grow with you. */}
+      <div className="fame-mult">
+        <b>×{rewardMult(mine).toFixed(1)}</b>
+        <span>on daily tasks, the all-five bonus, visits, events and place activities at your rank{mine < 10 ? `; ×${rewardMult(mine + 1).toFixed(1)} at the next` : ""}.</span>
+      </div>
       <div className="rank-list">
         {[...RANKS].reverse().map((r) => (
           <div key={r.level} className={`rank-row${r.level === mine ? " mine" : r.level < mine ? " done" : ""}`}>
@@ -56,6 +67,11 @@ export function RanksSheet({ open, onClose, clout, netWorth }: { open: boolean; 
               <span className="meta" style={{ display: "block" }}>
                 {r.level === 1 ? "Where everyone starts" : `${r.clout.toLocaleString("en-US")} clout or ${money(r.netWorth)}`}
               </span>
+              {FAME_PERKS.filter((p) => p.rank === r.level).map((p) => (
+                <span key={p.id} className={`fame-perk${r.level <= mine ? " have" : ""}`}>
+                  {p.emoji} {p.title}{r.level <= mine && used(p.id) ? <em> · {used(p.id)}</em> : null}
+                </span>
+              ))}
             </span>
             {r.level < mine && <span aria-label="Reached">✓</span>}
           </div>
@@ -70,11 +86,16 @@ export function rankCelebration(rank: Rank, name: string): Celebration {
   const share = `${name} just hit ${rank.title} in Clout City. ${rank.line}`;
   if (rank.level >= 10) {
     return { rung: 4, emoji: rank.emoji, tag: "Rank 10 of 10", num: "10", unit: "rank of 10", title: rank.title, line: rank.line, art: "story",
-      rewards: [{ text: "👑 The top of Clout City" }], share, cta: "Bow" };
+      rewards: [{ text: "👑 The top of Clout City" }, ...FAME_PERKS.filter((p) => p.rank === 10).map((p) => ({ text: `${p.emoji} ${p.title}` }))], share, cta: "Bow" };
   }
   return {
     rung: 3, emoji: rank.emoji, num: String(rank.level), tag: "New rank", title: rank.title, line: `Rank ${rank.level} of 10. ${rank.line}`,
-    rewards: rank.level === 2 ? [{ text: "🏪 Businesses" }, { text: "💼 Jobs" }, { text: "🗳️ Campaigns" }] : undefined,
+    // Owner, Nov 21: the rank's fame perks are part of the reveal.
+    rewards: [
+      ...(rank.level === 2 ? [{ text: "🏪 Businesses" }, { text: "💼 Jobs" }, { text: "🗳️ Campaigns" }] : []),
+      ...FAME_PERKS.filter((p) => p.rank === rank.level).map((p) => ({ text: `${p.emoji} ${p.title}` })),
+      { text: `×${rewardMult(rank.level).toFixed(1)} everyday rewards` },
+    ],
     lola: RANK_LOLA[rank.level] ?? "Look who\u2019s climbing. I knew you when.", share, cta: "Let's go",
   };
 }

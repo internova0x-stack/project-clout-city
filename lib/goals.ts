@@ -81,17 +81,28 @@ const LADDER: GoalDef[] = [
   { id: "vip_floor", unlock: 5000, reward: 500, lean: "boost", tags: ["club", "nightlife"], check: { type: "vip", level: "medium" } },
   { id: "move_highrise", unlock: 5000, reward: 500, lean: "cash", tags: [], check: { type: "home", home: "lic_highrise" } },
   { id: "campaign_all", unlock: 5000, reward: 500, lean: "boost", tags: [], check: { type: "candidates_run", count: 4 }, side: true },
+  // Owner, Nov 21 (the reward review: "get better progressively"): more rungs for Ranks 6 to 10, from checks the server knows.
+  { id: "skill_7", unlock: 5000, reward: 600, lean: "boost", tags: [], check: { type: "skill", level: 7 } },
+  { id: "save_100k", unlock: 5000, reward: 600, lean: "cash", tags: [], check: { type: "save", cash: 100000 } },
   // 🍼 Nepo Baby Energy
   { id: "own_home", unlock: 15000, reward: 1500, lean: "cash", tags: ["furniture", "home"], check: { type: "house", sku: "house-astoria-townhouse" } },
   { id: "laundromat", unlock: 15000, reward: 750, lean: "cash", tags: [], check: { type: "business", id: "laundromat" } },
+  { id: "rooftop_regular", unlock: 15000, reward: 1500, lean: "boost", tags: ["rooftop"], check: { type: "regular", place: "ditmars-heights-rooftop", days: 10 } },
+  { id: "skill_9", unlock: 15000, reward: 1500, lean: "boost", tags: [], check: { type: "skill", level: 9 } },
+  { id: "save_1m", unlock: 15000, reward: 1500, lean: "cash", tags: [], check: { type: "save", cash: 1000000 } },
   // 💸 New Money Rich
   { id: "penthouse", unlock: 50000, reward: 2500, lean: "cash", tags: ["furniture", "home"], check: { type: "house", sku: "house-lic-penthouse" } },
   { id: "cafe", unlock: 50000, reward: 2500, lean: "cash", tags: [], check: { type: "business", id: "cafe" } },
+  { id: "skill_10", unlock: 50000, reward: 2500, lean: "boost", tags: [], check: { type: "skill", level: 10 } },
+  { id: "save_10m", unlock: 50000, reward: 2500, lean: "cash", tags: [], check: { type: "save", cash: 10000000 } },
   // 🛥️ Self-Made Billionaire*
   { id: "duplex", unlock: 150000, reward: 5000, lean: "cash", tags: ["furniture", "home"], check: { type: "house", sku: "house-hunters-point-duplex" } },
   { id: "taco_trucks", unlock: 150000, reward: 5000, lean: "cash", tags: [], check: { type: "business", id: "taco-trucks" } },
+  { id: "nightclub", unlock: 150000, reward: 5000, lean: "cash", tags: ["club", "nightlife"], check: { type: "business", id: "nightclub" } },
+  { id: "save_100m", unlock: 150000, reward: 5000, lean: "cash", tags: [], check: { type: "save", cash: 100000000 } },
   // ✨ God Status
   { id: "go_public", unlock: 500000, reward: 10000, lean: "boost", tags: [], check: { type: "public" } },
+  { id: "save_1b", unlock: 500000, reward: 10000, lean: "cash", tags: [], check: { type: "save", cash: 1000000000 } },
 ];
 
 export type GoalId = string;
@@ -215,6 +226,16 @@ export const GOAL_COPY: Record<string, { emoji: string; title: string; line: str
   campaign_win: { emoji: "🏛️", title: "Make a Mayor", line: "Beat Papa-Dani. He'll call to congratulate you. He'll mean it.", toward: "Toward the win" },
   campaign_clean: { emoji: "😇", title: "Win with clean hands", line: "Win with Integrity 70 or more and nothing buried. Rarer than a rent-stabilized two-bedroom.", toward: "Toward a clean win" },
   campaign_all: { emoji: "👑", title: "Kingmaker", line: "Run a campaign for all four challengers. Every one of them still thinks they were your favorite.", toward: "Toward kingmaker" },
+  skill_7: { emoji: "🎯", title: "Get a skill to level 7", line: "Past good. Into the part where people ask how you did it.", toward: "Toward level 7" },
+  save_100k: { emoji: "💰", title: "Have C$100,000 in the bank", line: "Six figures. Your bank sends a fruit basket. It's mostly grapes.", toward: "Toward six figures" },
+  rooftop_regular: { emoji: "🌃", title: "Be a regular at Ditmars Heights Rooftop", line: "Ten different days. Kiki saves you the corner table now.", toward: "Toward the corner table" },
+  skill_9: { emoji: "🎯", title: "Get a skill to level 9", line: "One short of mastery. The internet calls you a guru. Don't let it.", toward: "Toward level 9" },
+  save_1m: { emoji: "💸", title: "Have C$1,000,000 in the bank", line: "A millionaire. In cash. Your accountant would like a word.", toward: "Toward the first million" },
+  skill_10: { emoji: "🏆", title: "Master a skill", line: "Level 10. They'll name a workshop after you. You'll charge for it.", toward: "Toward mastery" },
+  save_10m: { emoji: "🏦", title: "Have C$10,000,000 in the bank", line: "The bank calls you now. To ask how your weekend was.", toward: "Toward ten million" },
+  nightclub: { emoji: "🪩", title: "Own a nightclub", line: "Your name on the door. Literally. You had it printed.", toward: "Toward the club" },
+  save_100m: { emoji: "🛥️", title: "Have C$100,000,000 in the bank", line: "Prince Nassim calls this \"a start\". Ignore Prince Nassim.", toward: "Toward a hundred million" },
+  save_1b: { emoji: "✨", title: "Have a billion in the bank", line: "Self-made, they'll say. Terms and conditions apply.", toward: "Toward the billion" },
   go_public: { emoji: "🚀", title: "Take the startup public", line: "Ring the bell. Nobody knows what the company does. Valuation: huge.", toward: "Toward the bell" },
   [NEXT_CHAPTER]: { emoji: "🔓", title: "Unlock the next chapter", line: "Everything on your level is done. More clout opens more goals.", toward: "Toward the next chapter" },
 };

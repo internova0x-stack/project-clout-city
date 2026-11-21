@@ -1,0 +1,53 @@
+{
+ "week": "2026-11-23",
+ "moves": [
+  {
+   "id": "w1123-nassim-thanksgiving", "title": "Prince Nassim's \"small\" Thanksgiving", "emoji": "🦃", "area": "cast",
+   "places": ["ditmars-heights-rooftop"], "hours": 8, "cost": 250, "energy": 15, "clout": 220, "score": "status", "skill": "charisma",
+   "host": "prince-nassim", "needs": { "rank": 3 }, "days": [4],
+   "why": "Prince Nassim is hosting a \"small\" Thanksgiving", "line": "Forty guests, one turkey made of gold leaf.",
+   "headline": "{name} attended Prince Nassim’s “small” Thanksgiving. The turkey had its own security."
+  },
+  {
+   "id": "w1123-friendsgiving-diner", "title": "Friendsgiving at the diner", "emoji": "🥧", "area": "everyday",
+   "places": ["neon-spoon", "ditmars-deli"], "hours": 2, "cost": 30, "energy": 10, "clout": 55, "score": "social", "skill": "cooking", "days": [3, 4],
+   "why": "It's Friendsgiving week", "line": "Bring a side. Bring a story. Leave the drama at home."
+  },
+  {
+   "id": "w1123-lunaria-popup", "title": "Lunaria's surprise pop-up at Gantry Plaza", "emoji": "🌙", "area": "cast",
+   "places": ["gantry-plaza"], "hours": 2, "cost": 0, "energy": 15, "clout": 90, "score": "stage", "skill": "music",
+   "host": "lunaria", "days": [6],
+   "why": "Lunaria posted a blurry photo of Gantry Plaza", "line": "Nobody knows when. That's the point."
+  },
+  {
+   "id": "w1123-heir-mixtape", "title": "Heir Ruckus's mixtape release party", "emoji": "💿", "area": "cast",
+   "places": ["velvet-static", "real-clout-fm"], "hours": 8, "cost": 60, "energy": 20, "clout": 160, "score": "nightlife", "skill": "music",
+   "host": "heir-ruckus", "needs": { "rank": 2 }, "days": [5],
+   "why": "Big Ruckus bought out the whole first pressing", "line": "Track 4 is a voicemail from his mom.",
+   "headline": "{name} was at Heir Ruckus’s mixtape party. Big Ruckus was spotted buying the merch table."
+  },
+  {
+   "id": "w1123-black-friday-line", "title": "First in line on Black Friday", "emoji": "🛍️", "area": "everyday",
+   "places": ["atelier-vernon", "steinway-fresh"], "hours": 2, "cost": 0, "energy": 20, "clout": 60, "score": "street", "skill": "hustle", "days": [5],
+   "why": "Black Friday, and the line starts at 4 AM", "line": "Bring a folding chair and a grudge."
+  },
+  {
+   "id": "w1123-peyton-gratitude", "title": "Peyton Pastel's gratitude livestream", "emoji": "🙏", "area": "cast",
+   "places": ["grind-and-gossip", "glow-up-house"], "hours": 2, "cost": 0, "energy": 10, "clout": 65, "score": "social", "skill": "photography",
+   "host": "peyton-pastel", "needs": { "rank": 2 }, "days": [2],
+   "why": "Peyton Pastel is grateful (and sorry) on camera", "line": "Be grateful in the background. Softly."
+  },
+  {
+   "id": "w1123-turkey-trot", "title": "Astoria Turkey Trot", "emoji": "🏃", "area": "everyday",
+   "places": ["hell-gate-park"], "hours": 2, "cost": 20, "energy": 25, "clout": 60, "score": "street", "skill": "fitness", "days": [4],
+   "why": "Thanksgiving morning, the whole park is running", "line": "Run five kilometres. Eat five thousand calories."
+  },
+  {
+   "id": "w1123-duke-carving", "title": "Carve the bird at Duke Ledger's table", "emoji": "🍗", "area": "cast",
+   "places": ["queensboro-capital"], "hours": 24, "cost": 0, "energy": 10, "clout": 320, "score": "status", "skill": "cooking",
+   "host": "duke-ledger", "needs": { "netWorth": 250000 }, "days": [4],
+   "why": "Duke Ledger needs a carver he trusts", "line": "The knife is older than the bank.",
+   "headline": "{name} carved the turkey at Duke Ledger’s table. He nodded once. That’s a standing ovation for Duke."
+  }
+ ]
+}

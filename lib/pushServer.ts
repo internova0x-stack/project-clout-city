@@ -29,6 +29,7 @@ export async function runPush(opts: { player?: string } = {}): Promise<{ sent: n
   // Migration 0112: rent due within three days and not enough in the bank (owner, Oct 22).
   if (!opts.player) await admin.rpc("push_scan_streak").then(({ error }) => { if (error && !/schema cache|does not exist/i.test(error.message)) console.error("push_scan_streak failed", error); });
   if (!opts.player) await admin.rpc("push_scan_rent_short").then(({ error }) => { if (error && !/schema cache|does not exist/i.test(error.message)) console.error("push_scan_rent_short failed", error); });
+  if (!opts.player) await admin.rpc("push_scan_scene").then(({ error }) => { if (error && !/schema cache|does not exist/i.test(error.message)) console.error("push_scan_scene failed", error); });
   // Migration 0128: Campaign Mode's "Your poll results are in", once the results' New York day has come.
   if (!opts.player) await admin.rpc("push_scan_campaign").then(({ error }) => { if (error && !/schema cache|does not exist/i.test(error.message)) console.error("push_scan_campaign failed", error); });
   // Migration 0119: sublet rent comes due every 7 days even while nobody opens the game.

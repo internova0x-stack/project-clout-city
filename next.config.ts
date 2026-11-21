@@ -23,8 +23,8 @@ const nextConfig: NextConfig = {
   },
   outputFileTracingIncludes: {
     // The Shop Manager's import (lib/shopImport.ts): the catalog files and the invented-names list.
-    "/studio": ["./content/hunts/*.json", "./content/news/*.json", "./content/gossip/*.json", "./content/stories/*.json", "./content/shop/*.json", "./content/culture/parody-names.json"],
-    "/home": ["./content/gossip/*.json", "./content/stories/*.json", "./content/hunts/*.json", "./content/news/*.json", "./content/exams/*.json"],
+    "/studio": ["./content/hunts/*.json", "./content/news/*.json", "./content/gossip/*.json", "./content/stories/*.json", "./content/shop/*.json", "./content/culture/parody-names.json", "./content/scene-weeks/*.json"],
+    "/home": ["./content/gossip/*.json", "./content/stories/*.json", "./content/hunts/*.json", "./content/news/*.json", "./content/exams/*.json", "./content/scene-weeks/*.json"],
   },
 };
 

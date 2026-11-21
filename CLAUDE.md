@@ -188,6 +188,9 @@ components live in `app/globals.css`.
 - HUD entry points (owner, Oct 23): the task counter (1/5) is the way into Tasks (Daily, Goals, Hunt); its pin is gone (owner,
   Nov 3: it collided with the 🔥 streak badge), the streak badge stays; the side column's Tasks button is Skills (`SkillsSheet`, components/game/Skills.tsx:
   today's skill task on top, then every skill; pinned when a perk is ready). The skill task links back ("See skills ›").
+  Owner, Nov 21: the task counter moved to the top of the side column (the ring with 1/5, the 🔥 streak on its corner, "✓ 3/5"
+  pops there), above Skills, Events, Places, Bills and Look; the top bar's freed space is clout with the way to the next rank
+  under it (`rankBar`, `nextRank`). The bottom bar has five tabs: Home · Map · Scene · Phone · Shop.
 - Loading (owner, Oct 23-24): the launch splash `AppLoading` is `/`'s Suspense fallback only (no loading.tsx, so Continue
   keeps the welcome screen and its spinner up until the game is ready); it shows at once and `SplashHold` keeps it up
   until the screen behind it has drawn (owner, Nov 1: lib/splash.ts `screenReady`: the welcome screen's Room3D onReady, the map's
@@ -905,6 +908,59 @@ components live in `app/globals.css`.
   pieces). app/home/buildActions.ts checks a plan (`planProblems`) and prices it against the last (`planCost`: walls by the metre,
   floors by the m², paint, garden pieces; game_settings 'home_build'), then `home_build_save` (service role) charges and stores it.
   components/home/BuildMode.tsx is the plan editor (the 🔨 under 🛋️); GameShell draws the home through `builtTemplate`.
+- Your Scene (migration 0171, owner Nov 21: "daily grooming of clout", FarmVille's loop; docs/SCENE.md): slots by rank
+  (`slotsFor`: 2, 3 at Rank 3, 4 at Rank 5, 5 at Rank 7); a move (content/scene/moves.json, 58: everyday, status, hosted by the
+  cast, situational with a storylet `when`) is started at one of its places (`scene_start`, service role: place, hours,
+  holding, bans, rank or net worth, a free slot, Energy, bank; ledger cash 'scene_cost'), builds in real time (2/8/24/72 h),
+  wants hypes (`scene_hype`, at its place, an hour apart) and is collected (`scene_collect`: clout ledger 'scene', a quarter off
+  per missed hype, a quarter when stale, score points, `skill_practice`). Six scores with five titles each (`SCORES`), worked
+  out from collected rows. For you today (`forYou`, lib/scene.ts): four moves from different areas of life read from
+  `player_memory` (app/home/sceneActions.ts checks `when`), at least one everyday, none running or rested (3 days), yesterday's
+  last. Fake it till you make it (owner, Nov 21): short of a move's rank or money, `SNEAK` (confidence, name-drop, bribe; the
+  server rolls with crypto random; bounced spends the Energy, a name-drop's 24 h ban, `scene_bounces` blocks a retry that day,
+  meter nudges); invited players pay +10% a rank above the move's (`costFor`). UI: components/scene/Scene.tsx (`SceneScreen`, the
+  full-screen tab; `SceneHere`, the place panel's row; `SceneStartSheet`, start or the door); game_settings 'scene' from
+  `sceneSettings()` (tests/scene.test.ts compares). Start over clears it. `?scene=new|busy|student|rich` in the preview (lib/sceneSim.ts,
+  an hour in 30 seconds).
+  Step 2 (migration 0172, owner Nov 21: "rising costs, rivalries and pitfalls"): haters (content/scene/haters.json, by rank: petty,
+  then the cast's shade from Rank 3, pitfalls from Rank 6; `haterChance`, `hatersFor`, `haterAt`; the server action sets one with
+  `scene_set_hater`) take their `cut` (0.25-0.4) at collect unless dealt with (`scene_deal`: a Friendly regular's vouch once a week,
+  `scene_vouches`; a publicist `publicistCost`; spilling tea `teaCash`, ledger 'scene_tea'; rising above it keeps the cut; meter
+  nudges); the crew's moves (`scene_crew`: crew either way or a partner) can be hyped from anywhere once each (`scene_crew_hype`,
+  `scene_crew_hypes`, 5 clout ledger 'scene_crew'). UI: the red hater strip on a move, `HaterSheet`, "Your crew's moves".
+  Step 3 (migration 0173): plaques at 10/25/50 collects (`PLAQUES`, ledger 'scene_plaque', badge `scene-<move>-<n>`, the 10th a takeover);
+  a week's residency once a move has its first plaque (`scene_residency_take`/`_checkin`, half the move's clout once a New York day,
+  ledger 'scene_residency', `scene_residencies`); trending (`trendingFor`, 3 a week ×1.5, `scene_set_boost`); hosts remember you after 3
+  (content/scene/hosts.json, `HOST_KNOWS`); big moves' `headline` posts a Blotter 'win' line; pushes scene_ready/scene_stale
+  (`push_scan_scene`, run by the sender); Lola's welcome rung 'scene' (`WelcomeSituation.scene`); 10 Clout Pass XP a move (xp.scene).
+  The welcome and choice cards wait while the Scene screen is open.
+  Fresh every week (migration 0174, owner Nov 21): the cast's week (`daysFor`: hosted cast moves on two seeded days a week, `onDay`;
+  "This week on the scene", `castWeek`); weekly moves in content/scene-weeks/<Monday>.json (`validateSceneWeek`, lib/sceneWeeks.ts;
+  routine step 6e) imported by `content_import_scene` (24-hour veto window like storylets, Studio → Storylets → Scene moves,
+  `admin_scene_moves`/`admin_scene_move_set`), offered only in their week (`scene_move_open`), read by every scene function through
+  `scene_move_def`; the server merges `scene_weeks_live()` into its catalog (5-minute cache; past or vetoed ones `closed`).
+- Fame perks and rewards that grow (migration 0175, owner Nov 21: "build 1 and 2" after the reward review; docs/FAME.md, lib/fame.ts):
+  a perk at every rank (`FAME_PERKS`: the week's first event ticket back at 2, the day's first meal comped at 3, a celebrity-hosted
+  Scene move a day free at 4, Lola's Spotlight in the News at every rank from 5 (`SPOTLIGHT`, a players trigger `fame_on_rank`,
+  never for News opt-outs), the Gala match at 7, +10% on Scene moves at 8, the Rank 9 Scene move `own-night`, the Mayor's day and
+  badge 'mayor-day' at 10) and everyday rewards ×(1 + 0.2 a rank above 1, max 2.8) on daily_task, daily_bonus, visit, event and
+  place_life (`rewardMult`). All paid by the ledger trigger `fame_on_ledger` as rows 'fame_scale', 'fame_ticket', 'fame_comp',
+  'fame_invite', 'fame_match', 'fame_paparazzi' (no payment code changed; never raises). UI: Ranks & fame perks (`RanksSheet`, from
+  the leaderboard's button; `fame_state()` for usage) and the rank-up reveal lists the perks. The goal ladder gained ten rungs for
+  Ranks 6 to 10 (skill 7/9/10, savings C$100k to C$1B, the rooftop regular, the nightclub). SQL tests that sum a player's ledger
+  include the fame kinds.
+  One Known for and Pass XP from everything (migration 0176, owner Nov 21: "build 3 and 4"): `KNOWN_FOR` (lib/fame.ts, in
+  game_settings 'fame'.knownFor) maps ledger kinds to a Scene score; the trigger `fame_known` adds points once per kind+ref to
+  `fame_points`, which scene_context adds to Scene's own points; Start over clears it. SEASON.xp gained career_pay, career_promo,
+  campaign_poll, business_buy, business_upgrade, date_night, visit_host, party, hunt, couple_anniv, home_score and scene_plaque
+  (merged into season_pass xp by 0176; tests/seasonPass.test.ts reads the merge).
+  Small progress and surprises (migration 0177, owner Nov 21: "build 5 and 6"; lib/rewards.ts, app/home/rewardActions.ts,
+  components/game/rewardsCelebrations.ts): `goals_halfway()` pays a quarter of a half-done goal's reward once (ledger 'goal_half',
+  run with the goals; yes/no goals and locked ones never), `week_recap()` is last New York week for the Monday results card
+  (`firstTime('recap', week)`), and `surprises` (one roll a New York day, ~half get one: freebie, selfie, drink, a celebrity's
+  invite) paid by `surprise_give` (service role, ledger 'surprise'); an invite refunds that move's start once
+  (`surprise_invite_redeem`, 'surprise_invite', not on top of Rank 4's fame_invite). GameShell's `rewards` prop.
+  `?rewards=recap|halfway|freebie|selfie|drink|invite` in the preview.
 - Players see "Crew" for their invited friends; code, types and database tables still say `clique`
   (renaming stored data isn't worth the risk). Keep player-facing copy on "crew".
 - Culture packs (docs/culture/, one at a time, only when the owner says "Build C<number>"): slang, invented stand-ins

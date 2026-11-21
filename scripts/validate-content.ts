@@ -15,6 +15,9 @@ import { validateCards } from "../lib/choices.ts";
 import { validateStoryletWeek } from "../lib/storyletWeeks.ts";
 import { contentProblems, type Job, type UnderworldContent } from "../lib/underworld.ts";
 import { validateUnderworldWeek } from "../lib/underworldWeeks.ts";
+import { validateSceneWeek } from "../lib/sceneWeeks.ts";
+import { moveProblems, type SceneMove } from "../lib/scene.ts";
+import { CHARACTERS } from "../lib/characters.ts";
 import { validateConditionWeek, validateReactions } from "../lib/cityConditions.ts";
 import { validateRemembers } from "../lib/characterMemory.ts";
 import { faceProblems, gateProblems, type CardFace } from "../lib/cardFormat.ts";
@@ -124,6 +127,24 @@ else console.log(`✓ content/culture/calendar.json (${calendar.events.length} e
     if (`${r.week.week}.json` !== f) { fail(file, [`the file name must be its week (${r.week.week}.json)`]); continue; }
     seen = [...seen, ...r.week.jobs];
     console.log(`✓ ${file} (${r.week.jobs.length} jobs for Pablo)`);
+  }
+}
+// Your Scene (migrations 0171 to 0174): the game's moves, then each week's new moves beside them (ids never repeat).
+{
+  const base = (JSON.parse(readFileSync(new URL("scene/moves.json", root), "utf8")) as { moves: SceneMove[] }).moves;
+  const places = new Set(PLACES.map((p) => p.id));
+  const characters = new Set(CHARACTERS.map((c) => c.id));
+  const problems = moveProblems(base, places, characters);
+  if (problems.length) fail("content/scene/moves.json", problems);
+  else console.log(`✓ content/scene/moves.json (${base.length} moves)`);
+  let seen: SceneMove[] = [];
+  for (const f of list("scene-weeks/")) {
+    const file = `content/scene-weeks/${f}`;
+    const r = validateSceneWeek(JSON.parse(readFileSync(new URL(`scene-weeks/${f}`, root), "utf8")), { base, others: seen, places, characters });
+    if (!r.ok) { fail(file, r.problems); continue; }
+    if (`${r.week.week}.json` !== f) { fail(file, [`the file name must be its week (${r.week.week}.json)`]); continue; }
+    seen = [...seen, ...r.week.moves];
+    console.log(`✓ ${file} (${r.week.moves.length} scene moves)`);
   }
 }
 // Content Engine step 4 (migration 0140): the weekly city conditions and the city storylets (reactions to the tallies).

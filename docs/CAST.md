@@ -82,6 +82,17 @@ For City News. Each has a personality, a want and a flaw, so their news writes i
 | Movie star | Brock Squarejaw | Square-jawed, does his own stunts | To be cast as a superhero | Ages one year every two years |
 | Tech founder | Skyler Beta | Hoodie, ten apps, three pivots a year | To build the everything app | None of the apps work |
 | Influencer | Peyton Pastel | Pastel everything, link in bio | A brand deal with a car company | Every apology video goes viral |
+| Supermodel | Saffron Lux | Sweet and dreamy; says things that sound deep and mean nothing ("Time is just a calendar, babe"); calls everyone "angel" | To be taken seriously as a philosopher | Has never once been on time to her own party |
+| Prince | Prince Nassim of Qamaria | Long money from an invented principality that's mostly a marina; tips in watches, has a valet for his valet, calls everything "small" | One friend who doesn't want anything from him | Buys whatever you're looking at |
+| Rapper | Heir Ruckus | Gerald "Trey" Fennimore IV of Douglaston, Big Ruckus's son (Diss & Tell); raps about the struggle from his dad's mansion; first single samples his own baby monitor | A hit his dad didn't pay for | His dad pays for everything |
+
+Added Nov 21 (owner) for Scene's hosted moves (Prince Nassim's golden crab breakfast, Saffron's birthday, Heir Ruckus's
+listening party). **Prince Nassim's joke is the money, never where he's from** (docs/culture/VOICE.md: satirize attitudes,
+never identities): no real country, accent spelling, religion, oil or desert jokes; he's lonely and generous underneath.
+
+Portraits (owner, Nov 21: "Some should look attractive, some average, some funny, quirky"): every celebrity and the two
+designers have one, `public/cast/celeb-<id>.webp` (`portrait` in lib/cast.ts, the candidates' 3D style). Attractive: Saffron,
+Nassim, Lunaria, Dunk. Average: Skyler, Chase, Peyton. Funny or quirky: Brock, Brick, Heir Ruckus, Chardonnay, Vale, Duke.
 
 ## Fashion houses (owner, Oct 21)
 

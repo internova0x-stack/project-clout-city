@@ -111,6 +111,13 @@ import { DailyTasksHint, TourTooltip, TOUR } from "./game/Tutorial";
 import { openBoroughs, type BoroughGate } from "@/lib/boroughGates";
 import { boroughOf } from "@/lib/city";
 import { GameChrome, type ChromeAction, type QuestButton, type Tab } from "./hud/GameChrome";
+import { HaterSheet, SceneHere, SceneScreen, SceneStartSheet, useSceneNow } from "./scene/Scene";
+import type { CrewCard, MoveCard, Offer, SceneApi, SceneView } from "@/lib/sceneView";
+import type { DealWay } from "@/lib/scene";
+import { PLAQUES, scoreOf } from "@/lib/scene";
+import { RanksSheet, type FameUse } from "./game/Ranks";
+import { halfwayCelebration, recapCelebration, surpriseCelebration, type RewardsApi } from "./game/rewardsCelebrations";
+import { nextRank } from "@/lib/ranks";
 import { handle } from "@/lib/validation";
 import { rankCelebration } from "./game/Ranks";
 import { CelebrationHost, celebrate } from "./Celebrate";
@@ -305,6 +312,9 @@ export function GameShell({
   visits,
   starter: starterIn,
   guide,
+  scene,
+  fame,
+  rewards,
   deleteAccount,
   lockAppsPreview,
   demo,
@@ -386,6 +396,12 @@ export function GameShell({
   starter?: StarterApi;
   /** The Guide (migration 0170, lib/guide.ts): the one recommended next step, played through and paid once. */
   guide?: GuideApi;
+  /** Your Scene (migration 0171, lib/scene.ts): the daily clout loop, the bottom bar's middle tab. */
+  scene?: SceneApi;
+  /** Fame perks (migration 0175, lib/fame.ts): which repeating perks are used this week or today. */
+  fame?: () => Promise<FameUse | null>;
+  /** Credit for small progress and surprises (migration 0177, lib/rewards.ts): halfway goals, the Monday recap, a surprise a day. */
+  rewards?: RewardsApi;
   /** Preview: lock the apps that open at a rank, whatever the player's rank. */
   lockAppsPreview?: boolean;
   /** Demo mode (owner, Oct 27; components/demo): inviting and the end of the first session ask the guest to sign up. */
@@ -1405,10 +1421,12 @@ export function GameShell({
     goalsPrev.current = r.data;
     setGoalsNow(r.data);
     if (reveal) setGoalsReveal(reveal);
+    // Halfway there (migration 0177): a quarter of a goal's reward when it's half done, once.
+    if (rewards) void rewards.halfway().then((paid) => { for (const p of paid) celebrate(halfwayCelebration(p, () => { setTasksTab("goals"); setPanel("tasks"); })); }).catch(() => {});
     // Streak repair (migration 0158): the offer rides along with the goals.
     if (goals.repairState) void goals.repairState().then((x) => { if (x.ok) { setRepairOffer(x.data.offer); streakRead(r.data, x.data.offer, badCtx.current); } }).catch(() => {});
     else streakRead(r.data, undefined, badCtx.current);
-  }, [goals]);
+  }, [goals, rewards]);
   const [repairOffer, setRepairOffer] = useState<RepairOffer | null>(null);
   const repairStreak = async (method: RepairMethod) => {
     if (!goals?.repair) return;
@@ -1581,6 +1599,7 @@ export function GameShell({
     window.history.replaceState(null, "", url.toString());
     if (open === "messages" || open === "gigs" || open === "businesses" || open === "apartments" || open === "guide") setPhone({ open: true, app: open });
     else if (open === "bills" || open === "tasks" || open === "events" || open === "us") setPanel(open);
+    else if (open === "scene" && scene) setSceneOpen(true);
     // A visit invite (migration 0121).
     else if (open === "plans") setPanel("visits");
     // The Player Economy (migration 0151): a gift arrived; a job was taken or paid.
@@ -1784,9 +1803,11 @@ export function GameShell({
     if (!cityOn || todayP.current || !life?.today) return;
     todayP.current = life.today().then((r) => (r.ok ? r.data : null)).catch(() => null);
   }, [cityOn, life]);
+  // Your Scene's full screen is open (migration 0171): the welcome and choice cards wait while it is.
+  const [sceneOpen, setSceneOpen] = useState(false);
   useEffect(() => {
     // One decision at a time (owner, Nov 3): never over a choice card, a consequence coming back or the holding bench.
-    if (!cityOn || pickAsked.current || flow !== "none" || panel || phone.open || lifeCard || travelPlan || trip || choiceCard || choiceBack.length || holdingOpen) return;
+    if (!cityOn || pickAsked.current || flow !== "none" || panel || phone.open || lifeCard || travelPlan || trip || choiceCard || choiceBack.length || holdingOpen || sceneOpen) return;
     const force = process.env.NODE_ENV !== "production" && new URLSearchParams(window.location.search).get("daily") === "pick";
     const key = `cc-daily-pick:${new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York" }).format(new Date())}`;
     try { if (!force && localStorage.getItem(key)) return; } catch { /* show it */ }
@@ -1804,7 +1825,7 @@ export function GameShell({
     }, force ? 1200 : 1500);
     // Once shown, it stays shown for the visit (the preview's ?daily=pick used to bring it back after every sheet).
     return () => { clearTimeout(t); if (!pickShown.current) pickAsked.current = false; };
-  }, [life, cityOn, flow, panel, phone.open, lifeCard, travelPlan, trip, choiceCard, choiceBack.length, holdingOpen]);
+  }, [life, cityOn, flow, panel, phone.open, lifeCard, travelPlan, trip, choiceCard, choiceBack.length, holdingOpen, sceneOpen]);
   const goToPick = () => {
     const p = dailyPick ? placeById(dailyPick.place) : undefined;
     setWelcomeOpen(false);
@@ -2299,7 +2320,7 @@ export function GameShell({
   };
   // One card at a time (owner, Nov 4: the Halo ↔ Hustler card "pops up sometimes when another modal is loaded"): a choice,
   // a consequence or the bench waits while another sheet is open, and shows when it closes.
-  const choiceWaits = welcomeOpen || !!cutscene || !!place || !!panel || phone.open || careersOpen || campaignOpen || crownOpen || !!rivalMeet || backRoomOpen || !!lifeCard || !!travelPlan || !!trip;
+  const choiceWaits = welcomeOpen || sceneOpen || !!cutscene || !!place || !!panel || phone.open || careersOpen || campaignOpen || crownOpen || !!rivalMeet || backRoomOpen || !!lifeCard || !!travelPlan || !!trip;
   // The Homecoming race: the first walk onto a campus's Quad (its ground floor) for an enrolled student without a race
   // brings on the reigning royal, once per device (cc-seen:crown-rival); "Run against" opens Crown HQ's Declare screen.
   const onQuad = !!school && !!inside && isCampusPlace(inside) && insideFloor === 1 ? inside.id : null;
@@ -2641,6 +2662,138 @@ export function GameShell({
   // Migration 0151: C$ from other players over the weekly cap doesn't count (the server's net_worth agrees).
   const myWorth = Math.max(0, otherWorth + (biz ? businessesValue(biz.owned, me.clout) : 0) - (econ?.uncounted ?? 0));
   const myRank = rankFor(me.clout, myWorth);
+  // ---- Your Scene (migration 0171; owner, Nov 21) ----
+  const [sceneV, setSceneV] = useState<SceneView | null>(null);
+  const [sceneOffer, setSceneOffer] = useState<Offer | null>(null);
+  const [sceneBusy, setSceneBusy] = useState(false);
+  const [sceneHater, setSceneHater] = useState<MoveCard | null>(null);
+  const loadScene = useCallback(async () => {
+    if (!scene) return;
+    const r = await scene.state();
+    if (r.ok) setSceneV(r.data);
+  }, [scene]);
+  // The view on opening, on arriving somewhere (the place's moves) and every half minute (a move turns ready).
+  useEffect(() => { if (cityOn) void loadScene(); }, [cityOn, loadScene, atPlace, sceneOpen]);
+  useEffect(() => (cityOn && scene ? everyVisible(() => void loadScene(), 30_000) : undefined), [cityOn, scene, loadScene]);
+  const sceneNow = useSceneNow(sceneV);
+  const sceneDot = !!sceneV && sceneV.moves.some((m) => sceneNow >= Date.parse(m.readyAt) || (!!m.hater && !m.dealt)
+    || (m.hypes < m.need && sceneNow < Date.parse(m.readyAt) && (!m.hypeAt || sceneNow >= Date.parse(m.hypeAt))));
+  const sceneGo = (placeId: string) => { setSceneOpen(false); openPlace(placeId); };
+  const sceneStart = async (way?: "confidence" | "namedrop" | "bribe") => {
+    if (!scene || !sceneOffer || sceneBusy) return;
+    const o = sceneOffer;
+    setSceneBusy(true);
+    const r = await scene.start(o.move, way);
+    setSceneBusy(false);
+    if (!r.ok) return setToast(r.error);
+    setSceneOffer(null);
+    setSceneV(r.data.view);
+    if (cityApi) void cityApi.refresh().then((x) => x.ok && applyCity(x));
+    if (r.data.bounced) {
+      celebrate({ rung: 2, emoji: "🚫", tag: "Bounced", title: "They checked the list.",
+        line: r.data.banHours ? `Banned from here for ${r.data.banHours} hours. Worth a try.` : "Not tonight. Try again tomorrow.", rewards: [] });
+    } else {
+      celebrate({ rung: 2, emoji: o.emoji, tag: o.short ? "You're in 🤫" : "Move started", title: o.title,
+        line: r.data.refund ? `On the house: C$${r.data.refund.toLocaleString("en-US")} back. Ready in ${o.hours} h.` : `Ready in ${o.hours} h. It's in Your Scene.`,
+        rewards: r.data.refund ? [{ tone: "cash", text: `+C$${r.data.refund.toLocaleString("en-US")}` }] : [], cta: "Your Scene", onCta: () => setSceneOpen(true) });
+    }
+  };
+  const sceneHype = async (m: MoveCard) => {
+    if (!scene || sceneBusy) return;
+    setSceneBusy(true);
+    const r = await scene.hype(m.id);
+    setSceneBusy(false);
+    if (!r.ok) return setToast(r.error);
+    setSceneV(r.data);
+    setToast(`Hyped ${m.title} ⚡`);
+  };
+  const sceneCollect = async (m: MoveCard) => {
+    if (!scene || sceneBusy) return;
+    setSceneBusy(true);
+    const r = await scene.collect(m.id);
+    setSceneBusy(false);
+    if (!r.ok) return setToast(r.error);
+    setSceneV(r.data.view);
+    if (cityApi) void cityApi.refresh().then((x) => x.ok && applyCity(x));
+    const sc = scoreOf(r.data.score);
+    const rewards = [{ tone: "clout" as const, text: `+${r.data.clout} 🔥` }, { text: `${sc.emoji} +${r.data.points} ${sc.label}` }];
+    const pl = r.data.plaque ? PLAQUES.find((x) => x.at === r.data.plaque!.at) : undefined;
+    if (pl) {
+      // A plaque (migration 0173): the 10th, 25th or 50th time is a takeover.
+      celebrate({ rung: 3, emoji: "🏅", art: "stage", tag: `${pl.name} plaque`, title: m.title,
+        line: `${pl.at} times. They know your face here now.${pl.at === 10 ? " You can take a residency." : ""}`,
+        rewards: [...rewards, { tone: "clout", text: `+${pl.clout} 🔥 plaque bonus` }], cta: "Nice" });
+    } else {
+      celebrate({ rung: 2, emoji: m.emoji, tag: r.data.stale ? "Went stale" : (r.data.boost ?? 1) > 1 ? "Collected · trending" : "Collected", title: m.title,
+        line: r.data.stale ? "Old news by the time you showed up. A quarter's better than nothing." : "The city noticed.", rewards });
+    }
+  };
+  const sceneDeal = async (way: DealWay) => {
+    if (!scene || !sceneHater || sceneBusy) return;
+    const m = sceneHater;
+    setSceneBusy(true);
+    const r = await scene.deal(m.id, way);
+    setSceneBusy(false);
+    if (!r.ok) return setToast(r.error);
+    setSceneHater(null);
+    setSceneV(r.data);
+    if (cityApi) void cityApi.refresh().then((x) => x.ok && applyCity(x));
+    setToast(way === "rise" ? "You rose above it. The move pays a little less." : "Handled. Back to being fabulous.");
+  };
+  const sceneCrewHype = async (c: CrewCard) => {
+    if (!scene || sceneBusy) return;
+    setSceneBusy(true);
+    const r = await scene.crewHype(c.id);
+    setSceneBusy(false);
+    if (!r.ok) return setToast(r.error);
+    setSceneV(r.data);
+    setGain({ clout: 5 });
+    setToast(`You hyped ${c.owner}'s ${c.title} ⚡`);
+    if (cityApi) void cityApi.refresh().then((x) => x.ok && applyCity(x));
+  };
+  const sceneResidencyTake = async (move: string) => {
+    if (!scene || sceneBusy) return;
+    setSceneBusy(true);
+    const r = await scene.residencyTake(move);
+    setSceneBusy(false);
+    if (!r.ok) return setToast(r.error);
+    setSceneV(r.data);
+    celebrate({ rung: 2, emoji: "🎟️", tag: "Residency", title: "You're a resident now", line: "Check in here once a day this week.", rewards: [] });
+  };
+  const sceneResidencyCheckin = async () => {
+    if (!scene || sceneBusy) return;
+    setSceneBusy(true);
+    const r = await scene.residencyCheckin();
+    setSceneBusy(false);
+    if (!r.ok) return setToast(r.error);
+    setSceneV(r.data.view);
+    setGain({ clout: r.data.clout });
+    if (cityApi) void cityApi.refresh().then((x) => x.ok && applyCity(x));
+  };
+  // Fame perks (migration 0175): the Ranks & fame perks list, opened from the leaderboard, with this week's usage.
+  const [ranksOpen, setRanksOpen] = useState(false);
+  const [fameUse, setFameUse] = useState<FameUse | null>(null);
+  // Last week's recap (Mondays, once per week per device) and today's surprise (rolled once a New York day on the server),
+  // asked a little after the city is on. The celebration host holds them while a choice card, a trip or the welcome is up.
+  const rewardsAsked = useRef(false);
+  useEffect(() => {
+    if (!rewards || !cityOn || rewardsAsked.current || flow !== "none") return;
+    const t = setTimeout(() => {
+      if (rewardsAsked.current) return;
+      rewardsAsked.current = true;
+      void rewards.recap().then((r) => {
+        if (r && firstTime("recap", r.week)) celebrate(recapCelebration(r, () => setSceneOpen(true)));
+      }).catch(() => {});
+      void rewards.surprise().then((x) => {
+        if (!x) return;
+        celebrate(surpriseCelebration(x, x.invite ? () => { setSceneOpen(true); } : undefined));
+        void cityApi?.refresh().then((r) => { if (r.ok) setCity(r.state); });
+      }).catch(() => {});
+    }, 9000);
+    return () => clearTimeout(t);
+  }, [rewards, cityOn, flow, cityApi]);
+  useEffect(() => { if (ranksOpen && fame) void fame().then(setFameUse); }, [ranksOpen, fame]);
+  const rankNext = nextRank(me.clout, myWorth);
   // ---- The Guide (migration 0170) ----
   // Optional steps the player skipped ("Not for me"), kept on this device.
   const [guideSkipped, setGuideSkipped] = useState<string[]>([]);
@@ -2969,8 +3122,9 @@ export function GameShell({
 
   const onAction = useCallback(
     (a: ChromeAction) => {
-      if (a === "tab:home") return setTab("home");
-      if (a === "tab:map") return setTab("map");
+      if (a === "tab:home") { setSceneOpen(false); return setTab("home"); }
+      if (a === "tab:map") { setSceneOpen(false); return setTab("map"); }
+      if (a === "scene") { if (!scene) return setSoon({ key: "places" }); setPanel(null); setInside(null); setPlace(null); return setSceneOpen(true); }
       if (a === "invite") {
         if (demo) return demo.signUp("invite");
         markPin("invite");
@@ -3001,7 +3155,7 @@ export function GameShell({
       setSoon({ key: a });
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [flow, cityOn, markTasksSeen, endDailyHint, demo],
+    [flow, cityOn, markTasksSeen, endDailyHint, demo, scene],
   );
 
   const onPinTap = useCallback(
@@ -3254,6 +3408,8 @@ export function GameShell({
       rent: rentAlarm ? { title: rentAlarm.title, line: rentAlarm.line, canPay: rentAlarm.canPay } : null,
       repair: repairOffer && !repairOffer.earnPending ? { streak: repairOffer.streak } : null,
       passReady,
+      scene: sceneV ? ((rd) => (rd.length ? { ready: rd.length, title: rd[0].title, staleSoon: rd.some((m) => Date.parse(m.staleAt) - sceneNow < 2 * 3_600_000) } : null))(
+        sceneV.moves.filter((m) => sceneNow >= Date.parse(m.readyAt) && sceneNow < Date.parse(m.staleAt))) : null,
       streak: goalsNow ? { current: goalsNow.streak.current, doneToday: goalsNow.streak.today } : null,
       nyHour,
       tasks: { done: city ? tasksDone(city) : 0, total: city?.tasks.length ?? 0, next: undone[0] ? { title: taskTitle(undone[0]), place: undone[0].place_id } : null, undonePlaces: undone.map((t) => t.place_id) },
@@ -3275,6 +3431,7 @@ export function GameShell({
       case "bills": return setPanel("bills");
       case "gigs": return setPhone({ open: true, app: "gigs" });
       case "pass": setTasksTab("pass"); return setPanel("tasks");
+      case "scene": return setSceneOpen(true);
       case "tasks": setTasksTab("daily"); return setPanel("tasks");
       case "goals": setTasksTab("goals"); return setPanel("tasks");
       case "skills": return setPanel("skills");
@@ -3341,7 +3498,13 @@ export function GameShell({
               onDone={() => setSign(null)}
             />
           ) : null}
-          life={lifeV ? <LifeStrip view={lifeV} busy={busy !== null} onOpen={(a) => { setLifeResult(null); setLifeCard({ card: a, kind: "activity" }); }} onStamp={(d) => void claimStampLife(d)} /> : null}
+          life={lifeV || (sceneV && sceneV.at === inside.id && sceneV.here.length) ? (
+            <>
+              {/* Your Scene (owner, Nov 21): the moves you can start here, above the place's own things to do. */}
+              {sceneV && sceneV.at === inside.id && <SceneHere view={sceneV} busy={sceneBusy} onPick={setSceneOffer} />}
+              {lifeV && <LifeStrip view={lifeV} busy={busy !== null} onOpen={(a) => { setLifeResult(null); setLifeCard({ card: a, kind: "activity" }); }} onStamp={(d) => void claimStampLife(d)} />}
+            </>
+          ) : null}
           here={chat?.presence ? { people: here, count: Math.max(hereCount, here.length), inView: inView.map((p) => p.id), floor: insideFloor, onOpen: openPlayer } : undefined}
           room={
             <Room3D
@@ -3617,7 +3780,17 @@ export function GameShell({
         </>
       )}
 
+      {sceneOpen && sceneV && (
+        <SceneScreen view={sceneV} busy={sceneBusy} onStart={setSceneOffer} onHype={(m) => void sceneHype(m)} onCollect={(m) => void sceneCollect(m)} onGo={sceneGo}
+          onDeal={setSceneHater} onCrewHype={(c) => void sceneCrewHype(c)}
+          onResidencyTake={(mv) => void sceneResidencyTake(mv)} onResidencyCheckin={() => void sceneResidencyCheckin()} />
+      )}
+      <HaterSheet move={sceneHater} view={sceneV} busy={sceneBusy} onClose={() => setSceneHater(null)} onPick={(w) => void sceneDeal(w)} />
+      <SceneStartSheet offer={sceneOffer} busy={sceneBusy} onClose={() => setSceneOffer(null)} onGo={(way) => void sceneStart(way)} />
       <GameChrome
+        sceneOn={sceneOpen}
+        sceneDot={sceneDot}
+        rankBar={{ label: rankNext ? `Rank ${rankNext.rank.level} at ${rankNext.rank.clout.toLocaleString("en-US")}` : null, progress: rankNext?.progress ?? 1 }}
         me={{ head: <AvatarHead look={look} outfit={outfit} />, rank: myCard?.rank ?? null, onOpen: () => setPanel("profile") }}
         tips={statSuggestions}
         onTip={(id) => {
@@ -3740,7 +3913,9 @@ export function GameShell({
         fetchRows={leaderboardRows}
         fetchCrowned={chat?.crowned ? () => chat.crowned!().then((r) => (r.ok ? r.data : [])) : undefined}
         fetchTitled={chat?.titled ? () => chat.titled!().then((r) => (r.ok ? r.data : [])) : undefined}
+        onPerks={flow === "leaderboard" ? undefined : () => setRanksOpen(true)}
       />
+      <RanksSheet open={ranksOpen} onClose={() => setRanksOpen(false)} clout={me.clout} netWorth={myWorth} use={fameUse} />
       {chat && (
         <PlayerCardSheet
           playerId={cardId}
@@ -4273,7 +4448,7 @@ export function GameShell({
           {gala && <GalaSheet open={galaOpen} onClose={() => setGalaOpen(false)} api={gala} onToast={setToast}
             here={city?.player.at_place === GALA.place}
             onChanged={() => { if (cityApi) void cityApi.refresh().then((c) => c.ok && applyCity(c)); void loadChoices(); }} />}
-          <DailyWelcome open={welcomeOpen} name={me.display_name} hello={welcomeHello} streak={(process.env.NODE_ENV !== "production" && typeof window !== "undefined" && Number(new URLSearchParams(window.location.search).get("streakdays"))) || (goalsNow?.streak.current ?? 0)} streakNext={goalsNow?.streak.next.day}
+          <DailyWelcome open={welcomeOpen && !sceneOpen} name={me.display_name} hello={welcomeHello} streak={(process.env.NODE_ENV !== "production" && typeof window !== "undefined" && Number(new URLSearchParams(window.location.search).get("streakdays"))) || (goalsNow?.streak.current ?? 0)} streakNext={goalsNow?.streak.next.day}
             action={welcomeAction} onGo={welcomeGo} onLater={welcomeLater}
             variant={process.env.NODE_ENV !== "production" && typeof window !== "undefined" ? ((v) => (WELCOME_VARIANTS as readonly string[]).includes(v ?? "") ? v as WelcomeVariant : undefined)(new URLSearchParams(window.location.search).get("welcome")) : undefined} />
           <LifeSheet card={lifeCard?.card ?? null} who={lifeCard?.who ?? null} result={lifeResult} busy={busy === "life"}

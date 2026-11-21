@@ -184,6 +184,13 @@ from (values
   ('0167_season_pass_stakes.sql', to_regprocedure('public.season_titled()') is not null),
   ('0168_trip_skip_price.sql', coalesce((select (value -> 'economy' -> 'travel' -> 'skip' ->> 'min')::int = 20 from public.game_settings where key = 'city'), false)),
   ('0169_home_build.sql', to_regprocedure('public.home_build_save(uuid, jsonb, integer, text)') is not null),
-  ('0170_guide.sql', to_regprocedure('public.guide_claim(text)') is not null)
+  ('0170_guide.sql', to_regprocedure('public.guide_claim(text)') is not null),
+  ('0171_scene.sql', to_regprocedure('public.scene_collect(uuid, uuid)') is not null),
+  ('0172_scene_haters.sql', to_regprocedure('public.scene_deal(uuid, uuid, text, text, integer, integer)') is not null),
+  ('0173_scene_plaques.sql', to_regprocedure('public.scene_residency_checkin(uuid)') is not null),
+  ('0174_scene_weeks.sql', to_regprocedure('public.content_import_scene(date, jsonb)') is not null),
+  ('0175_fame_perks.sql', to_regprocedure('public.fame_state()') is not null),
+  ('0176_known_for.sql', to_regclass('public.fame_points') is not null),
+  ('0177_recaps_surprises.sql', to_regclass('public.surprises') is not null)
 ) as m(file, ran)
 order by (m.ran is distinct from false), m.file;

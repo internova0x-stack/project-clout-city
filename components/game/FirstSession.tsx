@@ -77,8 +77,10 @@ export interface Row { id?: string; rank: number; display_name: string; starting
 
 /** C27: the clout leaderboard, Queens or Crew. */
 export function LeaderboardSheet({
-  open, onClose, cta, myClout, onOpenPlayer, fetchRows, fetchCrowned, fetchTitled,
+  open, onClose, cta, myClout, onOpenPlayer, fetchRows, fetchCrowned, fetchTitled, onPerks,
 }: {
+  /** Owner, Nov 21: the ranks and their fame perks. */
+  onPerks?: () => void;
   open: boolean; onClose: () => void; cta?: { label: string; onClick: () => void }; myClout: number;
   /** v0.5: tap a row to open that player's card (and message them). */
   onOpenPlayer?: (id: string) => void;
@@ -130,6 +132,7 @@ export function LeaderboardSheet({
         <div className="stack-8" style={{ paddingRight: 44 }}>
           <h2 className="display-lg" style={{ margin: 0 }}>Leaderboard</h2>
           <p className="subtext" style={{ margin: 0 }}>In this city, clout is the only ranking that counts. Here&apos;s where you stand. Don&apos;t look too long.</p>
+          {onPerks && <button className="btn btn-secondary btn-sm" style={{ alignSelf: "flex-start" }} onClick={onPerks}>🎟️ Ranks &amp; fame perks</button>}
         </div>
         <div className="segmented" role="group" aria-label="Leaderboard scope">
           <button aria-pressed={scope === "queens"} onClick={() => setScope("queens")}>Queens</button>

@@ -7,6 +7,8 @@ import type { StudioApi } from "@/lib/studio";
 import type { ConditionEffect, StudioCondition } from "@/lib/cityConditions";
 import { LEARNING, pct, type StudioLearning } from "@/lib/cardLearning";
 import type { StudioUnderworldJob } from "@/lib/underworldWeeks";
+import type { StudioSceneMove } from "@/lib/sceneWeeks";
+import { daysText } from "@/lib/scene";
 
 // Content Engine step 3 (migration 0139): Studio → Storylets. Each week's new cards arrive here and go live 24 hours
 // later by themselves (owner, Oct 31: automatic with a veto window). Veto one and it never shows; pause it to decide
@@ -47,6 +49,7 @@ export function StoryletsTab({ api }: { api: StudioApi }) {
       </section>
       {api.conditions && <ConditionsSection api={api} />}
       {api.underworldJobs && <UnderworldJobsSection api={api} />}
+      {api.sceneMoves && <SceneMovesSection api={api} />}
       {api.learning && <LearningSection api={api} />}
       {data?.cards.length === 0 && <section className="studio-card"><p className="subtext" style={{ margin: 0 }}>No storylets yet. The weekly routine adds content/storylets/&lt;Monday&gt;.json.</p></section>}
       {weeks.map((w) => (
@@ -193,6 +196,49 @@ function UnderworldJobsSection({ api }: { api: StudioApi }) {
             {j.status === "scheduled" && <button className="btn btn-secondary btn-sm" disabled={busy === j.id} onClick={() => void act(j.id, "pause")}>Pause</button>}
             {j.status === "paused" && <button className="btn btn-secondary btn-sm" disabled={busy === j.id} onClick={() => void act(j.id, "restore")}>Restore</button>}
             {j.status === "scheduled" && <button className="btn btn-secondary btn-sm" disabled={busy === j.id} onClick={() => void act(j.id, "now")}>Approve now</button>}
+          </div>
+        </article>
+      ))}
+    </section>
+  );
+}
+
+// ---- Your Scene's weekly moves (migration 0174) ----
+
+function SceneMovesSection({ api }: { api: StudioApi }) {
+  const [list, setList] = useState<StudioSceneMove[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState<string | null>(null);
+  useEffect(() => { void api.sceneMoves!().then((r) => (r.ok ? setList(r.data) : setError(r.error))); }, [api]);
+  const act = async (id: string, action: StoryletAction) => {
+    setBusy(id); setError(null);
+    const r = await api.sceneMoveSet!(id, action);
+    setBusy(null);
+    if (r.ok) setList(r.data); else setError(r.error);
+  };
+  return (
+    <section className="stack-8">
+      <span className="title">🎬 Scene moves</span>
+      <span className="subtext">
+        New moves for Your Scene from the weekly routine, tied to the week&apos;s news and cast. Each goes live 24 hours after it
+        arrives unless you veto it, and runs only in its own week (on its days, when it has them).
+      </span>
+      {error && <span className="meta error-text">{error}</span>}
+      {list?.length === 0 && <section className="studio-card"><p className="subtext" style={{ margin: 0 }}>None yet. The weekly routine adds content/scene-weeks/&lt;Monday&gt;.json.</p></section>}
+      {list?.map((m) => (
+        <article key={m.id} className="studio-card stack-8">
+          <div className="row" style={{ justifyContent: "space-between", gap: 8, alignItems: "flex-start" }}>
+            <span className="body-strong" style={{ minWidth: 0 }}>{m.move.emoji} {m.move.title}</span>
+            <span className={`tag studio-review ${STATUS[m.status]}`}>{storyletWhen(m)}</span>
+          </div>
+          <span className="meta">Week of {fmtWeek(m.week)}{m.move.days?.length ? ` · ${daysText(m.move.days)}` : ""} · {m.move.hours} h · +{m.move.clout} 🔥{m.move.cost ? ` · C$${m.move.cost}` : ""}{m.move.needs?.rank ? ` · Rank ${m.move.needs.rank}+` : ""}</span>
+          <span className="meta">“{m.move.why}” · {m.move.line}</span>
+          {m.move.headline && <span className="meta">📰 “{m.move.headline.replace("{name}", "@player")}”</span>}
+          <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
+            {m.status !== "vetoed" && <button className="btn btn-secondary btn-sm" disabled={busy === m.id} onClick={() => void act(m.id, "veto")}>Veto</button>}
+            {m.status === "scheduled" && <button className="btn btn-secondary btn-sm" disabled={busy === m.id} onClick={() => void act(m.id, "pause")}>Pause</button>}
+            {m.status === "paused" && <button className="btn btn-secondary btn-sm" disabled={busy === m.id} onClick={() => void act(m.id, "restore")}>Restore</button>}
+            {m.status === "scheduled" && <button className="btn btn-secondary btn-sm" disabled={busy === m.id} onClick={() => void act(m.id, "now")}>Approve now</button>}
           </div>
         </article>
       ))}

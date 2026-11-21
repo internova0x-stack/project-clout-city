@@ -16,7 +16,13 @@ const stakes = readFileSync(new URL("../supabase/migrations/0167_season_pass_sta
 test("the migration's settings mirror lib/seasonPass.ts (0167 replaced 0156's season row)", () => {
   const m = stakes.match(/set value = '((?:[^']|'')*)'::jsonb where key = 'season_pass'/);
   assert.ok(m, "0167 updates the season row");
-  assert.deepEqual(JSON.parse(m[1].replaceAll("''", "'")), JSON.parse(JSON.stringify(seasonStakesSettings())));
+  // Migrations 0173 and 0176 add XP sources to 0167's row: xp.scene, then a list merged in (Clout Pass XP from everything).
+  const row = JSON.parse(m[1].replaceAll("''", "'"));
+  const added = /set value = jsonb_set\(value, '\{xp\}', \(value -> 'xp'\) \|\| '(\{[^']*\})'::jsonb\)/.exec(readFileSync(new URL("../supabase/migrations/0176_known_for.sql", import.meta.url), "utf8"));
+  assert.ok(added, "0176 merges the new XP sources");
+  row.xp = { ...row.xp, scene: 10, ...JSON.parse(added![1]) };
+  assert.deepEqual(row, JSON.parse(JSON.stringify(seasonStakesSettings())));
+  assert.match(readFileSync(new URL("../supabase/migrations/0173_scene_plaques.sql", import.meta.url), "utf8"), /jsonb_set\(value, '\{xp,scene\}', '10'::jsonb\)/);
   assert.equal(setting("season_pass").xpPerTier, 160, "0156 is history: it shipped 160 a level");
   assert.deepEqual(setting("starter_pack"), JSON.parse(JSON.stringify(starterPackSettings())));
   assert.match(sql, /\('season-pass-s1', 'season_pass', 'Clout Pass: Cuffing Season', 799\)/);

@@ -1,0 +1,155 @@
+{
+ "haters": [
+  {
+   "id": "reservation",
+   "emoji": "🗣️",
+   "quote": "Heard the reservation was under someone else's name.",
+   "line": "A rumour is going round. Until it's dealt with, the move pays less.",
+   "minRank": 1,
+   "cut": 0.25,
+   "maxRank": 4
+  },
+  {
+   "id": "mid-sneeze",
+   "emoji": "📸",
+   "quote": "Someone posted you mid-sneeze. It's the top comment.",
+   "line": "A bad photo is doing numbers.",
+   "minRank": 1,
+   "cut": 0.25,
+   "maxRank": 4
+  },
+  {
+   "id": "plus-one",
+   "emoji": "🙄",
+   "quote": "Your plus-one is telling everyone they brought you.",
+   "line": "Nobody likes a plus-one with a narrative.",
+   "minRank": 1,
+   "cut": 0.25,
+   "maxRank": 4
+  },
+  {
+   "id": "burner",
+   "emoji": "🤖",
+   "quote": "A burner account says you paid for your spot on the list.",
+   "line": "Three likes. One of them is your landlord.",
+   "minRank": 1,
+   "cut": 0.25,
+   "maxRank": 4
+  },
+  {
+   "id": "tiff-first",
+   "emoji": "🤳",
+   "quote": "Tiff says she did it first. She didn't.",
+   "line": "Basically an influencer, basically a problem.",
+   "minRank": 1,
+   "cut": 0.25,
+   "who": "tiff",
+   "maxRank": 5
+  },
+  {
+   "id": "chad-pitch",
+   "emoji": "🚀",
+   "quote": "Chad Kensington is pitching your night as his startup.",
+   "line": "He's calling it \"you, but as a service\".",
+   "minRank": 1,
+   "cut": 0.25,
+   "who": "chad-kensington",
+   "maxRank": 5
+  },
+  {
+   "id": "brave-outfit",
+   "emoji": "🍷",
+   "quote": "Chardonnay Shade called your outfit \"brave\". On camera.",
+   "line": "Reality TV's favourite villain picked you.",
+   "minRank": 3,
+   "cut": 0.3,
+   "who": "chardonnay-shade"
+  },
+  {
+   "id": "blind-item",
+   "emoji": "📰",
+   "quote": "A blind item in Lola's Blotter sounds a lot like you.",
+   "line": "Everyone's guessing. Everyone's right.",
+   "minRank": 3,
+   "cut": 0.3
+  },
+  {
+   "id": "heir-subtweet",
+   "emoji": "💿",
+   "quote": "Heir Ruckus subtweeted you. His dad's lawyers liked it.",
+   "line": "Douglaston has entered the chat.",
+   "minRank": 3,
+   "cut": 0.3,
+   "who": "heir-ruckus"
+  },
+  {
+   "id": "same-look",
+   "emoji": "🪞",
+   "quote": "Someone showed up in your exact look. And wore it better.",
+   "line": "Twinning, but make it hostile.",
+   "minRank": 3,
+   "cut": 0.3
+  },
+  {
+   "id": "chase-clip",
+   "emoji": "🎮",
+   "quote": "Chase Clout clipped you tripping on stream. 2 million views.",
+   "line": "Chat, chat, CHAT is laughing at you.",
+   "minRank": 3,
+   "cut": 0.3,
+   "who": "chase-clout"
+  },
+  {
+   "id": "peyton-apology",
+   "emoji": "🥞",
+   "quote": "Peyton Pastel filmed an apology video about you.",
+   "line": "She's sorry you made her do this.",
+   "minRank": 6,
+   "cut": 0.4,
+   "who": "peyton-pastel"
+  },
+  {
+   "id": "nassim-buyout",
+   "emoji": "🦀",
+   "quote": "Prince Nassim bought the venue and moved your night to his yacht.",
+   "line": "He says it's a compliment. It's not.",
+   "minRank": 6,
+   "cut": 0.4,
+   "who": "prince-nassim"
+  },
+  {
+   "id": "leaked-list",
+   "emoji": "📋",
+   "quote": "Your guest list leaked. Half of them weren't invited.",
+   "line": "Now they all want to be.",
+   "minRank": 6,
+   "cut": 0.4
+  },
+  {
+   "id": "kitchen-exit",
+   "emoji": "📸",
+   "quote": "Paparazzi caught you leaving through the kitchen.",
+   "line": "The kitchen staff are getting interviews.",
+   "minRank": 6,
+   "cut": 0.4
+  },
+  {
+   "id": "lunaria-unfollow",
+   "emoji": "🌙",
+   "quote": "Lunaria unfollowed you at 3 AM. Everyone noticed by 3:01.",
+   "line": "Nobody knows why. That's the point.",
+   "minRank": 6,
+   "cut": 0.4,
+   "who": "lunaria"
+  },
+  {
+   "id": "saffron-forgot",
+   "emoji": "🎂",
+   "quote": "Saffron Lux forgot your name. In front of everyone. Twice.",
+   "line": "\"Angel… Angela? Angelo?\"",
+   "minRank": 6,
+   "cut": 0.4,
+   "who": "saffron-lux"
+  }
+ ]
+}
