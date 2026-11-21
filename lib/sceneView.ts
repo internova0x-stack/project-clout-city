@@ -104,7 +104,7 @@ export interface Offer {
 }
 
 /** This week on the scene: who hosts what, on which days. */
-export interface CastDay { day: number; label: string; today: boolean; items: { move: string; title: string; emoji: string; host?: Host }[] }
+export interface CastDay { day: number; label: string; today: boolean; items: { move: string; title: string; emoji: string; host?: Host; offer: Offer }[] }
 
 export interface ScoreView { id: ScoreId; label: string; emoji: string; points: number; title: string; next: number | null; nextTitle: string | null }
 
@@ -116,6 +116,8 @@ export interface SceneView {
   moves: MoveCard[];
   forYou: Offer[];
   here: Offer[];
+  /** Every move you could start today somewhere you can go (a free slot's "Pick a move"). */
+  today: Offer[];
   scores: ScoreView[];
   collected: number;
   /** The clock the view was made at, and how fast it runs (1 in the game; the preview runs hours in seconds). The screen
@@ -216,13 +218,19 @@ export function sceneView(moves: SceneMove[], haters: Hater[], raw: SceneRaw, me
       .sort((a, b) => Number(!!a.short) - Number(!!b.short) || a.hours - b.hours)
     : [];
 
+  // A free slot's list (owner, Nov 21: "The slots are empty and not tapable"): what's on today, ready ones first.
+  const today = moves.filter((m) => !m.closed && m.places.some(open) && fits(m, ctx) && onDay(m, raw.today) && (needsOk(m, ctx) || canSneak(m, ctx)))
+    .map(offer)
+    .sort((a, b) => Number(a.running) - Number(b.running) || Number(!!a.short) - Number(!!b.short) || Number(b.trending) - Number(a.trending)
+      || Number(!!b.host) - Number(!!a.host) || a.hours - b.hours || a.cost - b.cost);
+
   const scores = SCORES.map((s) => {
     const pts = raw.scores[s.id] ?? 0;
     const t = titleFor(pts);
     return { id: s.id, label: s.label, emoji: s.emoji, points: pts, title: t.title(s.id), next: t.next, nextTitle: t.next !== null ? s.titles[t.tier + 1] : null };
   });
 
-  return { at: raw.at, rank: raw.rank, slots: slotsFor(raw.rank), nextSlotRank: nextSlotRank(raw.rank), moves: cards, forYou: picks, here, scores, collected: raw.collected, now, speed,
+  return { at: raw.at, rank: raw.rank, slots: slotsFor(raw.rank), nextSlotRank: nextSlotRank(raw.rank), moves: cards, forYou: picks, here, today, scores, collected: raw.collected, now, speed,
     deal: { vouch: raw.vouchFree && raw.vouchers?.length ? hostOf(raw.vouchers[0]) ?? null : null, publicist: publicistCost(raw.rank), tea: teaCash(raw.rank) },
     plaques: Object.entries(counts).flatMap(([id, n]) => {
       const m = byId.get(id);
@@ -244,7 +252,7 @@ export function sceneView(moves: SceneMove[], haters: Hater[], raw: SceneRaw, me
       for (const m of moves) {
         const ds = m.host || m.week ? daysFor(m, monday) : null;
         if (!ds || !m.places.some(open)) continue;
-        for (const d of ds) days[d - 1].items.push({ move: m.id, title: m.title, emoji: m.emoji, host: hostOf(m.host) });
+        for (const d of ds) days[d - 1].items.push({ move: m.id, title: m.title, emoji: m.emoji, host: hostOf(m.host), offer: offer(m) });
       }
       return days;
     })(mondayOf(raw.today)),
