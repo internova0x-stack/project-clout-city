@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { CELEBRITIES, REGULARS, WANNABES, regularAt, regularLine } from "../lib/cast.ts";
 import { PLACES } from "../lib/city.ts";
 import { withCatchphrases, type NpcProfile } from "../lib/culture.ts";
@@ -12,10 +12,15 @@ const evergreen = withCatchphrases(castLines, profiles);
 const generic = JSON.parse(readFileSync(new URL("../content/chatter-generic.json", import.meta.url), "utf8")) as Record<string, string[]>;
 
 test("the cast: one celebrity per type, unique ids, invented league-free types", () => {
-  assert.equal(new Set(CELEBRITIES.map((c) => c.type)).size, 8);
+  assert.equal(new Set(CELEBRITIES.map((c) => c.type)).size, CELEBRITIES.length);
   const ids = [...CELEBRITIES, ...WANNABES, ...REGULARS].map((x) => x.id);
   assert.equal(new Set(ids).size, ids.length);
   for (const c of CELEBRITIES) assert.doesNotMatch(c.type, /NBA|NFL/);
+});
+
+test("every celebrity's portrait exists", () => {
+  for (const c of CELEBRITIES) if (c.portrait) assert.ok(existsSync(new URL(`../public${c.portrait}`, import.meta.url)), c.portrait);
+  assert.ok(CELEBRITIES.every((c) => c.portrait), "every celebrity has a portrait");
 });
 
 test("every regular stands at a real place, speaks a known story role and has everyday lines", () => {

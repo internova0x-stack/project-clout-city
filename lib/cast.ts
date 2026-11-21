@@ -9,21 +9,31 @@ export interface Celebrity {
   id: string;
   name: string;
   /** What kind of famous: one each, per the spec. */
-  type: "streamer" | "basketball star" | "football star" | "reality TV star" | "pop star" | "movie star" | "tech founder" | "influencer";
+  type: "streamer" | "basketball star" | "football star" | "reality TV star" | "pop star" | "movie star" | "tech founder" | "influencer"
+    | "supermodel" | "prince" | "rapper" | "fashion designer" | "old money";
   personality: string;
   wants: string;
   flaw: string;
+  /** Profile picture (public/), in the candidates' 3D style (owner, Nov 21: a mix of attractive, average and funny looks). */
+  portrait?: string;
 }
 
 export const CELEBRITIES: Celebrity[] = [
-  { id: "chase-clout", name: "Chase Clout", type: "streamer", personality: "Loud, streams for 14 hours, catchphrase \"chat, chat, CHAT\"", wants: "A record million live viewers", flaw: "Gets banned about every other week" },
-  { id: "dunk-daniels", name: "Dunk Daniels", type: "basketball star", personality: "Smooth, shoots from the logo, owns 400 pairs of sneakers", wants: "A championship ring", flaw: "Late to everything, games included" },
-  { id: "brick-tackleton", name: "Brick Tackleton", type: "football star", personality: "Gentle giant, nonstop family man", wants: "To be taken seriously as an actor", flaw: "His acting" },
-  { id: "chardonnay-shade", name: "Chardonnay Shade", type: "reality TV star", personality: "Lives for the confessional booth, a born villain", wants: "Her own spin-off", flaw: "Can't keep a secret, or a friend" },
-  { id: "lunaria", name: "Lunaria", type: "pop star", personality: "Mysterious, one name, drops albums at 3 AM", wants: "The Golden Mic trophy", flaw: "Feuds with every producer she's worked with" },
-  { id: "brock-squarejaw", name: "Brock Squarejaw", type: "movie star", personality: "Square-jawed, does his own stunts", wants: "To be cast as a superhero", flaw: "Ages one year every two years" },
-  { id: "skyler-beta", name: "Skyler Beta", type: "tech founder", personality: "Hoodie, ten apps, three pivots a year", wants: "To build the everything app", flaw: "None of the apps work" },
-  { id: "peyton-pastel", name: "Peyton Pastel", type: "influencer", personality: "Pastel everything, link in bio", wants: "A brand deal with a car company", flaw: "Every apology video goes viral" },
+  { id: "chase-clout", name: "Chase Clout", type: "streamer", personality: "Loud, streams for 14 hours, catchphrase \"chat, chat, CHAT\"", wants: "A record million live viewers", flaw: "Gets banned about every other week", portrait: "/cast/celeb-chase-clout.webp" },
+  { id: "dunk-daniels", name: "Dunk Daniels", type: "basketball star", personality: "Smooth, shoots from the logo, owns 400 pairs of sneakers", wants: "A championship ring", flaw: "Late to everything, games included", portrait: "/cast/celeb-dunk-daniels.webp" },
+  { id: "brick-tackleton", name: "Brick Tackleton", type: "football star", personality: "Gentle giant, nonstop family man", wants: "To be taken seriously as an actor", flaw: "His acting", portrait: "/cast/celeb-brick-tackleton.webp" },
+  { id: "chardonnay-shade", name: "Chardonnay Shade", type: "reality TV star", personality: "Lives for the confessional booth, a born villain", wants: "Her own spin-off", flaw: "Can't keep a secret, or a friend", portrait: "/cast/celeb-chardonnay-shade.webp" },
+  { id: "lunaria", name: "Lunaria", type: "pop star", personality: "Mysterious, one name, drops albums at 3 AM", wants: "The Golden Mic trophy", flaw: "Feuds with every producer she's worked with", portrait: "/cast/celeb-lunaria.webp" },
+  { id: "brock-squarejaw", name: "Brock Squarejaw", type: "movie star", personality: "Square-jawed, does his own stunts", wants: "To be cast as a superhero", flaw: "Ages one year every two years", portrait: "/cast/celeb-brock-squarejaw.webp" },
+  { id: "skyler-beta", name: "Skyler Beta", type: "tech founder", personality: "Hoodie, ten apps, three pivots a year", wants: "To build the everything app", flaw: "None of the apps work", portrait: "/cast/celeb-skyler-beta.webp" },
+  { id: "peyton-pastel", name: "Peyton Pastel", type: "influencer", personality: "Pastel everything, link in bio", wants: "A brand deal with a car company", flaw: "Every apology video goes viral", portrait: "/cast/celeb-peyton-pastel.webp" },
+  // Owner, Nov 21: three more for Scene's hosted moves. Nassim's joke is the money, never where he's from (docs/culture/VOICE.md:
+  // satirize attitudes, never identities); Heir Ruckus is Big Ruckus's son (Diss & Tell).
+  { id: "saffron-lux", name: "Saffron Lux", type: "supermodel", personality: "Sweet, dreamy, says things that sound deep and mean nothing, calls everyone \"angel\"", wants: "To be taken seriously as a philosopher", flaw: "Has never once been on time to her own party", portrait: "/cast/celeb-saffron-lux.webp" },
+  { id: "prince-nassim", name: "Prince Nassim of Qamaria", type: "prince", personality: "Long money from a principality that's mostly a marina; tips in watches, has a valet for his valet, calls everything \"small\"", wants: "One friend who doesn't want anything from him", flaw: "Buys whatever you're looking at", portrait: "/cast/celeb-prince-nassim.webp" },
+  { id: "heir-ruckus", name: "Heir Ruckus", type: "rapper", personality: "Gerald \"Trey\" Fennimore IV of Douglaston, Big Ruckus's son; raps about the struggle from his dad's mansion", wants: "A hit his dad didn't pay for", flaw: "His dad pays for everything", portrait: "/cast/celeb-heir-ruckus.webp" },
+  { id: "vale-sartorio", name: "Vale Sartorio", type: "fashion designer", personality: "Avant-garde, sculptural, asymmetric, unbothered by your budget", wants: "A collection nobody can wear", flaw: "Has never said a compliment out loud", portrait: "/cast/celeb-vale-sartorio.webp" },
+  { id: "duke-ledger", name: "Duke Ledger", type: "old money", personality: "Quiet luxury; never says how old the money is, or how old he is", wants: "For nothing to ever change", flaw: "Has never carried cash, or a phone", portrait: "/cast/celeb-duke-ledger.webp" },
 ];
 
 /** City Hall (owner, Oct 22): the Mayor, a recurring face in City News every week and the one who answers players'
