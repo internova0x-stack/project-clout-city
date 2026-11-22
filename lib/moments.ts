@@ -4,7 +4,8 @@
 // (dance, run, wave, sit, sleep, walk) plus the dog that walks at your heels.
 // Pure: GameShell picks the moment, Room3D plays it, tests check the mapping.
 
-export type MomentKind = "dance" | "run" | "dogwalk" | "wave" | "sit" | "sleep" | "work" | "date" | "together" | "crew";
+export type MomentKind = "dance" | "run" | "dogwalk" | "wave" | "sit" | "sleep" | "work" | "date" | "together" | "crew"
+  | "hug" | "stroll" | "toast" | "selfie" | "cheer";
 
 export const MOMENTS: Record<MomentKind, { emoji: string; verb: string; seconds: number }> = {
   dance: { emoji: "💃", verb: "On the floor", seconds: 5 },
@@ -18,6 +19,12 @@ export const MOMENTS: Record<MomentKind, { emoji: string; verb: string; seconds:
   date: { emoji: "🌹", verb: "Date night", seconds: 6 },
   together: { emoji: "🛋️", verb: "Home together", seconds: 6 },
   crew: { emoji: "👯", verb: "Out with the crew", seconds: 6 },
+  // Phase 3: gestures.
+  hug: { emoji: "🤗", verb: "A hug", seconds: 4 },
+  stroll: { emoji: "💑", verb: "Hand in hand", seconds: 6 },
+  toast: { emoji: "🥂", verb: "Cheers", seconds: 3.5 },
+  selfie: { emoji: "🤳", verb: "Selfie", seconds: 3.5 },
+  cheer: { emoji: "🙌", verb: "Let's go", seconds: 3 },
 };
 
 /** A repeat the same New York day plays quickly: enough to see it, not enough to wait for it. */
@@ -30,7 +37,9 @@ const RULES: [RegExp, MomentKind][] = [
   [/\b(sleep|nap|lights out)\b/i, "sleep"],
   [/\b(shift|counter|barback|rush|work|clock in|behind the bar)\b/i, "work"],
   [/\b(eat|meal|brunch|lunch|dinner|breakfast|coffee|slice|plate|table|order|menu|bagel|feast|drink|toast)\b/i, "sit"],
-  [/\b(hello|hi|wave|photo|picture|selfie|directions|ring light|get ready with me|meet)\b/i, "wave"],
+  [/\b(toast|cheers|champagne|bubbly|gala|raise a glass)\b/i, "toast"],
+  [/\b(selfie|mirror selfie|get ready with me|ring light)\b/i, "selfie"],
+  [/\b(hello|hi|wave|photo|picture|directions|meet)\b/i, "wave"],
 ];
 
 /** The moment for something done at a place, from its id, title and kind (null: nothing to act out). */

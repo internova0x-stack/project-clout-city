@@ -919,6 +919,8 @@ export function GameShell({
   // A rank-up is a takeover (the top rank a legend): components/Celebrate.tsx.
   useEffect(() => {
     if (!rankUp) return;
+    // Phase 3: you cheer where you stand; the card waits for the moment.
+    playMomentRef.current("cheer", `Rank ${rankUp.level}: ${rankUp.title}`, undefined, { home: tab === "home" });
     celebrate(rankCelebration(rankUp, handle(me.display_name)));
     setRankUp(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -967,7 +969,11 @@ export function GameShell({
     setInbox(r.data);
     // The night's results card (components/nightResults.ts) replaces the old toast.
     const paid = dateNightsRead(prev, r.data, nightCtx.current);
-    if (paid && insideRef.current?.id === paid.placeId) playMomentRef.current("date", `Date night with ${paid.with.name}`, undefined, { with: [paid.with] });
+    if (paid && insideRef.current?.id === paid.placeId) {
+      // Phase 3: your partner walks it hand in hand; a match still sits down across from you.
+      const official = coupleRef.current?.partner?.id === paid.with.id;
+      playMomentRef.current(official ? "stroll" : "date", `Date night with ${paid.with.name}`, undefined, { with: [paid.with] });
+    }
     if (paid) {
       setGain({ clout: r.data.bonus.clout, mood: r.data.bonus.mood });
       resync.current();
@@ -975,6 +981,8 @@ export function GameShell({
   }, [dating]);
   // ---- Relationships (migration 0118): "Us" ----
   const [coupleS, setCoupleS] = useState<CoupleState | null>(null);
+  const coupleRef = useRef<CoupleState | null>(null);
+  coupleRef.current = coupleS;
   const [coupleBusy, setCoupleBusy] = useState(false);
   const [coupleError, setCoupleError] = useState<string | null>(null);
   const [coupleDismissed, setCoupleDismissed] = useState<string | null>(null);
@@ -993,7 +1001,9 @@ export function GameShell({
           rewards: [{ text: "💞 On your card" }, { tone: "clout", text: `+${COUPLES.dateClout} 🔥 a date` }, { text: `🏠 Move in from day ${COUPLES.moveInDays}` }],
           lola: "Official? In this city? I\u2019m already writing the headline.", share: `It's official: me and ${name} in Clout City.`, cta: "Open Us",
           onCta: () => setPanel("us") });
-        if (firstTime("cutscene", `official:${st.relId}`)) setCutscene({ kind: "official", partner: { ...st.partner, name }, onDone: show });
+        const partner = st.partner;
+        const hugThen = () => { if (!playMomentRef.current("hug", `You and ${name}`, show, { with: [partner], home: tab === "home" })) show(); };
+        if (firstTime("cutscene", `official:${st.relId}`)) setCutscene({ kind: "official", partner: { ...st.partner, name }, onDone: hugThen });
         else show();
       }
     }
@@ -1789,8 +1799,9 @@ export function GameShell({
     const today = new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York" }).format(new Date());
     const secs = momentSeconds(kind, firstTime("moment", `${kind}:${today}`));
     if (opts.act !== false) {
-      const use: RoomAct["use"] | null = kind === "date" || kind === "together" || kind === "crew"
+      const use: RoomAct["use"] | null = kind === "date" || kind === "together" || kind === "crew" || kind === "hug" || kind === "stroll"
         ? { moment: kind, seconds: secs, with: (opts.with ?? []).map((p) => ({ key: p.id, look: lookOfPerson(p) })) }
+        : kind === "toast" || kind === "selfie" || kind === "cheer" ? { moment: kind, seconds: secs }
         : kind === "dance" || kind === "run" || kind === "dogwalk" || kind === "wave" ? { moment: kind, seconds: secs + 0.6, dog: opts.dog }
         : kind === "sit" ? { moment: "sit", seconds: secs } : kind === "sleep" ? "sleep" : kind === "work" ? { action: "work", kind: "shift", seconds: secs } : null;
       if (use) setRoomAct({ use, key: Date.now() });
@@ -2885,6 +2896,9 @@ export function GameShell({
       }).catch(() => {});
       void rewards.surprise().then((x) => {
         if (!x) return;
+        // Phase 3: a fan's selfie or a stranger's drink plays where you are (the banner waits for it).
+        if (x.kind === "selfie") playMomentRef.current("selfie", x.title);
+        else if (x.kind === "drink") playMomentRef.current("toast", x.title);
         celebrate(surpriseCelebration(x, x.invite ? () => { setSceneOpen(true); } : undefined));
         void cityApi?.refresh().then((r) => { if (r.ok) setCity(r.state); });
       }).catch(() => {});

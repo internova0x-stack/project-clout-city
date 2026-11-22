@@ -8,6 +8,7 @@ import {
   RingGeometry, SphereGeometry, CylinderGeometry, SRGBColorSpace, Scene, Sprite, SpriteMaterial, AdditiveBlending, Vector2, Vector3, WebGLRenderer, type Object3D,
 } from "three";
 import { randomLook, type Look } from "@/lib/look";
+import { clearGesture, gesture, type Gesture } from "../avatar/gestures";
 import type { CrowdMember } from "@/lib/partyRoom";
 import { formatCash } from "@/lib/economy";
 import {
@@ -53,6 +54,8 @@ interface Actor {
   run?: boolean;
   /** Standing on something (a go-go dancer on her podium, the DJ on the stage). */
   y?: number;
+  /** Moments phase 3: a gesture drawn on top of the clip (components/avatar/gestures.ts), and the side its partner stands. */
+  gesture?: { g: Gesture; side: "left" | "right" } | null;
 }
 
 export interface Room3DProps {
@@ -140,7 +143,9 @@ export type RoomAct = {
   use: "sit" | "sleep" | "cook" | { action: string; index?: number; kind?: string; seconds?: number }
     | { moment: "dance" | "run" | "dogwalk" | "wave" | "sit"; seconds: number; dog?: "pom" }
     /** Phase 2 (owner, Nov 21): someone beside you: your date across the table, your partner on the sofa, the crew dancing. */
-    | { moment: "date" | "together" | "crew"; seconds: number; with: { key: string; look: Look }[] };
+    | { moment: "date" | "together" | "crew" | "hug" | "stroll"; seconds: number; with: { key: string; look: Look }[] }
+    /** Phase 3: a gesture on your own (raise a glass, a selfie, a cheer). */
+    | { moment: "toast" | "selfie" | "cheer"; seconds: number };
   key: number;
 };
 
@@ -182,7 +187,8 @@ export default function Room3D(props: Room3DProps) {
     goUse: (it: RoomItem, silent?: boolean) => void; talk: (i: number) => void; floorStep: (screen: number) => [number, number];
     sitNear: (near: RoomItem | null) => boolean; stroll: (seconds: number, dog: boolean, run?: boolean) => void;
     danceFor: (seconds: number) => void; wave: () => void; closeUp: (seconds: number) => void;
-    company: (kind: "date" | "together" | "crew", people: { key: string; look: Look }[], seconds: number) => void;
+    company: (kind: "date" | "together" | "crew" | "hug" | "stroll", people: { key: string; look: Look }[], seconds: number) => void;
+    gestureFor: (g: Gesture, seconds: number) => void;
     dogKind: (k: "pom" | null) => void;
   } | null>(null);
 
@@ -784,6 +790,7 @@ export default function Room3D(props: Room3DProps) {
       const wld = world.current;
       if (!wld) return;
       if (wld.dirty) syncFurniture();
+      if (me.gesture && me.parts) gesture(me.parts, me.gesture.g, t, me.gesture.side);
       stepActor(me, dt, t, reduceMotion, (it) => arrive(it));
       // The dog on a dog-walking stroll (owner, Nov 16: "No dog walking"): it trots a step behind, then goes home.
       if (dog) {
@@ -1001,10 +1008,23 @@ export default function Room3D(props: Room3DProps) {
       me.parts?.play?.("wave", true);
     };
     // Phase 2 (owner, Nov 21): people who appear beside you for a moment, dressed in their own style.
-    type Mate = { actor: Actor; seat: RoomItem | null };
+    type Mate = { actor: Actor; seat: RoomItem | null; follow?: boolean };
     let mates: Mate[] = [];
     let matesUntil = 0;
-    const clearMates = () => { for (const m of mates) { scene.remove(m.actor.rig); m.actor.parts?.dispose(); } mates = []; matesUntil = 0; };
+    const clearMates = () => {
+      for (const m of mates) { scene.remove(m.actor.rig); m.actor.parts?.dispose(); }
+      mates = []; matesUntil = 0;
+      if (me.gesture && (me.gesture.g === "hug" || me.gesture.g === "hold")) { me.gesture = null; if (me.parts) clearGesture(me.parts); }
+    };
+    // Your own gesture (a toast, a selfie, a cheer): stand, face the room, pose, then let go.
+    let gestureTimer: ReturnType<typeof setTimeout> | null = null;
+    const gestureFor = (g: Gesture, seconds: number) => {
+      if (me.mode === "sit" || me.mode === "sleep" || me.mode === "dance") standUp(me);
+      me.path = []; me.pending = null; if (me.mode === "walk") me.mode = "idle";
+      me.gesture = { g, side: "left" };
+      if (gestureTimer) clearTimeout(gestureTimer);
+      gestureTimer = setTimeout(() => { me.gesture = null; if (me.parts) clearGesture(me.parts); }, seconds * 1000);
+    };
     const SOFAS = ["sofa", "loveseat", "armchair", "bench"];
     /** Free seats near you, nearest first (sofas first for a night in). */
     const freeSeats = (sofas: boolean) => {
@@ -1013,8 +1033,30 @@ export default function Room3D(props: Room3DProps) {
       const rank = (i: RoomItem) => (sofas && SOFAS.includes(i.kind) ? 0 : 1);
       return all.sort((a, b) => rank(a) - rank(b) || Math.hypot(a.x - me.x, a.z - me.z) - Math.hypot(b.x - me.x, b.z - me.z));
     };
-    const company = (kind: "date" | "together" | "crew", people: { key: string; look: Look }[], seconds: number) => {
+    const company = (kind: "date" | "together" | "crew" | "hug" | "stroll", people: { key: string; look: Look }[], seconds: number) => {
       clearMates();
+      // Phase 3: a hug (face to face, arms round each other) or a walk hand in hand.
+      if ((kind === "hug" || kind === "stroll") && people[0]) {
+        if (me.mode === "sit" || me.mode === "sleep" || me.mode === "dance") standUp(me);
+        const parts = buildModelAvatar(people[0].look, { pedestal: false });
+        castShadows(parts.root);
+        const h = me.heading;
+        const left: [number, number] = [Math.cos(h), -Math.sin(h)];
+        const x = kind === "hug" ? me.x + Math.sin(h) * 0.36 : me.x + left[0] * 0.64;
+        const z = kind === "hug" ? me.z + Math.cos(h) * 0.36 : me.z + left[1] * 0.64;
+        const actor: Actor = { rig: new Group(), parts, x, z, heading: kind === "hug" ? h + Math.PI : h, mode: "idle", path: [], pending: null, phase: 0.4,
+          gesture: { g: kind === "hug" ? "hug" : "hold", side: "right" } };
+        actor.rig.add(parts.root);
+        actor.rig.position.set(x, 0, z);
+        actor.rig.rotation.y = actor.heading;
+        scene.add(actor.rig);
+        mates.push({ actor, seat: null, follow: kind === "stroll" });
+        me.gesture = { g: kind === "hug" ? "hug" : "hold", side: "left" };
+        if (kind === "stroll") stroll(seconds, false);
+        else { me.path = []; me.pending = null; me.mode = "idle"; }
+        matesUntil = performance.now() + (seconds + 1) * 1000;
+        return;
+      }
       const grid = makeGrid(template, itemsRef.current);
       // Where you'll be: your seat (date, night in) or the dance floor.
       let mySeat: RoomItem | null = null;
@@ -1066,6 +1108,17 @@ export default function Room3D(props: Room3DProps) {
     };
     stepMates = (dt: number, t: number, now: number) => {
       for (const m of mates) {
+        const a = m.actor;
+        if (a.gesture && a.parts) gesture(a.parts, a.gesture.g, t, a.gesture.side);
+        if (m.follow && a.parts) {
+          // Hand in hand: walking at your left, in step with you.
+          const h = me.heading;
+          a.x = me.x + Math.cos(h) * 0.64; a.z = me.z - Math.sin(h) * 0.64; a.heading = h;
+          a.parts.setMotion?.(me.mode === "walk" ? "walk" : "idle");
+          a.rig.position.set(a.x, 0, a.z); a.rig.rotation.y = h;
+          a.parts.update?.(dt);
+          continue;
+        }
         stepActor(m.actor, dt, t, reduceMotion, () => mateArrive(m));
         // Crew dancers drift onto the floor with you.
         if (m.actor.mode === "dance") {
@@ -1081,7 +1134,7 @@ export default function Room3D(props: Room3DProps) {
       nextDog = k;
       if (dog) { scene.remove(dog); dog = null; }
     };
-    actionsRef.current = { goUse, talk, floorStep, sitNear, stroll, danceFor, wave, closeUp, company, dogKind };
+    actionsRef.current = { goUse, talk, floorStep, sitNear, stroll, danceFor, wave, closeUp, company, dogKind, gestureFor };
 
     function walkTo(goal: [number, number], use: RoomItem | null) {
       const grid = makeGrid(template, itemsRef.current);
@@ -1274,6 +1327,7 @@ export default function Room3D(props: Room3DProps) {
     if (typeof want !== "string" && "moment" in want) {
       const a = actionsRef.current;
       if ("with" in want) { a?.company(want.moment, want.with, want.seconds); return; }
+      if (want.moment === "toast" || want.moment === "selfie" || want.moment === "cheer") { a?.gestureFor(want.moment, want.seconds); return; }
       if (want.moment === "dogwalk") a?.dogKind(want.dog ?? null);
       if (want.moment === "dance") a?.danceFor(want.seconds);
       else if (want.moment === "run") a?.stroll(want.seconds, false, true);

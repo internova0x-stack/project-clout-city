@@ -975,7 +975,13 @@ components live in `app/globals.css`.
   step away and sit at the seat nearest yours (a date at your spot when `dateNightsRead` reports it paid; "Home together" takes you home
   and onto the sofa together) or dance around you (crew outings when the crew bonus lands where you are); they leave 4 s after the
   moment. Sir Barksley walks as an orange Pomeranian (`buildPom`, RoomAct `dog: "pom"`). `?moment=date|crew|together` (together at home).
-  Phase 3 (hand-holding, hug, toast, selfie, cheer) is next.
+  Phase 3 (owner, Nov 22: "move on to phase 3"): gestures drawn in code (components/avatar/gestures.ts: hold, hug, toast,
+  selfie, cheer) by aiming limbs along directions in the avatar's own space (AvatarParts.aim on the new bodies: upper arms,
+  forearms, and "square" turns the hips square to +z against the idle's twist) with a glass or phone in the right hand
+  (AvatarParts.hold); `/preview/gestures`. Wired: a rank-up cheers before its card; "It's official" hugs your partner after the
+  cutscene (`hug` moment, Room3D `company`); a date night with your partner walks hand in hand (`stroll`, the partner follows at your
+  left), a match still sits; a fan's selfie surprise and a stranger's drink play the selfie and the toast; Living places titles
+  with toast/cheers/champagne/gala toast, selfie titles selfie (`momentFor`). `?moment=hug|stroll|toast|selfie|cheer` (with `?at=`).
 - Players see "Crew" for their invited friends; code, types and database tables still say `clique`
   (renaming stored data isn't worth the risk). Keep player-facing copy on "crew".
 - Culture packs (docs/culture/, one at a time, only when the owner says "Build C<number>"): slang, invented stand-ins
