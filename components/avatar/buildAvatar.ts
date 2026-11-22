@@ -46,6 +46,11 @@ export interface AvatarParts {
   /** New bodies only: sits (the sit clip, thighs on a seat at surfaceY) or lies down (the sleep clip, on a mattress at
    *  surfaceY), placed by moving root as poseSit and poseLie do; null gets up. */
   pose?(kind: "sit" | "lie" | null, surfaceY?: number): void;
+  /** New bodies only (moments phase 3): points an upper arm or forearm along dir, in the avatar's own space (+z forward,
+   *  +y up, −x its right), on top of the clip; null lets it go back to the clip. */
+  aim?(limb: "rArm" | "lArm" | "rFore" | "lFore" | "head" | "square", dir: import("three").Vector3 | null): void;
+  /** New bodies only (moments phase 3): something in the right hand (a glass for a toast, a phone for a selfie), or nothing. */
+  hold?(item: "glass" | "phone" | null): void;
   dispose(): void;
 }
 

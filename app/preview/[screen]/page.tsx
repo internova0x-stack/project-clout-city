@@ -1,3 +1,4 @@
+import { Gestures } from "@/components/preview/Gestures";
 import { AvatarMoves } from "@/components/preview/AvatarMoves";
 import { ModelsPreview } from "@/components/preview/ModelsPreview";
 import { Cutscene } from "@/components/preview/Cutscene";
@@ -284,6 +285,9 @@ export default async function Preview({
       return <ModelsPreview pick={pick} />;
     case "cutscene":
       return <Cutscene startShot={Number(shot ?? 0)} scene={scene} />;
+    // Moments phase 3: the gestures drawn in code (hold hands, hug, toast, selfie, cheer); ?pick= and ?size=.
+    case "gestures":
+      return <Gestures pick={pick} size={size ? Number(size) : undefined} />;
     case "room":
       return <PreviewRoom room={room ?? "cafe"} daytime={time !== "night"} mood={mood === "natural" ? "natural" : "dream"} />;
     default:

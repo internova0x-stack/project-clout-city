@@ -19,7 +19,7 @@
 //   * Low-graphics mode loads the lighter files (fewer triangles, a 512 px texture).
 
 import {
-  AnimationMixer, type AnimationClip, Box3, LoopOnce, LoopRepeat, BufferAttribute, Color, DoubleSide, Euler, Group, Matrix4, MeshStandardMaterial, Object3D, Quaternion,
+  AnimationMixer, type AnimationClip, Box3, BoxGeometry, CylinderGeometry, Mesh, LoopOnce, LoopRepeat, BufferAttribute, Color, DoubleSide, Euler, Group, Matrix4, MeshStandardMaterial, Object3D, Quaternion,
   Skeleton, SkinnedMesh, Vector2, Vector3, type AnimationAction, type BufferGeometry, type Bone, type Material,
   type WebGLProgramParametersWithUniforms,
 } from "three";
@@ -517,6 +517,10 @@ export function buildBaseAvatar(look: Look, opts: ModelAvatarOptions & { bare?: 
   const sitBones: { thighs: [Bone | undefined, Bone | undefined][] } = { thighs: [] };
   const sitSides: { arm: Bone; fore: Bone; hand: Bone }[] = [];
   let model: Object3D | null = null;
+  // Gestures (moments phase 3): limbs aimed along a direction in the avatar's own space (+z forward, +y up, −x its right).
+  let boneMap: Map<string, Bone> | null = null;
+  const aims = new Map<AimLimb, Vector3>();
+  let held: { kind: "glass" | "phone"; group: Group; dispose: () => void } | null = null;
   let disposed = false;
   const build = BASE_BUILD_SCALE[look.build] ?? BASE_BUILD_SCALE.athletic;
   const widen = { value: new Vector2(build.w - 1, build.l - 1) };
@@ -535,6 +539,7 @@ export function buildBaseAvatar(look: Look, opts: ModelAvatarOptions & { bare?: 
     const rig = cloneSkinned(gltf.scene);
     const bones = new Map<string, Bone>();
     rig.traverse((o) => { if ((o as Bone).isBone) bones.set(o.name, o as Bone); });
+    boneMap = bones;
     let skinned: SkinnedMesh | null = null;
     rig.traverse((o) => { if ((o as SkinnedMesh).isSkinnedMesh) skinned = o as SkinnedMesh; });
     if (!skinned) throw new Error("no body mesh");
@@ -824,6 +829,46 @@ void main() {`)
   const euler = new Euler();
   const rootQ = new Quaternion();
   const m4 = new Matrix4();
+  const av = new Vector3(), bv = new Vector3(), wv = new Vector3(), aq = new Quaternion(), bq = new Quaternion(), mq = new Quaternion();
+  /** Turns each aimed bone so its child lies along the wanted direction (upper arms first, then forearms). */
+  const applyAims = () => {
+    if (!aims.size || !boneMap || !model) return;
+    root.getWorldQuaternion(mq);
+    // Square up: the clip's idle twists the body; turn the hips so the hip line (right leg to left) lies along +x.
+    if (aims.has("square")) {
+      const hips = boneMap.get("Hips"), lUp = boneMap.get("LeftUpLeg"), rUp = boneMap.get("RightUpLeg");
+      if (hips && lUp && rUp && hips.parent) {
+        hips.updateMatrixWorld(true);
+        lUp.getWorldPosition(av); rUp.getWorldPosition(bv);
+        const line = av.sub(bv); line.y = 0;
+        wv.set(1, 0, 0).applyQuaternion(mq); wv.y = 0;
+        if (line.lengthSq() > 1e-6 && wv.lengthSq() > 1e-6) {
+          aq.setFromUnitVectors(line.normalize(), wv.normalize());
+          hips.getWorldQuaternion(bq);
+          hips.parent.getWorldQuaternion(pq);
+          hips.quaternion.copy(pq.invert().multiply(aq.multiply(bq)));
+          hips.updateMatrixWorld(true);
+        }
+      }
+    }
+    for (const limb of AIM_ORDER) {
+      const dir = aims.get(limb);
+      if (!dir) continue;
+      const [bn, cn] = AIM_BONES[limb];
+      const b = boneMap.get(bn), c = boneMap.get(cn);
+      if (!b || !c || !b.parent) continue;
+      b.updateMatrixWorld(true);
+      b.getWorldPosition(av);
+      c.getWorldPosition(bv);
+      const cur = bv.sub(av).normalize();
+      wv.copy(dir).applyQuaternion(mq).normalize();
+      aq.setFromUnitVectors(cur, wv);
+      b.getWorldQuaternion(bq);
+      b.parent.getWorldQuaternion(pq);
+      b.quaternion.copy(pq.invert().multiply(aq.multiply(bq)));
+      b.updateMatrixWorld(true);
+    }
+  };
 
   return {
     root, body, head, torso, eyes: [], legs, knees, arms, hips, chest, forearms,
@@ -866,6 +911,29 @@ void main() {`)
         d.bone.parent!.getWorldQuaternion(pq).premultiply(rootQ);
         d.bone.quaternion.premultiply(delta.copy(pq).invert().multiply(q).multiply(pq));
       }
+      applyAims();
+    },
+    hold(item) {
+      if (item === held?.kind) return;
+      if (held) { held.group.parent?.remove(held.group); held.dispose(); held = null; }
+      const hand = boneMap?.get("RightHand");
+      if (!item || !hand) return;
+      const made = buildProp(item);
+      root.updateMatrixWorld(true);
+      // Placed in the body's space a little past the palm, then carried by the hand bone.
+      hand.getWorldPosition(av);
+      // Past the palm: along the forearm's line beyond the wrist, a little up.
+      const fore = boneMap?.get("RightForeArm");
+      const out = fore ? av.clone().sub(fore.getWorldPosition(new Vector3())).normalize().multiplyScalar(item === "glass" ? 0.1 : 0.08) : new Vector3();
+      made.group.position.copy(body.worldToLocal(av.clone().add(out).add(new Vector3(0, item === "glass" ? 0.02 : 0, 0))));
+      made.group.scale.setScalar(item === "glass" ? 1.7 : 1.3);
+      body.add(made.group);
+      hand.attach(made.group);
+      held = { kind: item, ...made };
+    },
+    aim(limb, dir) {
+      if (dir) aims.set(limb, dir.clone().normalize());
+      else aims.delete(limb);
     },
     dispose() {
       disposed = true;
@@ -877,4 +945,36 @@ void main() {`)
       bodyPieces.forEach((p) => p.dispose());
     },
   };
+}
+
+/** The limbs a gesture can aim, and the bone and its child that define each one's direction. */
+export type AimLimb = "rArm" | "lArm" | "rFore" | "lFore" | "head" | "square";
+const AIM_BONES: Record<AimLimb, [string, string]> = {
+  rArm: ["RightArm", "RightForeArm"], lArm: ["LeftArm", "LeftForeArm"],
+  rFore: ["RightForeArm", "RightHand"], lFore: ["LeftForeArm", "LeftHand"],
+  head: ["Neck", "Head"],
+  square: ["Hips", "Spine"],
+};
+const AIM_ORDER: AimLimb[] = ["rArm", "lArm", "rFore", "lFore", "head"];
+
+/** A glass (a coupe with a little gold) or a phone, about life size, for gestures. */
+function buildProp(kind: "glass" | "phone"): { group: Group; dispose: () => void } {
+  const group = new Group();
+  const mats: MeshStandardMaterial[] = [];
+  const geos: { dispose(): void }[] = [];
+  const add = (geo: CylinderGeometry | BoxGeometry, color: string, y: number, opts: Partial<{ opacity: number; metal: number }> = {}) => {
+    const m = new MeshStandardMaterial({ color, roughness: 0.25, metalness: opts.metal ?? 0, transparent: opts.opacity !== undefined, opacity: opts.opacity ?? 1 });
+    const mesh = new Mesh(geo, m);
+    mesh.position.y = y;
+    group.add(mesh);
+    mats.push(m); geos.push(geo);
+  };
+  if (kind === "glass") {
+    add(new CylinderGeometry(0.004, 0.004, 0.07, 6), "#F2F2F2", 0.035, { opacity: 0.7 });
+    add(new CylinderGeometry(0.035, 0.012, 0.04, 12), "#FFF6D8", 0.09, { opacity: 0.55 });
+    add(new CylinderGeometry(0.03, 0.01, 0.025, 12), "#E8C15A", 0.085, { metal: 0.2 });
+  } else {
+    add(new BoxGeometry(0.075, 0.15, 0.01), "#17141C", 0.06, { metal: 0.4 });
+  }
+  return { group, dispose: () => { mats.forEach((m) => m.dispose()); geos.forEach((g) => g.dispose()); } };
 }
