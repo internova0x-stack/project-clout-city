@@ -23,7 +23,7 @@ import type { CutsceneRequest } from "./cutscene/CutsceneHost";
 import type { PlayerUpdate } from "@/app/home/actions";
 import { ECONOMY, formatCash } from "@/lib/economy";
 import { inviteUrl } from "@/lib/invite";
-import { normalizeLook } from "@/lib/look";
+import { normalizeLook, randomLook } from "@/lib/look";
 import { music, readLocalMuted, writeLocalMuted } from "@/lib/music";
 import { musicFor } from "@/lib/musicMap";
 import { checkBuild, isStaleBuild, reloadForNewBuild } from "@/lib/freshBuild";
@@ -32,7 +32,7 @@ import { SkillsSheet } from "./game/Skills";
 import { LOOK_LABEL, STYLE, lookBadge } from "@/lib/style";
 import type { CliqueMember, Player } from "@/lib/player";
 import { ASTORIA_CENTER, ASTORIA_ZOOM, DEFAULT_PLAYER_LOCATION, WAVE_1_PINS, type PlacePin } from "@/lib/places";
-import { defaultFit, getStyle, STYLE_FITS, starterOutfit } from "@/lib/styles";
+import { defaultFit, getStyle, STARTING_STYLES, STYLE_FITS, starterOutfit } from "@/lib/styles";
 import { CATALOG_FURNITURE, CITY_ECONOMY, shopBase, CLUB_EVENTS, PLACES, eventDaysLine, eventOpen, eventToday, isHub, itemBySku, placeById, realMinutesUntilOpen, type Place, type ShopItem } from "@/lib/city";
 import { cityMinutes } from "@/lib/cityClock";
 import { GAME_CONFIG } from "@/lib/config";
@@ -177,6 +177,8 @@ import { campusById, type CampusApi, type CampusId } from "@/lib/campus";
 import type { SchoolApi, SchoolRival } from "@/lib/schoolApi";
 import type { Crown } from "@/lib/schoolRace";
 import { firstTime } from "./seenOnce";
+import { MOMENTS, momentFor, momentSeconds, type MomentKind } from "@/lib/moments";
+import type { RoomAct } from "./room/Room3D";
 
 /** Culture pack C1: a regular's everyday lines plus their profile's catchphrases. */
 const EVERYDAY_LINES = withCatchphrases(CAST_LINES, NPC_PROFILES.profiles as NpcProfile[]);
@@ -686,6 +688,9 @@ export function GameShell({
   }, []);
   const [place, setPlace] = useState<Place | null>(null);
   const [inside, setInside] = useState<Place | null>(null);
+  /** For readers that run from older callbacks (date nights, crew outings). */
+  const insideRef = useRef(inside);
+  insideRef.current = inside;
   // The station sign (owner, Nov 3, the motion kit): walking into a place flips its sign down once; not when the game
   // reopens inside a place (the resume) and not when only the floor changes.
   const [sign, setSign] = useState<Place | null>(null);
@@ -914,6 +919,8 @@ export function GameShell({
   // A rank-up is a takeover (the top rank a legend): components/Celebrate.tsx.
   useEffect(() => {
     if (!rankUp) return;
+    // Phase 3: you cheer where you stand; the card waits for the moment.
+    playMomentRef.current("cheer", `Rank ${rankUp.level}: ${rankUp.title}`, undefined, { home: tab === "home" });
     celebrate(rankCelebration(rankUp, handle(me.display_name)));
     setRankUp(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -962,6 +969,11 @@ export function GameShell({
     setInbox(r.data);
     // The night's results card (components/nightResults.ts) replaces the old toast.
     const paid = dateNightsRead(prev, r.data, nightCtx.current);
+    if (paid && insideRef.current?.id === paid.placeId) {
+      // Phase 3: your partner walks it hand in hand; a match still sits down across from you.
+      const official = coupleRef.current?.partner?.id === paid.with.id;
+      playMomentRef.current(official ? "stroll" : "date", `Date night with ${paid.with.name}`, undefined, { with: [paid.with] });
+    }
     if (paid) {
       setGain({ clout: r.data.bonus.clout, mood: r.data.bonus.mood });
       resync.current();
@@ -969,6 +981,8 @@ export function GameShell({
   }, [dating]);
   // ---- Relationships (migration 0118): "Us" ----
   const [coupleS, setCoupleS] = useState<CoupleState | null>(null);
+  const coupleRef = useRef<CoupleState | null>(null);
+  coupleRef.current = coupleS;
   const [coupleBusy, setCoupleBusy] = useState(false);
   const [coupleError, setCoupleError] = useState<string | null>(null);
   const [coupleDismissed, setCoupleDismissed] = useState<string | null>(null);
@@ -987,7 +1001,9 @@ export function GameShell({
           rewards: [{ text: "💞 On your card" }, { tone: "clout", text: `+${COUPLES.dateClout} 🔥 a date` }, { text: `🏠 Move in from day ${COUPLES.moveInDays}` }],
           lola: "Official? In this city? I\u2019m already writing the headline.", share: `It's official: me and ${name} in Clout City.`, cta: "Open Us",
           onCta: () => setPanel("us") });
-        if (firstTime("cutscene", `official:${st.relId}`)) setCutscene({ kind: "official", partner: { ...st.partner, name }, onDone: show });
+        const partner = st.partner;
+        const hugThen = () => { if (!playMomentRef.current("hug", `You and ${name}`, show, { with: [partner], home: tab === "home" })) show(); };
+        if (firstTime("cutscene", `official:${st.relId}`)) setCutscene({ kind: "official", partner: { ...st.partner, name }, onDone: hugThen });
         else show();
       }
     }
@@ -1068,6 +1084,9 @@ export function GameShell({
       const arrived = r.data.outings.flatMap((o) => o.members.filter((m) => m.went && m.id !== player.id
         && prev.outings.find((p) => p.id === o.id)?.members.some((pm) => pm.id === m.id && !pm.went)));
       setGain({ clout: gained });
+      const here = r.data.outings.find((o) => o.placeId === insideRef.current?.id && o.iWent);
+      if (here) playMomentRef.current("crew", `Out with the crew at ${placeById(here.placeId)?.name ?? "the spot"}`, undefined,
+        { with: [here.host, ...here.members].filter((m, i, all) => m.id !== player.id && all.findIndex((x) => x.id === m.id) === i && ("went" in m ? m.went : true)) });
       if (!full) setToast(arrived.length ? `${arrived.map((m) => m.name).join(", ")} pulled up. Crew bonus!` : "Crew bonus!");
       resync.current();
     }
@@ -1318,7 +1337,7 @@ export function GameShell({
   const [trip, setTrip] = useState<Trip | null>(null);
   const [restKind, setRestKind] = useState<RestKind | null>(null);
   // Owner, Nov 6: an action started from a list plays out in the room (the avatar walks to the sofa, the bed, the counter).
-  const [roomAct, setRoomAct] = useState<{ use: "sit" | "sleep" | "cook" | { action: string; index?: number; kind?: string; seconds?: number }; key: number } | null>(null);
+  const [roomAct, setRoomAct] = useState<RoomAct | null>(null);
   useEffect(() => { setRoomAct(null); }, [inside?.id, tab, insideFloor]);
   const [kitchenOpen, setKitchenOpen] = useState(false);
   // v0.10 Lucky Star Lotto (migration 0032): lotto state is missing until it runs.
@@ -1760,6 +1779,70 @@ export function GameShell({
     if (r.cash || r.clout || r.mood) setGain({ cash: r.cash || undefined, clout: r.clout || undefined, mood: r.mood || undefined });
     if (cityApi) void cityApi.refresh().then((x) => x.ok && applyCity(x));
   };
+  // ---- Moments (owner, Nov 21; lib/moments.ts): your avatar acts out what you just did, the cards step aside ----
+  const [moment, setMoment] = useState<{ kind: MomentKind; label: string; key: number } | null>(null);
+  const momentDone = useRef<(() => void) | null>(null);
+  const momentTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const endMoment = useCallback(() => {
+    if (momentTimer.current) clearTimeout(momentTimer.current);
+    momentTimer.current = null;
+    setMoment(null);
+    const then = momentDone.current;
+    momentDone.current = null;
+    then?.();
+  }, []);
+  /** Plays a moment in the room you're in (false when it can't: not in a room, or "reduce motion"; then runs `then` now). */
+  const playMoment = (kind: MomentKind, label: string, then?: () => void,
+    opts: { act?: boolean; with?: { id: string; style: string }[]; dog?: "pom"; home?: boolean } = {}): boolean => {
+    const reduce = typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    if (reduce || (!inside && !opts.home)) { then?.(); return false; }
+    const today = new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York" }).format(new Date());
+    const secs = momentSeconds(kind, firstTime("moment", `${kind}:${today}`));
+    if (opts.act !== false) {
+      const use: RoomAct["use"] | null = kind === "date" || kind === "together" || kind === "crew" || kind === "hug" || kind === "stroll"
+        ? { moment: kind, seconds: secs, with: (opts.with ?? []).map((p) => ({ key: p.id, look: lookOfPerson(p) })) }
+        : kind === "toast" || kind === "selfie" || kind === "cheer" ? { moment: kind, seconds: secs }
+        : kind === "dance" || kind === "run" || kind === "dogwalk" || kind === "wave" ? { moment: kind, seconds: secs + 0.6, dog: opts.dog }
+        : kind === "sit" ? { moment: "sit", seconds: secs } : kind === "sleep" ? "sleep" : kind === "work" ? { action: "work", kind: "shift", seconds: secs } : null;
+      if (use) setRoomAct({ use, key: Date.now() });
+    }
+    if (momentTimer.current) clearTimeout(momentTimer.current);
+    momentDone.current?.();
+    momentDone.current = then ?? null;
+    setMoment({ kind, label, key: Date.now() });
+    momentTimer.current = setTimeout(endMoment, secs * 1000);
+    return true;
+  };
+  useEffect(() => () => { if (momentTimer.current) clearTimeout(momentTimer.current); }, []);
+  /** Someone we only know by id and style (a date, a partner, the crew), dressed in that style, the same every time. */
+  const lookOfPerson = (p: { id: string; style: string }) => {
+    let seed = [...p.id].reduce((n, c) => (n * 31 + c.charCodeAt(0)) % 2147483647, 7) || 7;
+    const rand = () => ((seed = (seed * 48271) % 2147483647) / 2147483647);
+    const styles = STARTING_STYLES.map((x) => x.id);
+    return randomLook(rand, styles.includes(p.style as (typeof styles)[number]) ? [p.style as (typeof styles)[number]] : styles);
+  };
+  useEffect(() => { if (moment) endMoment(); /* leaving the room ends it */ }, [inside?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  const momentPreview = useRef(false);
+  useEffect(() => {
+    if (process.env.NODE_ENV === "production" || momentPreview.current) return;
+    const k = new URLSearchParams(window.location.search).get("moment") as MomentKind | null;
+    if (!k || !MOMENTS[k]) return;
+    if (!inside && k === "together" && tab === "home") {
+      momentPreview.current = true;
+      setTimeout(() => playMomentRef.current("together", "Home together with tasha.b", undefined, { with: [{ id: "tasha-b", style: "pilates_princess" }], home: true }), 6000);
+      return;
+    }
+    if (!inside) return;
+    momentPreview.current = true;
+    const sample = [{ id: "tasha-b", style: "pilates_princess" }, { id: "kai-beats", style: "bodega_drip" }, { id: "nina-nyc", style: "night_owl_goth" }];
+    const t = setTimeout(() => playMoment(k, `${MOMENTS[k].verb} at ${inside.name}`, undefined,
+      { with: k === "crew" ? sample : sample.slice(0, 1), dog: inside.id === "hell-gate-park" && k === "dogwalk" ? "pom" : undefined }), 4500);
+    return () => clearTimeout(t);
+  }, [inside?.id, tab]); // eslint-disable-line react-hooks/exhaustive-deps
+  /** The activity sheet steps aside while its moment plays. */
+  const [lifeAway, setLifeAway] = useState(false);
+  const playMomentRef = useRef(playMoment);
+  playMomentRef.current = playMoment;
   const chooseLife = async (option: string) => {
     if (!life || !lifeCard) return;
     setBusy("life");
@@ -1771,6 +1854,9 @@ export function GameShell({
     setLifeResult(r.result);
     if (r.view) setLifeV(r.view);
     lifePaid(r.result);
+    // Act it out first (walk Sir Barksley, step into the circle, run the sprinklers), then the receipt.
+    const kind = momentFor({ id: lifeCard.card.id, title: lifeCard.card.title });
+    if (kind && playMoment(kind, lifeCard.card.title, () => setLifeAway(false), { dog: /barksley/i.test(lifeCard.card.id) ? "pom" : undefined })) setLifeAway(true);
   };
   const claimStampLife = async (days: number) => {
     if (!life || !insideId) return;
@@ -2320,7 +2406,7 @@ export function GameShell({
   };
   // One card at a time (owner, Nov 4: the Halo ↔ Hustler card "pops up sometimes when another modal is loaded"): a choice,
   // a consequence or the bench waits while another sheet is open, and shows when it closes.
-  const choiceWaits = welcomeOpen || sceneOpen || !!cutscene || !!place || !!panel || phone.open || careersOpen || campaignOpen || crownOpen || !!rivalMeet || backRoomOpen || !!lifeCard || !!travelPlan || !!trip;
+  const choiceWaits = welcomeOpen || sceneOpen || !!moment || !!cutscene || !!place || !!panel || phone.open || careersOpen || campaignOpen || crownOpen || !!rivalMeet || backRoomOpen || !!lifeCard || !!travelPlan || !!trip;
   // The Homecoming race: the first walk onto a campus's Quad (its ground floor) for an enrolled student without a race
   // brings on the reigning royal, once per device (cc-seen:crown-rival); "Run against" opens Crown HQ's Declare screen.
   const onQuad = !!school && !!inside && isCampusPlace(inside) && insideFloor === 1 ? inside.id : null;
@@ -2487,7 +2573,16 @@ export function GameShell({
       if (!cityApi) return;
       const act = placeById(pl)?.actions.find((x) => x.id === a);
       const v = act ? actionVerb(act) : { emoji: "✨", label: "On it" };
-      if (act && inside?.id === pl) setRoomAct({ use: { action: a, index: placeById(pl)!.actions.indexOf(act), kind: act.kind, seconds: actionSeconds(act) }, key: Date.now() });
+      if (act && inside?.id === pl) {
+        // Moments: dancing and running play their own move; everything else walks to its piece as before, with the
+        // place card stepping aside so you see it.
+        const mk = momentFor({ id: act.id, label: act.label, kind: act.kind });
+        if (mk === "dance" || mk === "run") playMoment(mk, act.label);
+        else {
+          setRoomAct({ use: { action: a, index: placeById(pl)!.actions.indexOf(act), kind: act.kind, seconds: actionSeconds(act) }, key: Date.now() });
+          if (mk) playMoment(mk, act.label, undefined, { act: false });
+        }
+      }
       // v0.13: a together plan for this activity pays its bonus once both have done it.
       void cityThenStory(`${pl}:${a}`, timed(v.emoji, v.label, act ? actionSeconds(act) : 0, () => cityApi.doAction(pl, a))).then((ok) => {
         void claimTogether(pl, a);
@@ -2508,7 +2603,7 @@ export function GameShell({
       }),
       busy,
     } : undefined,
-    onAttendEvent: (id) => cityApi && void cityThenStory(`event:${id}`, timed("🪩", `At ${CLUB_EVENTS.find((e) => e.id === id)?.name ?? "the event"}`, OTHER_SECONDS.event, () => cityApi.attendEvent(id))),
+    onAttendEvent: (id) => cityApi && (inside?.category === "nightlife" && playMoment("dance", CLUB_EVENTS.find((e) => e.id === id)?.name ?? "The party"), true) && void cityThenStory(`event:${id}`, timed("🪩", `At ${CLUB_EVENTS.find((e) => e.id === id)?.name ?? "the event"}`, OTHER_SECONDS.event, () => cityApi.attendEvent(id))),
     onOpenGigs: () => { setPlace(null); setPhone({ open: true, app: "gigs" }); },
     onBarksley: () => setBarksley({ first: !barksleyMet() }),
     onBuyGroceries: kitchenOn && cityApi?.buyGroceries ? (pl, b) => void run(`groceries:${b}`, timed("🛒", "Shopping", OTHER_SECONDS.groceries, () => cityApi.buyGroceries!(pl, b))) : undefined,
@@ -2707,6 +2802,7 @@ export function GameShell({
       celebrate({ rung: 2, emoji: "🚫", tag: "Bounced", title: "They checked the list.",
         line: r.data.banHours ? `Banned from here for ${r.data.banHours} hours. Worth a try.` : "Not tonight. Try again tomorrow.", rewards: [] });
     } else {
+      if (inside && o.places.some((pp) => pp.id === inside.id)) playMoment("wave", o.title);
       celebrate({ rung: 2, emoji: o.emoji, tag: o.short ? "You're in 🤫" : "Move started", title: o.title,
         line: r.data.refund ? `On the house: C$${r.data.refund.toLocaleString("en-US")} back. Ready in ${o.hours} h.` : `Ready in ${o.hours} h. It's in Your Scene.`,
         rewards: r.data.refund ? [{ tone: "cash", text: `+C$${r.data.refund.toLocaleString("en-US")}` }] : [], cta: "Your Scene", onCta: () => setSceneOpen(true) });
@@ -2800,6 +2896,9 @@ export function GameShell({
       }).catch(() => {});
       void rewards.surprise().then((x) => {
         if (!x) return;
+        // Phase 3: a fan's selfie or a stranger's drink plays where you are (the banner waits for it).
+        if (x.kind === "selfie") playMomentRef.current("selfie", x.title);
+        else if (x.kind === "drink") playMomentRef.current("toast", x.title);
         celebrate(surpriseCelebration(x, x.invite ? () => { setSceneOpen(true); } : undefined));
         void cityApi?.refresh().then((r) => { if (r.ok) setCity(r.state); });
       }).catch(() => {});
@@ -3503,6 +3602,12 @@ export function GameShell({
           handlers={handlers}
           onBack={() => setInside(null)}
           floor={insideFloor}
+          away={moment ? (
+            <button key={moment.key} className="moment-cap pill-glass glass-hud" onClick={endMoment} aria-label={`${MOMENTS[moment.kind].verb}: ${moment.label}. Tap to skip`}>
+              <span className="moment-cap-emoji" aria-hidden="true">{MOMENTS[moment.kind].emoji}</span>
+              <span className="moment-cap-text"><b>{moment.label}</b><span>Tap to skip</span></span>
+            </button>
+          ) : undefined}
           talkNonce={talkNonce}
           sign={sign && sign.id === inside.id ? (
             <StationSign
@@ -3638,6 +3743,12 @@ export function GameShell({
         </>
       ) : tab === "home" ? (
         <div className="layer">
+          {moment && (
+            <button key={moment.key} className="moment-cap home pill-glass glass-hud" onClick={endMoment} aria-label={`${MOMENTS[moment.kind].verb}: ${moment.label}. Tap to skip`}>
+              <span className="moment-cap-emoji" aria-hidden="true">{MOMENTS[moment.kind].emoji}</span>
+              <span className="moment-cap-text"><b>{moment.label}</b><span>Tap to skip</span></span>
+            </button>
+          )}
           <Room3D
             act={viewing || decor ? null : roomAct}
             template={viewing ?? decorHome ?? visitView?.template ?? sharedHome?.template ?? myHome}
@@ -4465,8 +4576,8 @@ export function GameShell({
           <DailyWelcome open={welcomeOpen && !sceneOpen} name={me.display_name} hello={welcomeHello} streak={(process.env.NODE_ENV !== "production" && typeof window !== "undefined" && Number(new URLSearchParams(window.location.search).get("streakdays"))) || (goalsNow?.streak.current ?? 0)} streakNext={goalsNow?.streak.next.day}
             action={welcomeAction} onGo={welcomeGo} onLater={welcomeLater}
             variant={process.env.NODE_ENV !== "production" && typeof window !== "undefined" ? ((v) => (WELCOME_VARIANTS as readonly string[]).includes(v ?? "") ? v as WelcomeVariant : undefined)(new URLSearchParams(window.location.search).get("welcome")) : undefined} />
-          <LifeSheet card={lifeCard?.card ?? null} who={lifeCard?.who ?? null} result={lifeResult} busy={busy === "life"}
-            onChoose={(o) => void chooseLife(o)} onClose={() => { setLifeCard(null); setLifeResult(null); }} />
+          <LifeSheet card={lifeAway ? null : lifeCard?.card ?? null} who={lifeCard?.who ?? null} result={lifeResult} busy={busy === "life"}
+            onChoose={(o) => void chooseLife(o)} onClose={() => { setLifeCard(null); setLifeResult(null); setLifeAway(false); }} />
           <ChoiceSheet card={choiceWaits && !choiceMade ? null : choiceCard} made={choiceMade} busy={choiceBusy} onChoose={(o) => void chooseChoice(o)} onSkip={closeChoice} onClose={closeChoice} />
           <ChoiceBackSheet entry={!choiceCard && !choiceWaits && choicesReady ? choiceBack[0] ?? null : null} onClose={closeBack} />
           <HoldingSheet open={holdingOpen && !choiceCard && !choiceBack.length && !choiceWaits} until={holdingUntil} busy={choiceBusy || favorBusy}
@@ -4513,6 +4624,11 @@ export function GameShell({
                     const r = await couple.moveIn!.hang();
                     const h = r.ok ? r.data.home : undefined;
                     if (h?.live?.homeToday && h.live.homeOther) {
+                      const partner = coupleS?.partner;
+                      if (partner) {
+                        setPanel(null); setPhone({ open: false, app: null }); setInside(null); setPlace(null); setTab("home"); setHomeFloor(1);
+                        setTimeout(() => playMomentRef.current("together", `Home together with ${partner.name}`, undefined, { with: [partner], home: true }), 900);
+                      }
                       setGain({ clout: h.rules.homeClout, mood: h.rules.homeMood });
                       setToast(`🛋️ Home together. 🙂 +${h.rules.homeMood}, 🔥 +${h.rules.homeClout}.`);
                     } else if (r.ok) setToast("Tapped in. Your partner gets a nudge.");
@@ -4614,7 +4730,7 @@ export function GameShell({
           onPhase={(ph) => setGuidePlay({ id: guidePlay.id, phase: ph })} onClose={() => setGuidePlay(null)}
           onSkip={() => skipGuideStep(guidePlay.id)} />
       )}
-      <CelebrationHost hold={!!choiceCard || !!trip || flow !== "none" || welcomeOpen || !!cutscene} />
+      <CelebrationHost hold={!!choiceCard || !!trip || flow !== "none" || welcomeOpen || !!cutscene || !!moment} />
       <ProfileSheet
         open={panel === "profile"}
         onClose={() => setPanel(null)}

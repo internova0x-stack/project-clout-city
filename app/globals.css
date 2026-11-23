@@ -3848,3 +3848,12 @@ button.scene-week-day:disabled { cursor:default; }
 .scene-card.planned { position:relative; gap:8px; border:2px solid var(--primary-top); }
 .scene-plan-tag { font-size:13px; font-weight:700; color:var(--primary-bottom); }
 .scene-plan-x { position:absolute; top:10px; right:10px; width:30px; height:30px; border-radius:50%; border:0; background:rgba(23,20,28,.06); color:var(--text-2); font-size:14px; cursor:pointer; }
+/* Moments (owner, Nov 21): the caption while your avatar acts something out; tap to skip. */
+.moment-cap { position:absolute; left:50%; bottom:calc(var(--nav-h, 86px) + 20px); transform:translateX(-50%); display:flex; align-items:center; gap:10px; padding:10px 18px 10px 12px; border:0; border-radius:999px; cursor:pointer; max-width:calc(100% - 32px); animation:moment-in .35s cubic-bezier(.2,.9,.3,1.2) both; z-index:6; }
+.moment-cap-emoji { font-size:24px; line-height:1; }
+.moment-cap-text { display:flex; flex-direction:column; text-align:left; min-width:0; }
+.moment-cap-text b { font-size:15px; color:var(--text-1); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.moment-cap-text span { font-size:12px; color:var(--text-2); }
+@keyframes moment-in { from { opacity:0; transform:translate(-50%, 14px) scale(.96); } to { opacity:1; transform:translate(-50%, 0) scale(1); } }
+@media (prefers-reduced-motion: reduce) { .moment-cap { animation:none; } }
+.moment-cap.home { bottom:calc(var(--nav-h, 86px) + 96px); }

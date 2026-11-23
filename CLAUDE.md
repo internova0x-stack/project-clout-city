@@ -961,6 +961,27 @@ components live in `app/globals.css`.
   invite) paid by `surprise_give` (service role, ledger 'surprise'); an invite refunds that move's start once
   (`surprise_invite_redeem`, 'surprise_invite', not on top of Rank 4's fame_invite). GameShell's `rewards` prop.
   `?rewards=recap|halfway|freebie|selfie|drink|invite` in the preview.
+- Moments (owner, Nov 21: "not a lot of moments or animations with the avatar… plan all three", "start"; phase 1, no migration):
+  lib/moments.ts (`momentFor` maps an activity's id/title/kind to dance, run, dogwalk, wave, sit, sleep, work; meals always sit;
+  tests/moments.test.ts). GameShell `playMoment(kind, label, then?)`: in a room, the avatar acts it out (Room3D `act` with
+  `{ moment, seconds }`: `danceFor` on the nearest dance floor, `stroll` running laps or with the dog, `wave`, `sitNear`), the camera
+  eases in (`closeUp`), the place panel gives way to a caption pill (InteriorScene `away`, `.moment-cap`, tap to skip) and the activity
+  sheet steps aside (`lifeAway`) until it ends; full length once a New York day per kind (`firstTime('moment', …)`), then 1.6 s; none
+  for "reduce motion" or outside a room; celebrations and choice cards wait (`!!moment`). Wired: Living places activities, place
+  actions (dance/run moves; others keep walking to their piece), a club event, starting a Scene move where you are. `?moment=dance|run|
+  dogwalk|wave|sit|sleep|work` plays one 4.5 s after you're inside (with `?at=`).
+  Phase 2 (owner, Nov 21: "phase 2"): companions (Room3D `company`, RoomAct `{ moment: "date"|"together"|"crew", with }`): people known
+  only by id and style are dressed in that style, the same every time (GameShell `lookOfPerson`, seeded `randomLook`), walk in from a
+  step away and sit at the seat nearest yours (a date at your spot when `dateNightsRead` reports it paid; "Home together" takes you home
+  and onto the sofa together) or dance around you (crew outings when the crew bonus lands where you are); they leave 4 s after the
+  moment. Sir Barksley walks as an orange Pomeranian (`buildPom`, RoomAct `dog: "pom"`). `?moment=date|crew|together` (together at home).
+  Phase 3 (owner, Nov 22: "move on to phase 3"): gestures drawn in code (components/avatar/gestures.ts: hold, hug, toast,
+  selfie, cheer) by aiming limbs along directions in the avatar's own space (AvatarParts.aim on the new bodies: upper arms,
+  forearms, and "square" turns the hips square to +z against the idle's twist) with a glass or phone in the right hand
+  (AvatarParts.hold); `/preview/gestures`. Wired: a rank-up cheers before its card; "It's official" hugs your partner after the
+  cutscene (`hug` moment, Room3D `company`); a date night with your partner walks hand in hand (`stroll`, the partner follows at your
+  left), a match still sits; a fan's selfie surprise and a stranger's drink play the selfie and the toast; Living places titles
+  with toast/cheers/champagne/gala toast, selfie titles selfie (`momentFor`). `?moment=hug|stroll|toast|selfie|cheer` (with `?at=`).
 - Players see "Crew" for their invited friends; code, types and database tables still say `clique`
   (renaming stored data isn't worth the risk). Keep player-facing copy on "crew".
 - Culture packs (docs/culture/, one at a time, only when the owner says "Build C<number>"): slang, invented stand-ins

@@ -798,8 +798,10 @@ function StoryBanners({ place, story }: { place: Place; story: StoryFeed | null 
 
 /** C38 (3D): the walkable interior. Tap things in the room, or open the actions list. */
 export function InteriorScene({
-  place, state, handlers, onBack, room, talkNonce = 0, here, life, sign, floor = 1,
+  place, state, handlers, onBack, room, talkNonce = 0, here, life, sign, floor = 1, away,
 }: {
+  /** A moment playing (owner, Nov 21): its caption takes the panel's place so you see the room. */
+  away?: React.ReactNode;
   /** The floor you're on: its own actions, events and tasks (owner, Nov 6). */
   floor?: number;
   place: Place;
@@ -843,7 +845,7 @@ export function InteriorScene({
       )}
       {/* Outside the panel: a sheet inside it sat under the nav bar (owner, Oct 15). */}
       {here && <HereList open={allHere} here={here} placeName={place.name} onClose={() => setAllHere(false)} />}
-      {mini ? (
+      {away ? away : mini ? (
         // Owner, Oct 15: the panel needs a way out of the way. Minimized, it's one small pill.
         <button className="interior-mini pill-glass glass-hud" onClick={() => setMini(false)} aria-label={`Show ${place.name} actions`}>
           <span className="one-line">{place.emoji} {place.name}</span>
